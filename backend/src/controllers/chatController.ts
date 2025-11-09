@@ -163,7 +163,7 @@ export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
     }, {} as Record<string, typeof users[0]>);
 
     // Mock chat rooms based on bookings
-    const chatRooms = bookings.map(booking => ({
+    const chatRooms = bookings.map((booking: any) => ({
       id: `chat_${booking.id}`,
       bookingId: booking.id,
       clientId: booking.clientId,

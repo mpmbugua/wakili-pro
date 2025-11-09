@@ -75,7 +75,7 @@ export class ChatService {
       }
     });
 
-    this.io.on('connection', (socket) => {
+    this.io.on('connection', (socket: any) => {
       this.handleUserConnection(socket as AuthenticatedSocket);
     });
   }
@@ -128,7 +128,7 @@ export class ChatService {
         select: { id: true }
       });
 
-      chatRooms.forEach(room => {
+      chatRooms.forEach((room: any) => {
         socket.join(`chat_${room.id}`);
       });
 

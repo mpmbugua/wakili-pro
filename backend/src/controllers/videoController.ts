@@ -169,7 +169,7 @@ export const joinVideoConsultation = async (req: AuthRequest, res: Response) => 
     }
 
     // Check if user is already a participant
-    const existingParticipant = consultation.participants.find(p => p.userId === userId);
+    const existingParticipant = consultation.participants.find((p: any) => p.userId === userId);
     
     if (existingParticipant) {
       // Update existing participant

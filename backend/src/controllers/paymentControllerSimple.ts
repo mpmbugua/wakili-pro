@@ -161,7 +161,7 @@ export const getPaymentHistory = async (req: AuthRequest, res: Response) => {
     });
 
     // Transform bookings to payment history format
-    const paymentHistory = bookings.map(booking => ({
+    const paymentHistory = bookings.map((booking: any) => ({
       id: booking.id,
       amount: booking.totalAmountKES,
       status: booking.paymentStatus,

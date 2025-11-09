@@ -136,7 +136,7 @@ class MobileIntegrationService {
         return;
       }
 
-      const tokens = userDevices.map(device => device.deviceToken);
+      const tokens = userDevices.map((device: any) => device.deviceToken);
       
       const message: admin.messaging.MulticastMessage = {
         tokens,
@@ -395,7 +395,7 @@ class MobileIntegrationService {
         where: whereClause
       });
 
-      return devices.map(device => ({
+      return devices.map((device: any) => ({
         id: device.id,
         userId: device.userId,
         deviceToken: device.deviceToken,

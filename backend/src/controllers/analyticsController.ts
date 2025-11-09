@@ -157,7 +157,7 @@ export const getRevenueAnalytics = async (req: AuthenticatedRequest, res: Respon
         status: 'PAID'
       },
       _sum: { amount: true }
-    }).then(async (payments) => {
+    }).then(async (payments: any[]) => {
       const serviceRevenue = new Map();
       
       for (const payment of payments) {
