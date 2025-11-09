@@ -12,8 +12,28 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+
+// CORS configuration for production and development
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:3000',
+  'http://localhost:3000',
+  'http://localhost:5173', // Vite dev server
+  'https://wakili-pro-frontend.vercel.app',
+  'https://wakili-pro.vercel.app',
+  'https://wakili-pro.netlify.app'
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
