@@ -148,8 +148,8 @@ export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
 
     // Get user details for each booking
     const userIds = [...new Set([
-      ...bookings.map(b => b.clientId),
-      ...bookings.map(b => b.providerId)
+      ...bookings.map((b: any) => b.clientId),
+      ...bookings.map((b: any) => b.providerId)
     ])];
 
     const users = await prisma.user.findMany({
@@ -157,13 +157,14 @@ export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
       select: { id: true, firstName: true, lastName: true, email: true }
     });
 
-    const userMap = users.reduce((acc, user) => {
+    type UserSummary = { id: string; firstName: string; lastName: string; email: string };
+    const userMap = users.reduce((acc: Record<string, UserSummary>, user: UserSummary) => {
       acc[user.id] = user;
       return acc;
-    }, {} as Record<string, typeof users[0]>);
+    }, {} as Record<string, UserSummary>);
 
     // Mock chat rooms based on bookings
-    const chatRooms = bookings.map((booking: any) => ({
+  const chatRooms = bookings.map((booking: any) => ({
       id: `chat_${booking.id}`,
       bookingId: booking.id,
       clientId: booking.clientId,

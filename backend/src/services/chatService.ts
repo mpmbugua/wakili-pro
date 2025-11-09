@@ -128,7 +128,7 @@ export class ChatService {
         select: { id: true }
       });
 
-      chatRooms.forEach((room: any) => {
+      chatRooms.forEach((room: { id: string }) => {
         socket.join(`chat_${room.id}`);
       });
 

@@ -136,7 +136,7 @@ class MobileIntegrationService {
         return;
       }
 
-      const tokens = userDevices.map((device: any) => device.deviceToken);
+  const tokens = userDevices.map((device: MobileDevice) => device.deviceToken);
       
       const message: admin.messaging.MulticastMessage = {
         tokens,
@@ -427,7 +427,7 @@ class MobileIntegrationService {
 
       tokens.forEach(token => {
         const device = Array.from(this.registeredDevices.values())
-          .find(d => d.deviceToken === token);
+          .find((d: MobileDevice) => d.deviceToken === token);
         if (device) {
           device.isActive = false;
         }
