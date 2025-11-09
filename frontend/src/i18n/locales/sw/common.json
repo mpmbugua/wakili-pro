@@ -1,0 +1,175 @@
+{
+  "app": {
+    "name": "Wakili Pro",
+    "tagline": "Mshirika wako wa kisheria unayeaminiwa"
+  },
+  "navigation": {
+    "home": "Nyumbani",
+    "services": "Huduma",
+    "lawyers": "Mawakili",
+    "about": "Kuhusu",
+    "contact": "Mawasiliano",
+    "login": "Ingia",
+    "register": "Jisajili",
+    "dashboard": "Dashibodi",
+    "profile": "Wasifu",
+    "logout": "Toka"
+  },
+  "auth": {
+    "login": {
+      "title": "Karibu Tena",
+      "subtitle": "Ingia kwenye akaunti yako",
+      "email": "Barua pepe",
+      "password": "Nywila",
+      "rememberMe": "Nikumbuke",
+      "forgotPassword": "Umesahau nywila?",
+      "loginButton": "Ingia",
+      "noAccount": "Huna akaunti?",
+      "signUp": "Jisajili"
+    },
+    "register": {
+      "title": "Unda Akaunti",
+      "subtitle": "Jiunge na Wakili Pro leo",
+      "firstName": "Jina la Kwanza",
+      "lastName": "Jina la Mwisho",
+      "email": "Anwani ya Barua Pepe",
+      "password": "Nywila",
+      "confirmPassword": "Thibitisha Nywila",
+      "userType": "Mimi ni",
+      "client": "Mteja",
+      "lawyer": "Wakili",
+      "agreeTerms": "Nakubali Masharti na Hali",
+      "createAccount": "Unda Akaunti",
+      "hasAccount": "Tayari una akaunti?",
+      "signIn": "Ingia"
+    }
+  },
+  "legal": {
+    "services": {
+      "title": "Huduma za Kisheria",
+      "consultation": "Ushauri wa Kisheria",
+      "documentReview": "Ukaguzi wa Hati",
+      "contractDrafting": "Kuandika Mikataba",
+      "familyLaw": "Sheria za Familia",
+      "businessLaw": "Sheria za Biashara",
+      "propertyLaw": "Sheria za Mali",
+      "criminalLaw": "Sheria za Jinai",
+      "laborLaw": "Sheria za Kazi"
+    },
+    "specialties": {
+      "familyLaw": "Sheria za Familia",
+      "businessLaw": "Sheria za Biashara na Makampuni",
+      "propertyLaw": "Mali na Ardhi",
+      "criminalLaw": "Utetezi wa Jinai",
+      "laborLaw": "Ajira na Kazi",
+      "immigrationLaw": "Sheria za Uhamiaji",
+      "intellectualProperty": "Mali ya Akili",
+      "taxLaw": "Sheria za Kodi"
+    },
+    "terms": {
+      "consultation": "Ushauri wa kisheria unaohusisha ushauri wa kitaalamu",
+      "retainer": "Ada ya kuweka wakili",
+      "litigation": "Uwakilishi mahakamani na michakato ya kisheria",
+      "arbitration": "Mchakato wa utatuzi wa migogoro",
+      "mediation": "Mazungumzo ya kupatanisha makundi",
+      "compliance": "Kufuata mahitaji ya kisheria na kanuni"
+    }
+  },
+  "ai": {
+    "assistant": {
+      "title": "Msaidizi wa AI wa Kisheria",
+      "subtitle": "Pata majibu ya haraka kwa maswali yako ya kisheria",
+      "placeholder": "Uliza kuhusu sheria za Kenya, taratibu, au haki za kisheria...",
+      "disclaimer": "AI hii inatoa taarifa za jumla tu. Tafuta ushauri wa kitaalamu wa kisheria kwa kesi maalum.",
+      "examples": {
+        "title": "Jaribu kuuliza kuhusu:",
+        "items": [
+          "Haki zangu ni zipi kama mpangaji Kenya?",
+          "Ninawezaje kusajili biashara Kenya?",
+          "Mchakato wa talaka Kenya ni upi?",
+          "Haki za ajira chini ya sheria za Kenya"
+        ]
+      }
+    },
+    "responses": {
+      "thinking": "Ninachambua swali lako la kisheria...",
+      "disclaimer": "Muhimu: Hii ni taarifa za kisheria za jumla. Kwa ushauri maalum wa kisheria, shauriana na wakili aliyehitimu.",
+      "bookConsultation": "Agiza mazungumzo na wakili",
+      "relatedServices": "Huduma za kisheria zinazohusiana"
+    }
+  },
+  "booking": {
+    "title": "Agiza Mazungumzo",
+    "selectLawyer": "Chagua Wakili",
+    "selectService": "Chagua Huduma",
+    "selectDate": "Chagua Tarehe na Wakati",
+    "consultationType": "Aina ya Mazungumzo",
+    "inPerson": "Ana kwa Ana",
+    "videoCall": "Simu ya Video",
+    "phoneCall": "Simu",
+    "duration": "Muda",
+    "minutes": "dakika",
+    "totalCost": "Gharama Jumla",
+    "bookNow": "Agiza Sasa",
+    "confirmBooking": "Thibitisha Agizo"
+  },
+  "payment": {
+    "methods": {
+      "title": "Njia za Kulipa",
+      "mpesa": "M-Pesa",
+      "card": "Kadi ya Mkopo/Malipo",
+      "bankTransfer": "Uhamisho wa Benki"
+    },
+    "mpesa": {
+      "phoneNumber": "Nambari ya Simu ya M-Pesa",
+      "enterPin": "Ingiza PIN yako ya M-Pesa unapoulizwa",
+      "confirmPayment": "Thibitisha Malipo"
+    },
+    "status": {
+      "processing": "Inachakata malipo...",
+      "success": "Malipo yamefaulu!",
+      "failed": "Malipo yameshindwa. Tafadhali jaribu tena."
+    }
+  },
+  "common": {
+    "loading": "Inapakia...",
+    "error": "Hitilafu imetokea",
+    "success": "Imefaulu!",
+    "cancel": "Ghairi",
+    "confirm": "Thibitisha",
+    "save": "Hifadhi",
+    "edit": "Hariri",
+    "delete": "Futa",
+    "search": "Tafuta",
+    "filter": "Chuja",
+    "sort": "Panga",
+    "previous": "Iliyotangulia",
+    "next": "Ifuatayo",
+    "close": "Funga",
+    "submit": "Wasilisha",
+    "reset": "Rudisha",
+    "clear": "Futa",
+    "select": "Chagua",
+    "upload": "Pakia",
+    "download": "Pakua"
+  },
+  "validation": {
+    "required": "Sehemu hii inahitajika",
+    "email": "Tafadhali ingiza anwani sahihi ya barua pepe",
+    "minLength": "Lazima iwe na angalau herufi {{count}}",
+    "maxLength": "Lazima iwe chini ya herufi {{count}}",
+    "passwordMatch": "Nywila lazima zilingane",
+    "phoneNumber": "Tafadhali ingiza nambari sahihi ya simu"
+  },
+  "dashboard": {
+    "welcome": "Karibu tena, {{name}}",
+    "overview": "Muhtasari",
+    "recentActivity": "Shughuli za Hivi Karibuni",
+    "upcomingConsultations": "Mazungumzo Yanayokuja",
+    "statistics": "Takwimu",
+    "earnings": "Mapato",
+    "clients": "Wateja",
+    "consultations": "Mazungumzo",
+    "rating": "Kiwango"
+  }
+}

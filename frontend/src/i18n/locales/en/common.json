@@ -1,0 +1,175 @@
+{
+  "app": {
+    "name": "Wakili Pro",
+    "tagline": "Your trusted legal partner"
+  },
+  "navigation": {
+    "home": "Home",
+    "services": "Services",
+    "lawyers": "Lawyers",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your account",
+      "email": "Email",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "loginButton": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join Wakili Pro today",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "userType": "I am a",
+      "client": "Client",
+      "lawyer": "Lawyer",
+      "agreeTerms": "I agree to the Terms & Conditions",
+      "createAccount": "Create Account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    }
+  },
+  "legal": {
+    "services": {
+      "title": "Legal Services",
+      "consultation": "Legal Consultation",
+      "documentReview": "Document Review",
+      "contractDrafting": "Contract Drafting",
+      "familyLaw": "Family Law",
+      "businessLaw": "Business Law",
+      "propertyLaw": "Property Law",
+      "criminalLaw": "Criminal Law",
+      "laborLaw": "Labor Law"
+    },
+    "specialties": {
+      "familyLaw": "Family Law",
+      "businessLaw": "Business & Corporate Law", 
+      "propertyLaw": "Property & Real Estate",
+      "criminalLaw": "Criminal Defense",
+      "laborLaw": "Employment & Labor",
+      "immigrationLaw": "Immigration Law",
+      "intellectualProperty": "Intellectual Property",
+      "taxLaw": "Tax Law"
+    },
+    "terms": {
+      "consultation": "Legal consultation involving professional advice",
+      "retainer": "Legal retainer fee for ongoing services",
+      "litigation": "Court representation and legal proceedings",
+      "arbitration": "Alternative dispute resolution process",
+      "mediation": "Facilitated negotiation between parties",
+      "compliance": "Adherence to legal and regulatory requirements"
+    }
+  },
+  "ai": {
+    "assistant": {
+      "title": "AI Legal Assistant",
+      "subtitle": "Get instant answers to your legal questions",
+      "placeholder": "Ask about Kenyan law, procedures, or legal rights...",
+      "disclaimer": "This AI provides general information only. Always seek professional legal advice for specific cases.",
+      "examples": {
+        "title": "Try asking about:",
+        "items": [
+          "What are my rights as a tenant in Kenya?",
+          "How do I register a business in Kenya?",
+          "What is the process for divorce in Kenya?",
+          "Employment rights under Kenyan law"
+        ]
+      }
+    },
+    "responses": {
+      "thinking": "Analyzing your legal question...",
+      "disclaimer": "Important: This is general legal information. For specific legal advice, consult with a qualified lawyer.",
+      "bookConsultation": "Book a consultation with a lawyer",
+      "relatedServices": "Related legal services"
+    }
+  },
+  "booking": {
+    "title": "Book Consultation",
+    "selectLawyer": "Select Lawyer",
+    "selectService": "Select Service",
+    "selectDate": "Select Date & Time",
+    "consultationType": "Consultation Type",
+    "inPerson": "In Person",
+    "videoCall": "Video Call",
+    "phoneCall": "Phone Call",
+    "duration": "Duration",
+    "minutes": "minutes",
+    "totalCost": "Total Cost",
+    "bookNow": "Book Now",
+    "confirmBooking": "Confirm Booking"
+  },
+  "payment": {
+    "methods": {
+      "title": "Payment Methods",
+      "mpesa": "M-Pesa",
+      "card": "Credit/Debit Card",
+      "bankTransfer": "Bank Transfer"
+    },
+    "mpesa": {
+      "phoneNumber": "M-Pesa Phone Number",
+      "enterPin": "Enter your M-Pesa PIN when prompted",
+      "confirmPayment": "Confirm Payment"
+    },
+    "status": {
+      "processing": "Processing payment...",
+      "success": "Payment successful!",
+      "failed": "Payment failed. Please try again."
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success!",
+    "cancel": "Cancel",
+    "confirm": "Confirm", 
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "previous": "Previous",
+    "next": "Next",
+    "close": "Close",
+    "submit": "Submit",
+    "reset": "Reset",
+    "clear": "Clear",
+    "select": "Select",
+    "upload": "Upload",
+    "download": "Download"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email address",
+    "minLength": "Must be at least {{count}} characters",
+    "maxLength": "Must be less than {{count}} characters",
+    "passwordMatch": "Passwords must match",
+    "phoneNumber": "Please enter a valid phone number"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}",
+    "overview": "Overview",
+    "recentActivity": "Recent Activity",
+    "upcomingConsultations": "Upcoming Consultations",
+    "statistics": "Statistics",
+    "earnings": "Earnings",
+    "clients": "Clients",
+    "consultations": "Consultations",
+    "rating": "Rating"
+  }
+}

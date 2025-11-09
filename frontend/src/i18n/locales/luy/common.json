@@ -1,0 +1,66 @@
+{
+  "app": {
+    "name": "Wakili Pro", 
+    "tagline": "Omulamuzi wuwo owesigika"
+  },
+  "navigation": {
+    "home": "Ewaka",
+    "services": "Obuweereza",
+    "lawyers": "Abalamuzi",
+    "about": "Kutuukusu",
+    "contact": "Okwejjanjaba",
+    "login": "Yingira",
+    "register": "Wewandiise",
+    "dashboard": "Entebe",
+    "profile": "Ebikuukusu",
+    "logout": "Fuluma"
+  },
+  "auth": {
+    "login": {
+      "title": "Tusanyuse okukulaba",
+      "subtitle": "Yingira mu akawunti yo",
+      "email": "Posta",
+      "password": "Ekigambo eky'obukuumi",
+      "rememberMe": "Njukira",
+      "forgotPassword": "Werabira ekigambo ky'obukuumi?",
+      "loginButton": "Yingira",
+      "noAccount": "Tolina kawunti?",
+      "signUp": "Wewandiise"
+    }
+  },
+  "legal": {
+    "services": {
+      "title": "Obuweereza bw'amateeka",
+      "consultation": "Okuweruzibwa ku mateeka",
+      "documentReview": "Okwekebera ebiwandiiko",
+      "contractDrafting": "Okuwandiika endagaano",
+      "familyLaw": "Amateeka g'amaka",
+      "businessLaw": "Amateeka ga bizinensi",
+      "propertyLaw": "Amateeka g'ebintu",
+      "criminalLaw": "Amateeka g'obuzzi bw'emisango",
+      "laborLaw": "Amateeka g'emirimu"
+    }
+  },
+  "common": {
+    "loading": "Gutekebwa...",
+    "error": "Wabaawo ensobi",
+    "success": "Kiwanguddwa!",
+    "cancel": "Sazamu",
+    "confirm": "Kakasa",
+    "save": "Kuuma",
+    "edit": "Longosa",
+    "delete": "Sangula",
+    "search": "Noonya",
+    "filter": "Sengula",
+    "sort": "Tegeka",
+    "previous": "Ekyasooka",
+    "next": "Ekiddako",
+    "close": "Ggalawo",
+    "submit": "Sindika",
+    "reset": "Ddamu okutandika",
+    "clear": "Sangula byonna",
+    "select": "Londa",
+    "upload": "Teeka waggulu",
+    "download": "Tikula wansi"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "app": {
+    "name": "Wakili Pro",
+    "tagline": "Jatich chir ma igenoni"
+  },
+  "navigation": {
+    "home": "Dala",
+    "services": "Tije",
+    "lawyers": "Jo-chir",
+    "about": "Wechwa",
+    "contact": "Wuoyo",
+    "login": "Donji",
+    "register": "Ndikri",
+    "dashboard": "Kama tich",
+    "profile": "Chandruok mari",
+    "logout": "Wuogi"
+  },
+  "auth": {
+    "login": {
+      "title": "Waduogo",
+      "subtitle": "Donji e akaunte mari",
+      "email": "Barupeche",
+      "password": "Nying mopondo",
+      "rememberMe": "Para",
+      "forgotPassword": "Wiu nying mopondo?",
+      "loginButton": "Donji",
+      "noAccount": "Onge gi akaunte?",
+      "signUp": "Ndikri"
+    }
+  },
+  "legal": {
+    "services": {
+      "title": "Tije mag chike",
+      "consultation": "Puonj mag chike",
+      "documentReview": "Neno kalatas",
+      "contractDrafting": "Ndiko singruok",
+      "familyLaw": "Chike mag dala",
+      "businessLaw": "Chike mag ohala",
+      "propertyLaw": "Chike mag gik",
+      "criminalLaw": "Chike mag richo", 
+      "laborLaw": "Chike mag tich"
+    }
+  },
+  "common": {
+    "loading": "Kelo...",
+    "error": "Rach osebet",
+    "success": "Odhi maber!",
+    "cancel": "Juk",
+    "confirm": "Mok adier",
+    "save": "Kan",
+    "edit": "Ket machien",
+    "delete": "Gol",
+    "search": "Manyo",
+    "filter": "Pog",
+    "sort": "Chan kaka dwaro",
+    "previous": "Mokwongo",
+    "next": "Maluwo",
+    "close": "Lor",
+    "submit": "Or",
+    "reset": "Dwok",
+    "clear": "Jow",
+    "select": "Yer",
+    "upload": "Ket malo",
+    "download": "Gol e sanduku"
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "app": {
+    "name": "Wakili Pro",
+    "tagline": "Mũndũ waku wa watho ũrĩa wĩhokeku"
+  },
+  "navigation": {
+    "home": "Mũciĩ",
+    "services": "Wĩra",
+    "lawyers": "Atũũri a ciira",
+    "about": "Ũhoro witũ",
+    "contact": "Gũkinyia ũhoro",
+    "login": "Tonyia",
+    "register": "Ĩyandĩkithia",
+    "dashboard": "Gĩtina kĩa mawira",
+    "profile": "Mũhianano waku",
+    "logout": "Uma"
+  },
+  "auth": {
+    "login": {
+      "title": "Ũcookete",
+      "subtitle": "Tonyia akaunti yaku",
+      "email": "Marũa ma thiĩni",
+      "password": "Kahinda ka ũhithũ",
+      "rememberMe": "Ndirikana",
+      "forgotPassword": "Ũriganĩirwo nĩ kahinda?",
+      "loginButton": "Tonyia",
+      "noAccount": "Ndũrĩ na akaunti?",
+      "signUp": "Ĩyandĩkithia"
+    },
+    "register": {
+      "title": "Ũmba Akaunti",
+      "subtitle": "Ũnyiitane na Wakili Pro ũmũthĩ",
+      "firstName": "Rĩĩtwa rĩa mbere",
+      "lastName": "Rĩĩtwa rĩa mũthia",
+      "email": "Ũndũ wa marũa ma thiĩni",
+      "password": "Kahinda ka ũhithũ",
+      "confirmPassword": "Menyithia kahinda ka ũhithũ",
+      "userType": "Niĩ ndĩ",
+      "client": "Mũndũ wa wĩra",
+      "lawyer": "Mũtũũri wa ciira",
+      "agreeTerms": "Ndetĩkĩra mawatho na mĩtũrire",
+      "createAccount": "Ũmba Akaunti",
+      "hasAccount": "Ũrĩ kuo na akaunti?",
+      "signIn": "Tonyia"
+    }
+  },
+  "legal": {
+    "services": {
+      "title": "Mawira ma watho",
+      "consultation": "Kĩrĩra kĩa watho",
+      "documentReview": "Gũthondeka marũa",
+      "contractDrafting": "Kwandĩka ciira",
+      "familyLaw": "Watho wa nyũmba",
+      "businessLaw": "Watho wa wonjoria",
+      "propertyLaw": "Watho wa indo",
+      "criminalLaw": "Watho wa mahĩtia",
+      "laborLaw": "Watho wa wĩra"
+    },
+    "specialties": {
+      "familyLaw": "Watho wa nyũmba",
+      "businessLaw": "Watho wa wonjoria na ikundi",
+      "propertyLaw": "Indo na mũgũnda",
+      "criminalLaw": "Kũgitĩra mahĩtia",
+      "laborLaw": "Wĩra na andũ a wĩra",
+      "immigrationLaw": "Watho wa gũthama",
+      "intellectualProperty": "Indo cia meciiria",
+      "taxLaw": "Watho wa mĩtheko"
+    }
+  },
+  "ai": {
+    "assistant": {
+      "title": "Mũteithĩrĩri wa AI wa watho",
+      "subtitle": "Ona macookio ma narua ma ciũria ciaku cia watho",
+      "placeholder": "Ũria ũhoro wa watho wa Kenya, mĩthiĩre, kana kĩhooto kĩa watho...",
+      "disclaimer": "AI ĩno ĩheaga ũhoro wa rũthiomi o rũthiomi. Hĩndĩ ciothe caria kĩrĩra kĩa mũtũũri wa ciira harĩ mahitia manene."
+    }
+  },
+  "booking": {
+    "title": "Atha Kĩrĩra",
+    "selectLawyer": "Thuura Mũtũũri wa Ciira",
+    "selectService": "Thuura Wĩra",
+    "selectDate": "Thuura Mũthenya na Ihinda"
+  },
+  "payment": {
+    "methods": {
+      "title": "Mĩthiĩre ya gũrĩha",
+      "mpesa": "M-Pesa",
+      "card": "Karata ya mbeeca",
+      "bankTransfer": "Kũgũra mbeeca bengi"
+    }
+  },
+  "common": {
+    "loading": "Nĩgũkuua...",
+    "error": "Mahĩtia nĩmekĩka",
+    "success": "Nĩkũhootete!",
+    "cancel": "Tiga",
+    "confirm": "Menyithia",
+    "save": "Iga",
+    "edit": "Gianũra",
+    "delete": "Eheria",
+    "search": "Caria",
+    "filter": "Amũra",
+    "sort": "Gaya",
+    "previous": "Rĩa mbere",
+    "next": "Rĩrĩa rĩngĩ",
+    "close": "Hinga",
+    "submit": "Rehera",
+    "reset": "Cokia",
+    "clear": "Theria",
+    "select": "Thuura",
+    "upload": "Rehera",
+    "download": "Ruta"
+  },
+  "dashboard": {
+    "welcome": "Wamũkĩra ũcookete, {{name}}",
+    "overview": "Rũgamo",
+    "recentActivity": "Wĩra wa rĩu",
+    "upcomingConsultations": "Ciũria iria igooka",
+    "statistics": "Ndũkanĩro"
+  }
+}
