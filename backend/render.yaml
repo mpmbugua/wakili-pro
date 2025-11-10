@@ -1,17 +1,11 @@
-# Render.com Deployment Configuration
-
-# Build Command
-npm install && npm run build
-
-# Start Command  
-npm start
-
-# Environment
-- NODE_ENV=production
-- PORT=(automatically set by Render)
-
-# Health Check
-GET /health
-
-# Auto-Deploy
-- Enabled on main branch commits
+services:
+  - type: web
+    name: wakili-pro-backend
+    runtime: node
+    rootDir: .
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
