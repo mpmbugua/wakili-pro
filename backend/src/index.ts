@@ -46,7 +46,6 @@ app.get('/health', (_req: Request, res: Response) => {
 // Database health check endpoint
 app.get('/health/db', async (_req: Request, res: Response) => {
   try {
-    const { testDatabaseConnection } = await import('./utils/database');
     const isConnected = await testDatabaseConnection();
     
     if (isConnected) {
@@ -120,9 +119,11 @@ const port = config.port || 5000;
 
 // Create HTTP server for Socket.IO integration
 import { createServer } from 'http';
-import { VideoSignalingServer } from './services/videoSignalingService';
 
 const server = createServer(app);
+
+// Import database utilities at top level
+import { testDatabaseConnection } from './utils/database';
 
 // Graceful startup with error handling
 async function startServer() {
@@ -130,17 +131,21 @@ async function startServer() {
     logger.info('Starting Wakili Pro Backend...');
 
     // Test database connection (non-blocking)
-    const { testDatabaseConnection } = await import('./utils/database');
-    const dbConnected = await testDatabaseConnection();
-    
-    if (dbConnected) {
-      logger.info('Database connected successfully');
-    } else {
-      logger.warn('Database not available - some features may be limited');
+    let dbConnected = false;
+    try {
+      dbConnected = await testDatabaseConnection();
+      if (dbConnected) {
+        logger.info('Database connected successfully');
+      } else {
+        logger.warn('Database not available - some features may be limited');
+      }
+    } catch (dbError) {
+      logger.warn('Database connection test failed:', dbError);
     }
 
-    // Initialize video signaling server
+    // Initialize video signaling server (delayed import to avoid build issues)
     try {
+      const { VideoSignalingServer } = await import('./services/videoSignalingService');
       new VideoSignalingServer(server);
       logger.info('Video signaling server initialized');
     } catch (error) {
@@ -153,7 +158,7 @@ async function startServer() {
       logger.info(`✅ Server running on port ${port}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`Database: ${dbConnected ? '✅ Connected' : '⚠️  Not available'}`);
-      logger.info(`Health check: http://localhost:${port}/health`);
+      logger.info(`Health check available at /health`);
     });
 
   } catch (error) {
