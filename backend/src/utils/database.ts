@@ -1,20 +1,28 @@
 import { PrismaClient } from '@prisma/client';
 
-// Validate DATABASE_URL before creating Prisma client
-if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL environment variable is not set');
-  process.exit(1);
-}
-
+// Create Prisma client with fallback
 export const prisma = new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  errorFormat: 'pretty',
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  }
+  errorFormat: 'pretty'
 });
+
+// Test database connection
+export async function testDatabaseConnection(): Promise<boolean> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      console.warn('DATABASE_URL environment variable is not set');
+      return false;
+    }
+    
+    await prisma.$connect();
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('Database connection successful');
+    return true;
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    return false;
+  }
+}
 
 // Handle graceful shutdown
 process.on('beforeExit', async () => {

@@ -46,17 +46,28 @@ app.get('/health', (_req: Request, res: Response) => {
 // Database health check endpoint
 app.get('/health/db', async (_req: Request, res: Response) => {
   try {
-    const { prisma } = await import('./utils/database');
-    await prisma.$queryRaw`SELECT 1`;
-    res.status(200).json({ 
-      status: 'OK', 
-      database: 'connected',
-      timestamp: new Date().toISOString()
-    });
+    const { testDatabaseConnection } = await import('./utils/database');
+    const isConnected = await testDatabaseConnection();
+    
+    if (isConnected) {
+      res.status(200).json({ 
+        status: 'OK', 
+        database: 'connected',
+        url: process.env.DATABASE_URL ? 'configured' : 'missing',
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      res.status(503).json({ 
+        status: 'UNAVAILABLE', 
+        database: 'disconnected',
+        url: process.env.DATABASE_URL ? 'configured' : 'missing',
+        timestamp: new Date().toISOString()
+      });
+    }
   } catch (error) {
     res.status(500).json({ 
       status: 'ERROR', 
-      database: 'disconnected',
+      database: 'error',
       error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     });
@@ -74,11 +85,19 @@ import videoRoutes from './routes/video';
 import aiRoutes from './routes/ai';
 import analyticsRoutes from './routes/analytics';
 
+// API status endpoint
 app.get('/api', (_req: Request, res: Response) => {
   res.json({ 
     message: 'Welcome to Wakili Pro API',
     version: '1.0.0',
-    documentation: '/api/docs'
+    status: 'running',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/health',
+      database: '/health/db',
+      auth: '/api/auth',
+      users: '/api/users'
+    }
   });
 });
 
@@ -108,10 +127,17 @@ const server = createServer(app);
 // Graceful startup with error handling
 async function startServer() {
   try {
-    // Test database connection
-    const { prisma } = await import('./utils/database');
-    await prisma.$connect();
-    logger.info('Database connected successfully');
+    logger.info('Starting Wakili Pro Backend...');
+
+    // Test database connection (non-blocking)
+    const { testDatabaseConnection } = await import('./utils/database');
+    const dbConnected = await testDatabaseConnection();
+    
+    if (dbConnected) {
+      logger.info('Database connected successfully');
+    } else {
+      logger.warn('Database not available - some features may be limited');
+    }
 
     // Initialize video signaling server
     try {
@@ -122,17 +148,26 @@ async function startServer() {
       // Continue without video features for now
     }
 
-    // Start server
+    // Start server regardless of database status
     server.listen(port, () => {
-      logger.info(`Server running on port ${port}`);
+      logger.info(`✅ Server running on port ${port}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
-      logger.info(`WebSocket server enabled for video consultations`);
+      logger.info(`Database: ${dbConnected ? '✅ Connected' : '⚠️  Not available'}`);
+      logger.info(`Health check: http://localhost:${port}/health`);
     });
 
   } catch (error) {
-    logger.error('Failed to start server:', error);
-    process.exit(1);
+    logger.error('❌ Failed to start server:', error);
+    
+    // Try to start basic server without features
+    try {
+      server.listen(port, () => {
+        logger.info(`🆘 Basic server started on port ${port} (limited functionality)`);
+      });
+    } catch (basicError) {
+      logger.error('❌ Complete startup failure:', basicError);
+      process.exit(1);
+    }
   }
 }
 
