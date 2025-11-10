@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { LoginRequest } from '../../../../shared/src/types/auth';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+
+// Inline type to replace shared dependency
+interface LoginRequest {
+  email: string;
+  password: string;
+}
 import { WakiliLogo } from '../ui/WakiliLogo';
 import { Button } from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';

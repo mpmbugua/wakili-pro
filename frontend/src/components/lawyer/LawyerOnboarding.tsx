@@ -3,10 +3,22 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { Scale, MapPin, FileText, Briefcase, Plus, X } from 'lucide-react';
-import { LawyerOnboardingSchema } from '../../../../shared/src/schemas/user';
 import { useAuthStore } from '../../store/authStore';
 import { lawyerService } from '../../services/lawyerService';
 import { z } from 'zod';
+
+// Inline schema to replace shared dependency
+const LawyerOnboardingSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Valid email is required'),
+  phone: z.string().min(10, 'Valid phone number is required'),
+  specializations: z.array(z.string()).min(1, 'Select at least one specialization'),
+  experience: z.number().min(0, 'Experience must be 0 or greater'),
+  location: z.string().min(1, 'Location is required'),
+  bio: z.string().min(50, 'Bio must be at least 50 characters'),
+  hourlyRate: z.number().min(1, 'Hourly rate is required')
+});
 
 type LawyerOnboardingFormData = z.infer<typeof LawyerOnboardingSchema>;
 

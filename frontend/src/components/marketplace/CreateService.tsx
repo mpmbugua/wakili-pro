@@ -3,10 +3,21 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { Briefcase, DollarSign, Clock, FileText, Plus, X } from 'lucide-react';
-import { CreateServiceSchema } from '../../../../shared/src/schemas/marketplace';
 import { useAuthStore } from '../../store/authStore';
 import { marketplaceService } from '../../services/marketplaceService';
 import { z } from 'zod';
+
+// Inline schema to replace shared dependency
+const CreateServiceSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(50, 'Description must be at least 50 characters'),
+  type: z.enum(['CONSULTATION', 'DOCUMENT_REVIEW', 'CONTRACT_DRAFTING', 'REPRESENTATION', 'OTHER']),
+  category: z.string().min(1, 'Category is required'),
+  price: z.number().min(1, 'Price is required'),
+  duration: z.number().min(1, 'Duration is required'),
+  requirements: z.array(z.string()).optional(),
+  deliverables: z.array(z.string()).optional()
+});
 
 type CreateServiceFormData = z.infer<typeof CreateServiceSchema>;
 

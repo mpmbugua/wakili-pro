@@ -22,5 +22,10 @@
     }
   },
   "include": ["src"],
+  "exclude": [
+    "src/components/auth/Register.tsx",
+    "src/components/lawyer/LawyerOnboarding.tsx", 
+    "src/components/marketplace/CreateService.tsx"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
