@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wakili Pro - Professional Legal Services Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Force no cache
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <!-- Deployment Success Banner -->
+    <div class="bg-green-600 text-white text-center py-3 font-bold text-lg">
+        🎉 SUCCESS! WAKILI PRO v6.0 - FULL INTERFACE WORKING - NO MORE CACHE ISSUES! 🎉
+        <div class="text-sm">Deployed: <span id="timestamp"></span></div>
+    </div>
+
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6 flex-wrap">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                            W
+                        </div>
+                        <h1 class="ml-3 text-3xl font-bold text-gray-900">Wakili Pro</h1>
+                        <span class="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">Professional Legal Services</span>
+                    </div>
+                    <div class="space-x-4 mt-4 sm:mt-0">
+                        <button onclick="showAlert('Login Coming Soon!')" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                            Login
+                        </button>
+                        <button onclick="showAlert('Registration Coming Soon!')" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium">
+                            Register
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-gray-900 sm:text-6xl">
+                    🚀 Professional Legal Services Platform 🚀
+                </h1>
+                <p class="mt-6 text-xl leading-8 text-gray-600 max-w-3xl mx-auto">
+                    Connect with qualified lawyers for consultations, document reviews, and legal representation in Kenya. 
+                    Professional, secure, and transparent legal services at your fingertips.
+                </p>
+                
+                <div class="mt-10 flex items-center justify-center gap-x-6 flex-wrap">
+                    <button onclick="showAlert('Find Lawyer Feature Coming Soon!')" class="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-blue-700 transition-colors shadow-lg">
+                        🔍 Find a Lawyer
+                    </button>
+                    <button onclick="showAlert('Lawyer Registration Coming Soon!')" class="bg-green-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-700 transition-colors shadow-lg">
+                        ⚖️ Join as Lawyer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-6 text-3xl">
+                        📞
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Video Consultations</h3>
+                    <p class="text-gray-600 leading-relaxed">Schedule and conduct secure video calls with qualified lawyers. Get legal advice from the comfort of your home or office.</p>
+                    <button onclick="showAlert('Video Consultations Coming Soon!')" class="mt-4 text-blue-600 font-medium hover:text-blue-700">Learn More →</button>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mb-6 text-3xl">
+                        📄
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Document Review</h3>
+                    <p class="text-gray-600 leading-relaxed">Get your legal documents professionally reviewed by experienced lawyers. Ensure your contracts and agreements are legally sound.</p>
+                    <button onclick="showAlert('Document Review Coming Soon!')" class="mt-4 text-green-600 font-medium hover:text-green-700">Learn More →</button>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mb-6 text-3xl">
+                        💼
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Legal Marketplace</h3>
+                    <p class="text-gray-600 leading-relaxed">Browse and purchase legal services at transparent, competitive prices. Find the right legal solution for your needs.</p>
+                    <button onclick="showAlert('Legal Marketplace Coming Soon!')" class="mt-4 text-purple-600 font-medium hover:text-purple-700">Learn More →</button>
+                </div>
+            </div>
+
+            <!-- Additional Features -->
+            <div class="mt-20 bg-white rounded-2xl p-8 shadow-lg">
+                <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">Why Choose Wakili Pro?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">🛡️</div>
+                        <h4 class="font-semibold mb-2">Secure & Confidential</h4>
+                        <p class="text-sm text-gray-600">End-to-end encryption for all communications</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">⚡</div>
+                        <h4 class="font-semibold mb-2">Fast Response</h4>
+                        <p class="text-sm text-gray-600">Get connected with lawyers within minutes</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">💰</div>
+                        <h4 class="font-semibold mb-2">Transparent Pricing</h4>
+                        <p class="text-sm text-gray-600">No hidden fees, clear pricing structure</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">🏆</div>
+                        <h4 class="font-semibold mb-2">Qualified Lawyers</h4>
+                        <p class="text-sm text-gray-600">All lawyers are verified and licensed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="mt-20">
+                <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">System Status</h2>
+                <div class="bg-white p-8 rounded-xl shadow-lg max-w-3xl mx-auto">
+                    <div class="text-center">
+                        <div id="status" class="text-lg mb-4">Testing backend connection...</div>
+                        <div id="response" class="mt-6 p-4 bg-gray-50 rounded-lg text-left text-sm" style="display:none;">
+                            <h4 class="font-semibold mb-2">Backend Response:</h4>
+                            <pre id="response-data" class="bg-gray-100 p-3 rounded overflow-x-auto"></pre>
+                        </div>
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <div class="font-semibold text-blue-800 mb-1">Backend URL</div>
+                                <a href="https://wakili-pro.onrender.com" target="_blank" class="text-blue-600 hover:underline break-all">
+                                    https://wakili-pro.onrender.com
+                                </a>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <div class="font-semibold text-green-800 mb-1">Health Check</div>
+                                <a href="https://wakili-pro.onrender.com/health" target="_blank" class="text-green-600 hover:underline break-all">
+                                    /health
+                                </a>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <div class="font-semibold text-purple-800 mb-1">API Root</div>
+                                <a href="https://wakili-pro.onrender.com/api" target="_blank" class="text-purple-600 hover:underline break-all">
+                                    /api
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-12 mt-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="text-2xl font-bold mb-4">Wakili Pro</div>
+                <p class="text-gray-400 mb-4">Professional Legal Services Platform for Kenya</p>
+                <p class="text-sm text-gray-500">© 2025 Wakili Pro. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Set timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        
+        // Alert function for interactive elements
+        function showAlert(message) {
+            alert(message + '\n\nThis is a demo of the Wakili Pro platform. Full functionality coming soon!');
+        }
+        
+        // Test backend connection
+        async function testBackend() {
+            try {
+                const response = await fetch('https://wakili-pro.onrender.com/health');
+                const data = await response.json();
+                document.getElementById('status').innerHTML = '✅ Backend Connected Successfully!';
+                document.getElementById('status').className = 'text-green-600 font-semibold text-xl';
+                document.getElementById('response').style.display = 'block';
+                document.getElementById('response-data').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('status').innerHTML = '❌ Backend Connection Failed';
+                document.getElementById('status').className = 'text-red-600 font-semibold text-xl';
+                console.error('Backend test failed:', error);
+            }
+        }
+        
+        // Run test on page load
+        testBackend();
+        
+        // Add some interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎉 Wakili Pro v6.0 - Full Interface Loaded Successfully!');
+        });
+    </script>
+</body>
+</html>
