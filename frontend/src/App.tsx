@@ -1,5 +1,4 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import BackendTest from './components/BackendTest';
 
 // Simple Logo Component
@@ -39,9 +38,11 @@ const LandingPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 sm:text-6xl">
-            Professional Legal Services Platform
+            🚀 Professional Legal Services Platform 🚀
           </h1>
-          <p className="text-sm text-gray-500 mt-2">v2.0 - Updated UI</p>
+          <div className="bg-yellow-100 border border-yellow-400 rounded-lg p-3 mt-4 mx-auto max-w-md">
+            <p className="text-yellow-800 font-semibold">✅ NEW UI v3.0 - Full Features Loaded!</p>
+          </div>
           <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
             Connect with qualified lawyers for consultations, document reviews, and legal representation in Kenya.
           </p>
@@ -94,15 +95,8 @@ const LandingPage: React.FC = () => {
 };
 
 function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/test" element={<BackendTest />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
-  );
+  // Always show the landing page to ensure it's visible
+  return <LandingPage />;
 }
 
 export default App;
