@@ -1,14 +1,27 @@
 {
-  "framework": null,
-  "cleanUrls": true,
-  "trailingSlash": false,
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
+          "value": "no-cache, no-store, must-revalidate, max-age=0"
         },
         {
           "key": "Pragma",
@@ -17,6 +30,10 @@
         {
           "key": "Expires",
           "value": "0"
+        },
+        {
+          "key": "X-Cache-Bust",
+          "value": "final-v8-2025-11-10"
         }
       ]
     }
