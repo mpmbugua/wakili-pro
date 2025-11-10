@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import WakiliProApp from './WakiliProApp.tsx'
+import FinalWakiliApp from './FinalWakiliApp.tsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <WakiliProApp />
+    <FinalWakiliApp />
   </React.StrictMode>,
 )
