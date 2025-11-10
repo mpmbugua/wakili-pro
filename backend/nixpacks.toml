@@ -1,17 +1,12 @@
-# Nixpacks configuration for Railway
+# Minimal Nixpacks configuration for Railway
 [phases.setup]
 nixPkgs = ["nodejs-18_x"]
 
 [phases.install]
-cmds = [
-  "npm ci",
-  "npx prisma generate || echo 'Prisma generate failed but continuing'"
-]
+cmds = ["npm install --production"]
 
 [phases.build] 
-cmds = [
-  "npm run build || echo 'Build failed but continuing'"
-]
+cmds = ["npm run build"]
 
 [start]
 cmd = "npm start"
