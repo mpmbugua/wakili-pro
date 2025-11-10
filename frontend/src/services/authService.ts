@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import { LoginRequest, RegisterRequest, AuthUser } from '../../../shared/src/types/auth';
 import { ApiResponse } from '../../../shared/src/types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://wakili-pro.onrender.com/api';
 
 // Create axios instance with default config
 const apiClient = axios.create({

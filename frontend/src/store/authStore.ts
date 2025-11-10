@@ -184,7 +184,9 @@ export const useAuthStore = create<AuthStore>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated
-      })
+      }),
+      // Add version to force refresh if structure changes
+      version: 1
     }
   )
 );
