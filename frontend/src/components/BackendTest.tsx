@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-const BackendTest: React.FC = () => {
+const BackendTest = () => {
   const [status, setStatus] = useState<string>('Testing...');
   const [data, setData] = useState<any>(null);
 
