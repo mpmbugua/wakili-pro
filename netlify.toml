@@ -1,11 +1,12 @@
 # Netlify Deployment Configuration
 [build]
   base = "frontend"
-  command = "npm run build"
-  publish = "frontend/dist"
+  command = "npm ci && npm run build"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 # Redirect all routes to index.html for SPA
 [[redirects]]
@@ -13,7 +14,7 @@
   to = "/index.html"
   status = 200
 
-# Cache busting headers
+# Cache busting headers  
 [[headers]]
   for = "/*"
   [headers.values]
