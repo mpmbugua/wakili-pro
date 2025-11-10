@@ -5,9 +5,11 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "prisma generate && tsc --skipLibCheck",
+    "build": "tsc --skipLibCheck",
+    "build:full": "prisma generate && tsc --skipLibCheck",
     "start": "node dist/index.js",
-    "postinstall": "prisma generate || echo 'Prisma generate skipped'",
+    "start:minimal": "node dist/index.minimal.js",
+    "postinstall": "echo 'Postinstall completed'",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
