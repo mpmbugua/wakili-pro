@@ -18,7 +18,7 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Alert Banner */}
       <div className="bg-red-600 text-white text-center py-2 font-bold text-lg">
-        🔥 EMERGENCY FIX v4.0 - COMPLETELY NEW APP - THIS MUST WORK! 🔥
+        🔥 CACHE-BUSTED v5.0 - {new Date().toISOString()} - FRESH DEPLOYMENT! 🔥
       </div>
 
       {/* Header */}
