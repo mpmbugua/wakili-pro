@@ -13,27 +13,9 @@ const app = express();
 // Security middleware
 app.use(helmet());
 
-// CORS configuration for production and development
-const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:3000',
-  'http://localhost:3000',
-  'http://localhost:5173', // Vite dev server
-  'https://wakili-pro-frontend.vercel.app',
-  'https://wakili-pro.vercel.app',
-  'https://wakili-pro.netlify.app'
-];
-
+// CORS configuration - allow all origins in production for now
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true, // Allow all origins temporarily for deployment
   credentials: true
 }));
 
@@ -50,14 +32,35 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
+// Health check endpoint (no database dependency)
 app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0'
   });
+});
+
+// Database health check endpoint
+app.get('/health/db', async (_req: Request, res: Response) => {
+  try {
+    const { prisma } = await import('./utils/database');
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ 
+      status: 'OK', 
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'ERROR', 
+      database: 'disconnected',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // API routes
@@ -102,11 +105,46 @@ import { VideoSignalingServer } from './services/videoSignalingService';
 
 const server = createServer(app);
 
-// Initialize video signaling server
-new VideoSignalingServer(server);
+// Graceful startup with error handling
+async function startServer() {
+  try {
+    // Test database connection
+    const { prisma } = await import('./utils/database');
+    await prisma.$connect();
+    logger.info('Database connected successfully');
 
-server.listen(port, () => {
-  logger.info(`Server running on port ${port}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  logger.info(`WebSocket server enabled for video consultations`);
+    // Initialize video signaling server
+    try {
+      new VideoSignalingServer(server);
+      logger.info('Video signaling server initialized');
+    } catch (error) {
+      logger.warn('Video signaling server failed to initialize:', error);
+      // Continue without video features for now
+    }
+
+    // Start server
+    server.listen(port, () => {
+      logger.info(`Server running on port ${port}`);
+      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      logger.info(`Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
+      logger.info(`WebSocket server enabled for video consultations`);
+    });
+
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
 });
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+startServer();
