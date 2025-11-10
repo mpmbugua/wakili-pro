@@ -1,0 +1,17 @@
+# Render.com Deployment Configuration
+
+# Build Command
+npm install && npm run build
+
+# Start Command  
+npm start
+
+# Environment
+- NODE_ENV=production
+- PORT=(automatically set by Render)
+
+# Health Check
+GET /health
+
+# Auto-Deploy
+- Enabled on main branch commits

@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = parseInt(process.env.PORT || '5000', 10);
 
 // Basic middleware
 app.use(helmet());
@@ -61,11 +61,13 @@ app.use('*', (_req: Request, res: Response) => {
   });
 });
 
-// Start server
-app.listen(port, () => {
-  console.log(`✅ Wakili Pro Backend running on port ${port}`);
-  console.log(`🌍 Health check: http://localhost:${port}/health`);
-  console.log(`📡 API root: http://localhost:${port}/api`);
+// Start server - bind to 0.0.0.0 for cloud platforms
+const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+app.listen(port, host, () => {
+  console.log(`✅ Wakili Pro Backend running on ${host}:${port}`);
+  console.log(`🌍 Health check: http://${host}:${port}/health`);
+  console.log(`📡 API root: http://${host}:${port}/api`);
+  console.log(`🎯 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 export default app;
