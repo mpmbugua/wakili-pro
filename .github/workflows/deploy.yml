@@ -25,14 +25,17 @@ jobs:
         node-version: '18'
         cache: 'npm'
         
-    - name: 📦 Install Dependencies
-      run: |
-        npm ci
-        cd frontend && npm ci
+    - name: 📦 Install Root Dependencies
+      run: npm ci --ignore-scripts
+        
+    - name: 📦 Install Frontend Dependencies
+      run: cd frontend && npm ci --ignore-scripts
+        
+    - name: 🏗️ Build Shared Package
+      run: cd shared && npm run build || echo "No shared build needed"
         
     - name: 🏗️ Build Frontend
-      run: |
-        cd frontend && npm run build
+      run: cd frontend && npm run build
         
     - name: 📋 Setup Pages
       uses: actions/configure-pages@v3
