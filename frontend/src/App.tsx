@@ -1,7 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { WakiliLogo } from './components/ui/WakiliLogo';
 import BackendTest from './components/BackendTest';
+
+// Simple Logo Component
+const SimpleLogo = () => (
+  <div className="flex items-center">
+    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+      W
+    </div>
+  </div>
+);
 
 // Simplified Landing Page Component
 const LandingPage: React.FC = () => {
@@ -12,7 +20,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <WakiliLogo />
+              <SimpleLogo />
               <h1 className="ml-3 text-2xl font-bold text-gray-900">Wakili Pro</h1>
             </div>
             <div className="space-x-4">
@@ -33,6 +41,7 @@ const LandingPage: React.FC = () => {
           <h1 className="text-4xl font-bold text-gray-900 sm:text-6xl">
             Professional Legal Services Platform
           </h1>
+          <p className="text-sm text-gray-500 mt-2">v2.0 - Updated UI</p>
           <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
             Connect with qualified lawyers for consultations, document reviews, and legal representation in Kenya.
           </p>
