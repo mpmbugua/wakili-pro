@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wakili Pro - CACHE OVERRIDE v8.1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="version" content="8.1">
+    <meta name="timestamp" content="2025-11-10T10:00:00Z">
+</head>
+<body>
+    <!-- CACHE OVERRIDE SUCCESS BANNER -->
+    <div class="bg-gradient-to-r from-red-600 to-orange-600 text-white text-center py-6 font-bold text-2xl">
+        🔥 CACHE OVERRIDE v8.1 - IF YOU SEE THIS, THE CACHE IS BROKEN! 🔥
+        <div class="text-lg mt-2">Vercel Deployment Working - New Interface Loading...</div>
+    </div>
+
+    <div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 p-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-2xl p-12 text-center">
+                <div class="w-20 h-20 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-3xl mx-auto mb-8">
+                    W
+                </div>
+                
+                <h1 class="text-6xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-8">
+                    Wakili Pro
+                </h1>
+                
+                <div class="text-2xl font-bold text-green-600 mb-6">
+                    🎉 DEPLOYMENT SUCCESS! 🎉
+                </div>
+                
+                <p class="text-xl text-gray-600 mb-8">
+                    Professional Legal Services Platform for Kenya
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <div class="bg-green-50 p-6 rounded-2xl border-2 border-green-200">
+                        <div class="text-4xl mb-4">📞</div>
+                        <h3 class="text-xl font-bold mb-2">Video Consultations</h3>
+                        <p class="text-gray-600">Connect with qualified lawyers</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-6 rounded-2xl border-2 border-blue-200">
+                        <div class="text-4xl mb-4">📄</div>
+                        <h3 class="text-xl font-bold mb-2">Document Review</h3>
+                        <p class="text-gray-600">Professional legal document analysis</p>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-6 rounded-2xl border-2 border-purple-200">
+                        <div class="text-4xl mb-4">💼</div>
+                        <h3 class="text-xl font-bold mb-2">Legal Marketplace</h3>
+                        <p class="text-gray-600">Browse and purchase legal services</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <button onclick="alert('Login feature coming soon!')" class="bg-green-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-green-700 transition-colors">
+                        🔐 Login
+                    </button>
+                    <button onclick="alert('Registration coming soon!')" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition-colors">
+                        📝 Register
+                    </button>
+                </div>
+                
+                <div class="mt-12 p-6 bg-gray-50 rounded-2xl">
+                    <h3 class="text-xl font-bold mb-4">Backend Status</h3>
+                    <div id="status" class="text-lg mb-4">Testing backend connection...</div>
+                    <div class="text-sm text-gray-600">
+                        <p><strong>Backend:</strong> https://wakili-pro.onrender.com</p>
+                        <p><strong>Health:</strong> https://wakili-pro.onrender.com/health</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-lg font-bold text-orange-600">
+                    🚀 Cache Override Successful - Full Interface Loading! 🚀
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test backend connection
+        fetch('https://wakili-pro.onrender.com/health')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('status').innerHTML = '✅ Backend Connected Successfully!';
+                document.getElementById('status').className = 'text-green-600 font-bold text-xl';
+            })
+            .catch(() => {
+                document.getElementById('status').innerHTML = '❌ Backend Connection Failed';
+                document.getElementById('status').className = 'text-red-600 font-bold text-xl';
+            });
+            
+        console.log('🎉 Wakili Pro v8.1 - Cache Override Working!');
+    </script>
+</body>
+</html>

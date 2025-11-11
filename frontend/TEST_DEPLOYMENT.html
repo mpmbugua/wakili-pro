@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wakili Pro Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 WAKILI PRO TEST SUCCESS!</h1>
+        <h2>Authentication System Deployed</h2>
+        <p>If you can see this page, the deployment is working!</p>
+        
+        <div style="margin: 30px 0;">
+            <button onclick="testBackend()" style="background: #4CAF50; color: white; padding: 15px 30px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer;">
+                Test Backend Connection
+            </button>
+        </div>
+        
+        <div id="status">Click button to test backend...</div>
+        
+        <div style="margin-top: 30px;">
+            <h3>✅ What's Working:</h3>
+            <ul style="text-align: left;">
+                <li>✅ Frontend deployment successful</li>
+                <li>✅ Netlify hosting active</li>
+                <li>✅ Authentication system code ready</li>
+                <li>✅ Backend API available</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function testBackend() {
+            document.getElementById('status').innerHTML = 'Testing backend...';
+            
+            fetch('https://wakili-pro.onrender.com/health')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('status').innerHTML = 
+                        '✅ Backend Connected! ' + JSON.stringify(data);
+                })
+                .catch(error => {
+                    document.getElementById('status').innerHTML = 
+                        '❌ Backend Error: ' + error.message;
+                });
+        }
+        
+        // Auto-test on load
+        window.onload = function() {
+            setTimeout(testBackend, 1000);
+        }
+    </script>
+</body>
+</html>
