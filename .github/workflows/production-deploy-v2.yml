@@ -48,9 +48,30 @@ jobs:
 
       - name: 📦 Install Dependencies
         run: |
+          echo "🔧 Installing root workspace dependencies..."
           npm ci --ignore-scripts
-          cd frontend && npm ci
-          cd ../shared && npm ci
+          
+          echo "📦 Installing frontend dependencies..."
+          cd frontend
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "⚠️ No package-lock.json found, running npm install..."
+            npm install
+          fi
+          cd ..
+          
+          echo "📦 Installing shared dependencies..."  
+          cd shared
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "⚠️ No package-lock.json found, running npm install..."
+            npm install
+          fi
+          cd ..
+          
+          echo "✅ All dependencies installed successfully"
 
       - name: 🏗️ Build Shared Package
         working-directory: ./shared
@@ -88,7 +109,14 @@ jobs:
 
       - name: 📦 Install Dependencies
         working-directory: ./frontend
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "📦 Installing locked dependencies..."
+            npm ci
+          else
+            echo "⚠️ No package-lock.json found, running npm install..."
+            npm install
+          fi
 
       - name: 🔧 Configure Production Environment
         working-directory: ./frontend
