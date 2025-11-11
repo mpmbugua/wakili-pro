@@ -1,10 +1,11 @@
 name: CI/CD Pipeline
 
+# Disabled in favor of deploy-vercel.yml for main branch deployments
+# This workflow runs tests with stricter linting that treats warnings as errors
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
 
 jobs:
   test:
