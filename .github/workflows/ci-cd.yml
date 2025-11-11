@@ -140,91 +140,27 @@ jobs:
       with:
         sarif_file: 'trivy-results.sarif'
 
-  # Build and Push Docker Images (Production)
-  build-and-push:
-    name: Build Docker Images
+  # Trigger Frontend Deployment (handled by separate workflow)
+  trigger-deploy:
+    name: Trigger Vercel Deployment
     runs-on: ubuntu-latest
     needs: [frontend-test, backend-test, security-scan]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
-    strategy:
-      matrix:
-        service: [frontend, backend]
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha
-          type=raw,value=latest,enable={{is_default_branch}}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./${{ matrix.service }}
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-  # Deploy to Staging
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [build-and-push]
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-    environment: staging
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Deploy to staging
+    - name: ✅ Tests Passed - Deployment Ready
       run: |
-        echo "Deploying to staging environment..."
-        echo "This would typically include:"
-        echo "- Updating Kubernetes manifests"
-        echo "- Rolling out new containers"
-        echo "- Running smoke tests"
-        # Add actual deployment commands here
-
-  # Deploy to Production
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [build-and-push]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Deploy to production
-      run: |
-        echo "Deploying to production environment..."
-        echo "This would typically include:"
-        echo "- Blue-green deployment"
-        echo "- Health checks"
-        echo "- Database migrations"
-        echo "- CDN cache invalidation"
-        # Add actual deployment commands here
+        echo "🎉 All tests passed! Frontend deployment will be handled by deploy-vercel.yml"
+        echo ""
+        echo "📊 Test Results:"
+        echo "- ✅ Frontend: Linting, Type Check, Unit Tests"  
+        echo "- ✅ Backend: API Tests, Database Tests"
+        echo "- ✅ Security: Vulnerability Scan"
+        echo ""
+        echo "🚀 Next Steps:"
+        echo "- Frontend will deploy to Vercel automatically"
+        echo "- Backend already deployed to Render.com"
+        echo "- Check Actions tab for deployment status"
 
   # Notify on Failure
   notify-failure:
