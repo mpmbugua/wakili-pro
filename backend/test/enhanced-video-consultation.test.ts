@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeEach, afterEach, jest } from '@jest/globals';
 import request from 'supertest';
 import { prisma } from '../src/utils/database';
-import { generateAccessToken } from '../src/utils/jwt';
+import { generateAccessToken } from '../src/middleware/auth';
 
 // Create a minimal Express app for testing
 import express from 'express';
@@ -29,7 +29,7 @@ describe('Enhanced Video Consultation API', () => {
         password: 'hashedpassword',
         firstName: 'Test',
         lastName: 'User',
-        role: 'CLIENT',
+        role: 'PUBLIC',
         emailVerified: true
       }
     });
@@ -211,10 +211,12 @@ describe('Enhanced Video Consultation API', () => {
         data: {
           consultationId,
           fileName: 'test-recording.webm',
-          filePath: '/recordings/test-recording.webm',
+          storageKey: '/recordings/test-recording.webm',
           duration: 1800,
           fileSize: 10485760,
-          format: 'webm'
+          format: 'webm',
+          codec: 'VP9',
+          resolution: '1280x720'
         }
       });
 
@@ -248,7 +250,7 @@ describe('Enhanced Video Consultation API', () => {
           consultationId,
           userId,
           joinedAt: new Date(),
-          role: 'CLIENT'
+          participantType: 'CLIENT'
         }
       });
 
@@ -330,7 +332,7 @@ describe('Enhanced Video Consultation API', () => {
           password: 'hashedpassword',
           firstName: 'Other',
           lastName: 'User',
-          role: 'CLIENT',
+          role: 'PUBLIC',
           emailVerified: true
         }
       });
@@ -372,10 +374,12 @@ describe('Enhanced Video Consultation API', () => {
         data: {
           consultationId,
           fileName: 'test-recording.webm',
-          filePath: '/recordings/test-recording.webm',
+          storageKey: '/recordings/test-recording.webm',
           duration: 1800,
           fileSize: 10485760,
-          format: 'webm'
+          format: 'webm',
+          codec: 'VP9',
+          resolution: '1280x720'
         }
       });
 

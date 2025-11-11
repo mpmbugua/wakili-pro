@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
+import { ZodIssue } from 'zod';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
-import { ApiResponse } from '@shared/types';
+import { ApiResponse } from '../../../shared/src/types';
 import { 
   CreateAIQuerySchema,
   CreateDocumentGenerationSchema,
   LegalResearchSchema,
   ContractAnalysisSchema
-} from '@shared/schemas/ai';
+} from '../../../shared/src/schemas/ai';
 
 // Import AI service providers
 import { speechService } from '../services/speechService';
@@ -36,7 +37,7 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
       res.status(400).json({
         success: false,
         message: 'Invalid input',
-        errors: validationResult.error.issues.map(issue => ({
+        errors: validationResult.error.issues.map((issue: ZodIssue) => ({
           field: issue.path.join('.'),
           message: issue.message
         }))

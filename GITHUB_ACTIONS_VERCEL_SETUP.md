@@ -15,7 +15,8 @@ This guide sets up automated deployment from GitHub to Vercel using GitHub Actio
    - Root Directory: `frontend`
    - Build Command: `npm run build`
    - Output Directory: `dist`
-   - Install Command: `npm ci`
+   - Install Command: `
+   `
 
 ### 2. Get Vercel Project IDs
 
@@ -25,13 +26,14 @@ After creating the project:
 # Install Vercel CLI locally
 npm install -g vercel
 
+
 # Login and link project
 cd frontend
 vercel login
 vercel link
 
 # Get project details
-vercel project ls
+vercel project lsvercel project ls
 ```
 
 This will show:

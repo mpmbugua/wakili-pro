@@ -236,10 +236,12 @@ describe('Database Integration Tests', () => {
         data: {
           consultationId: consultation.id,
           fileName: 'consultation_recording.webm',
-          filePath: '/recordings/consultation_recording.webm',
+          storageKey: '/recordings/consultation_recording.webm',
           duration: 1800,
           fileSize: 10485760,
-          format: 'webm'
+          format: 'webm',
+          codec: 'VP9',
+          resolution: '1280x720'
         }
       });
 
@@ -265,13 +267,13 @@ describe('Database Integration Tests', () => {
           {
             consultationId: consultation.id,
             userId: lawyerId,
-            role: 'LAWYER',
+            participantType: 'LAWYER',
             joinedAt: new Date()
           },
           {
             consultationId: consultation.id,
             userId: clientId,
-            role: 'CLIENT',
+            participantType: 'CLIENT',
             joinedAt: new Date()
           }
         ]
@@ -282,8 +284,8 @@ describe('Database Integration Tests', () => {
       });
 
       expect(participants).toHaveLength(2);
-      expect(participants.map(p => p.role)).toContain('LAWYER');
-      expect(participants.map(p => p.role)).toContain('CLIENT');
+      expect(participants.map(p => p.participantType)).toContain('LAWYER');
+      expect(participants.map(p => p.participantType)).toContain('CLIENT');
     });
   });
 

@@ -1,9 +1,8 @@
 import OpenAI from 'openai';
 import { logger } from '../utils/logger';
-import { config } from '../config/config';
 
 const openai = new OpenAI({
-  apiKey: config.openai.apiKey,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 interface SpeechToTextResult {
@@ -25,11 +24,11 @@ class SpeechService {
     try {
       logger.info('Processing speech-to-text conversion');
 
-      // Create a File-like object from the buffer
-      const audioFile = new File([audioBuffer], 'audio.webm', { type: 'audio/webm' });
+      // Create a Blob-like object from the buffer for OpenAI API
+      const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
 
       const transcription = await openai.audio.transcriptions.create({
-        file: audioFile,
+        file: audioBlob as any,
         model: 'whisper-1',
         language: 'en', // Can be extended to support Swahili 'sw'
         response_format: 'json',
@@ -195,10 +194,10 @@ class SpeechService {
   async speechToTextWithLanguageDetection(audioBuffer: Buffer): Promise<SpeechToTextResult & { detectedLanguage?: string }> {
     try {
       // First, try without specifying language to let Whisper detect
-      const audioFile = new File([audioBuffer], 'audio.webm', { type: 'audio/webm' });
+      const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
 
       const transcription = await openai.audio.transcriptions.create({
-        file: audioFile,
+        file: audioBlob as any,
         model: 'whisper-1',
         response_format: 'verbose_json',
         temperature: 0.2

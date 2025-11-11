@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeEach, afterEach, jest, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import { prisma } from '../src/utils/database';
-import { generateAccessToken } from '../src/utils/jwt';
+import { generateAccessToken } from '../src/middleware/auth';
 
 // Create a minimal Express app for testing
 import express from 'express';
@@ -40,7 +40,7 @@ describe('Enhanced Payment Processing', () => {
         password: 'hashedpassword',
         firstName: 'Test',
         lastName: 'Client',
-        role: 'CLIENT',
+        role: 'PUBLIC',
         emailVerified: true
       }
     });
@@ -119,9 +119,9 @@ describe('Enhanced Payment Processing', () => {
     });
 
     test('should create Stripe payment intent successfully', async () => {
-      const mockStripe = require('stripe');
+      const mockStripe = require('stripe') as any;
       mockStripe.paymentIntents = {
-        create: jest.fn().mockResolvedValue({
+        create: (jest.fn() as any).mockResolvedValue({
           id: 'pi_test123',
           client_secret: 'pi_test123_secret',
           status: 'requires_payment_method'
@@ -153,7 +153,7 @@ describe('Enhanced Payment Processing', () => {
           password: 'hashedpassword',
           firstName: 'Other',
           lastName: 'User',
-          role: 'CLIENT',
+          role: 'PUBLIC',
           emailVerified: true
         }
       });
@@ -217,8 +217,8 @@ describe('Enhanced Payment Processing', () => {
     });
 
     test('should verify M-Pesa payment successfully', async () => {
-      const mockMpesaService = require('../src/services/mpesaService');
-      mockMpesaService.verifyPayment = jest.fn().mockResolvedValue({
+      const mockMpesaService = require('../src/services/mpesaService') as any;
+      mockMpesaService.verifyPayment = (jest.fn() as any).mockResolvedValue({
         success: true,
         status: 'PAID',
         transactionId: 'MPG12345',
@@ -240,8 +240,8 @@ describe('Enhanced Payment Processing', () => {
     });
 
     test('should handle payment verification failure', async () => {
-      const mockMpesaService = require('../src/services/mpesaService');
-      mockMpesaService.verifyPayment = jest.fn().mockResolvedValue({
+      const mockMpesaService = require('../src/services/mpesaService') as any;
+      mockMpesaService.verifyPayment = (jest.fn() as any).mockResolvedValue({
         success: false,
         status: 'FAILED',
         message: 'Transaction not found'
@@ -281,9 +281,9 @@ describe('Enhanced Payment Processing', () => {
     });
 
     test('should process refund successfully', async () => {
-      const mockStripe = require('stripe');
+      const mockStripe = require('stripe') as any;
       mockStripe.refunds = {
-        create: jest.fn().mockResolvedValue({
+        create: (jest.fn() as any).mockResolvedValue({
           id: 're_test123',
           status: 'succeeded',
           amount: 5000
@@ -410,7 +410,7 @@ describe('Enhanced Payment Processing', () => {
 
   describe('Webhook Handling', () => {
     test('should handle M-Pesa callback webhook', async () => {
-      const mockMpesaService = require('../src/services/mpesaService');
+      const mockMpesaService = require('../src/services/mpesaService') as any;
       mockMpesaService.validateCallback = jest.fn().mockReturnValue(true);
 
       const webhookPayload = {
@@ -439,7 +439,7 @@ describe('Enhanced Payment Processing', () => {
     });
 
     test('should handle Stripe webhook', async () => {
-      const mockStripe = require('stripe');
+      const mockStripe = require('stripe') as any;
       mockStripe.webhooks = {
         constructEvent: jest.fn().mockReturnValue({
           type: 'payment_intent.succeeded',
@@ -528,8 +528,8 @@ describe('Enhanced Payment Processing', () => {
 
   describe('Error Scenarios', () => {
     test('should handle payment processor downtime', async () => {
-      const mockMpesaService = require('../src/services/mpesaService');
-      mockMpesaService.initiatePayment = jest.fn().mockRejectedValue(
+      const mockMpesaService = require('../src/services/mpesaService') as any;
+      mockMpesaService.initiatePayment = (jest.fn() as any).mockRejectedValue(
         new Error('Service temporarily unavailable')
       );
 

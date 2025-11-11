@@ -62,6 +62,7 @@ jobs:
         run: npm install -g vercel@latest
 
       - name: 🌐 Deploy to Vercel (Fresh)
+        id: deploy
         working-directory: ./frontend
         run: |
           # Deploy as completely new project to avoid existing config issues
@@ -79,7 +80,7 @@ jobs:
             --force \
             --public)
           echo "Deployment URL: $DEPLOYMENT_URL"
-          echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
+          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
 
       - name: 🧪 Health Check
         run: |
@@ -87,9 +88,9 @@ jobs:
           sleep 30
           
           # Check if the deployment is accessible
-          if curl -f --retry 3 --retry-delay 10 "${{ env.DEPLOYMENT_URL }}" > /dev/null 2>&1; then
+          if curl -f --retry 3 --retry-delay 10 "${{ steps.deploy.outputs.deployment_url }}" > /dev/null 2>&1; then
             echo "✅ Deployment successful and accessible!"
-            echo "🌐 Live URL: ${{ env.DEPLOYMENT_URL }}"
+            echo "🌐 Live URL: ${{ steps.deploy.outputs.deployment_url }}"
           else
             echo "❌ Deployment failed health check"
             exit 1
@@ -101,7 +102,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
           echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY
-          echo "- **URL**: [${{ env.DEPLOYMENT_URL }}](${{ env.DEPLOYMENT_URL }})" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: [${{ steps.deploy.outputs.deployment_url }}](${{ steps.deploy.outputs.deployment_url }})" >> $GITHUB_STEP_SUMMARY
           echo "- **Backend**: [wakili-pro.onrender.com](https://wakili-pro.onrender.com)" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
