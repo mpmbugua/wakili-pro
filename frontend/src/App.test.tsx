@@ -1,7 +1,15 @@
-import BackendTest from './components/BackendTest';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import App from './App';
 
-function App() {
-  return <BackendTest />;
-}
+describe('App Component', () => {
+  it('renders without crashing', () => {
+    render(<App />);
+    expect(screen.getByText(/🎯 Production Ready/i)).toBeInTheDocument();
+  });
 
-export default App;
+  it('displays backend status testing message', () => {
+    render(<App />);
+    expect(screen.getByText(/Testing.../i)).toBeInTheDocument();
+  });
+});
