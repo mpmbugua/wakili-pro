@@ -7,16 +7,15 @@ import { useAuthStore } from '../../store/authStore';
 import { marketplaceService } from '../../services/marketplaceService';
 import { z } from 'zod';
 
-// Inline schema to replace shared dependency
+// Use the shared schema that matches the API
 const CreateServiceSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(50, 'Description must be at least 50 characters'),
-  type: z.enum(['CONSULTATION', 'DOCUMENT_REVIEW', 'CONTRACT_DRAFTING', 'REPRESENTATION', 'OTHER']),
-  category: z.string().min(1, 'Category is required'),
-  price: z.number().min(1, 'Price is required'),
-  duration: z.number().min(1, 'Duration is required'),
-  requirements: z.array(z.string()).optional(),
-  deliverables: z.array(z.string()).optional()
+  type: z.enum(['CONSULTATION', 'DOCUMENT_DRAFTING', 'LEGAL_REVIEW', 'IP_FILING', 'DISPUTE_MEDIATION', 'CONTRACT_NEGOTIATION']),
+  title: z.string().min(5, 'Title must be at least 5 characters').max(100),
+  description: z.string().min(20, 'Description must be at least 20 characters').max(1000),
+  priceKES: z.number().min(100, 'Price must be at least KES 100').max(1000000),
+  duration: z.number().min(15, 'Duration must be at least 15 minutes').max(480).optional(),
+  deliveryTimeframe: z.string().max(50).optional(),
+  tags: z.array(z.string().min(2).max(30)).max(10).optional(),
 });
 
 type CreateServiceFormData = z.infer<typeof CreateServiceSchema>;
@@ -58,7 +57,7 @@ const SERVICE_TYPES = [
     description: 'Negotiating terms and conditions on behalf of clients',
     icon: '🤝'
   }
-];
+] as const;
 
 const CreateService: React.FC = () => {
   const navigate = useNavigate();

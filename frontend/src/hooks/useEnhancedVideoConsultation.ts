@@ -88,7 +88,7 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
   const [networkQuality, setNetworkQuality] = useState<'excellent' | 'good' | 'fair' | 'poor'>('good');
 
   // Refs
-  const socketRef = useRef<any>(null);
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const screenShareStreamRef = useRef<MediaStream | null>(null);
@@ -139,7 +139,7 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
   // Network quality detection
   const detectNetworkQuality = useCallback(() => {
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
+      const connection = (navigator as { connection?: { effectiveType?: string; downlink?: number } }).connection;
       const effectiveType = connection?.effectiveType;
       
       switch (effectiveType) {
@@ -196,7 +196,7 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
     connectionStatsIntervalRef.current = setInterval(async () => {
       for (const [socketId, peer] of peers.entries()) {
         try {
-          const peerConnection = (peer as any)._pc;
+          const peerConnection = (peer as unknown as { _pc?: RTCPeerConnection })._pc;
           if (!peerConnection) continue;
 
           const stats = await peerConnection.getStats();
@@ -273,15 +273,15 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
       // Update peer connection encodings
       peers.forEach(async (peer) => {
         try {
-          const peerConnection = (peer as any)._pc;
+          const peerConnection = (peer as unknown as { _pc?: RTCPeerConnection })._pc;
           if (!peerConnection) return;
 
           const senders = peerConnection.getSenders();
           for (const sender of senders) {
             if (sender.track && sender.track.kind === 'video') {
               const params = sender.getParameters();
-              if (params.encodings && params.encodings.length > 0) {
-                params.encodings[0].maxBitrate = qualityConfig.bitrate;
+              if ((params as any).encodings && (params as any).encodings.length > 0) {
+                (params as any).encodings[0].maxBitrate = qualityConfig.bitrate;
                 await sender.setParameters(params);
               }
             }
@@ -293,7 +293,7 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
 
       setVideoSettings(prev => ({
         ...prev,
-        qualityProfile: profile as any,
+        qualityProfile: profile as 'low' | 'medium' | 'high' | 'auto',
         bitrate: qualityConfig.bitrate
       }));
 
@@ -522,9 +522,9 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
         setTimeout(() => startRecording(), 2000);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to join consultation:', error);
-      onError?.(`Failed to join consultation: ${error.message}`);
+      onError?.(`Failed to join consultation: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsJoining(false);
     }

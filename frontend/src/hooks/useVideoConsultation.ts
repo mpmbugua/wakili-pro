@@ -31,6 +31,33 @@ export interface VideoSettings {
   isScreenSharing: boolean;
 }
 
+interface SocketError {
+  message: string;
+}
+
+interface WebRTCSignal {
+  sourceSocketId: string;
+  signal: SimplePeer.SignalData;
+}
+
+interface ParticipantSettingsUpdate {
+  userId: string;
+  hasVideo: boolean;
+  hasAudio: boolean;
+}
+
+interface ScreenShareUpdate {
+  userId: string;
+  isSharing: boolean;
+}
+
+interface ConsultationMessage {
+  userId: string;
+  email: string;
+  message: string;
+  timestamp: string;
+}
+
 interface UseVideoConsultationOptions {
   consultationId: string;
   onParticipantJoined?: (participant: Participant) => void;
@@ -60,15 +87,10 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
     isScreenSharing: false
   });
   const [isJoining, setIsJoining] = useState(false);
-  const [roomMessages, setRoomMessages] = useState<Array<{
-    userId: string;
-    email: string;
-    message: string;
-    timestamp: string;
-  }>>([]);
+  const [roomMessages, setRoomMessages] = useState<ConsultationMessage[]>([]);
 
   // Refs
-  const socketRef = useRef<any>(null);
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const screenShareStreamRef = useRef<MediaStream | null>(null);
@@ -94,7 +116,7 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
       console.log('Disconnected from video signaling server');
     });
 
-    socket.on('error', (error: any) => {
+    socket.on('error', (error: SocketError) => {
       console.error('Socket error:', error);
       onError?.(error.message || 'Connection error');
     });
@@ -147,14 +169,14 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
       });
     });
 
-    socket.on('webrtc-signal', ({ sourceSocketId, signal }: any) => {
+    socket.on('webrtc-signal', ({ sourceSocketId, signal }: WebRTCSignal) => {
       const peer = peers.get(sourceSocketId);
       if (peer && signal) {
         peer.signal(signal);
       }
     });
 
-    socket.on('participant-settings-updated', ({ userId, hasVideo, hasAudio }: any) => {
+    socket.on('participant-settings-updated', ({ userId, hasVideo, hasAudio }: ParticipantSettingsUpdate) => {
       setParticipants(prev => {
         const participant = prev.get(userId);
         if (participant) {
@@ -165,7 +187,7 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
       });
     });
 
-    socket.on('screen-share-started', ({ userId, isSharing }: any) => {
+    socket.on('screen-share-started', ({ userId, isSharing }: ScreenShareUpdate) => {
       setParticipants(prev => {
         const participant = prev.get(userId);
         if (participant) {
@@ -176,7 +198,7 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
       });
     });
 
-    socket.on('consultation-message', (message: any) => {
+    socket.on('consultation-message', (message: ConsultationMessage) => {
       setRoomMessages(prev => [...prev, message]);
     });
 
@@ -257,9 +279,9 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
         hasAudio: videoSettings.hasAudio
       });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to get user media:', error);
-      onError?.(`Camera/microphone access denied: ${error.message}`);
+      onError?.(`Camera/microphone access denied: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsJoining(false);
     }
@@ -313,7 +335,8 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
 
       // Replace video track in all peer connections
       peers.forEach(peer => {
-        const sender = (peer as any)._pc?.getSenders()?.find((s: any) => 
+        const pc = (peer as unknown as { _pc?: { getSenders?(): RTCRtpSender[] } })._pc;
+        const sender = pc?.getSenders?.()?.find((s: RTCRtpSender) => 
           s.track?.kind === 'video'
         );
         if (sender) {
@@ -336,9 +359,9 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
         stopScreenShare();
       };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Screen share failed:', error);
-      onError?.(`Screen sharing failed: ${error.message}`);
+      onError?.(`Screen sharing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }, [consultationId, peers, onError]);
 
@@ -360,7 +383,8 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
 
       // Replace tracks in peer connections
       peers.forEach(peer => {
-        const videoSender = (peer as any)._pc?.getSenders()?.find((s: any) => 
+        const pc = (peer as unknown as { _pc?: { getSenders?(): RTCRtpSender[] } })._pc;
+        const videoSender = pc?.getSenders?.()?.find((s: RTCRtpSender) => 
           s.track?.kind === 'video'
         );
         if (videoSender && cameraStream.getVideoTracks()[0]) {

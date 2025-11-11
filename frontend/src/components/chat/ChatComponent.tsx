@@ -39,7 +39,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onCl
       setIsLoading(true);
       const response = await chatService.getChatMessages(roomId);
       if (response.success && response.data) {
-        setMessages(response.data.messages);
+        setMessages(response.data);
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -253,7 +253,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onCl
           <textarea
             value={newMessage}
             onChange={(e) => handleTyping(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder="Type your message..."
             className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             rows={2}

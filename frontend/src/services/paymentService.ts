@@ -39,6 +39,35 @@ interface PaymentIntent {
   createdAt: string;
 }
 
+interface PaymentVerificationResponse {
+  paymentId: string;
+  status: 'COMPLETED' | 'FAILED' | 'PENDING';
+  transactionId?: string;
+  message?: string;
+}
+
+interface WithdrawalResponse {
+  withdrawalId: string;
+  status: 'INITIATED' | 'COMPLETED' | 'FAILED';
+  estimatedCompletion?: string;
+  transactionFee?: number;
+}
+
+interface BankDetails {
+  accountNumber: string;
+  bankCode: string;
+  accountName: string;
+  branch?: string;
+}
+
+interface PaymentProcessResult {
+  paymentId: string;
+  status: 'SUCCESS' | 'FAILED' | 'PENDING';
+  transactionId?: string;
+  receiptUrl?: string;
+  message?: string;
+}
+
 interface PaymentHistory {
   id: string;
   amount: number;
@@ -78,9 +107,9 @@ class PaymentServiceClass {
     }
   }
 
-  async verifyPayment(data: PaymentVerificationData): Promise<ApiResponse<any>> {
+  async verifyPayment(data: PaymentVerificationData): Promise<ApiResponse<PaymentVerificationResponse>> {
     try {
-      const response: AxiosResponse<ApiResponse<any>> = await apiClient.post(
+      const response: AxiosResponse<ApiResponse<PaymentVerificationResponse>> = await apiClient.post(
         '/payments/verify',
         data
       );
@@ -96,9 +125,9 @@ class PaymentServiceClass {
     }
   }
 
-  async processPayment(data: ProcessPaymentData): Promise<ApiResponse<any>> {
+  async processPayment(data: ProcessPaymentData): Promise<ApiResponse<PaymentProcessResult>> {
     try {
-      const response: AxiosResponse<ApiResponse<any>> = await apiClient.post(
+      const response: AxiosResponse<ApiResponse<PaymentProcessResult>> = await apiClient.post(
         '/payments/process',
         data
       );
@@ -146,7 +175,7 @@ class PaymentServiceClass {
     bookingId: string;
     phoneNumber: string;
     amount: number;
-  }): Promise<ApiResponse<any>> {
+  }): Promise<ApiResponse<PaymentProcessResult>> {
     return this.processPayment({
       bookingId: data.bookingId,
       paymentMethod: 'MPESA',
@@ -160,7 +189,7 @@ class PaymentServiceClass {
     bookingId: string;
     cardToken: string;
     amount: number;
-  }): Promise<ApiResponse<any>> {
+  }): Promise<ApiResponse<PaymentProcessResult>> {
     return this.processPayment({
       bookingId: data.bookingId,
       paymentMethod: 'STRIPE_CARD',
@@ -185,7 +214,7 @@ class PaymentServiceClass {
     }
   }
 
-  async addFundsToWallet(amount: number, paymentMethod: string): Promise<ApiResponse<any>> {
+  async addFundsToWallet(amount: number, paymentMethod: string): Promise<ApiResponse<{ walletBalance: number; transactionId: string }>> {
     try {
       const response = await apiClient.post('/payments/wallet/add-funds', {
         amount,
@@ -203,7 +232,7 @@ class PaymentServiceClass {
     }
   }
 
-  async withdrawFromWallet(amount: number, bankDetails: any): Promise<ApiResponse<any>> {
+  async withdrawFromWallet(amount: number, bankDetails: BankDetails): Promise<ApiResponse<WithdrawalResponse>> {
     try {
       const response = await apiClient.post('/payments/wallet/withdraw', {
         amount,
@@ -226,7 +255,7 @@ class PaymentServiceClass {
     paymentId: string,
     maxAttempts: number = 10,
     intervalMs: number = 3000
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<PaymentProcessResult>> {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
         const response = await apiClient.get(`/payments/${paymentId}/status`);

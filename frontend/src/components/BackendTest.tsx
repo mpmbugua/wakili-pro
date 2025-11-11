@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 const BackendTest = () => {
   const [status, setStatus] = useState<string>('Testing...');
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     const testBackend = async () => {

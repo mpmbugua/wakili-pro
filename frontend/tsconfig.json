@@ -21,7 +21,7 @@
       "@shared/*": ["../shared/src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "test"],
   "exclude": [
     "src/components/auth/Register.tsx",
     "src/components/lawyer/LawyerOnboarding.tsx", 

@@ -227,7 +227,7 @@ export const AdminAnalyticsDashboard: React.FC = () => {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key as any)}
+                  onClick={() => setActiveTab(tab.key as 'overview' | 'behavior' | 'platform' | 'trends')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
                     activeTab === tab.key
                       ? 'border-indigo-500 text-indigo-600'

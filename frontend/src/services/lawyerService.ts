@@ -3,6 +3,13 @@ import { ApiResponse } from '../../../shared/src/types';
 import { LawyerOnboardingSchema } from '../../../shared/src/schemas/user';
 import { z } from 'zod';
 
+interface LawyerAvailability {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // Create axios instance
@@ -55,7 +62,7 @@ interface LawyerProfile {
   reviewCount: number;
   isVerified: boolean;
   profileImageUrl?: string;
-  availability: any[];
+  availability: LawyerAvailability[];
   user: {
     id: string;
     firstName: string;
@@ -120,9 +127,9 @@ class LawyerService {
     }
   }
 
-  async updateAvailability(availability: any[]): Promise<ApiResponse<{ availability: any[] }>> {
+  async updateAvailability(availability: LawyerAvailability[]): Promise<ApiResponse<{ availability: LawyerAvailability[] }>> {
     try {
-      const response: AxiosResponse<ApiResponse<{ availability: any[] }>> = await apiClient.put(
+      const response: AxiosResponse<ApiResponse<{ availability: LawyerAvailability[] }>> = await apiClient.put(
         '/lawyers/availability',
         { availability }
       );

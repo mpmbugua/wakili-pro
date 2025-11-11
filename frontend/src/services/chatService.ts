@@ -1,4 +1,4 @@
-import { ApiResponse } from '@shared/types';
+import { ApiResponse, PaginatedResponse } from '@shared/types';
 import { api } from './api';
 import io from 'socket.io-client';
 
@@ -61,7 +61,7 @@ export interface Notification {
   type: 'MESSAGE_RECEIVED' | 'BOOKING_CONFIRMED' | 'PAYMENT_RECEIVED' | 'SYSTEM_ALERT';
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   isRead: boolean;
   readAt?: Date;
   createdAt: Date;
@@ -182,8 +182,8 @@ class ChatService {
     roomId: string,
     page = 1,
     limit = 50
-  ): Promise<ApiResponse<{ messages: ChatMessage[]; pagination: any }>> {
-    const response = await api.get<ApiResponse<{ messages: ChatMessage[]; pagination: any }>>(
+  ): Promise<PaginatedResponse<ChatMessage>> {
+    const response = await api.get<PaginatedResponse<ChatMessage>>(
       `/chat/rooms/${roomId}/messages`,
       {
         params: { page, limit }
@@ -211,8 +211,8 @@ class ChatService {
     page = 1,
     limit = 20,
     unreadOnly = false
-  ): Promise<ApiResponse<{ notifications: Notification[]; pagination: any }>> {
-    const response = await api.get<ApiResponse<{ notifications: Notification[]; pagination: any }>>(
+  ): Promise<PaginatedResponse<Notification>> {
+    const response = await api.get<PaginatedResponse<Notification>>(
       '/chat/notifications',
       {
         params: { page, limit, unreadOnly }

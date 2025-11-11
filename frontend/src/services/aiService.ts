@@ -110,8 +110,8 @@ class AIService {
   // Premium feature: Generate legal document
   async generateDocument(request: {
     type: string;
-    parameters: Record<string, any>;
-    clientInfo?: Record<string, any>;
+    parameters: Record<string, unknown>;
+    clientInfo?: Record<string, unknown>;
   }): Promise<ApiResponse<{ documentId: string; content: string; downloadUrl: string }>> {
     try {
       const response = await fetch(`${this.baseUrl}/generate-document`, {

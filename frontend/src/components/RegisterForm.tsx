@@ -29,8 +29,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onClose, onSwitchToL
     try {
       await register(formData);
       onClose();
-    } catch (error: any) {
-      setError(error.message || 'Registration failed');
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Registration failed');
     } finally {
       setIsLoading(false);
     }

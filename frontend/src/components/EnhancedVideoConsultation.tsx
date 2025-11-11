@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ChatMessage } from '../services/chatService';
+
+interface Recording {
+  id: string;
+  fileName: string;
+  duration: number;
+  createdAt: Date;
+  downloadUrl?: string;
+}
 import { 
   Video, 
   VideoOff, 
@@ -62,7 +71,7 @@ export const EnhancedVideoConsultation: React.FC = () => {
   const connectionQuality = networkQuality;
   const participantCount = participants.length;
   const recordingDuration = 0;
-  const chatMessages: any[] = [];
+  const chatMessages: ChatMessage[] = [];
 
   // Additional refs
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -72,7 +81,9 @@ export const EnhancedVideoConsultation: React.FC = () => {
   const toggleVideo = () => {};
   const toggleAudio = () => {};
   const toggleScreenShare = () => {};
-  const sendChatMessage = (_message: string) => {};
+  const sendChatMessage = () => {
+    // Mock implementation - no message handling needed for demo
+  };
   const changeVideoQuality = updateVideoQuality;
   const getRecordings = () => Promise.resolve([]);
 
@@ -88,7 +99,7 @@ export const EnhancedVideoConsultation: React.FC = () => {
   });
   const [chatMessage, setChatMessage] = useState('');
   const [showRecordings, setShowRecordings] = useState(false);
-  const [recordings, setRecordings] = useState<any[]>([]);
+  const [recordings, setRecordings] = useState<Recording[]>([]);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const isLawyer = user?.role === 'LAWYER';
@@ -157,7 +168,7 @@ export const EnhancedVideoConsultation: React.FC = () => {
   // Handle chat
   const handleSendMessage = useCallback(() => {
     if (chatMessage.trim()) {
-      sendChatMessage(chatMessage.trim());
+      sendChatMessage();
       setChatMessage('');
     }
   }, [chatMessage, sendChatMessage]);
@@ -288,19 +299,19 @@ export const EnhancedVideoConsultation: React.FC = () => {
             </div>
             
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {chatMessages.map((message: any, index: number) => (
+              {chatMessages.map((message: ChatMessage, index: number) => (
                 <div
                   key={index}
                   className={`p-2 rounded ${
-                    message.fromUserId === user?.id
+                    message.senderId === user?.id
                       ? 'bg-blue-600 ml-8'
                       : 'bg-gray-700 mr-8'
                   }`}
                 >
                   <div className="text-xs text-gray-300 mb-1">
-                    {message.fromName} • {new Date(message.timestamp).toLocaleTimeString()}
+                    {message.sender.firstName} {message.sender.lastName} • {new Date(message.createdAt).toLocaleTimeString()}
                   </div>
-                  <div className="text-sm">{message.message}</div>
+                  <div className="text-sm">{message.content}</div>
                 </div>
               ))}
             </div>

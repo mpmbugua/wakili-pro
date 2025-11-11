@@ -7,7 +7,47 @@ interface AnalyticsQuery {
   };
 }
 
-interface DashboardAnalytics {
+interface RecentActivity {
+  id: string;
+  type: 'consultation' | 'payment' | 'registration' | 'service';
+  description: string;
+  timestamp: Date;
+  amount?: number;
+  service: {
+    title: string;
+    type: string;
+  };
+  client: {
+    firstName: string;
+    lastName: string;
+  };
+  provider: {
+    firstName: string;
+    lastName: string;
+  };
+  status: string;
+  createdAt: string;
+}
+
+interface MonthlyRevenue {
+  month: string;
+  revenue: number;
+  consultations: number;
+}
+
+interface RevenueByService {
+  serviceType: string;
+  revenue: number;
+  count: number;
+}
+
+interface PaymentMethodStats {
+  method: string;
+  count: number;
+  percentage: number;
+}
+
+interface OverviewAnalytics {
   overview: {
     totalBookings: number;
     totalRevenue: number;
@@ -15,13 +55,13 @@ interface DashboardAnalytics {
     completedServices: number;
     averageRating: number;
   };
-  recentActivity: any[];
+  recentActivity: RecentActivity[];
 }
 
 interface RevenueAnalytics {
-  monthlyRevenue: any[];
-  revenueByService: any[];
-  paymentMethodStats: any[];
+  monthlyRevenue: MonthlyRevenue[];
+  revenueByService: RevenueByService[];
+  paymentMethodStats: PaymentMethodStats[];
 }
 
 interface PerformanceAnalytics {
@@ -36,11 +76,39 @@ interface PerformanceAnalytics {
   responseTime: number;
 }
 
+interface RegistrationTrend {
+  date: string;
+  count: number;
+  type: 'client' | 'lawyer';
+}
+
+interface PopularService {
+  name: string;
+  bookings: number;
+  revenue: number;
+}
+
+interface AIQueryStat {
+  type: string;
+  count: number;
+  averageResponseTime: number;
+}
+
+interface PeakHour {
+  hour: number;
+  activity: number;
+  day: string;
+}
+
 interface UserBehaviorAnalytics {
-  registrationTrends: any[];
-  popularServices: any[];
-  aiQueryStats: any[];
-  peakHours: any[];
+  registrationTrends: RegistrationTrend[];
+  popularServices: PopularService[];
+  aiQueryStats: AIQueryStat[];
+  peakHours: PeakHour[];
+}
+
+interface DashboardAnalytics extends OverviewAnalytics, RevenueAnalytics, UserBehaviorAnalytics {
+  performance: PerformanceAnalytics;
 }
 
 class AnalyticsService {

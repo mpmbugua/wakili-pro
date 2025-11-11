@@ -19,6 +19,36 @@ export interface AdminStats {
   systemHealth: 'healthy' | 'warning' | 'critical';
 }
 
+export interface AdminAnalytics {
+  overview: AdminStats;
+  userGrowth: Array<{
+    date: string;
+    users: number;
+    lawyers: number;
+  }>;
+  revenue: Array<{
+    month: string;
+    amount: number;
+  }>;
+}
+
+export interface UserBehaviorAnalytics {
+  pageViews: Array<{
+    page: string;
+    views: number;
+    avgTime: number;
+  }>;
+  userFlows: Array<{
+    from: string;
+    to: string;
+    count: number;
+  }>;
+  dropOffPoints: Array<{
+    step: string;
+    dropOffRate: number;
+  }>;
+}
+
 // User Management
 export interface AdminUser {
   id: string;
@@ -257,7 +287,7 @@ class AdminService {
   }
 
   // Analytics
-  async getAdminAnalytics(dateRange: string = '30d'): Promise<any> {
+  async getAdminAnalytics(dateRange: string = '30d'): Promise<AdminAnalytics> {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/analytics?dateRange=${dateRange}`, {
         headers: getAuthHeaders()
@@ -274,7 +304,7 @@ class AdminService {
     }
   }
 
-  async getUserBehaviorAnalytics(dateRange: string = '30d'): Promise<any> {
+  async getUserBehaviorAnalytics(dateRange: string = '30d'): Promise<UserBehaviorAnalytics> {
     try {
       const response = await fetch(`${API_BASE_URL}/analytics/behavior?dateRange=${dateRange}`, {
         headers: getAuthHeaders()
@@ -374,7 +404,22 @@ class AdminService {
     dateTo?: string;
     page?: number;
     limit?: number;
-  }): Promise<any> {
+  }): Promise<{
+    logs: Array<{
+      id: string;
+      userId: string;
+      action: string;
+      details: Record<string, unknown>;
+      timestamp: string;
+      ipAddress: string;
+    }>;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  }> {
     try {
       const queryParams = new URLSearchParams();
       if (filters?.userId) queryParams.append('userId', filters.userId);
@@ -400,7 +445,14 @@ class AdminService {
   }
 
   // System Health
-  async getSystemHealth(): Promise<any> {
+  async getSystemHealth(): Promise<{
+    status: 'healthy' | 'warning' | 'critical';
+    uptime: number;
+    database: { status: string; responseTime: number };
+    memory: { used: number; total: number; percentage: number };
+    cpu: { usage: number };
+    diskSpace: { used: number; total: number; percentage: number };
+  }> {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/health`, {
         headers: getAuthHeaders()

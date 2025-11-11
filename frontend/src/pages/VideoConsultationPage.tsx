@@ -68,8 +68,9 @@ export const VideoConsultationPage: React.FC = () => {
 
   // Handle remote streams
   useEffect(() => {
-    const handleRemoteStream = (event: any) => {
-      const { socketId, stream } = event.detail;
+    const handleRemoteStream = (event: Event) => {
+      const customEvent = event as CustomEvent<{ socketId: string; stream: MediaStream }>;
+      const { socketId, stream } = customEvent.detail;
       const participant = participants.find(p => p.socketId === socketId);
       
       if (participant) {

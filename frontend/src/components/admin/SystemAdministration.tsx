@@ -113,7 +113,7 @@ export const SystemAdministration: React.FC = () => {
     }
   };
 
-  const updateSetting = (category: keyof SystemSettings, key: string, value: any) => {
+  const updateSetting = (category: keyof SystemSettings, key: string, value: string | number | boolean) => {
     if (!settings) return;
     
     setSettings(prev => ({
@@ -229,7 +229,7 @@ export const SystemAdministration: React.FC = () => {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key as any)}
+                  onClick={() => setActiveTab(tab.key as 'platform' | 'features' | 'security' | 'communications' | 'integrations')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
                     activeTab === tab.key
                       ? 'border-indigo-500 text-indigo-600'

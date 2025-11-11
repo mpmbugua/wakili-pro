@@ -27,8 +27,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onClose, onSwitchToRegiste
       } else {
         setError('Login failed');
       }
-    } catch (error: any) {
-      setError(error.message || 'Login failed');
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Login failed');
     } finally {
       setIsLoading(false);
     }

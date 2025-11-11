@@ -38,8 +38,8 @@ export const VideoConsultationDashboard: React.FC = () => {
       
       setActiveConsultations(active);
       setUpcomingConsultations(upcoming);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load video consultations');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load video consultations');
       console.error('Failed to load consultations:', err);
     } finally {
       setLoading(false);

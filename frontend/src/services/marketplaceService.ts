@@ -52,8 +52,12 @@ interface MarketplaceService {
     lawyerProfile: {
       rating: number;
       reviewCount: number;
-      specializations: any[];
-      location: any;
+      specializations: string[];
+      location: {
+        city: string;
+        county: string;
+        country: string;
+      };
       isVerified: boolean;
     };
   };

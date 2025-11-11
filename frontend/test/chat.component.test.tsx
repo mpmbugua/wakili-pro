@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act } from 'react';
 import { ChatRoomsList } from '../src/components/chat/ChatRoomsList';
 import { ChatComponent } from '../src/components/chat/ChatComponent';
 import { chatService } from '../src/services/chatService';
@@ -99,9 +100,15 @@ describe('Chat System Components', () => {
       writable: true,
     });
     
-    // Create proper mock socket object
+    // Create proper mock socket object with event emitters
     const mockSocket = {
-      on: vi.fn(),
+      on: vi.fn((event: string, callback: Function) => {
+        if (event === 'connect') {
+          // Trigger connect event immediately
+          Promise.resolve().then(() => callback());
+        }
+        // Store callbacks for other events as needed
+      }),
       off: vi.fn(),
       emit: vi.fn(),
       disconnect: vi.fn(),
@@ -116,17 +123,18 @@ describe('Chat System Components', () => {
     vi.mocked(chatService.sendMessage).mockResolvedValue({
       success: true,
       data: mockMessages[0]
-    } as any);
+    });
     vi.mocked(chatService.getChatMessages).mockResolvedValue({
       success: true,
-      data: mockMessages
-    } as any);
+      data: mockMessages,
+      pagination: { page: 1, limit: 50, total: 2, pages: 1 }
+    });
   });
 
   describe('ChatRoomsList Component', () => {
     it('should render loading state initially', () => {
-      vi.mocked(chatService.getChatRooms).mockImplementation(() => 
-        new Promise(() => {}) // Never resolves to keep loading state
+      vi.mocked(chatService.getChatRooms).mockReturnValue(
+        new Promise(() => {}) as any // Never resolves to keep loading state
       );
 
       render(<ChatRoomsList />);
@@ -159,10 +167,12 @@ describe('Chat System Components', () => {
         message: 'No chat rooms found'
       });
 
-      render(<ChatRoomsList />);
+      await act(async () => {
+        render(<ChatRoomsList />);
+      });
 
       await waitFor(() => {
-        expect(screen.getByText(/no chat rooms yet/i)).toBeDefined();
+        expect(screen.getByText('No chat rooms yet')).toBeDefined();
       });
     });
 
@@ -171,7 +181,9 @@ describe('Chat System Components', () => {
         new Error('Failed to fetch')
       );
 
-      render(<ChatRoomsList />);
+      await act(async () => {
+        render(<ChatRoomsList />);
+      });
 
       await waitFor(() => {
         expect(screen.getByText(/failed to load chat rooms/i)).toBeDefined();
@@ -191,7 +203,9 @@ describe('Chat System Components', () => {
         message: 'Chat room created'
       });
 
-      render(<ChatRoomsList />);
+      await act(async () => {
+        render(<ChatRoomsList />);
+      });
 
       await waitFor(() => {
         const createButton = screen.getByText(/create demo chat room/i);
@@ -208,20 +222,28 @@ describe('Chat System Components', () => {
         message: 'Chat rooms loaded'
       });
 
-      render(<ChatRoomsList />);
+      await act(async () => {
+        render(<ChatRoomsList />);
+      });
 
       await waitFor(() => {
-        const roomElement = screen.getByText('Jane Smith').closest('[role="button"]') || 
-                           screen.getByText('Jane Smith').closest('div');
-        if (roomElement) {
-          fireEvent.click(roomElement);
-        }
+        expect(screen.getByText('Jane Smith')).toBeDefined();
+      });
+
+      // Find and click the room element - it should be a div with cursor-pointer class
+      const roomElement = screen.getByText('Jane Smith').closest('.cursor-pointer');
+      expect(roomElement).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(roomElement!);
       });
 
       // Should transition to chat component view
       await waitFor(() => {
         expect(screen.queryByText('Chat Rooms')).toBeNull();
-      });
+      }, { timeout: 3000 });
+      // Optionally, check for chat header
+      // expect(screen.getByText(/Jane Smith/)).toBeInTheDocument();
     });
   });
 
@@ -238,22 +260,22 @@ describe('Chat System Components', () => {
 
       vi.mocked(chatService.getChatMessages).mockResolvedValue({
         success: true,
-        data: {
-          messages: mockMessages,
-          pagination: { page: 1, limit: 50, total: 2, hasMore: false }
-        },
+        data: mockMessages,
+        pagination: { page: 1, limit: 50, total: 2, pages: 1 },
         message: 'Messages loaded'
       });
     });
 
     it('should render chat interface', async () => {
-      render(
-        <ChatComponent 
-          roomId={mockRoom.id}
-          room={mockRoom}
-          onClose={mockOnClose}
-        />
-      );
+      await act(async () => {
+        render(
+          <ChatComponent 
+            roomId={mockRoom.id}
+            room={mockRoom}
+            onClose={mockOnClose}
+          />
+        );
+      });
 
       expect(screen.getByText('Jane Smith')).toBeDefined();
       expect(screen.getByText('Legal Consultation')).toBeDefined();
@@ -287,25 +309,51 @@ describe('Chat System Components', () => {
         message: 'Message sent'
       });
 
-      render(
-        <ChatComponent 
-          roomId={mockRoom.id}
-          room={mockRoom}
-          onClose={mockOnClose}
-        />
-      );
+      // Mock socket to trigger 'connect' event immediately
+      const mockSocket = {
+        on: (event: string, cb: Function) => {
+          if (event === 'connect') {
+            cb();
+          }
+        },
+        emit: vi.fn(),
+        connected: true
+      };
+      vi.mocked(chatService.initializeSocket).mockReturnValue(mockSocket as any);
+
+      await act(async () => {
+        render(
+          <ChatComponent 
+            roomId={mockRoom.id}
+            room={mockRoom}
+            onClose={mockOnClose}
+          />
+        );
+      });
+
+      // Wait for socket connection to establish and component to be ready
+      await waitFor(() => {
+        expect(screen.getByText('Connected')).toBeDefined();
+      }, { timeout: 2000 });
 
       const messageInput = screen.getByPlaceholderText(/type your message/i);
       const sendButton = screen.getByText(/send/i);
 
-      fireEvent.change(messageInput, { target: { value: 'Test message' } });
-      fireEvent.click(sendButton);
-
-      expect(chatService.sendSocketMessage).toHaveBeenCalledWith({
-        roomId: mockRoom.id,
-        content: 'Test message',
-        messageType: 'TEXT'
+      await act(async () => {
+        fireEvent.change(messageInput, { target: { value: 'Test message' } });
       });
+
+      await act(async () => {
+        fireEvent.click(sendButton);
+      });
+
+      await waitFor(() => {
+        expect(chatService.sendSocketMessage).toHaveBeenCalledWith({
+          roomId: mockRoom.id,
+          content: 'Test message',
+          messageType: 'TEXT'
+        });
+      }, { timeout: 2000 });
 
       expect(chatService.sendMessage).toHaveBeenCalledWith({
         roomId: mockRoom.id,
@@ -315,20 +363,45 @@ describe('Chat System Components', () => {
     });
 
     it('should handle Enter key to send message', async () => {
-      render(
-        <ChatComponent 
-          roomId={mockRoom.id}
-          room={mockRoom}
-          onClose={mockOnClose}
-        />
-      );
+      // Mock socket to trigger 'connect' event immediately
+      const mockSocket = {
+        on: (event: string, cb: Function) => {
+          if (event === 'connect') {
+            cb();
+          }
+        },
+        emit: vi.fn(),
+        connected: true
+      };
+      vi.mocked(chatService.initializeSocket).mockReturnValue(mockSocket as any);
+
+      await act(async () => {
+        render(
+          <ChatComponent 
+            roomId={mockRoom.id}
+            room={mockRoom}
+            onClose={mockOnClose}
+          />
+        );
+      });
+
+      // Wait for socket connection to establish and component to be ready  
+      await waitFor(() => {
+        expect(screen.getByText('Connected')).toBeDefined();
+      }, { timeout: 2000 });
 
       const messageInput = screen.getByPlaceholderText(/type your message/i);
 
-      fireEvent.change(messageInput, { target: { value: 'Test message' } });
-      fireEvent.keyPress(messageInput, { key: 'Enter', code: 'Enter' });
+      await act(async () => {
+        fireEvent.change(messageInput, { target: { value: 'Test message' } });
+      });
+      await act(async () => {
+        fireEvent.keyDown(messageInput, { key: 'Enter', code: 'Enter' });
+      });
 
-      expect(chatService.sendSocketMessage).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(chatService.sendSocketMessage).toHaveBeenCalled();
+      });
     });
 
     it('should prevent sending empty messages', async () => {
@@ -388,16 +461,34 @@ describe('Chat System Components', () => {
         writable: true
       });
 
-      render(
-        <ChatComponent 
-          roomId={mockRoom.id}
-          room={mockRoom}
-          onClose={mockOnClose}
-        />
-      );
+      // Mock socket to trigger 'connect' event
+      const mockSocket = {
+        on: (event: string, cb: Function) => {
+          if (event === 'connect') {
+            setTimeout(cb, 10); // async trigger
+          }
+        },
+        emit: vi.fn(),
+        connected: true
+      };
+      vi.mocked(chatService.initializeSocket).mockReturnValue(mockSocket as any);
+
+      await act(async () => {
+        render(
+          <ChatComponent 
+            roomId={mockRoom.id}
+            room={mockRoom}
+            onClose={mockOnClose}
+          />
+        );
+      });
 
       expect(chatService.initializeSocket).toHaveBeenCalledWith('mock_token');
-      expect(chatService.joinRoom).toHaveBeenCalledWith(mockRoom.id);
+      
+      // Wait for the socket 'connect' event to trigger joinRoom
+      await waitFor(() => {
+        expect(chatService.joinRoom).toHaveBeenCalledWith(mockRoom.id);
+      }, { timeout: 2000 });
     });
 
     it('should clean up on unmount', () => {

@@ -9,6 +9,47 @@ import {
 } from 'lucide-react';
 import { analyticsService } from '../../services/analyticsService';
 
+interface RecentActivity {
+  id: string;
+  type: 'consultation' | 'payment' | 'registration' | 'service';
+  description: string;
+  timestamp: Date;
+  amount?: number;
+  service: {
+    title: string;
+    type: string;
+  };
+  client: {
+    firstName: string;
+    lastName: string;
+  };
+  provider: {
+    firstName: string;
+    lastName: string;
+  };
+  status: string;
+  createdAt: string;
+}
+
+interface MonthlyRevenue {
+  month: string;
+  revenue: number;
+  consultations: number;
+}
+
+interface RevenueByService {
+  serviceType: string;
+  revenue: number;
+  count: number;
+  [key: string]: string | number;
+}
+
+interface PaymentMethodStats {
+  method: string;
+  count: number;
+  percentage: number;
+}
+
 interface AnalyticsData {
   overview: {
     totalBookings: number;
@@ -17,17 +58,29 @@ interface AnalyticsData {
     completedServices: number;
     averageRating: number;
   };
-  recentActivity: any[];
-  monthlyRevenue: any[];
-  revenueByService: any[];
-  paymentMethodStats: any[];
+  recentActivity: RecentActivity[];
+  monthlyRevenue: MonthlyRevenue[];
+  revenueByService: RevenueByService[];
+  paymentMethodStats: PaymentMethodStats[];
+}
+
+interface PerformanceData {
+  consultations: {
+    total: number;
+    averageDuration: number;
+  };
+  satisfaction: {
+    averageRating: number;
+    totalReviews: number;
+  };
+  responseTime: number;
 }
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1'];
 
 const AdvancedAnalyticsDashboard: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const [performanceData, setPerformanceData] = useState<any>(null);
+  const [performanceData, setPerformanceData] = useState<PerformanceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState({
@@ -72,7 +125,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
       }
 
       if (perfData.status === 'fulfilled' && perfData.value.success) {
-        setPerformanceData(perfData.value.data);
+        setPerformanceData(perfData.value.data || null);
       }
 
     } catch (err) {
@@ -187,7 +240,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
             ].map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
+                onClick={() => setActiveTab(tab.key as 'overview' | 'revenue' | 'performance')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.key
                     ? 'border-indigo-500 text-indigo-600'
@@ -252,12 +305,12 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="month" 
-                      tickFormatter={(value: any) => new Date(value).toLocaleDateString('en-US', { month: 'short' })}
+                      tickFormatter={(value: string | number) => new Date(value).toLocaleDateString('en-US', { month: 'short' })}
                     />
-                    <YAxis tickFormatter={(value: any) => formatCurrency(value)} />
+                    <YAxis tickFormatter={(value: string | number) => formatCurrency(Number(value))} />
                     <Tooltip 
-                      labelFormatter={(value: any) => new Date(value).toLocaleDateString()}
-                      formatter={(value: any) => [formatCurrency(Number(value)), 'Revenue']}
+                      labelFormatter={(value: string | number) => new Date(value).toLocaleDateString()}
+                      formatter={(value: string | number) => [formatCurrency(Number(value)), 'Revenue']}
                     />
                     <Area 
                       type="monotone" 
@@ -283,7 +336,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }: Record<string, unknown>) => `${name} ${(Number(percent) * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="revenue"
@@ -292,7 +345,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
+                      <Tooltip formatter={(value: string | number) => formatCurrency(Number(value))} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -303,8 +356,8 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
                     <BarChart data={analyticsData.paymentMethodStats}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="method" />
-                      <YAxis tickFormatter={(value: any) => formatCurrency(value)} />
-                      <Tooltip formatter={(value: any) => [formatCurrency(Number(value)), 'Amount']} />
+                      <YAxis tickFormatter={(value: string | number) => formatCurrency(Number(value))} />
+                      <Tooltip formatter={(value: string | number) => [formatCurrency(Number(value)), 'Amount']} />
                       <Bar dataKey="_sum.amount" fill="#82ca9d" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -406,7 +459,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
 interface MetricCardProps {
   title: string;
   value: string | number;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   trend: string;
   trendUp: boolean;
 }
