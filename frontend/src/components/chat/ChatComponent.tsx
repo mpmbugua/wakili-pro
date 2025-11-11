@@ -4,7 +4,7 @@ import { chatService, ChatMessage, ChatRoom } from '../../services/chatService';
 // Mock useAuth hook for now
 const useAuth = () => ({
   user: {
-    id: 'user_123',
+    id: 'client_123', // Match the test data clientId
     email: 'user@example.com',
     firstName: 'John',
     lastName: 'Doe'

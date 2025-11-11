@@ -88,6 +88,15 @@ const mockMessages = [
 describe('Chat System Components', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    // Setup default successful mocks to prevent test failures
+    vi.mocked(chatService.initializeSocket).mockReturnValue(undefined);
+    vi.mocked(chatService.joinRoom).mockReturnValue(undefined);
+    vi.mocked(chatService.sendSocketMessage).mockReturnValue(undefined);
+    vi.mocked(chatService.sendMessage).mockResolvedValue({
+      success: true,
+      data: mockMessages[0]
+    });
   });
 
   describe('ChatRoomsList Component', () => {
