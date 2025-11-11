@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { User, Phone, Mail, Shield, Calendar, Edit2, Save, X } from 'lucide-react';
+import { User, Mail, Shield, Edit2, Save, X } from 'lucide-react';
 
 export const UserProfile: React.FC = () => {
   const { user, logout, updateProfile } = useAuthStore();

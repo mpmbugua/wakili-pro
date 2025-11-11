@@ -134,7 +134,6 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getStatusColor = (status: ActivityItem['status']) => {
     switch (status) {
       case 'success':
