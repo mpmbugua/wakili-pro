@@ -1,10 +1,10 @@
 name: CI/CD Pipeline
 
+# Runs on PRs and manual triggers to avoid conflicts with deploy-vercel.yml
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 env:
   NODE_VERSION: '18.x'

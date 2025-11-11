@@ -1,10 +1,16 @@
 name: 🚀 Deploy Wakili Pro to GitHub Pages
 
+# Disabled in favor of Vercel deployment (deploy-vercel.yml)
+# To re-enable, uncomment the 'on' section below
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+# Manual trigger only for GitHub Pages deployment
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
