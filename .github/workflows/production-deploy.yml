@@ -216,50 +216,55 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: production-build
-          path: frontend/dist/
+          path: ./frontend/dist/
 
       - name: 🚀 Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: 🔧 Configure Vercel Project
+      - name: 🔧 Verify Build Artifacts
         working-directory: ./frontend
         run: |
-          echo "🔧 Setting up Vercel configuration..."
-          
-          # Create Vercel project configuration
-          mkdir -p .vercel
-          cat > .vercel/project.json << EOF
-          {
-            "projectId": "${{ env.VERCEL_PROJECT_ID }}",
-            "orgId": "${{ env.VERCEL_ORG_ID }}"
-          }
-          EOF
-          
-          # Verify build exists
-          echo "📁 Verifying build artifacts:"
+          echo "� Verifying build artifacts:"
           ls -la dist/
+          echo "📄 Checking index.html exists:"
+          test -f dist/index.html && echo "✅ index.html found" || echo "❌ index.html missing"
 
       - name: 🌐 Deploy to Vercel
         working-directory: ./frontend
         run: |
           echo "🌐 Deploying to Vercel..."
           
-          # Deploy with comprehensive configuration
-          DEPLOYMENT_URL=$(vercel deploy \
+          # Debug current directory and structure
+          echo "📍 Current working directory: $(pwd)"
+          echo "📁 Directory contents:"
+          ls -la
+          echo "📦 Dist directory contents:"
+          ls -la dist/ || echo "❌ No dist directory found"
+          
+          # Deploy without any existing project association to avoid path issues
+          echo "🚀 Starting fresh deployment..."
+          DEPLOYMENT_URL=$(vercel \
             --prod \
             --token="${{ env.VERCEL_TOKEN }}" \
             --yes \
             --force \
-            2>&1 | tee deploy.log | grep -o 'https://[^[:space:]]*' | head -1)
+            --scope="${{ env.VERCEL_ORG_ID }}" \
+            2>&1 | tee deploy.log | grep -o 'https://[^[:space:]]*' | tail -1)
           
           if [ -z "$DEPLOYMENT_URL" ]; then
             echo "❌ Failed to extract deployment URL"
             echo "📋 Full deploy log:"
             cat deploy.log
-            exit 1
+            
+            # Try alternative deployment approach
+            echo "🔄 Trying alternative deployment method..."
+            vercel --prod --token="${{ env.VERCEL_TOKEN }}" --yes --force || exit 1
+            
+            # Get URL from vercel ls
+            DEPLOYMENT_URL=$(vercel ls --token="${{ env.VERCEL_TOKEN }}" | grep "https://" | head -1 | awk '{print $2}')
           fi
           
-          echo "✅ Deployment successful!"
+          echo "✅ Deployment completed!"
           echo "🌐 Deployment URL: $DEPLOYMENT_URL"
           echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
 
@@ -267,7 +272,7 @@ jobs:
         run: |
           echo "🧪 Running deployment health checks..."
           
-          if [ -z "${{ env.DEPLOYMENT_URL }}" ]; then
+          if [ -z "$DEPLOYMENT_URL" ]; then
             echo "❌ No deployment URL available for health check"
             exit 1
           fi
@@ -277,7 +282,7 @@ jobs:
           
           # Test deployment accessibility
           echo "🔍 Testing deployment accessibility..."
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ env.DEPLOYMENT_URL }}" || echo "000")
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOYMENT_URL" || echo "000")
           
           if [ "$HTTP_STATUS" = "200" ]; then
             echo "✅ Health check passed - deployment is accessible"
@@ -285,7 +290,7 @@ jobs:
             echo "❌ Health check failed - HTTP status: $HTTP_STATUS"
             echo "🔄 Retrying in 30 seconds..."
             sleep 30
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ env.DEPLOYMENT_URL }}" || echo "000")
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOYMENT_URL" || echo "000")
             if [ "$HTTP_STATUS" = "200" ]; then
               echo "✅ Health check passed on retry"
             else
@@ -300,10 +305,10 @@ jobs:
           echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -n "${{ env.DEPLOYMENT_URL }}" ]; then
+          if [ -n "$DEPLOYMENT_URL" ]; then
             echo "- **Status**: ✅ SUCCESS" >> $GITHUB_STEP_SUMMARY
             echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY
-            echo "- **URL**: [${{ env.DEPLOYMENT_URL }}](${{ env.DEPLOYMENT_URL }})" >> $GITHUB_STEP_SUMMARY
+            echo "- **URL**: [$DEPLOYMENT_URL]($DEPLOYMENT_URL)" >> $GITHUB_STEP_SUMMARY
             echo "- **Backend API**: [wakili-pro.onrender.com](https://wakili-pro.onrender.com)" >> $GITHUB_STEP_SUMMARY
           else
             echo "- **Status**: ❌ FAILED" >> $GITHUB_STEP_SUMMARY
