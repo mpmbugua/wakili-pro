@@ -17,8 +17,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Alert Banner */}
-      <div className="bg-red-600 text-white text-center py-2 font-bold text-lg">
-        🔥 CACHE-BUSTED v5.0 - {new Date().toISOString()} - FRESH DEPLOYMENT! 🔥
+      <div className="bg-green-600 text-white text-center py-2 font-bold text-lg">
+        ✅ GITHUB ACTIONS FIXED v6.0 - {new Date().toISOString()} - DEPLOYMENT ACTIVE! ✅
       </div>
 
       {/* Header */}
