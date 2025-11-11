@@ -59,13 +59,16 @@ jobs:
 
       - name: 🔗 Link Vercel Project
         working-directory: ./frontend
-        run: vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Set up Vercel project configuration
+          mkdir -p .vercel
+          echo '{"projectId":"prj_3pFNy227EbDTPtz0TlDcWPYk6W8o","orgId":"team_JGrb0SdhRZ3K2W1mnCPAFkom"}' > .vercel/project.json
 
       - name: 🌐 Deploy to Vercel
         working-directory: ./frontend
         run: |
           # Deploy to Vercel and capture the URL
-          DEPLOYMENT_URL=$(vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes)
+          DEPLOYMENT_URL=$(vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes --force)
           echo "Deployment URL: $DEPLOYMENT_URL"
           echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
 
