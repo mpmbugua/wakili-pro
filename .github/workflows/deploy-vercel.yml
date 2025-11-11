@@ -56,19 +56,23 @@ jobs:
       - name: 🚀 Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: 🌐 Deploy to Vercel (Direct)
+      - name: 🌐 Deploy to Vercel (Fresh)
         working-directory: ./frontend
         run: |
-          # Deploy directly with all parameters specified to avoid project detection issues
-          echo "Deploying with explicit Vercel project parameters..."
+          # Deploy as completely new project to avoid existing config issues
+          echo "Deploying fresh to Vercel without existing project association..."
           pwd
           ls -la dist/
+          
+          # Remove any existing vercel config to start fresh
+          rm -rf .vercel
+          
+          # Deploy as new project
           DEPLOYMENT_URL=$(vercel --prod \
             --token=${{ secrets.VERCEL_TOKEN }} \
             --yes \
             --force \
-            --scope=team_JGrb0SdhRZ3K2W1mnCPAFkom \
-            --name=wakili-pro-frontend)
+            --public)
           echo "Deployment URL: $DEPLOYMENT_URL"
           echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
 
