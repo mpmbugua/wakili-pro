@@ -57,16 +57,22 @@ jobs:
         run: npm install -g vercel@latest
 
       - name: 🔗 Link Vercel Project
-        working-directory: ./frontend
         run: |
-          # Set up Vercel project configuration
-          mkdir -p .vercel
-          echo '{"projectId":"prj_3pFNy227EbDTPtz0TlDcWPYk6W8o","orgId":"team_JGrb0SdhRZ3K2W1mnCPAFkom"}' > .vercel/project.json
+          # Set up Vercel project configuration in frontend directory
+          mkdir -p frontend/.vercel
+          echo '{"projectId":"prj_3pFNy227EbDTPtz0TlDcWPYk6W8o","orgId":"team_JGrb0SdhRZ3K2W1mnCPAFkom"}' > frontend/.vercel/project.json
+          echo "Repository root contents:"
+          ls -la
+          echo "Frontend directory contents:"
+          ls -la frontend/
 
       - name: 🌐 Deploy to Vercel
-        working-directory: ./frontend
         run: |
-          # Deploy to Vercel and capture the URL
+          # Deploy to Vercel from repository root, specifying frontend directory
+          echo "Deploying frontend directory to Vercel..."
+          cd frontend
+          pwd
+          ls -la
           DEPLOYMENT_URL=$(vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes --force)
           echo "Deployment URL: $DEPLOYMENT_URL"
           echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
