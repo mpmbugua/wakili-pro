@@ -56,24 +56,19 @@ jobs:
       - name: 🚀 Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: 🔗 Link Vercel Project
+      - name: 🌐 Deploy to Vercel (Direct)
+        working-directory: ./frontend
         run: |
-          # Set up Vercel project configuration in frontend directory
-          mkdir -p frontend/.vercel
-          echo '{"projectId":"prj_3pFNy227EbDTPtz0TlDcWPYk6W8o","orgId":"team_JGrb0SdhRZ3K2W1mnCPAFkom"}' > frontend/.vercel/project.json
-          echo "Repository root contents:"
-          ls -la
-          echo "Frontend directory contents:"
-          ls -la frontend/
-
-      - name: 🌐 Deploy to Vercel
-        run: |
-          # Deploy to Vercel from repository root, specifying frontend directory
-          echo "Deploying frontend directory to Vercel..."
-          cd frontend
+          # Deploy directly with all parameters specified to avoid project detection issues
+          echo "Deploying with explicit Vercel project parameters..."
           pwd
-          ls -la
-          DEPLOYMENT_URL=$(vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes --force)
+          ls -la dist/
+          DEPLOYMENT_URL=$(vercel --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --yes \
+            --force \
+            --scope=team_JGrb0SdhRZ3K2W1mnCPAFkom \
+            --name=wakili-pro-frontend)
           echo "Deployment URL: $DEPLOYMENT_URL"
           echo "DEPLOYMENT_URL=$DEPLOYMENT_URL" >> $GITHUB_ENV
 
