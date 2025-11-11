@@ -1,17 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { RegisterRequest } from '@wakili-pro/shared/src/types/auth';
 import { Mail, Lock, User, Phone, Eye, EyeOff, Scale } from 'lucide-react';
-
-// Inline type to replace shared dependency
-interface RegisterRequest {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  phone: string;
-  userType: 'client' | 'lawyer';
-}
 import { WakiliLogo } from '../ui/WakiliLogo';
 import { Button } from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';
