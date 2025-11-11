@@ -5,28 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { Scale, MapPin, FileText, Briefcase, Plus, X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { lawyerService } from '../../services/lawyerService';
-import { z } from 'zod';
+import { LawyerOnboardingSchema, LawyerOnboardingData } from '@wakili-pro/shared/src/schemas/user';
+import { LegalSpecialization } from '@wakili-pro/shared/src/types/user';
 
-// Inline schema to replace shared dependency
-const LawyerOnboardingSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().email('Valid email is required'),
-  phone: z.string().min(10, 'Valid phone number is required'),
-  specializations: z.array(z.string()).min(1, 'Select at least one specialization'),
-  experience: z.number().min(0, 'Experience must be 0 or greater'),
-  location: z.string().min(1, 'Location is required'),
-  bio: z.string().min(50, 'Bio must be at least 50 characters'),
-  hourlyRate: z.number().min(1, 'Hourly rate is required')
-});
-
-type LawyerOnboardingFormData = z.infer<typeof LawyerOnboardingSchema>;
-
-const LEGAL_SPECIALIZATIONS: Array<{
-  id: string;
-  name: string;
-  category: 'CORPORATE' | 'CRIMINAL' | 'FAMILY' | 'PROPERTY' | 'IMMIGRATION' | 'IP' | 'EMPLOYMENT';
-}> = [
+const LEGAL_SPECIALIZATIONS: LegalSpecialization[] = [
   { id: 'corporate', name: 'Corporate Law', category: 'CORPORATE' },
   { id: 'criminal', name: 'Criminal Law', category: 'CRIMINAL' },
   { id: 'family', name: 'Family Law', category: 'FAMILY' },
@@ -45,14 +27,14 @@ const LawyerOnboarding: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedSpecializations, setSelectedSpecializations] = useState<typeof LEGAL_SPECIALIZATIONS>([]);
+  const [selectedSpecializations, setSelectedSpecializations] = useState<LegalSpecialization[]>([]);
 
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors }
-  } = useForm<LawyerOnboardingFormData>({
+  } = useForm<LawyerOnboardingData>({
     resolver: zodResolver(LawyerOnboardingSchema),
     defaultValues: {
       specializations: [],
@@ -62,11 +44,13 @@ const LawyerOnboarding: React.FC = () => {
         address: '',
         city: 'Nairobi',
         county: 'Nairobi'
-      }
+      },
+      yearsOfExperience: 0,
+      bio: ''
     }
   });
 
-  const handleSpecializationToggle = (specialization: typeof LEGAL_SPECIALIZATIONS[0]) => {
+  const handleSpecializationToggle = (specialization: LegalSpecialization) => {
     const isSelected = selectedSpecializations.find(s => s.id === specialization.id);
     
     if (isSelected) {
@@ -80,7 +64,7 @@ const LawyerOnboarding: React.FC = () => {
     }
   };
 
-  const onSubmit = async (data: LawyerOnboardingFormData) => {
+  const onSubmit = async (data: LawyerOnboardingData) => {
     try {
       setIsSubmitting(true);
 
