@@ -13,7 +13,8 @@
     "noImplicitAny": false,
     "baseUrl": "./",
     "paths": {
-      "@wakili-pro/shared/*": ["../shared/src/*"]
+      "@wakili-pro/shared": ["../shared"],
+      "@wakili-pro/shared/*": ["../shared/dist/*"]
     },
     "composite": true,
     "declaration": true,
