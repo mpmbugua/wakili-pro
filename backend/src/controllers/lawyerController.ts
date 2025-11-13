@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { LawyerOnboardingSchema, UpdateAvailabilitySchema } from '../../../shared/src/schemas/user';
-import { ApiResponse } from '../../../shared/src/types';
+import { LawyerOnboardingSchema, UpdateAvailabilitySchema } from '@wakili-pro/shared/src/schemas/user';
+import { ApiResponse } from '@wakili-pro/shared/src/types';
 
 const prisma = new PrismaClient();
 

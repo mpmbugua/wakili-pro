@@ -78,8 +78,8 @@ class VideoSignalingService {
   private rooms: Map<string, VideoSignalingRoom> = new Map();
   private userSockets: Map<string, string> = new Map(); // userId -> socketId
   private socketUsers: Map<string, string> = new Map(); // socketId -> userId
-  private metricsInterval: NodeJS.Timeout | null = null;
-  private cleanupInterval: NodeJS.Timeout | null = null;
+  private metricsInterval: ReturnType<typeof setInterval> | null = null;
+  private cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(server: HTTPServer) {
     this.io = new SocketIOServer(server, {

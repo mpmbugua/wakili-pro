@@ -6,7 +6,7 @@ import {
   UpdateBookingStatusSchema,
   CreateReviewSchema,
   ServiceSearchSchema
-} from '../../../shared/src/schemas/marketplace';
+} from '@wakili-pro/shared/src/schemas/marketplace';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();

@@ -1,7 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
 import { ApiResponse } from '../../../shared/src/types';
-import { LawyerOnboardingSchema } from '../../../shared/src/schemas/user';
-import { z } from 'zod';
 
 interface LawyerAvailability {
   dayOfWeek: number;
@@ -38,7 +36,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-type LawyerOnboardingData = z.infer<typeof LawyerOnboardingSchema>;
+type LawyerOnboardingData = any;
 
 interface LawyerProfile {
   id: string;

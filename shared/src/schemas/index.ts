@@ -15,3 +15,6 @@ export * from './ai';
 
 // Payment schemas
 export * from './payment';
+
+// Forgot password schemas
+export { ForgotPasswordSchema, ResetPasswordSchema } from './forgotPassword';

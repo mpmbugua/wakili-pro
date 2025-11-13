@@ -1,7 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
 import { ApiResponse } from '../../../shared/src/types';
-import { CreateServiceSchema, CreateBookingSchema, CreateReviewSchema } from '../../../shared/src/schemas/marketplace';
-import { z } from 'zod';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -31,9 +29,9 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-type CreateServiceData = z.infer<typeof CreateServiceSchema>;
-type CreateBookingData = z.infer<typeof CreateBookingSchema>;
-type CreateReviewData = z.infer<typeof CreateReviewSchema>;
+type CreateServiceData = any;
+type CreateBookingData = any;
+type CreateReviewData = any;
 
 interface MarketplaceService {
   id: string;

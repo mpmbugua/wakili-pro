@@ -56,11 +56,11 @@ const LawyerOnboarding: React.FC = () => {
     if (isSelected) {
       const newSelections = selectedSpecializations.filter(s => s.id !== specialization.id);
       setSelectedSpecializations(newSelections);
-      setValue('specializations', newSelections);
+  setValue('specializations', newSelections as any);
     } else {
       const newSelections = [...selectedSpecializations, specialization];
       setSelectedSpecializations(newSelections);
-      setValue('specializations', newSelections);
+  setValue('specializations', newSelections as any);
     }
   };
 

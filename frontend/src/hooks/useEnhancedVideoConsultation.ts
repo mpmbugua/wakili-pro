@@ -94,7 +94,7 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
   const screenShareStreamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingChunksRef = useRef<Blob[]>([]);
-  const connectionStatsIntervalRef = useRef<any>(null);
+  const connectionStatsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Quality profiles for adaptive streaming
   const qualityProfiles = {
@@ -193,7 +193,7 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
   const startConnectionMonitoring = useCallback(() => {
     if (connectionStatsIntervalRef.current) return;
 
-  connectionStatsIntervalRef.current = window.setInterval(async () => {
+    connectionStatsIntervalRef.current = setInterval(async () => {
       for (const [socketId, peer] of peers.entries()) {
         try {
           const peerConnection = (peer as unknown as { _pc?: RTCPeerConnection })._pc;

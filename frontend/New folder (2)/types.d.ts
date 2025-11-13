@@ -1,0 +1,3 @@
+declare module 'react-native-config';
+declare module '@react-native-community/datetimepicker';
+declare module '@react-native-picker/picker';

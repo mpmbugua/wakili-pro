@@ -10,17 +10,17 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "allowJs": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "baseUrl": "./",
+    "paths": {
+      "@wakili-pro/shared/*": ["../shared/src/*"]
+    },
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true
   },
-  "include": ["src/index.ts"],
-  "exclude": [
-    "node_modules", 
-    "dist",
-    "src/controllers/**",
-    "src/services/**",
-    "src/middleware/**",
-    "src/routes/**",
-    "src/config/**",
-    "src/utils/**"
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../shared" }
   ]
 }

@@ -8,8 +8,8 @@ import {
   AuthenticatedRequest,
   JWTPayload
 } from '../middleware/auth';
-import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '../../../shared/src/schemas/auth';
-import { ApiResponse } from '../../../shared/src/types';
+import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '@wakili-pro/shared/schemas/auth';
+import { ApiResponse } from '@wakili-pro/shared/types';
 
 const prisma = new PrismaClient();
 
@@ -406,5 +406,96 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response): 
       success: false,
       message: 'Internal server error during password change'
     });
+  }
+};
+
+import { ForgotPasswordSchema, ResetPasswordSchema } from '@wakili-pro/shared/schemas';
+import crypto from 'crypto';
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const validationResult = ForgotPasswordSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validationResult.error.issues.map((issue: any) => ({
+          field: issue.path.join('.'),
+          message: issue.message
+        }))
+      });
+      return;
+    }
+
+    const { email } = validationResult.data;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    // Store token in DB (add passwordResetToken/passwordResetExpires fields to user model if not present)
+    await prisma.user.update({
+      where: { email },
+      data: {
+        passwordResetToken: resetToken,
+        passwordResetExpires: expiresAt
+      }
+    });
+
+    // TODO: Send email with resetToken (implement email sending logic)
+
+    res.json({ success: true, message: 'Password reset link sent to email.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error during forgot password' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const validationResult = ResetPasswordSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validationResult.error.issues.map((issue: any) => ({
+          field: issue.path.join('.'),
+          message: issue.message
+        }))
+      });
+      return;
+    }
+
+    const { token, newPassword } = validationResult.data;
+    const user = await prisma.user.findFirst({
+      where: {
+        passwordResetToken: token,
+        passwordResetExpires: { gt: new Date() }
+      }
+    });
+    if (!user) {
+      res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+      return;
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedNewPassword,
+        passwordResetToken: null,
+        passwordResetExpires: null
+      }
+    });
+
+    res.json({ success: true, message: 'Password reset successful. You can now log in.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error during password reset' });
   }
 };

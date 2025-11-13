@@ -14,9 +14,9 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "type-check": "tsc --noEmit",
-  "dedupe": "yarn install --force && yarn run type-check",
-  "postinstall": "node ./scripts/remove-react-19-types.cjs"
+  "type-check": "tsc --noEmit -p ./tsconfig.json",
+    "dedupe": "yarn install --force && yarn run type-check",
+    "postinstall": "node ./scripts/remove-react-19-types.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -54,12 +54,12 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
     "happy-dom": "^12.10.3",
+    "npm-force-resolutions": "^0.0.10",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.6",
-    "typescript": "^5.3.3",
+    "typescript": "^5.9.3",
     "vite": "^5.0.0",
-    "vitest": "^0.34.6",
-    "npm-force-resolutions": "^0.0.10"
+    "vitest": "^0.34.6"
   },
   "engines": {
     "node": ">=20.0.0"

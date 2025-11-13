@@ -8,7 +8,7 @@ import {
   RefundRequestSchema,
   EscrowReleaseSchema,
   PaymentWebhookSchema
-} from '../../../shared/src/schemas/payment';
+} from '@wakili-pro/shared/src/schemas/payment';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 

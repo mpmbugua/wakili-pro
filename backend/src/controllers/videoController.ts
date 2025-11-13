@@ -1,11 +1,35 @@
 import { Request, Response } from 'express';
+// Stubs for enhanced video consultation endpoints
+export const startVideoConsultation = async (req: Request, res: Response) => {
+  res.status(200).json({ success: true, data: { turnServers: [] } });
+};
+
+export const endVideoConsultation = async (req: Request, res: Response) => {
+  res.status(200).json({ success: true, data: { status: 'COMPLETED' } });
+};
+
+export const startRecording = async (req: Request, res: Response) => {
+  res.status(200).json({ success: true, message: 'Recording started' });
+};
+
+export const stopRecording = async (req: Request, res: Response) => {
+  res.status(200).json({ success: true, data: { recordingUrl: 'https://example.com/recording.mp4' } });
+};
+
+export const getConsultationRecordings = async (req: Request, res: Response) => {
+  res.status(200).json({ success: true, data: [] });
+};
+
+export const getConsultationStats = async (req: Request, res: Response) => {
+  res.status(200).json({ success: true, data: { participantCount: 1 } });
+};
 import { PrismaClient } from '@prisma/client';
 import { 
   CreateVideoConsultationSchema,
   JoinVideoConsultationSchema,
   UpdateParticipantStatusSchema,
   MeetingControlSchema
-} from '../../../shared/src/schemas/video';
+} from '@wakili-pro/shared/src/schemas/video';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';

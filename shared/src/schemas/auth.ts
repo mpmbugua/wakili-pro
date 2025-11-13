@@ -22,9 +22,6 @@ export const RefreshTokenSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
 });
 
-export const ResetPasswordSchema = z.object({
-  email: z.string().email('Invalid email format'),
-});
 
 export const ChangePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
@@ -38,6 +35,7 @@ export const VerifyEmailSchema = z.object({
 });
 
 // Infer types from schemas
+import { ResetPasswordSchema } from './forgotPassword';
 export type LoginRequest = z.infer<typeof LoginSchema>;
 export type RegisterRequest = z.infer<typeof RegisterSchema>;
 export type RefreshTokenRequest = z.infer<typeof RefreshTokenSchema>;

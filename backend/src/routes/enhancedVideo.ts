@@ -169,7 +169,10 @@ router.post('/consultations/:id/recording/stop', async (req, res) => {
  * @desc    Upload a consultation recording
  * @access  Private
  */
-router.post('/recordings/upload', upload.single('recording'), async (req, res) => {
+import type { Request, Response } from 'express';
+
+// @ts-expect-error: Multer/Express type mismatch due to monorepo type duplication
+router.post('/recordings/upload', upload.single('recording'), (async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -203,7 +206,7 @@ router.post('/recordings/upload', upload.single('recording'), async (req, res) =
       message: 'Failed to upload recording'
     });
   }
-});
+}) as any);
 
 /**
  * @route   GET /api/video/consultations/:id/recordings

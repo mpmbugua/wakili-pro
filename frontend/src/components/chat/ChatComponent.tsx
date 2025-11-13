@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { chatService, ChatMessage, ChatRoom } from '../../services/chatService';
 
 // Mock useAuth hook for now
@@ -18,7 +17,7 @@ interface ChatComponentProps {
   onClose: () => void;
 }
 
-export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onClose }: ChatComponentProps) => {
+export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onClose }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -26,7 +25,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onCl
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<any>();
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const { user } = useAuth();
 
   // Scroll to bottom of messages
@@ -143,14 +142,14 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onCl
     }
 
     // Set new timeout to stop typing indicator
-  typingTimeoutRef.current = window.setTimeout(() => {
+    typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
       chatService.sendTypingStatus(roomId, false);
     }, 2000);
   };
 
   // Handle Enter key press
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();

@@ -8,7 +8,7 @@ import {
   WebRTCSignalSchema,
   ScreenShareRequestSchema,
   VideoSettingsUpdateSchema
-} from '../../../shared/src/schemas/video';
+} from '@wakili-pro/shared/src/schemas/video';
 
 const prisma = new PrismaClient();
 
