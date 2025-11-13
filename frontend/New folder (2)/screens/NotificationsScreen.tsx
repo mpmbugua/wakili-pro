@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { fetchNotifications, markNotificationRead } from '../../shared/notificationApi';
-import { AppNotification } from '../../shared/notificationTypes';
+import { fetchNotifications, markNotificationRead } from '@wakili-pro/shared/notificationApi';
+import { AppNotification } from '@wakili-pro/shared/notificationTypes';
 
 export default function NotificationsScreen({ route }: any) {
   const { token } = route.params;
@@ -29,7 +29,9 @@ export default function NotificationsScreen({ route }: any) {
     try {
       await markNotificationRead(token, id);
       setNotifications(notifications => notifications.map(n => n.id === id ? { ...n, read: true } : n));
-    } catch {}
+    } catch (e) {
+      // handle error or log
+    }
   };
 
   if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" />;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, FlatList, TextInput, Button, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { fetchMessages, sendMessage } from '../../shared/chatApi';
-import { ChatMessage } from '../../shared/chatTypes';
+import { fetchMessages, sendMessage } from '@wakili-pro/shared/chatApi';
+import { ChatMessage } from '@wakili-pro/shared/chatTypes';
 
 export default function ChatDetailScreen({ route }: any) {
   const { token, chatId } = route.params;
@@ -16,7 +16,9 @@ export default function ChatDetailScreen({ route }: any) {
       try {
         const data = await fetchMessages(token, chatId);
         setMessages(data);
-      } catch {}
+      } catch (e) {
+        // handle error or log
+      }
       setLoading(false);
     };
     load();
@@ -29,7 +31,9 @@ export default function ChatDetailScreen({ route }: any) {
       setMessages(prev => [...prev, msg]);
       setInput('');
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
-    } catch {}
+    } catch (e) {
+      // handle error or log
+    }
   };
 
   return (

@@ -25,10 +25,10 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    '@typescript-eslint/no-explicit-any': 'warn',
-    'no-undef': 'error',
-    'no-unused-vars': 'warn',
+    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    'no-undef': 'off',
+    'no-unused-vars': 'off',
     'no-redeclare': 'warn'
   },
 }

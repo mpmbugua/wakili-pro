@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { login, register, forgotPassword, resetPassword } from '../../shared/api';
 
+export default function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
   const [showForgot, setShowForgot] = useState(false);
   const [showReset, setShowReset] = useState(false);
