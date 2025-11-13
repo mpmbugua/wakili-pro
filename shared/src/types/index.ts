@@ -1,3 +1,6 @@
+
+import type { UserRole } from './user';
+
 export interface User {
   id: string;
   email: string;
@@ -8,7 +11,6 @@ export interface User {
   updatedAt: Date;
 }
 
-export type UserRole = 'admin' | 'user' | 'moderator';
 
 export interface ApiResponse<T = any> {
   success: boolean;
