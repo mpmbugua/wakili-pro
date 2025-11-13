@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { act } from 'react';
+import { act } from '@testing-library/react';
 import { ChatRoomsList } from '../src/components/chat/ChatRoomsList';
 import { ChatComponent } from '../src/components/chat/ChatComponent';
 import { chatService } from '../src/services/chatService';
