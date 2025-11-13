@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "prebuild": "rimraf dist",
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest",
@@ -15,6 +16,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "rimraf": "^5.0.0",
     "@types/jest": "^29.5.8",
     "@types/node": "^20.9.0",
     "@types/uuid": "^11.0.0",

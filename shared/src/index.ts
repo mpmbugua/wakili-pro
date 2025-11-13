@@ -72,5 +72,5 @@ export { ForgotPasswordSchema, ResetPasswordSchema } from './schemas/forgotPassw
 
 export * from './schemas/case';
 
-// Export ApiResponse interface for backend usage
-export type { ApiResponse } from './types/index';
+// Export ApiResponse interface and UserRole for backend usage
+export type { ApiResponse, UserRole } from './types/index';
