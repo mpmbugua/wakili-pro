@@ -15,7 +15,8 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit",
-    "dedupe": "yarn install --force && yarn run type-check"
+  "dedupe": "yarn install --force && yarn run type-check",
+  "postinstall": "node ./scripts/remove-react-19-types.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
