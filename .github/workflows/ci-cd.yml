@@ -21,36 +21,36 @@ jobs:
         working-directory: ./frontend
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-    - name: Run linting
-      run: npm run lint
+      - name: Run linting
+        run: yarn lint
 
-    - name: Run type checking
-      run: npm run type-check
+      - name: Run type checking
+        run: yarn type-check
 
-    - name: Run tests
-      run: npm test -- --coverage --watchAll=false
+      - name: Run tests
+        run: yarn test --coverage --watchAll=false
 
-    - name: Build frontend
-      run: npm run build
+      - name: Build frontend
+        run: yarn build
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: frontend-build
-        path: frontend/dist/
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/dist/
 
   # Backend Tests and Build
   backend-test:
@@ -62,48 +62,48 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: wakili_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+          - name: Setup Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: ${{ env.NODE_VERSION }}
+              cache: yarn
+              cache-dependency-path: backend/yarn.lock
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: backend/package-lock.json
+          - name: Install dependencies
+            run: yarn install --frozen-lockfile
 
-    - name: Install dependencies
-      run: npm ci
+          - name: Generate Prisma client
+            run: npx prisma generate
+            env:
+              DATABASE_URL: postgresql://test:test@localhost:5432/wakili_test
 
-    - name: Generate Prisma client
-      run: npx prisma generate
-      env:
-        DATABASE_URL: postgresql://test:test@localhost:5432/wakili_test
+          - name: Run database migrations
+            run: npx prisma migrate deploy
+            env:
+              DATABASE_URL: postgresql://test:test@localhost:5432/wakili_test
 
-    - name: Run database migrations
-      run: npx prisma migrate deploy
-      env:
-        DATABASE_URL: postgresql://test:test@localhost:5432/wakili_test
+          - name: Run linting
+            run: yarn lint
 
-    - name: Run linting
-      run: npm run lint
+          - name: Run type checking
+            run: yarn type-check
 
-    - name: Run type checking
-      run: npm run build
+          - name: Run tests
+            env:
+              DATABASE_URL: postgresql://test:test@localhost:5432/wakili_test
+              JWT_SECRET: test-secret-key
+              JWT_REFRESH_SECRET: test-refresh-secret-key
+              NODE_ENV: test
+            run: yarn test --coverage
+
+          - name: Upload coverage reports
+            uses: codecov/codecov-action@v3
+            with:
+              directory: ./backend/coverage/
 
     - name: Run tests
       run: npm test -- --coverage
