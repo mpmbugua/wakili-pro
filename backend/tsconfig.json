@@ -12,9 +12,7 @@
     "allowJs": true,
     "noImplicitAny": false,
     "baseUrl": "./",
-    "paths": {
-      "@wakili-pro/shared/*": ["../shared/dist/*"]
-    },
+    // No paths mapping for @wakili-pro/shared; rely on Yarn workspaces
     "composite": true,
     "declaration": true,
     "declarationMap": true

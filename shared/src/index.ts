@@ -1,4 +1,6 @@
 // Export all types
+// Runtime export to ensure dist/index.js is emitted
+export const sharedMarker = true;
 export * from './types/auth';
 export * from './types/user';
 export * from './types/marketplace';
@@ -73,4 +75,4 @@ export { ForgotPasswordSchema, ResetPasswordSchema } from './schemas/forgotPassw
 export * from './schemas/case';
 
 // Export ApiResponse interface and UserRole for backend usage
-export { ApiResponse, UserRole } from './types/index';
+export type { ApiResponse, UserRole } from './types/index';
