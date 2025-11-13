@@ -28,7 +28,7 @@ jobs:
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 20.19.4
           # Skip npm caching since package-lock.json doesn't exist
 
       - name: 📦 Install Dependencies
