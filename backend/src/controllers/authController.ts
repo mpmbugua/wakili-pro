@@ -8,7 +8,8 @@ import {
   AuthenticatedRequest,
   JWTPayload
 } from '../middleware/auth';
-import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema, ApiResponse } from '@wakili-pro/shared';
+import type { ApiResponse } from '@wakili-pro/shared';
+import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '@wakili-pro/shared';
 
 const prisma = new PrismaClient();
 

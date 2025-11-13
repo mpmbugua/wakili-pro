@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import { ZodIssue } from 'zod';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
-import { ApiResponse, CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema } from '@wakili-pro/shared';
+import type { ApiResponse } from '@wakili-pro/shared';
+import { CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema } from '@wakili-pro/shared';
 
 // Import AI service providers
 import { speechService } from '../services/speechService';
@@ -257,7 +258,17 @@ export const researchLegalTopic = async (req: AuthenticatedRequest, res: Respons
       return;
     }
 
-    const research = await kenyanLawService.conductLegalResearch(validationResult.data);
+    // Ensure required 'query' is present
+    const { query, jurisdiction, searchDepth, includeStatutes, includeCaselaw, includeRegulations, maxResults } = validationResult.data;
+    const research = await kenyanLawService.conductLegalResearch({
+      query,
+      jurisdiction,
+      searchDepth,
+      includeStatutes,
+      includeCaselaw,
+      includeRegulations,
+      maxResults
+    });
 
     const response: ApiResponse<typeof research> = {
       success: true,
@@ -297,7 +308,14 @@ export const generateDocument = async (req: AuthenticatedRequest, res: Response)
       return;
     }
 
-    const document = await kenyanLawService.generateLegalDocument(validationResult.data);
+    // Ensure required 'type' is present
+    const { type, parameters, clientName, customRequirements } = validationResult.data;
+    const document = await kenyanLawService.generateLegalDocument({
+      type,
+      parameters,
+      clientName,
+      customRequirements
+    });
 
     const response: ApiResponse<typeof document> = {
       success: true,
@@ -337,7 +355,15 @@ export const analyzeContract = async (req: AuthenticatedRequest, res: Response):
       return;
     }
 
-    const analysis = await kenyanLawService.analyzeContract(validationResult.data);
+    // Ensure required 'contractText' and 'analysisType' are present
+    const { contractText, analysisType, contractType, jurisdiction: analysisJurisdiction, focusAreas } = validationResult.data;
+    const analysis = await kenyanLawService.analyzeContract({
+      contractText,
+      analysisType,
+      contractType,
+      jurisdiction: analysisJurisdiction,
+      focusAreas
+    });
 
     const response: ApiResponse<typeof analysis> = {
       success: true,
