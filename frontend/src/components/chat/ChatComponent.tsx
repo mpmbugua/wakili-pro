@@ -25,7 +25,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onCl
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<any>();
   const { user } = useAuth();
 
   // Scroll to bottom of messages
@@ -142,7 +142,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onCl
     }
 
     // Set new timeout to stop typing indicator
-    typingTimeoutRef.current = setTimeout(() => {
+  typingTimeoutRef.current = window.setTimeout(() => {
       setIsTyping(false);
       chatService.sendTypingStatus(roomId, false);
     }, 2000);

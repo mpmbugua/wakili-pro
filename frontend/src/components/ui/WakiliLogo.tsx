@@ -2,7 +2,7 @@ import React from 'react';
 import { colors } from '../../styles/designSystem';
 
 interface WakiliLogoProps {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   variant?: 'full' | 'icon' | 'text';
   className?: string;
 }
@@ -13,7 +13,6 @@ export const WakiliLogo: React.FC<WakiliLogoProps> = ({
   className = '' 
 }) => {
   const dimensions = {
-    xs: { width: 100, height: 28, iconSize: 24, fontSize: '12px' },
     sm: { width: 120, height: 32, iconSize: 28, fontSize: '14px' },
     md: { width: 160, height: 40, iconSize: 36, fontSize: '18px' },
     lg: { width: 200, height: 48, iconSize: 44, fontSize: '22px' },
