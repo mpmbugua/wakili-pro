@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../utils/database';
-import { 
-  CreatePaymentIntentSchema,
-  PaymentVerificationSchema
-} from '@wakili-pro/shared/src/schemas/payment';
+import { CreatePaymentIntentSchema, PaymentVerificationSchema } from '@wakili-pro/shared';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 

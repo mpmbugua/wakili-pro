@@ -7,7 +7,7 @@ import { logger } from '../utils/logger';
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
-interface AuthenticatedSocket extends Socket {
+type AuthenticatedSocket = Socket & {
   userId: string;
   email: string;
   role: string;

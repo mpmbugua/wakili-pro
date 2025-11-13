@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { UserRole } from '@wakili-pro/shared/src/types/user';
+import { UserRole } from '@wakili-pro/shared';
 
 export interface AuthenticatedRequest extends Request {
   user?: {

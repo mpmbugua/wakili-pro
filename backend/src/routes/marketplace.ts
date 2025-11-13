@@ -15,7 +15,8 @@ import {
 import { authenticateToken } from '../middleware/auth';
 import { authorizeRoles } from '../middleware/auth';
 
-const router = express.Router();
+import type { Router as ExpressRouter } from 'express';
+const router: ExpressRouter = express.Router();
 
 // Service routes
 router.post('/services', authenticateToken, authorizeRoles('LAWYER'), createService);

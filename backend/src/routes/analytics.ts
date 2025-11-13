@@ -7,7 +7,8 @@ import {
   getUserBehaviorAnalytics
 } from '../controllers/analyticsController';
 
-const router = Router();
+import type { Router as ExpressRouter } from 'express';
+const router: ExpressRouter = Router();
 
 // Protect all analytics routes
 router.use(authenticateToken);

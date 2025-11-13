@@ -2,13 +2,7 @@ import { Request, Response } from 'express';
 import { ZodIssue } from 'zod';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
-import { ApiResponse } from '@wakili-pro/shared/src/types';
-import { 
-  CreateAIQuerySchema,
-  CreateDocumentGenerationSchema,
-  LegalResearchSchema,
-  ContractAnalysisSchema
-} from '@wakili-pro/shared/src/schemas/ai';
+import { ApiResponse, CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema } from '@wakili-pro/shared';
 
 // Import AI service providers
 import { speechService } from '../services/speechService';

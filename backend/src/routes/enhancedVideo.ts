@@ -16,7 +16,8 @@ import { performanceTestingService } from '../services/performanceTestingService
 import { mobileIntegrationService } from '../services/mobileIntegrationService';
 import { logger } from '../utils/logger';
 
-const router = express.Router();
+import type { Router as ExpressRouter } from 'express';
+const router: ExpressRouter = express.Router();
 
 // Configure multer for recording uploads
 const upload = multer({
@@ -171,7 +172,7 @@ router.post('/consultations/:id/recording/stop', async (req, res) => {
  */
 import type { Request, Response } from 'express';
 
-// @ts-expect-error: Multer/Express type mismatch due to monorepo type duplication
+
 router.post('/recordings/upload', upload.single('recording'), (async (req, res) => {
   try {
     if (!req.file) {

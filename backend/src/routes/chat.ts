@@ -9,7 +9,8 @@ import {
   getUserNotifications
 } from '../controllers/chatController';
 
-const router = Router();
+import type { Router as ExpressRouter } from 'express';
+const router: ExpressRouter = Router();
 
 // Protect all chat routes with authentication
 router.use(authenticateToken);

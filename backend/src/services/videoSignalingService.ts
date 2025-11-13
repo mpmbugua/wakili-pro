@@ -4,11 +4,7 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { PrismaClient } from '@prisma/client';
-import { 
-  WebRTCSignalSchema,
-  ScreenShareRequestSchema,
-  VideoSettingsUpdateSchema
-} from '@wakili-pro/shared/src/schemas/video';
+import { WebRTCSignalSchema, ScreenShareRequestSchema, VideoSettingsUpdateSchema } from '@wakili-pro/shared';
 
 const prisma = new PrismaClient();
 

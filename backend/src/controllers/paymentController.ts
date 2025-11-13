@@ -2,13 +2,7 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
 import axios from 'axios';
-import { 
-  CreatePaymentIntentSchema,
-  PaymentVerificationSchema,
-  RefundRequestSchema,
-  EscrowReleaseSchema,
-  PaymentWebhookSchema
-} from '@wakili-pro/shared/src/schemas/payment';
+import { CreatePaymentIntentSchema, PaymentVerificationSchema, RefundRequestSchema, EscrowReleaseSchema, PaymentWebhookSchema } from '@wakili-pro/shared';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 

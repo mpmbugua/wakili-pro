@@ -24,12 +24,7 @@ export const getConsultationStats = async (req: Request, res: Response) => {
   res.status(200).json({ success: true, data: { participantCount: 1 } });
 };
 import { PrismaClient } from '@prisma/client';
-import { 
-  CreateVideoConsultationSchema,
-  JoinVideoConsultationSchema,
-  UpdateParticipantStatusSchema,
-  MeetingControlSchema
-} from '@wakili-pro/shared/src/schemas/video';
+import { CreateVideoConsultationSchema, JoinVideoConsultationSchema, UpdateParticipantStatusSchema, MeetingControlSchema } from '@wakili-pro/shared';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';

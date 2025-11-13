@@ -41,7 +41,8 @@ const refundPayment = async (req: Request, res: Response) => {
 };
 import { authenticateToken } from '../middleware/auth';
 
-const router = express.Router();
+import type { Router as ExpressRouter } from 'express';
+const router: ExpressRouter = express.Router();
 
 
 // Payment processing routes (match test expectations)

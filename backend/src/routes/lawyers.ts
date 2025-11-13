@@ -8,7 +8,8 @@ import {
 } from '../controllers/lawyerController';
 import { authenticateToken, authorizeRoles } from '../middleware/auth';
 
-const router = Router();
+import type { Router as ExpressRouter } from 'express';
+const router: ExpressRouter = Router();
 
 /**
  * @route   GET /api/lawyers/profile

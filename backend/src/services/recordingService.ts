@@ -6,6 +6,8 @@ import { logger } from '../utils/logger';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+// Use Express.Multer.File for Multer file type
+
 
 const prisma = new PrismaClient();
 
@@ -21,7 +23,6 @@ export interface RecordingMetadata {
   uploadUrl?: string;
   downloadUrl?: string;
 }
-
 export interface StorageProvider {
   upload(file: Express.Multer.File, metadata: RecordingMetadata): Promise<string>;
   getDownloadUrl(key: string, expiresIn?: number): Promise<string>;
@@ -37,7 +38,6 @@ class S3StorageProvider implements StorageProvider {
   constructor() {
     this.bucketName = process.env.AWS_S3_BUCKET || 'wakili-pro-recordings';
     this.prefix = process.env.AWS_S3_RECORDINGS_PREFIX || 'consultations/recordings/';
-    
     this.s3Client = new S3Client({
       region: process.env.AWS_REGION || 'us-east-1',
       credentials: {
@@ -45,13 +45,11 @@ class S3StorageProvider implements StorageProvider {
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
       },
     });
-
     logger.info('S3 storage provider initialized');
   }
 
   async upload(file: Express.Multer.File, metadata: RecordingMetadata): Promise<string> {
     const key = `${this.prefix}${metadata.consultationId}/${metadata.fileName}`;
-    
     try {
       const upload = new Upload({
         client: this.s3Client,
@@ -69,10 +67,8 @@ class S3StorageProvider implements StorageProvider {
           }
         }
       });
-
       await upload.done();
       logger.info(`Recording uploaded to S3: ${key}`);
-      
       return key;
     } catch (error) {
       logger.error('S3 upload failed:', error);
@@ -115,14 +111,11 @@ class S3StorageProvider implements StorageProvider {
 class R2StorageProvider implements StorageProvider {
   private r2Client: S3Client;
   private bucketName: string;
-
   constructor() {
     this.bucketName = process.env.CLOUDFLARE_R2_BUCKET || 'wakili-recordings';
-    
     const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID;
     const endpoint = process.env.CLOUDFLARE_R2_ENDPOINT || 
       `https://${accountId}.r2.cloudflarestorage.com`;
-
     this.r2Client = new S3Client({
       region: 'auto',
       endpoint: endpoint,
@@ -131,13 +124,11 @@ class R2StorageProvider implements StorageProvider {
         secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY!,
       },
     });
-
     logger.info('CloudFlare R2 storage provider initialized');
   }
 
   async upload(file: Express.Multer.File, metadata: RecordingMetadata): Promise<string> {
     const key = `consultations/${metadata.consultationId}/${metadata.fileName}`;
-    
     try {
       const upload = new Upload({
         client: this.r2Client,
@@ -154,10 +145,8 @@ class R2StorageProvider implements StorageProvider {
           }
         }
       });
-
       await upload.done();
       logger.info(`Recording uploaded to R2: ${key}`);
-      
       return key;
     } catch (error) {
       logger.error('R2 upload failed:', error);
@@ -171,7 +160,6 @@ class R2StorageProvider implements StorageProvider {
         Bucket: this.bucketName,
         Key: key,
       });
-
       const url = await getSignedUrl(this.r2Client, command, { expiresIn });
       return url;
     } catch (error) {
@@ -186,7 +174,6 @@ class R2StorageProvider implements StorageProvider {
         Bucket: this.bucketName,
         Key: key,
       });
-
       await this.r2Client.send(command);
       logger.info(`Recording deleted from R2: ${key}`);
     } catch (error) {

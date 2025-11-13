@@ -1,12 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { 
-  CreateServiceSchema, 
-  CreateBookingSchema, 
-  UpdateBookingStatusSchema,
-  CreateReviewSchema,
-  ServiceSearchSchema
-} from '@wakili-pro/shared/src/schemas/marketplace';
+import { CreateServiceSchema, CreateBookingSchema, UpdateBookingStatusSchema, CreateReviewSchema, ServiceSearchSchema } from '@wakili-pro/shared';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();

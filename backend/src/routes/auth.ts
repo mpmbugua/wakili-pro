@@ -8,7 +8,8 @@ import {
 } from '../controllers/authController';
 import { authenticateToken } from '../middleware/auth';
 
-const router = Router();
+import type { Router as ExpressRouter } from 'express';
+const router: ExpressRouter = Router();
 
 /**
  * @route   POST /api/auth/register

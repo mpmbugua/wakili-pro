@@ -10,7 +10,8 @@ import {
 import { authenticateToken } from '../middleware/auth';
 import { rateLimiter } from '../middleware/rateLimitMiddleware';
 
-const router = express.Router();
+import type { Router as ExpressRouter } from 'express';
+const router: ExpressRouter = express.Router();
 import {
   startVideoConsultation,
   endVideoConsultation,

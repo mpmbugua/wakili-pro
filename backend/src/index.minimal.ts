@@ -2,7 +2,8 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
-const app = express();
+import type { Express } from 'express';
+const app: Express = express();
 const port = process.env.PORT || 5000;
 
 // Basic middleware

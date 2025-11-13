@@ -11,7 +11,8 @@ import {
   textToSpeechResponse
 } from '../controllers/aiController';
 
-const router = Router();
+import type { Router as ExpressRouter } from 'express';
+const router: ExpressRouter = Router();
 
 // Public AI endpoints (with rate limiting for free users)
 router.post('/ask', optionalAuth, askAIQuestion);
