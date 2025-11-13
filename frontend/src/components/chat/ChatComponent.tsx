@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { chatService, ChatMessage, ChatRoom } from '../../services/chatService';
 
 // Mock useAuth hook for now
@@ -17,7 +18,7 @@ interface ChatComponentProps {
   onClose: () => void;
 }
 
-export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onClose }) => {
+export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onClose }: ChatComponentProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -149,7 +150,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onCl
   };
 
   // Handle Enter key press
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
