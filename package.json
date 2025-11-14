@@ -1,6 +1,4 @@
 {
-    "name": "wakili-pro",
-    "version": "1.0.0",
     "description": "Modern full-stack web application built with agile development practices",
     "private": true,
     "workspaces": [
@@ -10,10 +8,8 @@
     ],
     "scripts": {
       "setup": "npm install && npm run setup:frontend && npm run setup:backend",
-      "setup:frontend": "cd frontend && npm install",
-      "setup:backend": "cd backend && npm install",
-      "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-      "dev:frontend": "cd frontend && npm run dev",
+    "setup:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
       "dev:backend": "cd backend && npm run dev",
       "build": "npm run build:shared && npm run build:frontend && npm run build:backend",
       "build:frontend": "cd frontend && npm run build",
@@ -113,5 +109,9 @@
     "engines": {
       "node": ">=20.0.0",
       "npm": ">=10.0.0"
+    },
+    "resolutions": {
+      "@types/express": "4.17.21",
+      "@types/express-serve-static-core": "4.17.37"
     }
-  }
+    
