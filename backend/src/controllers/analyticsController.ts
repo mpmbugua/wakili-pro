@@ -31,14 +31,13 @@ export const getDashboardAnalytics = async (req: AuthenticatedRequest, res: Resp
     const filters = AnalyticsFiltersSchema.parse(req.query);
     const whereClause = buildWhereClause(filters, userId, userRole);
 
-    // Get overview metrics
-    const [
-      totalBookings,
-      totalRevenue,
-      activeConsultations,
-      // Get overview metrics (aIQuery model removed, so AI query stats are not available)
-      })
-    ]);
+    // Get overview metrics (update to match available models)
+    const totalBookings = await prisma.serviceBooking.count({ where: whereClause });
+    const totalRevenue = await prisma.payment.aggregate({ _sum: { amount: true }, where: whereClause });
+    const activeConsultations = await prisma.videoConsultation.count({ where: { ...whereClause, status: 'ACTIVE' } });
+    const completedServices = await prisma.serviceBooking.count({ where: { ...whereClause, status: 'COMPLETED' } });
+    const averageRating = await prisma.serviceReview.aggregate({ _avg: { rating: true }, where: whereClause });
+    const recentActivity = await prisma.serviceBooking.findMany({ where: whereClause, orderBy: { createdAt: 'desc' }, take: 10 });
 
     res.json({
       success: true,

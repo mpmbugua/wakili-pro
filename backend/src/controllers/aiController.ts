@@ -396,25 +396,23 @@ export const getAIQueryHistory = async (req: AuthenticatedRequest, res: Response
       return;
     }
 
-        // Rate limiting for unauthenticated users is currently disabled because aIQuery model does not exist.
-    ]);
-
-    const response: ApiResponse<{
-      queries: typeof queries;
-      pagination: {
-        page: number;
-        limit: number;
-        total: number;
-        totalPages: number;
-        hasMore: boolean;
-      };
-    }> = {
-        // The logic to save the query to the database has been removed as aIQuery model does not exist.
+    // Query history logic (aIQuery model removed, so return empty array)
+    const queries: any[] = [];
+    const response: ApiResponse<{ queries: any[]; pagination: { page: number; limit: number; total: number; totalPages: number; hasMore: boolean; }; }> = {
+      success: true,
+      message: 'Query history retrieved successfully',
+      data: {
+        queries,
+        pagination: {
+          page: 1,
+          limit: 0,
+          total: 0,
+          totalPages: 1,
+          hasMore: false
+        }
       }
     };
-
     res.json(response);
-
   } catch (error) {
     logger.error('Query history error:', error);
     res.status(500).json({
