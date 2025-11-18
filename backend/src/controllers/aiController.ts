@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { ZodIssue } from 'zod';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
-import type { ApiResponse } from '@wakili-pro/shared';
-import { CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema } from '@wakili-pro/shared';
+import type { ApiResponse } from '@shared';
+import { CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema } from '@shared';
 
 // Import AI service providers
 import { speechService } from '../services/speechService';
@@ -88,8 +88,8 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
       data: {
         userId: userId || req.ip || 'anonymous',
         query,
-        type: type as any,
-        context: (context as any) || 'LEGAL_ADVICE',
+  type: type as string,
+  context: (context as string) || 'LEGAL_ADVICE',
         response: aiResponse.answer,
         confidence: aiResponse.confidence,
         tokensUsed: aiResponse.tokensUsed
@@ -120,9 +120,9 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
       id: string;
       answer: string;
       confidence: number;
-      sources?: any[];
-      relatedTopics?: string[];
-      consultationSuggestion?: any;
+  sources?: Array<Record<string, unknown>>;
+  relatedTopics?: string[];
+  consultationSuggestion?: Record<string, unknown>;
       remainingQueries?: number;
     }> = {
       success: true,
@@ -166,8 +166,9 @@ export const voiceToTextQuery = async (req: AuthenticatedRequest, res: Response)
     }
 
     // Convert voice to text
-    const audioBuffer = req.file ? req.file.buffer : Buffer.from(req.body.audioData, 'base64');
-    const transcription = await speechService.speechToText(audioBuffer);
+    // Accept language from request, default to 'en'
+    const language = req.body.language === 'sw' ? 'sw' : 'en';
+    const transcription = await speechService.speechToText(audioBuffer, language);
 
     if (!transcription.success) {
       res.status(400).json({
@@ -204,6 +205,8 @@ export const textToSpeechResponse = async (req: AuthenticatedRequest, res: Respo
   try {
     const { queryId } = req.params;
     const userId = req.user?.id;
+    // Accept language from query param, default to 'en'
+    const language = req.query.language === 'sw' ? 'sw' : 'en';
 
     // Get the AI query response
     const query = await prisma.aIQuery.findFirst({
@@ -222,7 +225,7 @@ export const textToSpeechResponse = async (req: AuthenticatedRequest, res: Respo
     }
 
     // Convert response to speech
-    const audioResult = await speechService.textToSpeech(query.response);
+    const audioResult = await speechService.textToSpeech(query.response, language);
 
     if (!audioResult.success) {
       res.status(500).json({

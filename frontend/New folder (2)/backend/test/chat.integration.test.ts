@@ -14,42 +14,78 @@ describe('Chat API Integration Tests', () => {
 
   beforeAll(async () => {
     // Create test users
+<<<<<<< HEAD
+=======
+
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     const client = await prisma.user.create({
       data: {
         email: 'testclient@chat.com',
         firstName: 'Test',
         lastName: 'Client',
         password: 'hashedpassword',
+<<<<<<< HEAD
   role: 'PUBLIC' as any,
+=======
+        role: 'PUBLIC',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         emailVerified: true
       }
     });
     userId = client.id;
+<<<<<<< HEAD
 
+=======
+              role: 'PUBLIC',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     const lawyer = await prisma.user.create({
       data: {
         email: 'testlawyer@chat.com',
         firstName: 'Test',
         lastName: 'Lawyer',
         password: 'hashedpassword',
+<<<<<<< HEAD
   role: 'LAWYER' as any,
+=======
+        role: 'LAWYER',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         emailVerified: true
       }
     });
     lawyerId = lawyer.id;
+<<<<<<< HEAD
 
+=======
+              role: 'LAWYER',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     // Create lawyer profile
     await prisma.lawyerProfile.create({
       data: {
         userId: lawyer.id,
         licenseNumber: 'TEST123',
         yearOfAdmission: 2018,
+<<<<<<< HEAD
         specializations: ['CORPORATE_LAW'] as any,
         location: {} as any,
         yearsOfExperience: 5,
         bio: 'Test lawyer for chat system',
         isVerified: true,
         availability: {} as any
+=======
+        specializations: ['CORPORATE'],
+        location: { county: 'Nairobi', city: 'Nairobi' },
+        yearsOfExperience: 5,
+        bio: 'Test lawyer for chat system',
+        isVerified: true,
+        availability: [
+          {
+            day: 'MONDAY',
+            startTime: '09:00',
+            endTime: '17:00',
+            isAvailable: true
+          }
+        ]
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       }
     });
 
@@ -59,10 +95,18 @@ describe('Chat API Integration Tests', () => {
         providerId: lawyer.id,
         title: 'Chat Test Service',
         description: 'Service for testing chat functionality',
+<<<<<<< HEAD
         type: 'CONSULTATION' as any,
         priceKES: 150,
         duration: 60,
         tags: ['test']
+=======
+        type: 'CONSULTATION',
+        priceKES: 150,
+        duration: 60,
+        tags: ['test'],
+        status: 'ACTIVE'
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       }
     });
 
@@ -72,8 +116,13 @@ describe('Chat API Integration Tests', () => {
         serviceId: service.id,
         clientId: client.id,
         providerId: lawyer.id,
+<<<<<<< HEAD
         status: 'CONFIRMED' as any,
         paymentStatus: 'PAID' as any,
+=======
+        status: 'CONFIRMED',
+        paymentStatus: 'COMPLETED',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         totalAmountKES: 150,
         clientRequirements: 'Test requirements',
         scheduledAt: new Date(Date.now() + 86400000) // Tomorrow

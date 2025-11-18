@@ -189,12 +189,12 @@ class MobileIntegrationService {
         }
       };
 
-      const response = await (admin.messaging() as any).sendMulticast(message);
+  const response = await (admin.messaging() as admin.messaging.Messaging).sendMulticast(message);
       
       // Handle failed tokens
       if (response.failureCount > 0) {
         const failedTokens: string[] = [];
-        response.responses.forEach((resp: any, idx: number) => {
+  response.responses.forEach((resp: admin.messaging.SendResponse, idx: number) => {
           if (!resp.success) {
             failedTokens.push(tokens[idx]);
             logger.warn(`Failed to send notification to token ${tokens[idx]}:`, resp.error);
@@ -381,8 +381,8 @@ class MobileIntegrationService {
     userId: string,
     platforms?: ('ios' | 'android' | 'web')[]
   ): Promise<MobileDevice[]> {
-    try {
-      const whereClause: any = {
+        try {
+      const whereClause: Record<string, unknown> = {
         userId,
         isActive: true
       };
@@ -484,7 +484,7 @@ class MobileIntegrationService {
   /**
    * Get mobile app configuration
    */
-  getMobileAppConfig(): any {
+  getMobileAppConfig(): Record<string, unknown> {
     return {
       videoCall: {
         maxParticipants: 6,

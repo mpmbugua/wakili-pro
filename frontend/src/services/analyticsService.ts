@@ -1,5 +1,44 @@
 import { ApiResponse } from '@shared/types';
 
+const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+async function makeRequest<T = unknown>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${baseURL}${path.startsWith('/') ? path : `/${path}`}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  if (!res.ok) throw new Error('Network error');
+  return res.json();
+}
+
+export const analyticsService = {
+  async fetchFeatureEventStats(): Promise<ApiResponse<EventStats>> {
+    return makeRequest('/analytics/feature-events');
+  },
+  async logEvent(event: { type: string; details?: Record<string, unknown> }): Promise<void> {
+    try {
+      await makeRequest('/analytics/event', {
+        method: 'POST',
+        body: JSON.stringify(event)
+      });
+    } catch (error) {
+      // Non-blocking: log error but do not throw
+      console.error('Failed to log analytics event:', error);
+    }
+  }
+};
+
+// --- Types and Interfaces ---
+export interface EventStats {
+  aiChatMessages: number;
+  aiChatAudio: number;
+  aiChatByLanguage: Record<string, number>;
+  emergencyInitiated: number;
+  emergencySuccess: number;
+  emergencyByLawyer: Record<string, number>;
+  timeline: Array<{ date: string; aiChat: number; emergency: number }>;
+}
+
 interface AnalyticsQuery {
   dateRange?: {
     start: string;
@@ -111,80 +150,3 @@ interface DashboardAnalytics extends OverviewAnalytics, RevenueAnalytics, UserBe
   performance: PerformanceAnalytics;
 }
 
-class AnalyticsService {
-  private baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
-  private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${this.baseURL}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        ...options,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Analytics API error:', error);
-      throw error;
-    }
-  }
-
-  async getDashboardAnalytics(query: AnalyticsQuery): Promise<ApiResponse<DashboardAnalytics>> {
-    const params = new URLSearchParams();
-    if (query.dateRange) {
-      params.append('startDate', query.dateRange.start);
-      params.append('endDate', query.dateRange.end);
-    }
-
-    return this.makeRequest<DashboardAnalytics>(`/analytics/dashboard?${params}`);
-  }
-
-  async getRevenueAnalytics(query: AnalyticsQuery): Promise<ApiResponse<RevenueAnalytics>> {
-    const params = new URLSearchParams();
-    if (query.dateRange) {
-      params.append('startDate', query.dateRange.start);
-      params.append('endDate', query.dateRange.end);
-    }
-
-    return this.makeRequest<RevenueAnalytics>(`/analytics/revenue?${params}`);
-  }
-
-  async getPerformanceAnalytics(query: AnalyticsQuery): Promise<ApiResponse<PerformanceAnalytics>> {
-    const params = new URLSearchParams();
-    if (query.dateRange) {
-      params.append('startDate', query.dateRange.start);
-      params.append('endDate', query.dateRange.end);
-    }
-
-    return this.makeRequest<PerformanceAnalytics>(`/analytics/performance?${params}`);
-  }
-
-  async getUserBehaviorAnalytics(query: AnalyticsQuery): Promise<ApiResponse<UserBehaviorAnalytics>> {
-    const params = new URLSearchParams();
-    if (query.dateRange) {
-      params.append('startDate', query.dateRange.start);
-      params.append('endDate', query.dateRange.end);
-    }
-
-    return this.makeRequest<UserBehaviorAnalytics>(`/analytics/user-behavior?${params}`);
-  }
-
-  async exportAnalytics(query: AnalyticsQuery): Promise<ApiResponse<string>> {
-    const params = new URLSearchParams();
-    if (query.dateRange) {
-      params.append('startDate', query.dateRange.start);
-      params.append('endDate', query.dateRange.end);
-    }
-
-    return this.makeRequest<string>(`/analytics/export?${params}`);
-  }
-}
-
-export const analyticsService = new AnalyticsService();

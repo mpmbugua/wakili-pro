@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middleware/auth';
-import type { ApiResponse } from '@wakili-pro/shared';
-import { LawyerOnboardingSchema, UpdateAvailabilitySchema } from '@wakili-pro/shared';
+import type { ApiResponse } from '@shared';
+import { LawyerOnboardingSchema, UpdateAvailabilitySchema } from '@shared';
 
 const prisma = new PrismaClient();
 
@@ -129,10 +129,8 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
     const updatedProfile = await prisma.lawyerProfile.update({
       where: { userId },
       data: {
-        ...(updateData.licenseNumber && { licenseNumber: updateData.licenseNumber }),
-        ...(updateData.yearOfAdmission && { yearOfAdmission: updateData.yearOfAdmission }),
-        ...(updateData.specializations && { specializations: updateData.specializations as any }),
-        ...(updateData.location && { location: updateData.location as any }),
+        ...(updateData.specializations && { specializations: updateData.specializations as Record<string, unknown> }),
+        ...(updateData.location && { location: updateData.location as Record<string, unknown> }),
         ...(updateData.bio && { bio: updateData.bio }),
         ...(updateData.yearsOfExperience && { yearsOfExperience: updateData.yearsOfExperience }),
         ...(updateData.profileImageUrl && { profileImageUrl: updateData.profileImageUrl })
@@ -206,15 +204,15 @@ export const updateAvailability = async (req: AuthenticatedRequest, res: Respons
     const updatedProfile = await prisma.lawyerProfile.update({
       where: { userId },
       data: {
-        availability: availability as any // Prisma Json type
+        availability: availability as Record<string, unknown> // Prisma Json type
       }
     });
 
     const response: ApiResponse<{ availability: typeof availability }> = {
-      success: true,
-      message: 'Availability updated successfully',
-      data: {
-        availability: updatedProfile.availability as any
+            success: true,
+            message: 'Availability updated successfully',
+            data: {
+        availability: updatedProfile.availability as Record<string, unknown>
       }
     };
 
@@ -227,8 +225,8 @@ export const updateAvailability = async (req: AuthenticatedRequest, res: Respons
     });
   }
 };
-
-export const getPublicLawyerProfile = async (req: any, res: Response): Promise<void> => {
+import { Request } from 'express';
+export const getPublicLawyerProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const { lawyerId } = req.params;
 
@@ -297,8 +295,7 @@ export const getPublicLawyerProfile = async (req: any, res: Response): Promise<v
     });
   }
 };
-
-export const searchLawyers = async (req: any, res: Response): Promise<void> => {
+export const searchLawyers = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       specialization,
@@ -310,7 +307,7 @@ export const searchLawyers = async (req: any, res: Response): Promise<void> => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build where clause
-    const where: any = {
+  const where: Record<string, unknown> = {
       isVerified: true
     };
 

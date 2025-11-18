@@ -28,6 +28,7 @@ const LawyerOnboarding: React.FC = () => {
   const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedSpecializations, setSelectedSpecializations] = useState<LegalSpecialization[]>([]);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const {
     register,
@@ -56,27 +57,26 @@ const LawyerOnboarding: React.FC = () => {
     if (isSelected) {
       const newSelections = selectedSpecializations.filter(s => s.id !== specialization.id);
       setSelectedSpecializations(newSelections);
-  setValue('specializations', newSelections as any);
+      setValue('specializations', newSelections);
     } else {
       const newSelections = [...selectedSpecializations, specialization];
       setSelectedSpecializations(newSelections);
-  setValue('specializations', newSelections as any);
+      setValue('specializations', newSelections);
     }
   };
 
   const onSubmit = async (data: LawyerOnboardingData) => {
     try {
       setIsSubmitting(true);
-
       const response = await lawyerService.completeLawyerOnboarding(data);
-
       if (response.success) {
-        navigate('/dashboard?onboarded=true');
+        setToast({ type: 'success', message: 'Profile completed successfully!' });
+        setTimeout(() => navigate('/dashboard?onboarded=true'), 1200);
       } else {
-        console.error('Onboarding failed:', response.message);
+        setToast({ type: 'error', message: response.message || 'Onboarding failed. Please try again.' });
       }
     } catch (error) {
-      console.error('Onboarding error:', error);
+      setToast({ type: 'error', message: 'Onboarding error. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -88,7 +88,17 @@ const LawyerOnboarding: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8" aria-label="Lawyer Onboarding Form">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-lg text-white transition-all duration-500 animate-fade-in ${toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}
+        >
+          {toast.message}
+        </div>
+      )}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -103,7 +113,7 @@ const LawyerOnboarding: React.FC = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+  <form onSubmit={handleSubmit(onSubmit)} className="space-y-8" aria-label="Complete your legal practice profile">
           {/* Professional Credentials */}
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex items-center mb-4">
@@ -119,12 +129,15 @@ const LawyerOnboarding: React.FC = () => {
                 <input
                   type="text"
                   id="licenseNumber"
+                  aria-invalid={!!errors.licenseNumber}
+                  aria-describedby={errors.licenseNumber ? 'licenseNumber-error' : undefined}
                   {...register('licenseNumber')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
                   placeholder="e.g., LSK/001/2020"
                 />
                 {errors.licenseNumber && (
-                  <p className="mt-1 text-sm text-red-600">{errors.licenseNumber.message}</p>
+                  <p id="licenseNumber-error" className="mt-1 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.licenseNumber.message}</p>
+                )}
                 )}
               </div>
 
@@ -135,14 +148,17 @@ const LawyerOnboarding: React.FC = () => {
                 <input
                   type="number"
                   id="yearOfAdmission"
+                  aria-invalid={!!errors.yearOfAdmission}
+                  aria-describedby={errors.yearOfAdmission ? 'yearOfAdmission-error' : undefined}
                   {...register('yearOfAdmission', { valueAsNumber: true })}
                   min="1960"
                   max={new Date().getFullYear()}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
                   placeholder="e.g., 2018"
                 />
                 {errors.yearOfAdmission && (
-                  <p className="mt-1 text-sm text-red-600">{errors.yearOfAdmission.message}</p>
+                  <p id="yearOfAdmission-error" className="mt-1 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.yearOfAdmission.message}</p>
+                )}
                 )}
               </div>
 
@@ -153,14 +169,17 @@ const LawyerOnboarding: React.FC = () => {
                 <input
                   type="number"
                   id="yearsOfExperience"
+                  aria-invalid={!!errors.yearsOfExperience}
+                  aria-describedby={errors.yearsOfExperience ? 'yearsOfExperience-error' : undefined}
                   {...register('yearsOfExperience', { valueAsNumber: true })}
                   min="0"
                   max="60"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
                   placeholder="e.g., 5"
                 />
                 {errors.yearsOfExperience && (
-                  <p className="mt-1 text-sm text-red-600">{errors.yearsOfExperience.message}</p>
+                  <p id="yearsOfExperience-error" className="mt-1 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.yearsOfExperience.message}</p>
+                )}
                 )}
               </div>
 
@@ -171,12 +190,15 @@ const LawyerOnboarding: React.FC = () => {
                 <input
                   type="url"
                   id="profileImageUrl"
+                  aria-invalid={!!errors.profileImageUrl}
+                  aria-describedby={errors.profileImageUrl ? 'profileImageUrl-error' : undefined}
                   {...register('profileImageUrl')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
                   placeholder="https://example.com/photo.jpg"
                 />
                 {errors.profileImageUrl && (
-                  <p className="mt-1 text-sm text-red-600">{errors.profileImageUrl.message}</p>
+                  <p id="profileImageUrl-error" className="mt-1 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.profileImageUrl.message}</p>
+                )}
                 )}
               </div>
             </div>
@@ -218,7 +240,8 @@ const LawyerOnboarding: React.FC = () => {
             </div>
 
             {errors.specializations && (
-              <p className="mt-2 text-sm text-red-600">{errors.specializations.message}</p>
+              <p className="mt-2 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.specializations.message}</p>
+            )}
             )}
           </div>
 
@@ -237,12 +260,15 @@ const LawyerOnboarding: React.FC = () => {
                 <input
                   type="text"
                   id="address"
+                  aria-invalid={!!errors.location?.address}
+                  aria-describedby={errors.location?.address ? 'address-error' : undefined}
                   {...register('location.address')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
                   placeholder="e.g., 123 Kimathi Street, CBD"
                 />
                 {errors.location?.address && (
-                  <p className="mt-1 text-sm text-red-600">{errors.location.address.message}</p>
+                  <p id="address-error" className="mt-1 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.location.address.message}</p>
+                )}
                 )}
               </div>
 
@@ -253,12 +279,15 @@ const LawyerOnboarding: React.FC = () => {
                 <input
                   type="text"
                   id="city"
+                  aria-invalid={!!errors.location?.city}
+                  aria-describedby={errors.location?.city ? 'city-error' : undefined}
                   {...register('location.city')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
                   placeholder="e.g., Nairobi"
                 />
                 {errors.location?.city && (
-                  <p className="mt-1 text-sm text-red-600">{errors.location.city.message}</p>
+                  <p id="city-error" className="mt-1 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.location.city.message}</p>
+                )}
                 )}
               </div>
 
@@ -268,8 +297,10 @@ const LawyerOnboarding: React.FC = () => {
                 </label>
                 <select
                   id="county"
+                  aria-invalid={!!errors.location?.county}
+                  aria-describedby={errors.location?.county ? 'county-error' : undefined}
                   {...register('location.county')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
                 >
                   <option value="">Select County</option>
                   <option value="Nairobi">Nairobi</option>
@@ -284,7 +315,7 @@ const LawyerOnboarding: React.FC = () => {
                   <option value="Meru">Meru</option>
                 </select>
                 {errors.location?.county && (
-                  <p className="mt-1 text-sm text-red-600">{errors.location.county.message}</p>
+                  <p id="county-error" className="mt-1 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.location.county.message}</p>
                 )}
               </div>
             </div>
@@ -303,13 +334,16 @@ const LawyerOnboarding: React.FC = () => {
               </label>
               <textarea
                 id="bio"
+                aria-invalid={!!errors.bio}
+                aria-describedby={errors.bio ? 'bio-error' : undefined}
                 {...register('bio')}
                 rows={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
                 placeholder="Describe your legal background, notable cases, approach to client service, and what makes your practice unique. This will be visible to potential clients searching for legal services."
               />
               {errors.bio && (
-                <p className="mt-1 text-sm text-red-600">{errors.bio.message}</p>
+                <p id="bio-error" className="mt-1 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.bio.message}</p>
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
               )}
               <p className="mt-1 text-sm text-gray-500">
                 Minimum 100 characters. This helps clients understand your expertise and approach.
@@ -339,16 +373,3 @@ const LawyerOnboarding: React.FC = () => {
                 <div className="flex items-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Submitting...
-                </div>
-              ) : (
-                'Complete Profile'
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-export default LawyerOnboarding;

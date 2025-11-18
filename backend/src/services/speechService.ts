@@ -20,17 +20,17 @@ interface TextToSpeechResult {
 }
 
 class SpeechService {
-  async speechToText(audioBuffer: Buffer): Promise<SpeechToTextResult> {
+  async speechToText(audioBuffer: Buffer, language: 'en' | 'sw' = 'en'): Promise<SpeechToTextResult> {
     try {
       logger.info('Processing speech-to-text conversion');
 
       // Create a Blob-like object from the buffer for OpenAI API
-      const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
+            const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
 
-      const transcription = await openai.audio.transcriptions.create({
-        file: audioBlob as any,
+            const transcription = await openai.audio.transcriptions.create({
+        file: audioBlob as File,
         model: 'whisper-1',
-        language: 'en', // Can be extended to support Swahili 'sw'
+        language,
         response_format: 'json',
         temperature: 0.2
       });
@@ -60,7 +60,7 @@ class SpeechService {
     }
   }
 
-  async textToSpeech(text: string, voice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' = 'alloy'): Promise<TextToSpeechResult> {
+  async textToSpeech(text: string, language: 'en' | 'sw' = 'en', voice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' = 'alloy'): Promise<TextToSpeechResult> {
     try {
       logger.info('Processing text-to-speech conversion');
 
@@ -69,14 +69,15 @@ class SpeechService {
       const processedText = text.length > maxLength 
         ? text.substring(0, maxLength) + '... For the complete response, please refer to the text version.'
         : text;
-
-      const mp3 = await openai.audio.speech.create({
-        model: 'tts-1',
-        voice: voice,
-        input: processedText,
-        response_format: 'mp3',
-        speed: 1.0
-      });
+  // OpenAI TTS supports Swahili, but only with some voices. We'll use 'alloy' for both for now.
+  const mp3 = await openai.audio.speech.create({
+    model: 'tts-1',
+    voice: voice,
+    input: processedText,
+    response_format: 'mp3',
+    speed: 1.0,
+    // OpenAI API will auto-detect language from input text
+  });
 
       const audioBuffer = Buffer.from(await mp3.arrayBuffer());
 

@@ -20,6 +20,7 @@ interface AuthActions {
   clearError: () => void;
   setUser: (user: AuthUser) => void;
   updateProfile: (updates: Partial<AuthUser>) => void;
+    changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
 }
 
 type AuthStore = AuthState & AuthActions;
@@ -174,7 +175,25 @@ export const useAuthStore = create<AuthStore>()(
             user: { ...user, ...updates }
           });
         }
-      }
+      },
+
+      changePassword: async (currentPassword: string, newPassword: string): Promise<boolean> => {
+        try {
+          set({ isLoading: true, error: null });
+          const response = await authService.changePassword(currentPassword, newPassword);
+          if (response.success) {
+            set({ isLoading: false, error: null });
+            return true;
+          } else {
+            set({ isLoading: false, error: response.message || 'Password change failed' });
+            return false;
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Password change failed';
+          set({ isLoading: false, error: errorMessage });
+          return false;
+        }
+      },
     }),
     {
       name: 'wakili-auth-storage',

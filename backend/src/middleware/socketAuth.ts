@@ -1,7 +1,22 @@
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/database';
 
-export const authenticateSocket = async (socket: any, next: any) => {
+import { Socket } from 'socket.io';
+import { NextFunction } from 'express';
+
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+  role: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface AuthenticatedSocket extends Socket {
+  user?: AuthenticatedUser;
+}
+
+export const authenticateSocket = async (socket: AuthenticatedSocket, next: NextFunction) => {
   try {
     const token = socket.handshake.auth.token || 
                  socket.handshake.headers.authorization?.replace('Bearer ', '');

@@ -1,15 +1,52 @@
 
-import type { UserRole } from './user';
+// Force TypeScript to emit this file at runtime
+export const __types_runtime_marker = true;
 
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// User & Roles
+import type { UserRole } from './user';
+export type { UserRole } from './user';
+export type { VerificationStatus, SubscriptionTier, SubscriptionStatus, BillingCycle, UserProfile, LawyerProfile, LegalSpecialization, LocationData, WorkingHours, Subscription } from './user';
+export type { UserRole as AdminUserRole, Permission, PermissionKey } from './roles';
+export { RolePermissions } from './roles';
+
+// Admin
+// export type { Price } from './admin/Price';
+
+// CLE & Lawyer Collaboration
+// export type { CLECourse, CLEEnrollment, CLEProgress, CLECertificate } from './lawyerCLE';
+// export type { LawyerMessage, LawyerReferral, ForumPost } from './lawyerCollaboration';
+// export type { LawyerDocumentTemplate } from './lawyerDocumentTemplate';
+
+// Lawyer Marketing
+// export type { LawyerMarketingProfile, LawyerReview, SEOAnalytics } from './lawyerMarketing';
+
+// Security
+// export type { PasswordPolicy, TwoFAMethod, UserSecurity } from './security';
+
+// Payment Types
+// (All payment types are now only exported from ../schemas/payment.ts)
+
+// Zod Schemas (for backend validation)
+
+
+// Explicit Zod Schema Exports for Backend Compatibility
+export { 
+  LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema 
+} from '../schemas/auth';
+export { ForgotPasswordSchema, ResetPasswordSchema } from '../schemas/forgotPassword';
+export { 
+  CreateServiceSchema, CreateBookingSchema, UpdateBookingStatusSchema, CreateReviewSchema, ServiceSearchSchema 
+} from '../schemas/marketplace';
+export { 
+  CreatePaymentIntentSchema, PaymentVerificationSchema, RefundRequestSchema, EscrowReleaseSchema, PaymentWebhookSchema 
+} from '../schemas/payment';
+export { 
+  UpdateUserProfileSchema, LawyerOnboardingSchema, UpdateAvailabilitySchema 
+} from '../schemas/user';
+export { 
+  CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema 
+} from '../schemas/ai';
+
 
 
 export interface ApiResponse<T = any> {
@@ -65,7 +102,6 @@ export interface AIQueryResponse {
   remainingQueries?: number;
   createdAt: Date;
 }
-
 export interface VoiceQueryRequest {
   audioData: string; // base64 encoded audio
   format: 'mp3' | 'wav' | 'webm' | 'ogg' | 'm4a';

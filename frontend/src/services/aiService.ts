@@ -59,7 +59,7 @@ class AIService {
   }
 
   // Process voice query (speech to text + AI response)
-  async processVoiceQuery(audioBase64: string): Promise<ApiResponse<AIQueryResponse & { query: string }>> {
+  async processVoiceQuery(audioBase64: string, language: 'en' | 'sw' = 'en'): Promise<ApiResponse<AIQueryResponse & { query: string }>> {
     try {
       const response = await fetch(`${this.baseUrl}/voice-query`, {
         method: 'POST',
@@ -69,7 +69,8 @@ class AIService {
         credentials: 'include',
         body: JSON.stringify({ 
           audioData: audioBase64,
-          format: 'webm'
+          format: 'webm',
+          language
         }),
       });
 
@@ -89,9 +90,11 @@ class AIService {
   }
 
   // Get voice response for a message (text to speech)
-  async getVoiceResponse(messageId: string): Promise<Blob | null> {
+  async getVoiceResponse(messageId: string, language: 'en' | 'sw' = 'en'): Promise<Blob | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/voice-response/${messageId}`, {
+      const url = new URL(`${this.baseUrl}/voice-response/${messageId}`, window.location.origin);
+      url.searchParams.append('language', language);
+      const response = await fetch(url.toString(), {
         method: 'GET',
         credentials: 'include',
       });

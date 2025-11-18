@@ -14,14 +14,22 @@ interface LegalQueryRequest {
   userId: string;
 }
 
+interface LegalSource {
+  type: 'statute' | 'constitution';
+  title: string;
+  jurisdiction: string;
+}
+
 interface LegalQueryResponse {
   answer: string;
   confidence: number;
   tokensUsed: number;
-  sources: any[];
+  sources: LegalSource[];
   relatedTopics: string[];
   recommendsLawyer: boolean;
 }
+
+
 
 interface LegalResearchRequest {
   query: string;
@@ -35,7 +43,7 @@ interface LegalResearchRequest {
 
 interface DocumentGenerationRequest {
   type: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   clientName: string;
   customRequirements?: string;
 }
@@ -113,7 +121,14 @@ Be conversational but professional, accurate but accessible to laypeople.
     }
   }
 
-  async conductLegalResearch(request: LegalResearchRequest): Promise<any> {
+  async conductLegalResearch(request: LegalResearchRequest): Promise<{
+    research: string;
+    query: string;
+    jurisdiction: string;
+    searchDepth: string;
+    tokensUsed: number;
+    generatedAt: string;
+  }> {
     try {
       const researchPrompt = `
 Conduct comprehensive legal research on: "${request.query}"
@@ -164,7 +179,15 @@ Format as structured research brief suitable for legal professionals.
     }
   }
 
-  async generateLegalDocument(request: DocumentGenerationRequest): Promise<any> {
+  async generateLegalDocument(request: DocumentGenerationRequest): Promise<{
+    documentType: string;
+    clientName: string;
+    content: string;
+    parameters: Record<string, unknown>;
+    disclaimer: string;
+    tokensUsed: number;
+    generatedAt: string;
+  }> {
     try {
       const documentPrompt = `
 Generate a ${request.type} document for ${request.clientName} in Kenya.
@@ -214,7 +237,16 @@ Generate a professional, legally sound document template.
     }
   }
 
-  async analyzeContract(request: ContractAnalysisRequest): Promise<any> {
+  async analyzeContract(request: ContractAnalysisRequest): Promise<{
+    contractType?: string;
+    analysisType: string;
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+    analysis: string;
+    recommendations: string[];
+    disclaimer: string;
+    tokensUsed: number;
+    analyzedAt: string;
+  }> {
     try {
       const analysisPrompt = `
 Analyze this contract under Kenyan law:
@@ -336,8 +368,8 @@ Keep the response accessible to non-lawyers while being legally accurate.
     return Math.max(0.1, Math.min(0.95, confidence));
   }
 
-  private extractSources(response: string): any[] {
-    const sources: any[] = [];
+  private extractSources(response: string): LegalSource[] {
+    const sources: LegalSource[] = [];
     
     // Extract Act references
     const actMatches = response.match(/([A-Z][a-zA-Z\s]+Act\s+\d{4}|\d{4})/g);

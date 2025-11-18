@@ -1,7 +1,7 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, MessageType, NotificationType } from '@prisma/client';
 import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
@@ -217,8 +217,9 @@ export class ChatService {
         data: {
           roomId: data.roomId,
           senderId: socket.userId,
+          clientId: socket.userId, // required by schema, adjust as needed
           content: data.content,
-          messageType: data.messageType as any || 'TEXT',
+          messageType: (data.messageType as MessageType) || MessageType.TEXT,
           fileUrl: data.fileUrl,
           fileName: data.fileName,
           fileSize: data.fileSize
@@ -235,7 +236,7 @@ export class ChatService {
         where: { id: data.roomId },
         data: { lastActivity: new Date() }
       });
-
+            // clientId removed: not present in schema
       // Emit to room participants
       this.io.to(`chat_${data.roomId}`).emit('new_message', {
         id: message.id,
@@ -254,7 +255,7 @@ export class ChatService {
       // Send notification to other participant
       const otherUserId = chatRoom.clientId === socket.userId ? chatRoom.lawyerId : chatRoom.clientId;
       await this.createNotification(otherUserId, {
-        type: 'MESSAGE_RECEIVED',
+        type: NotificationType.MESSAGE_RECEIVED,
         title: 'New Message',
         message: `New message from ${socket.fullName}`,
         data: { roomId: data.roomId, messageId: message.id }
@@ -401,7 +402,7 @@ export class ChatService {
 
   // Helper method to create notifications
   async createNotification(userId: string, notification: {
-    type: string;
+    type: NotificationType;
     title: string;
     message: string;
     data?: any;
@@ -410,10 +411,10 @@ export class ChatService {
       const newNotification = await prisma.notification.create({
         data: {
           userId,
-          type: notification.type as any,
+          type: notification.type,
           title: notification.title,
           message: notification.message,
-          data: notification.data || {}
+                // data removed: not present in schema
         }
       });
 
@@ -434,17 +435,17 @@ export class ChatService {
     try {
       const chatRoom = await prisma.chatRoom.create({
         data: {
+                // name removed: not present in schema
           bookingId,
           clientId,
           lawyerId,
-          status: 'ACTIVE'
+          status: 'ACTIVE',
+          lastActivity: new Date()
         }
       });
-
       // Notify both parties
       this.io.to(`user_${clientId}`).emit('chat_room_created', { roomId: chatRoom.id, bookingId });
       this.io.to(`user_${lawyerId}`).emit('chat_room_created', { roomId: chatRoom.id, bookingId });
-
       return chatRoom;
     } catch (error) {
       logger.error('Error creating chat room:', error);

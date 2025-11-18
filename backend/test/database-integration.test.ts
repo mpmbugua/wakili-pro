@@ -1,12 +1,21 @@
+<<<<<<< HEAD
+=======
+require('dotenv/config');
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 import { describe, expect, test, beforeAll, afterAll } from '@jest/globals';
 import { prisma } from '../src/utils/database';
 
 describe('Database Integration Tests', () => {
+<<<<<<< HEAD
+=======
+  jest.setTimeout(30000); // Increase timeout for slow DB operations
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
   beforeAll(async () => {
     await prisma.$connect();
   });
 
   afterAll(async () => {
+<<<<<<< HEAD
   // Clean up test data
   await prisma.consultationRecording.deleteMany({});
   await prisma.videoParticipant.deleteMany({});
@@ -20,6 +29,28 @@ describe('Database Integration Tests', () => {
   await prisma.lawyerProfile.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.$disconnect();
+=======
+    // Strict FK-safe cleanup: delete in precise dependency order
+    await prisma.videoParticipant.deleteMany({});
+    await prisma.consultationRecording.deleteMany({});
+    await prisma.refund.deleteMany({});
+  await prisma.refund.deleteMany({});
+  await prisma.escrowTransaction.deleteMany({});
+  await prisma.videoParticipant.deleteMany({});
+  await prisma.consultationRecording.deleteMany({});
+  await prisma.payment.deleteMany({});
+  await prisma.videoConsultation.deleteMany({});
+  await prisma.serviceReview.deleteMany({});
+  await prisma.notification.deleteMany({});
+  await prisma.walletTransaction.deleteMany({});
+  await prisma.deviceRegistration.deleteMany({});
+  await prisma.serviceBooking.deleteMany({});
+    await prisma.marketplaceService.deleteMany({});
+    await prisma.lawyerProfile.deleteMany({});
+    await prisma.userProfile.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.$disconnect();
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
   });
 
   describe('User Management', () => {
@@ -42,9 +73,17 @@ describe('Database Integration Tests', () => {
     });
 
     test('should create lawyer with profile', async () => {
+<<<<<<< HEAD
       const lawyer = await prisma.user.create({
         data: {
           email: `lawyer+${Date.now()}@example.com`,
+=======
+
+      const unique = Date.now() + Math.floor(Math.random() * 10000);
+      const lawyer = await prisma.user.create({
+        data: {
+          email: `lawyer+${unique}@example.com`,
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           password: 'hashedpassword',
           firstName: 'Test',
           lastName: 'Lawyer',
@@ -56,7 +95,11 @@ describe('Database Integration Tests', () => {
       const lawyerProfile = await prisma.lawyerProfile.create({
         data: {
           userId: lawyer.id,
+<<<<<<< HEAD
           licenseNumber: 'LSK001',
+=======
+          licenseNumber: `LSK${unique}`,
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           yearOfAdmission: 2020,
           specializations: ['CORPORATE', 'FAMILY'],
           location: { county: 'Nairobi', city: 'Nairobi' },
@@ -74,9 +117,15 @@ describe('Database Integration Tests', () => {
         }
       });
 
+<<<<<<< HEAD
       expect(lawyerProfile).toHaveProperty('id');
       expect(lawyerProfile.licenseNumber).toBe('LSK001');
       expect(lawyerProfile.isVerified).toBe(true);
+=======
+  expect(lawyerProfile).toHaveProperty('id');
+  expect(lawyerProfile.licenseNumber.startsWith('LSK')).toBe(true);
+  expect(lawyerProfile.isVerified).toBe(true);
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     });
   });
 
@@ -331,8 +380,13 @@ describe('Database Integration Tests', () => {
       });
 
       expect(participants).toHaveLength(2);
+<<<<<<< HEAD
       expect(participants.map(p => p.participantType)).toContain('LAWYER');
       expect(participants.map(p => p.participantType)).toContain('CLIENT');
+=======
+  expect(participants.map((p: any) => p.participantType)).toContain('LAWYER');
+  expect(participants.map((p: any) => p.participantType)).toContain('CLIENT');
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     });
   });
 
@@ -531,8 +585,14 @@ describe('Database Integration Tests', () => {
 
   describe('Data Validation', () => {
     test('should enforce unique constraints', async () => {
+<<<<<<< HEAD
       const email = 'unique@example.com';
       
+=======
+      const unique = Date.now() + Math.floor(Math.random() * 10000);
+      const email = `unique+${unique}@example.com`;
+
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       await prisma.user.create({
         data: {
           email,

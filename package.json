@@ -1,118 +1,119 @@
 {
-    "description": "Modern full-stack web application built with agile development practices",
-    "private": true,
-    "workspaces": [
-      "frontend",
-      "backend",
-      "shared"
-    ],
-    "scripts": {
-      "setup": "npm install && npm run setup:frontend && npm run setup:backend",
+  "description": "Modern full-stack web application built with agile development practices",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "setup": "npm install && npm run setup:frontend && npm run setup:backend",
     "setup:frontend": "cd frontend && npm install",
+    "setup:backend": "cd backend && npm install",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-      "dev:backend": "cd backend && npm run dev",
-      "build": "npm run build:shared && npm run build:frontend && npm run build:backend",
-      "build:frontend": "cd frontend && npm run build",
-      "build:backend": "cd backend && npm run build",
-      "build:shared": "cd shared && npm run build",
-      "test": "npm run test:frontend && npm run test:backend && npm run test:integration",
-      "test:frontend": "cd frontend && npm run test",
-      "test:backend": "cd backend && npm run test",
-      "test:integration": "cd tests && npm run test",
-      "test:e2e": "cd tests && npm run test:e2e",
-      "lint": "npm run lint:frontend && npm run lint:backend",
-      "lint:frontend": "cd frontend && npm run lint",
-      "lint:backend": "cd backend && npm run lint",
-      "deploy:staging": "npm run build && npm run deploy:staging:backend && npm run deploy:staging:frontend",
-      "deploy:production": "npm run build && npm run deploy:production:backend && npm run deploy:production:frontend",
-      "docker:build": "docker-compose build",
-      "docker:up": "docker-compose up -d",
-      "docker:down": "docker-compose down",
-      "docker:logs": "docker-compose logs -f",
-      "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
-      "docker:prod": "docker-compose -f docker-compose.yml up -d",
-      "prisma:generate": "cd backend && npx prisma generate",
-      "prisma:migrate": "cd backend && npx prisma migrate deploy",
-      "prisma:reset": "cd backend && npx prisma migrate reset",
-      "start": "npm run start:backend",
-      "start:backend": "cd backend && npm start",
-      "start:frontend": "cd frontend && npm run preview",
-      "test:ci": "npm run lint && npm run build && npm run test",
-      "health-check": "curl -f http://localhost:5000/api/health && curl -f http://localhost:3000/health",
-      "clean": "rm -rf node_modules frontend/node_modules backend/node_modules shared/node_modules",
-      "android": "react-native run-android",
-      "ios": "react-native run-ios",
-      "lint:mobile": "eslint .",
-      "start:mobile": "react-native start",
-      "test:mobile": "jest"
-    },
-    "dependencies": {
-      "rimraf": "^5.0.0",
-      "@react-native-community/datetimepicker": "^8.5.0",
-      "@react-native-picker/picker": "^2.11.4",
-      "@react-native/new-app-screen": "0.82.1",
-      "@react-navigation/native": "^7.1.19",
-      "@react-navigation/stack": "^7.6.3",
-      "axios": "^1.13.2",
-      "react": "19.1.1",
-      "react-native": "0.82.1",
-      "react-native-config": "^1.6.0",
-      "react-native-gesture-handler": "^2.29.1",
-      "react-native-reanimated": "^4.1.5",
-      "react-native-safe-area-context": "^5.6.2",
-      "react-native-screens": "^4.18.0",
-      "react-native-vector-icons": "^10.3.0",
-      "react-native-worklets": "^0.6.1",
-      "socket.io": "^4.8.1",
-      "socket.io-client": "^4.8.1"
-    },
-    "devDependencies": {
-      "@babel/core": "^7.25.2",
-      "@babel/preset-env": "^7.25.3",
-      "@babel/runtime": "^7.25.0",
-      "@react-native-community/cli": "20.0.0",
-      "@react-native-community/cli-platform-android": "20.0.0",
-      "@react-native-community/cli-platform-ios": "20.0.0",
-      "@react-native/babel-preset": "0.82.1",
-      "@react-native/eslint-config": "0.82.1",
-      "@react-native/metro-config": "0.82.1",
-      "@react-native/typescript-config": "0.82.1",
-      "@types/express": "4.17.21",
-      "@types/jest": "^29.5.13",
-      "@types/multer": "^2.0.0",
-      "@types/react": "^19.1.1",
-      "@types/react-native-vector-icons": "^6.4.18",
-      "@types/react-test-renderer": "^19.1.0",
-      "concurrently": "^8.2.2",
-      "eslint": "^8.19.0",
-      "husky": "^8.0.3",
-      "jest": "^29.6.3",
-      "lint-staged": "^15.2.0",
-      "prettier": "2.8.8",
-      "react-test-renderer": "19.1.1",
-      "typescript": "^5.8.3"
-    },
-    "husky": {
-      "hooks": {
-        "pre-commit": "lint-staged"
-      }
-    },
-    "lint-staged": {
-      "*.{js,jsx,ts,tsx}": [
-        "eslint --fix",
-        "prettier --write"
-      ],
-      "*.{json,md,yml,yaml}": [
-        "prettier --write"
-      ]
-    },
-    "engines": {
-      "node": ">=20.0.0",
-      "npm": ">=10.0.0"
-    },
-    "resolutions": {
-      "@types/express": "4.17.21",
-      "@types/express-serve-static-core": "4.17.37"
+    "dev:backend": "cd backend && npm run dev",
+    "build": "npm run build:shared && npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build:shared": "cd shared && npm run build",
+    "test": "npm run test:frontend && npm run test:backend && npm run test:integration",
+    "test:frontend": "cd frontend && npm run test",
+    "test:backend": "cd backend && npm run test",
+    "test:integration": "cd tests && npm run test",
+    "test:e2e": "cd tests && npm run test:e2e",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "deploy:staging": "npm run build && npm run deploy:staging:backend && npm run deploy:staging:frontend",
+    "deploy:production": "npm run build && npm run deploy:production:backend && npm run deploy:production:frontend",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:prod": "docker-compose -f docker-compose.yml up -d",
+    "prisma:generate": "cd backend && npx prisma generate",
+    "prisma:migrate": "cd backend && npx prisma migrate deploy",
+    "prisma:reset": "cd backend && npx prisma migrate reset",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run preview",
+    "test:ci": "npm run lint && npm run build && npm run test",
+    "health-check": "powershell -Command \"try { curl -f http://localhost:5000/api/health } catch { curl -f http://localhost:5000/health }\"",
+    "clean": "rm -rf node_modules frontend/node_modules backend/node_modules shared/node_modules",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "lint:mobile": "eslint .",
+    "start:mobile": "react-native start",
+    "test:mobile": "jest"
+  },
+  "dependencies": {
+    "rimraf": "^5.0.0",
+    "@react-native-community/datetimepicker": "^8.5.0",
+    "@react-native-picker/picker": "^2.11.4",
+    "@react-native/new-app-screen": "0.82.1",
+    "@react-navigation/native": "^7.1.19",
+    "@react-navigation/stack": "^7.6.3",
+    "axios": "^1.13.2",
+    "react": "19.1.1",
+    "react-native": "0.82.1",
+    "react-native-config": "^1.6.0",
+    "react-native-gesture-handler": "^2.29.1",
+    "react-native-reanimated": "^4.1.5",
+    "react-native-safe-area-context": "^5.6.2",
+    "react-native-screens": "^4.18.0",
+    "react-native-vector-icons": "^10.3.0",
+    "react-native-worklets": "^0.6.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@react-native-community/cli": "20.0.0",
+    "@react-native-community/cli-platform-android": "20.0.0",
+    "@react-native-community/cli-platform-ios": "20.0.0",
+    "@react-native/babel-preset": "0.82.1",
+    "@react-native/eslint-config": "0.82.1",
+    "@react-native/metro-config": "0.82.1",
+    "@react-native/typescript-config": "0.82.1",
+    "@types/express": "4.17.21",
+    "@types/jest": "^29.5.13",
+    "@types/multer": "^2.0.0",
+    "@types/react": "^19.1.1",
+    "@types/react-native-vector-icons": "^6.4.18",
+    "@types/react-test-renderer": "^19.1.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.19.0",
+    "husky": "^8.0.3",
+    "jest": "^29.6.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "2.8.8",
+    "react-test-renderer": "19.1.1",
+    "typescript": "^5.8.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "resolutions": {
+    "@types/express": "4.17.21",
+    "@types/express-serve-static-core": "4.17.37"
   }
 }
 

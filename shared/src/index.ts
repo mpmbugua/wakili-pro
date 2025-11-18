@@ -1,79 +1,17 @@
-// Export all types
-// Runtime export to ensure dist/index.js is emitted
-export const sharedMarker = true;
+// Centralized type and schema exports for shared package
 export * from './types/auth';
 export * from './types/user';
 export * from './types/marketplace';
 export * from './types/case';
 export * from './types/ai';
-
-// Export only Zod schemas (not types) to avoid conflicts
-export {
-	LoginSchema,
-	RegisterSchema,
-	RefreshTokenSchema,
-	ChangePasswordSchema,
-	VerifyEmailSchema
-} from './schemas/auth';
-
-export {
-	CreateAIQuerySchema,
-	CreateDocumentGenerationSchema,
-	LegalResearchSchema,
-	ContractAnalysisSchema,
-	UpdateAIQuerySchema,
-	AIQueryFiltersSchema,
-	LegalTemplateSchema
-} from './schemas/ai';
-
-export {
-	CreateServiceSchema,
-	ServiceFiltersSchema,
-	CreateBookingSchema,
-	UpdateBookingStatusSchema,
-	CreateReviewSchema,
-	ServiceSearchSchema,
-	PaginationSchema
-} from './schemas/marketplace';
-
-export {
-	PaymentMethodSchema,
-	PaymentStatusSchema,
-	MpesaPaymentSchema,
-	StripePaymentSchema,
-	CreatePaymentIntentSchema,
-	PaymentVerificationSchema,
-	RefundRequestSchema,
-	EscrowReleaseSchema,
-	WalletTransactionSchema,
-	PaymentWebhookSchema,
-	PaymentAnalyticsSchema
-} from './schemas/payment';
-
-export {
-	CreateVideoConsultationSchema,
-	JoinVideoConsultationSchema,
-	UpdateParticipantStatusSchema,
-	WebRTCSignalSchema,
-	ScreenShareRequestSchema,
-	MeetingControlSchema,
-	VideoQualitySchema,
-	MeetingAnalyticsSchema,
-	VideoSettingsUpdateSchema
-} from './schemas/video';
-
-export {
-	UserProfileSchema,
-	LawyerOnboardingSchema,
-	WorkingHoursSchema,
-	UpdateAvailabilitySchema,
-	UpdateUserProfileSchema
-} from './schemas/user';
-
+export * from './types/index';
+export { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema, VerifyEmailSchema } from './schemas/auth';
 export { ForgotPasswordSchema, ResetPasswordSchema } from './schemas/forgotPassword';
-
+export { CreateServiceSchema, CreateBookingSchema, UpdateBookingStatusSchema, CreateReviewSchema, ServiceSearchSchema, PaginationSchema, ServiceFiltersSchema } from './schemas/marketplace';
+export { CreatePaymentIntentSchema, PaymentVerificationSchema, RefundRequestSchema, EscrowReleaseSchema, PaymentWebhookSchema, PaymentMethodSchema, PaymentStatusSchema, MpesaPaymentSchema, StripePaymentSchema, WalletTransactionSchema, PaymentAnalyticsSchema } from './schemas/payment';
+export { UpdateUserProfileSchema, LawyerOnboardingSchema, UpdateAvailabilitySchema, UserProfileSchema, WorkingHoursSchema } from './schemas/user';
+export { CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema, UpdateAIQuerySchema, AIQueryFiltersSchema, LegalTemplateSchema } from './schemas/ai';
+export { CreateVideoConsultationSchema, JoinVideoConsultationSchema, UpdateParticipantStatusSchema, MeetingControlSchema, WebRTCSignalSchema, ScreenShareRequestSchema, VideoSettingsUpdateSchema, MeetingAnalyticsSchema, VideoQualitySchema } from './schemas/video';
 export * from './schemas/case';
-
-// Export ApiResponse interface and UserRole for backend usage
-export type { ApiResponse } from './types/index';
-export type { UserRole } from './types/user';
+// Force TypeScript to emit a runtime file for the shared package
+export const __shared_runtime_marker = true;

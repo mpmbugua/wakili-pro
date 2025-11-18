@@ -3,7 +3,7 @@
     "target": "ES2020",
     "module": "CommonJS",
     "outDir": "./dist",
-    "rootDir": "./src",
+  "rootDir": ".",
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,12 +12,14 @@
     "allowJs": true,
     "noImplicitAny": false,
     "baseUrl": "./",
-    // No paths mapping for @wakili-pro/shared; rely on Yarn workspaces
+    "paths": {
+      "@wakili-pro/shared": ["../shared/src/index"]
+    },
     "composite": true,
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "prisma/*.ts"],
   "references": [
     { "path": "../shared" }
   ]

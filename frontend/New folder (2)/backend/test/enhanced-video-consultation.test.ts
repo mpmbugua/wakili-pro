@@ -48,7 +48,11 @@ describe('Enhanced Video Consultation API', () => {
         password: 'hashedpassword',
         firstName: 'Test',
         lastName: 'Lawyer',
+<<<<<<< HEAD
   role: 'LAWYER',
+=======
+        role: 'LAWYER',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         emailVerified: true
       }
     });

@@ -130,7 +130,19 @@ export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
     }
 
     // Get user's bookings that could have chat rooms
+<<<<<<< HEAD
     const bookings = await prisma.serviceBooking.findMany({
+=======
+    type Booking = {
+      id: string;
+      clientId: string;
+      providerId: string;
+      updatedAt: Date;
+      createdAt: Date;
+      service: { id: string; title: string; type: string };
+    };
+    const bookings: Booking[] = await prisma.serviceBooking.findMany({
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       where: {
         OR: [
           { clientId: userId },
@@ -148,8 +160,13 @@ export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
 
     // Get user details for each booking
     const userIds = [...new Set([
+<<<<<<< HEAD
       ...bookings.map((b: any) => b.clientId),
       ...bookings.map((b: any) => b.providerId)
+=======
+      ...bookings.map((b) => b.clientId),
+      ...bookings.map((b) => b.providerId)
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     ])];
 
     const users = await prisma.user.findMany({
@@ -164,7 +181,24 @@ export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
     }, {} as Record<string, UserSummary>);
 
     // Mock chat rooms based on bookings
+<<<<<<< HEAD
   const chatRooms = bookings.map((booking: any) => ({
+=======
+    type ChatRoom = {
+      id: string;
+      bookingId: string;
+      clientId: string;
+      lawyerId: string;
+      status: string;
+      lastActivity: Date;
+      service: { id: string; title: string; type: string };
+      client: UserSummary;
+      lawyer: UserSummary;
+      unreadCount: number;
+      lastMessage: { content: string; createdAt: Date; senderId: string };
+    };
+    const chatRooms: ChatRoom[] = bookings.map((booking) => ({
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       id: `chat_${booking.id}`,
       bookingId: booking.id,
       clientId: booking.clientId,

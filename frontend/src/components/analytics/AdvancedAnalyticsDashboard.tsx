@@ -8,6 +8,7 @@ import {
   Calendar, Download, RefreshCw
 } from 'lucide-react';
 import { analyticsService } from '../../services/analyticsService';
+import { AdminFeatureAnalytics } from './AdminFeatureAnalytics';
 
 interface RecentActivity {
   id: string;
@@ -257,6 +258,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'overview' && analyticsData && (
           <div className="space-y-8">
+            <AdminFeatureAnalytics />
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               <MetricCard
@@ -336,7 +338,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }: any) => `${name} ${(Number(percent) * 100).toFixed(0)}%`}
+                        label={({ name, percent }: { name: string; percent: number }) => `${name} ${(Number(percent) * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="revenue"

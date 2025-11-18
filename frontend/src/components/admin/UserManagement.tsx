@@ -14,22 +14,7 @@ import {
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  role: 'PUBLIC' | 'LAWYER' | 'ADMIN';
-  verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
-  isActive: boolean;
-  createdAt: string;
-  lastLoginAt?: string;
-  location?: string;
-  totalBookings: number;
-  totalSpent: number;
-}
+import { adminService, AdminUser } from '@/services/adminService';
 
 interface UserFilters {
   search: string;
@@ -40,10 +25,10 @@ interface UserFilters {
 }
 
 export const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [filters, setFilters] = useState<UserFilters>({
     search: '',
@@ -55,118 +40,30 @@ export const UserManagement: React.FC = () => {
 
   useEffect(() => {
     loadUsers();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [users, filters]);
+  }, [filters]);
+  // Remove applyFilters effect, filtering will be handled by backend
 
   const loadUsers = async () => {
     try {
       setLoading(true);
-      
-      // Mock data - will integrate with backend API
-      const mockUsers: User[] = [
-        {
-          id: '1',
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john.doe@example.com',
-          phone: '+254712345678',
-          role: 'PUBLIC',
-          verificationStatus: 'VERIFIED',
-          isActive: true,
-          createdAt: '2024-01-15T10:30:00Z',
-          lastLoginAt: '2024-11-08T14:22:00Z',
-          location: 'Nairobi, Kenya',
-          totalBookings: 3,
-          totalSpent: 15000
-        },
-        {
-          id: '2',
-          firstName: 'Sarah',
-          lastName: 'Johnson',
-          email: 'sarah.johnson@law.co.ke',
-          phone: '+254723456789',
-          role: 'LAWYER',
-          verificationStatus: 'PENDING',
-          isActive: true,
-          createdAt: '2024-02-20T09:15:00Z',
-          lastLoginAt: '2024-11-09T08:45:00Z',
-          location: 'Mombasa, Kenya',
-          totalBookings: 0,
-          totalSpent: 0
-        },
-        {
-          id: '3',
-          firstName: 'Michael',
-          lastName: 'Ochieng',
-          email: 'michael.ochieng@gmail.com',
-          role: 'PUBLIC',
-          verificationStatus: 'VERIFIED',
-          isActive: false,
-          createdAt: '2024-03-10T16:45:00Z',
-          lastLoginAt: '2024-10-15T12:30:00Z',
-          location: 'Kisumu, Kenya',
-          totalBookings: 1,
-          totalSpent: 5500
-        },
-        {
-          id: '4',
-          firstName: 'Grace',
-          lastName: 'Wanjiku',
-          email: 'grace.wanjiku@legal.co.ke',
-          phone: '+254734567890',
-          role: 'LAWYER',
-          verificationStatus: 'VERIFIED',
-          isActive: true,
-          createdAt: '2024-01-05T11:20:00Z',
-          lastLoginAt: '2024-11-09T10:15:00Z',
-          location: 'Nakuru, Kenya',
-          totalBookings: 25,
-          totalSpent: 0
-        }
-      ];
-      
-      setUsers(mockUsers);
+      const { users: fetchedUsers } = await adminService.getUsers({
+        search: filters.search,
+        role: filters.role,
+        verificationStatus: filters.verificationStatus,
+        isActive: filters.isActive === '' ? undefined : filters.isActive === 'active',
+      });
+      setUsers(fetchedUsers);
+      setFilteredUsers(fetchedUsers);
     } catch (err) {
       console.error('Load users error:', err);
+      setUsers([]);
+      setFilteredUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const applyFilters = () => {
-    let filtered = users;
-
-    // Search filter
-    if (filters.search) {
-      const searchTerm = filters.search.toLowerCase();
-      filtered = filtered.filter(user =>
-        user.firstName.toLowerCase().includes(searchTerm) ||
-        user.lastName.toLowerCase().includes(searchTerm) ||
-        user.email.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    // Role filter
-    if (filters.role) {
-      filtered = filtered.filter(user => user.role === filters.role);
-    }
-
-    // Verification status filter
-    if (filters.verificationStatus) {
-      filtered = filtered.filter(user => user.verificationStatus === filters.verificationStatus);
-    }
-
-    // Active status filter
-    if (filters.isActive) {
-      const isActive = filters.isActive === 'active';
-      filtered = filtered.filter(user => user.isActive === isActive);
-    }
-
-    setFilteredUsers(filtered);
-  };
+  // Removed applyFilters, filtering is now backend-driven
 
   const handleFilterChange = (key: keyof UserFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -184,24 +81,8 @@ export const UserManagement: React.FC = () => {
 
   const handleUserAction = async (userId: string, action: 'activate' | 'deactivate' | 'verify' | 'reject') => {
     try {
-      // Mock action - will integrate with backend API
-      console.log(`${action} user ${userId}`);
-      
-      setUsers(prev => prev.map(user => {
-        if (user.id === userId) {
-          switch (action) {
-            case 'activate':
-              return { ...user, isActive: true };
-            case 'deactivate':
-              return { ...user, isActive: false };
-            case 'verify':
-              return { ...user, verificationStatus: 'VERIFIED' as const };
-            case 'reject':
-              return { ...user, verificationStatus: 'REJECTED' as const };
-          }
-        }
-        return user;
-      }));
+      await adminService.updateUserStatus(userId, action);
+      await loadUsers();
     } catch (err) {
       console.error(`Error ${action} user:`, err);
     }
@@ -223,7 +104,7 @@ export const UserManagement: React.FC = () => {
     }).format(amount);
   };
 
-  const getRoleColor = (role: User['role']) => {
+  const getRoleColor = (role: AdminUser['role']) => {
     switch (role) {
       case 'ADMIN':
         return 'bg-purple-100 text-purple-800';
@@ -236,7 +117,7 @@ export const UserManagement: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: User['verificationStatus']) => {
+  const getStatusColor = (status: AdminUser['verificationStatus']) => {
     switch (status) {
       case 'VERIFIED':
         return 'bg-green-100 text-green-800';

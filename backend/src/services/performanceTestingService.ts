@@ -39,7 +39,7 @@ export interface RoomMetrics {
 class PerformanceTestingService {
   private io: SocketServer | null = null;
   private testConfig: LoadTestConfig;
-  private activeTests: Map<string, any> = new Map();
+  private activeTests: Map<string, Record<string, unknown>> = new Map();
   private metricsHistory: PerformanceMetrics[] = [];
   private roomMetrics: Map<string, RoomMetrics> = new Map();
   private messageCounter = 0;
@@ -95,7 +95,7 @@ class PerformanceTestingService {
     try {
       // Create multiple consultation rooms
       const rooms = await this.createTestRooms(testConfig.maxConcurrentRooms);
-      (testInstance as any).createdRooms = rooms;
+      (testInstance as Record<string, unknown>).createdRooms = rooms;
 
       // Simulate participants joining
       await this.simulateParticipantLoad(testId, testConfig);
@@ -431,14 +431,14 @@ class PerformanceTestingService {
   /**
    * Get active test status
    */
-  getActiveTests(): any[] {
+  getActiveTests(): Record<string, unknown>[] {
     return Array.from(this.activeTests.values());
   }
 
   /**
    * Generate performance report
    */
-  generatePerformanceReport(testId?: string): any {
+  generatePerformanceReport(testId?: string): Record<string, unknown> {
     const metrics = testId && this.activeTests.has(testId) 
       ? this.getMetricsHistory(30) // Last 30 minutes for specific test
       : this.getMetricsHistory();
@@ -482,7 +482,7 @@ class PerformanceTestingService {
   /**
    * Report connection metrics from video signaling
    */
-  reportConnectionMetrics(userId: string, stats: any): void {
+  reportConnectionMetrics(userId: string, stats: { roundTripTime: number; audioPacketsLost: number; videoPacketsLost: number; bandwidth: number }): void {
     logger.info(`Connection metrics reported for user ${userId}`, {
       roundTripTime: stats.roundTripTime,
       audioPacketsLost: stats.audioPacketsLost,

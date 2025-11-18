@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { describe, expect, test, beforeEach, afterEach, jest, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import { prisma } from '../src/utils/database';
@@ -22,6 +23,55 @@ describe('Enhanced Payment Processing', () => {
   let serviceId: string;
   let providerId: string;
 
+=======
+require('dotenv/config');
+import { describe, expect, test, beforeEach, afterEach, jest, beforeAll, afterAll } from '@jest/globals';
+import request from 'supertest';
+import { prisma } from '../src/utils/database';
+import { UserRole } from '@prisma/client';
+import { generateAccessToken } from '../src/middleware/auth';
+
+import express from 'express';
+import paymentRoutes from '../src/routes/payments';
+
+// Mock external payment services
+
+jest.setTimeout(20000);
+
+let authToken: string;
+let userId: string;
+let bookingId: string;
+let serviceId: string;
+let providerId: string;
+let userEmail: string;
+let providerEmail: string;
+let app: express.Express;
+
+describe('Enhanced Payment Processing', () => {
+  // Global FK-safe cleanup before each test suite
+  beforeAll(async () => {
+    jest.setTimeout(120000); // 2 min for slow DB cleanup
+    // Strict FK-safe order: delete deepest children first
+  await prisma.consultationRecording.deleteMany({});
+  await prisma.refund.deleteMany({});
+  await prisma.escrowTransaction.deleteMany({});
+  await prisma.payment.deleteMany({});
+  await prisma.videoParticipant.deleteMany({});
+  await prisma.videoConsultation.deleteMany({});
+    await prisma.chatMessage.deleteMany({});
+    await prisma.chatRoom.deleteMany({});
+    await prisma.serviceReview.deleteMany({});
+    await prisma.notification.deleteMany({});
+    await prisma.walletTransaction.deleteMany({});
+    await prisma.deviceRegistration.deleteMany({});
+  await prisma.serviceBooking.deleteMany({});
+    await prisma.marketplaceService.deleteMany({});
+    await prisma.lawyerProfile.deleteMany({});
+    await prisma.userProfile.deleteMany({});
+    await prisma.user.deleteMany({});
+  });
+  jest.setTimeout(30000); // Increase timeout for slow DB operations
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
   beforeAll(async () => {
     // Connect to test database
     await prisma.$connect();
@@ -33,6 +83,7 @@ describe('Enhanced Payment Processing', () => {
   });
 
   beforeEach(async () => {
+<<<<<<< HEAD
     // Create test users
     const client = await prisma.user.create({
       data: {
@@ -73,10 +124,80 @@ describe('Enhanced Payment Processing', () => {
         providerId: provider.id,
         priceKES: 5000,
         status: 'ACTIVE'
+=======
+    // Setup app
+    app = express();
+    app.use(express.json());
+    app.use('/api/payments', paymentRoutes);
+
+    // Use a unique suffix for all unique fields per test run
+    const unique = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
+    // 1. Create test user (client)
+    const user = await prisma.user.create({
+      data: {
+        firstName: 'Test',
+        lastName: 'User',
+        email: `client+${unique}@test.com`,
+        password: 'hashedpassword',
+        role: UserRole.PUBLIC,
+        emailVerified: true,
+        verificationStatus: 'VERIFIED',
+      }
+    });
+    userId = user.id;
+    userEmail = user.email;
+    authToken = generateAccessToken({ userId: user.id, email: user.email, role: user.role });
+
+    // 2. Create provider
+    const provider = await prisma.user.create({
+      data: {
+        firstName: 'Test',
+        lastName: 'Lawyer',
+        email: `testlawyer+${unique}@test.com`,
+        password: 'password',
+        role: UserRole.LAWYER,
+        emailVerified: true,
+        verificationStatus: 'VERIFIED',
+      }
+    });
+    providerId = provider.id;
+    providerEmail = provider.email;
+
+    // 3. Create lawyer profile
+    await prisma.lawyerProfile.create({
+      data: {
+        userId: providerId,
+        bio: 'Test bio',
+        licenseNumber: `LN${unique}`,
+        yearOfAdmission: 2020,
+        specializations: JSON.stringify(['Corporate']),
+        location: JSON.stringify({ city: 'Nairobi' }),
+        yearsOfExperience: 5,
+        rating: 5,
+        reviewCount: 1,
+        isVerified: true,
+        availability: JSON.stringify([{ day: 'Monday', start: '09:00', end: '17:00' }]),
+      }
+    });
+
+    // 4. Create service
+    const service = await prisma.marketplaceService.create({
+      data: {
+        type: 'CONSULTATION',
+        title: `Payment Service ${unique}`,
+        description: 'A test payment service',
+        provider: { connect: { id: providerId } },
+        priceKES: 2000,
+        status: 'ACTIVE',
+        tags: ['payment'],
+        duration: 60,
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       }
     });
     serviceId = service.id;
 
+<<<<<<< HEAD
     // Create test booking
     const booking = await prisma.serviceBooking.create({
       data: {
@@ -96,6 +217,54 @@ describe('Enhanced Payment Processing', () => {
     await prisma.payment.deleteMany({});
     await prisma.serviceBooking.deleteMany({});
     await prisma.marketplaceService.deleteMany({});
+=======
+    // 5. Create booking
+    const booking = await prisma.serviceBooking.create({
+      data: {
+        clientId: userId,
+        providerId: providerId,
+        serviceId: serviceId,
+        status: 'CONFIRMED',
+        scheduledAt: new Date(Date.now() + 3600000),
+        totalAmountKES: 2000,
+        clientRequirements: 'Test booking',
+      }
+    });
+    bookingId = booking.id;
+
+    // 6. Create payment
+    await prisma.payment.create({
+      data: {
+        bookingId: bookingId,
+        userId: userId,
+        amount: 2000,
+        status: 'PAID',
+        method: 'STRIPE_CARD',
+      }
+    });
+  });
+
+
+  // Per-test FK-safe cleanup
+  afterEach(async () => {
+    // Strictest FK-safe order: delete deepest children first
+    await prisma.consultationRecording.deleteMany({});
+    await prisma.refund.deleteMany({});
+    await prisma.escrowTransaction.deleteMany({});
+    await prisma.payment.deleteMany({});
+    await prisma.videoParticipant.deleteMany({});
+    await prisma.videoConsultation.deleteMany({});
+    await prisma.chatMessage.deleteMany({});
+    await prisma.chatRoom.deleteMany({});
+    await prisma.serviceReview.deleteMany({});
+    await prisma.notification.deleteMany({});
+    await prisma.walletTransaction.deleteMany({});
+    await prisma.deviceRegistration.deleteMany({});
+    await prisma.serviceBooking.deleteMany({});
+    await prisma.marketplaceService.deleteMany({});
+    await prisma.lawyerProfile.deleteMany({});
+    await prisma.userProfile.deleteMany({});
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     await prisma.user.deleteMany({});
   });
 

@@ -8,8 +8,9 @@ import {
   AuthenticatedRequest,
   JWTPayload
 } from '../middleware/auth';
-import type { ApiResponse } from '@wakili-pro/shared';
-import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '@wakili-pro/shared';
+import type { ApiResponse } from '@shared';
+import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '@shared';
+import { validatePassword } from '../services/security/passwordPolicyService';
 
 const prisma = new PrismaClient();
 
@@ -44,6 +45,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Password policy validation
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      res.status(400).json({
+        success: false,
+        message: 'Password does not meet security requirements',
+        errors: passwordCheck.errors.map(message => ({ field: 'password', message }))
+      });
+      return;
+    }
     // Hash password
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -75,7 +86,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const tokenPayload = {
       userId: user.id,
       email: user.email,
-      role: user.role
+      role: user.role as import('../../shared').UserRole
     };
 
     const accessToken = generateAccessToken(tokenPayload);
@@ -169,7 +180,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const tokenPayload = {
       userId: user.id,
       email: user.email,
-      role: user.role
+      role: user.role as import('../../shared').UserRole
     };
 
     const accessToken = generateAccessToken(tokenPayload);
@@ -260,7 +271,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
       const tokenPayload: JWTPayload = {
         userId: user.id,
         email: user.email,
-        role: user.role
+        role: user.role as import('../../shared').UserRole
       };
 
       const newAccessToken = generateAccessToken(tokenPayload);
@@ -381,6 +392,16 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response): 
       return;
     }
 
+    // Password policy validation
+    const passwordCheck = validatePassword(newPassword);
+    if (!passwordCheck.valid) {
+      res.status(400).json({
+        success: false,
+        message: 'Password does not meet security requirements',
+        errors: passwordCheck.errors.map(message => ({ field: 'newPassword', message }))
+      });
+      return;
+    }
     // Hash new password
     const saltRounds = 12;
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
@@ -409,7 +430,7 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response): 
   }
 };
 
-import { ForgotPasswordSchema, ResetPasswordSchema } from '@wakili-pro/shared';
+import { ForgotPasswordSchema, ResetPasswordSchema } from '@shared';
 import crypto from 'crypto';
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
@@ -419,7 +440,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: validationResult.error.issues.map((issue: any) => ({
+        errors: validationResult.error.issues.map((issue: import('zod').ZodIssue) => ({
           field: issue.path.join('.'),
           message: issue.message
         }))
@@ -463,7 +484,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: validationResult.error.issues.map((issue: any) => ({
+        errors: validationResult.error.issues.map((issue: import('zod').ZodIssue) => ({
           field: issue.path.join('.'),
           message: issue.message
         }))

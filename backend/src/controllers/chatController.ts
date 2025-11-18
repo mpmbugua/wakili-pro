@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { createNotification } from './notificationController';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 
@@ -30,105 +31,54 @@ export const createChatRoom = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      return res.status(401).json({ success: false, message: 'Authentication required' });
     }
-
     const { bookingId } = CreateChatRoomSchema.parse(req.body);
-
     // Verify booking exists and user is participant
     const booking = await prisma.serviceBooking.findUnique({
       where: { id: bookingId },
-      include: {
-        service: { select: { title: true } }
-      }
     });
-
     if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: 'Booking not found'
-      });
+      return res.status(404).json({ success: false, message: 'Booking not found' });
     }
-
     if (booking.clientId !== userId && booking.providerId !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to create chat for this booking'
-      });
+      return res.status(403).json({ success: false, message: 'Not authorized to create chat for this booking' });
     }
-
     // Check if chat room already exists
-    const existingRoom = await prisma.serviceBooking.findUnique({
-      where: { id: bookingId },
-      select: { id: true }
-    });
-
-    if (existingRoom) {
-      // For now, return a mock chat room since Prisma models aren't generated
-      const mockChatRoom = {
-        id: `chat_${bookingId}`,
-        bookingId: bookingId,
-        clientId: booking.clientId,
-        lawyerId: booking.providerId,
-        status: 'ACTIVE',
-        lastActivity: new Date(),
-        createdAt: new Date()
-      };
-
-      return res.json({
-        success: true,
-        data: mockChatRoom,
-        message: 'Chat room created successfully'
+    let chatRoom = await prisma.chatRoom.findFirst({ where: { bookingId } });
+    if (!chatRoom) {
+      chatRoom = await prisma.chatRoom.create({
+        data: {
+          bookingId,
+          clientId: booking.clientId,
+          lawyerId: booking.providerId,
+          // Add required fields per schema, e.g., name, status
+          status: 'ACTIVE',
+        },
       });
     }
-
-    // Create new chat room (mock for now)
-    const chatRoom = {
-      id: `chat_${bookingId}`,
-      bookingId: bookingId,
-      clientId: booking.clientId,
-      lawyerId: booking.providerId,
-      status: 'ACTIVE',
-      lastActivity: new Date(),
-      createdAt: new Date()
-    };
-
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: chatRoom,
-      message: 'Chat room created successfully'
+      message: 'Chat room created successfully',
     });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: error.errors
-      });
+      return res.status(400).json({ success: false, message: 'Validation error', errors: error.errors });
     }
-
     logger.error('Create chat room error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create chat room'
-    });
+    res.status(500).json({ success: false, message: 'Failed to create chat room' });
   }
 };
+
 
 export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      return res.status(401).json({ success: false, message: 'Authentication required' });
     }
-
     // Get user's bookings that could have chat rooms
     const bookings = await prisma.serviceBooking.findMany({
       where: {
@@ -164,7 +114,7 @@ export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
     }, {} as Record<string, UserSummary>);
 
     // Mock chat rooms based on bookings
-  const chatRooms = bookings.map((booking: any) => ({
+    const chatRooms = bookings.map((booking: any) => ({
       id: `chat_${booking.id}`,
       bookingId: booking.id,
       clientId: booking.clientId,
@@ -196,13 +146,9 @@ export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
       success: true,
       data: chatRooms
     });
-
   } catch (error) {
     logger.error('Get user chat rooms error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch chat rooms'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch chat rooms' });
   }
 };
 
@@ -210,36 +156,19 @@ export const getChatMessages = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      return res.status(401).json({ success: false, message: 'Authentication required' });
     }
-
     const { roomId } = req.params;
     const { page = 1, limit = 50 } = req.query;
-
     // Verify user has access to this chat room (extract booking ID from room ID)
     const bookingId = roomId.replace('chat_', '');
-    
-    const booking = await prisma.serviceBooking.findUnique({
-      where: { id: bookingId }
-    });
-
+    const booking = await prisma.serviceBooking.findUnique({ where: { id: bookingId } });
     if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: 'Chat room not found'
-      });
+      return res.status(404).json({ success: false, message: 'Chat room not found' });
     }
-
     if (booking.clientId !== userId && booking.providerId !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
+      return res.status(403).json({ success: false, message: 'Access denied' });
     }
-
     // Mock messages for now
     const mockMessages = [
       {
@@ -271,7 +200,6 @@ export const getChatMessages = async (req: AuthRequest, res: Response) => {
         }
       }
     ];
-
     res.json({
       success: true,
       data: {
@@ -284,13 +212,9 @@ export const getChatMessages = async (req: AuthRequest, res: Response) => {
         }
       }
     });
-
   } catch (error) {
     logger.error('Get chat messages error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch messages'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch messages' });
   }
 };
 
@@ -298,74 +222,53 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      return res.status(401).json({ success: false, message: 'Authentication required' });
     }
-
     const validatedData = CreateMessageSchema.parse(req.body);
-
     // Verify user has access to this chat room
-    const bookingId = validatedData.roomId.replace('chat_', '');
-    
-    const booking = await prisma.serviceBooking.findUnique({
-      where: { id: bookingId }
-    });
-
-    if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: 'Chat room not found'
-      });
+    const chatRoom = await prisma.chatRoom.findUnique({ where: { id: validatedData.roomId } });
+    if (!chatRoom) {
+      return res.status(404).json({ success: false, message: 'Chat room not found' });
     }
-
-    if (booking.clientId !== userId && booking.providerId !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
+    if (chatRoom.clientId !== userId && chatRoom.lawyerId !== userId) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
     }
-
-    // Create mock message
-    const message = {
-      id: `msg_${Date.now()}`,
-      roomId: validatedData.roomId,
-      senderId: userId,
-      content: validatedData.content,
-      messageType: validatedData.messageType,
-      fileUrl: validatedData.fileUrl,
-      fileName: validatedData.fileName,
-      fileSize: validatedData.fileSize,
-      isRead: false,
-      createdAt: new Date(),
-      sender: {
-        firstName: 'User',
-        lastName: 'Name',
-        profilePicture: null
+    const message = await prisma.chatMessage.create({
+      data: {
+        roomId: validatedData.roomId,
+        senderId: userId,
+        content: validatedData.content,
+        messageType: validatedData.messageType,
+        fileUrl: validatedData.fileUrl,
+        fileName: validatedData.fileName,
+        fileSize: validatedData.fileSize,
+        // Add required fields or enums if needed by schema
+      },
+      include: {
+        sender: { select: { id: true, firstName: true, lastName: true, email: true } }
       }
-    };
-
-    res.status(201).json({
-      success: true,
-      data: message,
-      message: 'Message sent successfully'
     });
-
+    // Update lastActivity on chat room
+    await prisma.chatRoom.update({ where: { id: validatedData.roomId }, data: { lastActivity: new Date() } });
+    // Send notification to recipient
+    const recipientId = (chatRoom.clientId === userId) ? chatRoom.lawyerId : chatRoom.clientId;
+    // Fetch sender's name
+    const sender = await prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true } });
+    const senderName = sender ? `${sender.firstName} ${sender.lastName}` : 'a user';
+    await createNotification(
+      recipientId,
+      'MESSAGE_RECEIVED',
+      'New Message',
+      `You have a new message from ${senderName}`,
+      { roomId: validatedData.roomId, messageId: message.id }
+    );
+    res.status(201).json({ success: true, data: message, message: 'Message sent successfully' });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: error.errors
-      });
+      return res.status(400).json({ success: false, message: 'Validation error', errors: error.errors });
     }
-
     logger.error('Send message error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to send message'
-    });
+    res.status(500).json({ success: false, message: 'Failed to send message' });
   }
 };
 
@@ -373,27 +276,25 @@ export const markMessageRead = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      return res.status(401).json({ success: false, message: 'Authentication required' });
     }
-
     const { messageId } = req.params;
-
-    // Mock successful read confirmation
-    res.json({
-      success: true,
-      data: { messageId, readAt: new Date() },
-      message: 'Message marked as read'
+    const message = await prisma.chatMessage.findUnique({ where: { id: messageId } });
+    if (!message) {
+      return res.status(404).json({ success: false, message: 'Message not found' });
+    }
+    // Only recipient can mark as read (not sender)
+    if (message.senderId === userId) {
+      return res.status(403).json({ success: false, message: 'Sender cannot mark own message as read' });
+    }
+    const updated = await prisma.chatMessage.update({
+      where: { id: messageId },
+      data: { isRead: true, editedAt: new Date() }
     });
-
+    res.json({ success: true, data: { messageId, readAt: updated.editedAt }, message: 'Message marked as read' });
   } catch (error) {
     logger.error('Mark message read error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to mark message as read'
-    });
+    res.status(500).json({ success: false, message: 'Failed to mark message as read' });
   }
 };
 
@@ -450,7 +351,6 @@ export const getUserNotifications = async (req: AuthRequest, res: Response) => {
         }
       }
     });
-
   } catch (error) {
     logger.error('Get user notifications error:', error);
     res.status(500).json({
@@ -458,4 +358,4 @@ export const getUserNotifications = async (req: AuthRequest, res: Response) => {
       message: 'Failed to fetch notifications'
     });
   }
-};
+}

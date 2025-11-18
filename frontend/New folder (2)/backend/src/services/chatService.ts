@@ -43,7 +43,11 @@ export class ChatService {
 
   private setupSocketHandlers() {
     // Authentication middleware
+<<<<<<< HEAD
     this.io.use(async (socket: any, next) => {
+=======
+    this.io.use(async (socket: AuthenticatedSocket, next) => {
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       try {
         const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
         
@@ -51,7 +55,11 @@ export class ChatService {
           throw new Error('No token provided');
         }
 
+<<<<<<< HEAD
         const decoded = jwt.verify(token, JWT_SECRET) as any;
+=======
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         
         // Get user details
         const user = await prisma.user.findUnique({
@@ -75,8 +83,13 @@ export class ChatService {
       }
     });
 
+<<<<<<< HEAD
     this.io.on('connection', (socket: any) => {
       this.handleUserConnection(socket as AuthenticatedSocket);
+=======
+    this.io.on('connection', (socket: AuthenticatedSocket) => {
+      this.handleUserConnection(socket);
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     });
   }
 
@@ -218,7 +231,11 @@ export class ChatService {
           roomId: data.roomId,
           senderId: socket.userId,
           content: data.content,
+<<<<<<< HEAD
           messageType: data.messageType as any || 'TEXT',
+=======
+          messageType: data.messageType || 'TEXT',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           fileUrl: data.fileUrl,
           fileName: data.fileName,
           fileSize: data.fileSize
@@ -246,7 +263,11 @@ export class ChatService {
         fileUrl: message.fileUrl,
         fileName: message.fileName,
         fileSize: message.fileSize,
+<<<<<<< HEAD
         sender: (message as any).sender,
+=======
+        sender: message.sender,
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         createdAt: message.createdAt,
         isRead: false
       });
@@ -404,13 +425,21 @@ export class ChatService {
     type: string;
     title: string;
     message: string;
+<<<<<<< HEAD
     data?: any;
+=======
+    data?: Record<string, unknown>;
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
   }) {
     try {
       const newNotification = await prisma.notification.create({
         data: {
           userId,
+<<<<<<< HEAD
           type: notification.type as any,
+=======
+          type: notification.type,
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           title: notification.title,
           message: notification.message,
           data: notification.data || {}

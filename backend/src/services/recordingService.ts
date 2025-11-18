@@ -355,12 +355,10 @@ export class RecordingService {
 
     } catch (error) {
       logger.error('Failed to upload recording:', error);
-      
       // Clean up on failure
       if (fs.existsSync(file.path)) {
         fs.unlinkSync(file.path);
       }
-      
       throw new Error('Failed to upload recording');
     }
   }
@@ -371,21 +369,11 @@ export class RecordingService {
   async getRecordingDownloadUrl(recordingId: string, expiresIn: number = 3600): Promise<string> {
     try {
       const recording = await prisma.consultationRecording.findUnique({
-        where: { id: recordingId },
-        include: {
-          consultation: {
-            select: {
-              lawyerId: true,
-              clientId: true
-            }
-          }
-        }
+        where: { id: recordingId }
       });
-
       if (!recording) {
         throw new Error('Recording not found');
       }
-
       return await this.storageProvider.getDownloadUrl(recording.storageKey, expiresIn);
     } catch (error) {
       logger.error('Failed to get download URL:', error);
@@ -396,7 +384,7 @@ export class RecordingService {
   /**
    * Get consultation recordings
    */
-  async getConsultationRecordings(consultationId: string): Promise<any[]> {
+  async getConsultationRecordings(consultationId: string): Promise<import('@prisma/client').ConsultationRecording[]> {
     try {
       return await prisma.consultationRecording.findMany({
         where: { consultationId },

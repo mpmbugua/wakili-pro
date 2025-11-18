@@ -1,13 +1,71 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { Navigate, Link } from 'react-router-dom';
 import { User, Scale, Shield, Calendar, MessageSquare, FileText, BarChart3 } from 'lucide-react';
 import { VideoConsultationDashboard } from './VideoConsultationDashboard';
+import { analyticsService } from '../services/analyticsService';
+import chatService from '../services/chatService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card';
 import { Button } from './ui/Button';
 
 const Dashboard: React.FC = () => {
   const { user, isAuthenticated } = useAuthStore();
+<<<<<<< HEAD
+=======
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  // const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [stats, setStats] = useState<{
+    appointments: number;
+    messages: number;
+    documents: number;
+    analytics: number;
+  }>({ appointments: 0, messages: 0, documents: 0, analytics: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        // Appointments: count of upcoming video consultations
+        // Messages: unread chat messages
+        // Documents: recent files (simulate as 0 for now)
+        // Analytics: revenue this month (for lawyers)
+        let appointments = 0;
+        let messages = 0;
+        let documents = 0;
+        let analytics = 0;
+        try {
+          const upcoming = await import('../services/videoConsultationService').then(m => m.videoConsultationService.getUpcomingConsultations());
+          appointments = upcoming.length;
+        } catch {
+          // Ignore errors: appointments fallback to 0
+        }
+        try {
+          const chatRooms = await chatService.getChatRooms();
+          messages = chatRooms.data?.reduce((acc, room) => acc + (room.unreadCount || 0), 0) || 0;
+        } catch {
+          // Ignore errors: messages fallback to 0
+        }
+        // Documents: not implemented, set to 0
+        try {
+          if (user?.role === 'LAWYER') {
+            const analyticsRes = await analyticsService.getDashboardAnalytics({});
+            analytics = analyticsRes.data?.monthlyRevenue?.[analyticsRes.data.monthlyRevenue.length - 1]?.revenue || 0;
+          }
+        } catch {
+          // Ignore errors: analytics fallback to 0
+        }
+        setStats({ appointments, messages, documents, analytics });
+      } catch (err) {
+        setError('Failed to load dashboard stats.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, [user]);
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 
   // Redirect to login if not authenticated
   if (!isAuthenticated || !user) {
@@ -15,7 +73,19 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" aria-label="User Dashboard">
+      {loading && (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <span className="ml-2 text-gray-600">Loading dashboard...</span>
+        </div>
+      )}
+      {error && (
+        <div className="flex items-center justify-center py-8 text-red-600">
+          <span>{error}</span>
+          <Button variant="outline" size="sm" className="ml-4" onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      )}
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 rounded-2xl p-8 text-white">
         <div className="flex items-center space-x-4">
@@ -42,8 +112,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Quick Actions">
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" aria-label="Appointments">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center space-x-2">
               <Calendar className="h-5 w-5 text-sky-600" />
@@ -51,12 +121,12 @@ const Dashboard: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-900">3</p>
-            <p className="text-sm text-gray-600">Upcoming today</p>
-          </CardContent>
-        </Card>
+      <p className="text-2xl font-bold text-gray-900">{stats.appointments}</p>
+      <p className="text-sm text-gray-600">Upcoming</p>
+    </CardContent>
+  </Card>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+  <Card className="hover:shadow-lg transition-shadow cursor-pointer" aria-label="Messages">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center space-x-2">
               <MessageSquare className="h-5 w-5 text-green-600" />
@@ -64,12 +134,16 @@ const Dashboard: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-900">12</p>
+            <p className="text-2xl font-bold text-gray-900">{stats.messages}</p>
             <p className="text-sm text-gray-600">Unread messages</p>
           </CardContent>
         </Card>
 
+<<<<<<< HEAD
         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+=======
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer" aria-label="Documents">
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center space-x-2">
               <FileText className="h-5 w-5 text-purple-600" />
@@ -77,13 +151,13 @@ const Dashboard: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-900">48</p>
+            <p className="text-2xl font-bold text-gray-900">{stats.documents}</p>
             <p className="text-sm text-gray-600">Recent files</p>
           </CardContent>
         </Card>
 
         {user.role === 'LAWYER' && (
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" aria-label="Analytics">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center space-x-2">
                 <BarChart3 className="h-5 w-5 text-amber-600" />
@@ -91,7 +165,7 @@ const Dashboard: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-gray-900">$12.4k</p>
+              <p className="text-2xl font-bold text-gray-900">KES {stats.analytics.toLocaleString()}</p>
               <p className="text-sm text-gray-600">This month</p>
             </CardContent>
           </Card>

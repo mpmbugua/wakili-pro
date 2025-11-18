@@ -36,7 +36,15 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-type LawyerOnboardingData = any;
+// TODO: Replace with actual type from shared if available
+interface LawyerOnboardingData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  specializations: string[];
+  // Add other fields as needed
+}
 
 interface LawyerProfile {
   id: string;

@@ -67,45 +67,10 @@ export const SystemAdministration: React.FC = () => {
   const loadSettings = async () => {
     try {
       setLoading(true);
-      
-      // Mock data - will integrate with backend API
-      const mockSettings: SystemSettings = {
-        platform: {
-          maintenanceMode: false,
-          allowNewRegistrations: true,
-          requireEmailVerification: true,
-          maxUploadSize: 10,
-          sessionTimeout: 30
-        },
-        features: {
-          aiAssistantEnabled: true,
-          videoConsultationEnabled: true,
-          paymentProcessingEnabled: true,
-          multiLanguageEnabled: true,
-          mobileAppEnabled: false
-        },
-        security: {
-          passwordMinLength: 8,
-          requireTwoFactor: false,
-          maxLoginAttempts: 5,
-          sessionSecurityLevel: 'medium',
-          ipWhitelistEnabled: false
-        },
-        communications: {
-          emailNotifications: true,
-          smsNotifications: true,
-          pushNotifications: true,
-          marketingEmails: false
-        },
-        integrations: {
-          mpesaEnabled: true,
-          firebaseEnabled: true,
-          cloudinaryEnabled: true,
-          twilioEnabled: false
-        }
-      };
-      
-      setSettings(mockSettings);
+          // Fetch real system settings from backend
+          const { adminService } = await import('../../services/adminService');
+          const realSettings = await adminService.getSystemSettings();
+          setSettings(realSettings);
     } catch (err) {
       console.error('Load settings error:', err);
     } finally {

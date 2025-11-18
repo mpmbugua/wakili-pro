@@ -131,8 +131,13 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
       data: {
         ...(updateData.licenseNumber && { licenseNumber: updateData.licenseNumber }),
         ...(updateData.yearOfAdmission && { yearOfAdmission: updateData.yearOfAdmission }),
+<<<<<<< HEAD
         ...(updateData.specializations && { specializations: updateData.specializations as any }),
         ...(updateData.location && { location: updateData.location as any }),
+=======
+        ...(updateData.specializations && { specializations: updateData.specializations }),
+        ...(updateData.location && { location: updateData.location }),
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         ...(updateData.bio && { bio: updateData.bio }),
         ...(updateData.yearsOfExperience && { yearsOfExperience: updateData.yearsOfExperience }),
         ...(updateData.profileImageUrl && { profileImageUrl: updateData.profileImageUrl })
@@ -206,7 +211,11 @@ export const updateAvailability = async (req: AuthenticatedRequest, res: Respons
     const updatedProfile = await prisma.lawyerProfile.update({
       where: { userId },
       data: {
+<<<<<<< HEAD
         availability: availability as any // Prisma Json type
+=======
+        availability,
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       }
     });
 
@@ -214,7 +223,11 @@ export const updateAvailability = async (req: AuthenticatedRequest, res: Respons
       success: true,
       message: 'Availability updated successfully',
       data: {
+<<<<<<< HEAD
         availability: updatedProfile.availability as any
+=======
+        availability: updatedProfile.availability
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       }
     };
 
@@ -228,7 +241,13 @@ export const updateAvailability = async (req: AuthenticatedRequest, res: Respons
   }
 };
 
+<<<<<<< HEAD
 export const getPublicLawyerProfile = async (req: any, res: Response): Promise<void> => {
+=======
+import { Request } from 'express';
+
+export const getPublicLawyerProfile = async (req: Request, res: Response): Promise<void> => {
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
   try {
     const { lawyerId } = req.params;
 

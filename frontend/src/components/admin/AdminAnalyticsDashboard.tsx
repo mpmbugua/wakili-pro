@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import {
   TrendingUp,
   Users,
@@ -58,10 +59,30 @@ interface AdminAnalytics {
 export const AdminAnalyticsDashboard: React.FC = () => {
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
+=======
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { adminService } from '@/services/adminService';
+import type { AdminAnalytics, UserBehaviorAnalytics } from '@/services/adminService';
+
+const TABS = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'behavior', label: 'User Behavior' },
+  { key: 'platform', label: 'Platform Metrics' },
+  { key: 'trends', label: 'Trends' }
+];
+
+function AdminAnalyticsDashboard() {
+  const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
+  const [userBehavior, setUserBehavior] = useState<UserBehaviorAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
   const [dateRange, setDateRange] = useState('30d');
   const [activeTab, setActiveTab] = useState<'overview' | 'behavior' | 'platform' | 'trends'>('overview');
 
   useEffect(() => {
+<<<<<<< HEAD
     loadAnalytics();
   }, [dateRange]);
 
@@ -151,10 +172,29 @@ export const AdminAnalyticsDashboard: React.FC = () => {
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
+=======
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      adminService.getAdminAnalytics(dateRange),
+      adminService.getUserBehaviorAnalytics(dateRange)
+    ])
+      .then(([analyticsData, behaviorData]) => {
+        setAnalytics(analyticsData);
+        setUserBehavior(behaviorData);
+      })
+      .catch((err) => setError(err?.message || 'Failed to load analytics'))
+      .finally(() => setLoading(false));
+  }, [dateRange]);
+
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-KE', {
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       style: 'currency',
       currency: 'KES',
       minimumFractionDigits: 0
     }).format(amount);
+<<<<<<< HEAD
   };
 
   const formatPercentage = (value: number) => {
@@ -165,6 +205,11 @@ export const AdminAnalyticsDashboard: React.FC = () => {
     if (minutes < 60) {
       return `${minutes.toFixed(1)}m`;
     }
+=======
+  const formatPercentage = (value: number) => `${value.toFixed(1)}%`;
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) return `${minutes.toFixed(1)}m`;
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}h ${mins.toFixed(0)}m`;
@@ -180,6 +225,22 @@ export const AdminAnalyticsDashboard: React.FC = () => {
       </div>
     );
   }
+<<<<<<< HEAD
+=======
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl text-red-600 font-semibold mb-2">Error</div>
+          <p className="text-gray-600">{error}</p>
+          <Button className="mt-4" onClick={() => setDateRange(dateRange)}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -188,6 +249,7 @@ export const AdminAnalyticsDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
+<<<<<<< HEAD
               <h1 className="text-2xl font-bold text-gray-900 flex items-center">
                 <TrendingUp className="w-6 h-6 mr-2 text-indigo-600" />
                 Admin Analytics
@@ -197,6 +259,11 @@ export const AdminAnalyticsDashboard: React.FC = () => {
               </p>
             </div>
             
+=======
+              <h1 className="text-2xl font-bold text-gray-900">Admin Analytics</h1>
+              <p className="text-gray-600 mt-1">Deep insights into platform performance and user behavior</p>
+            </div>
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
             <div className="flex items-center space-x-4">
               <select
                 value={dateRange}
@@ -208,6 +275,7 @@ export const AdminAnalyticsDashboard: React.FC = () => {
                 <option value="90d">Last 3 months</option>
                 <option value="365d">Last year</option>
               </select>
+<<<<<<< HEAD
               
               <Button variant="outline">
                 <Download className="w-4 h-4 mr-2" />
@@ -229,12 +297,27 @@ export const AdminAnalyticsDashboard: React.FC = () => {
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key as 'overview' | 'behavior' | 'platform' | 'trends')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
+=======
+            </div>
+          </div>
+          {/* Tabs */}
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                     activeTab === tab.key
                       ? 'border-indigo-500 text-indigo-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
+<<<<<<< HEAD
                   <tab.icon className="w-4 h-4 mr-2" />
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                   {tab.label}
                 </button>
               ))}
@@ -242,32 +325,45 @@ export const AdminAnalyticsDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Overview Tab */}
         {activeTab === 'overview' && analytics && (
           <div className="space-y-6">
+<<<<<<< HEAD
             {/* Key Metrics */}
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center">
+<<<<<<< HEAD
                     <div className="flex-shrink-0">
                       <Users className="h-8 w-8 text-blue-600" />
                     </div>
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-500">Total Users</p>
                       <p className="text-2xl font-semibold text-gray-900">
                         {analytics.overview.totalUsers.toLocaleString()}
                       </p>
+<<<<<<< HEAD
                       <div className="flex items-center text-sm text-green-600">
                         <ArrowUpRight className="w-3 h-3 mr-1" />
                         +12.3% from last month
                       </div>
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                     </div>
                   </div>
                 </CardContent>
               </Card>
+<<<<<<< HEAD
 
               <Card>
                 <CardContent className="p-6">
@@ -275,19 +371,28 @@ export const AdminAnalyticsDashboard: React.FC = () => {
                     <div className="flex-shrink-0">
                       <DollarSign className="h-8 w-8 text-green-600" />
                     </div>
+=======
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-500">Total Revenue</p>
                       <p className="text-2xl font-semibold text-gray-900">
                         {formatCurrency(analytics.overview.totalRevenue)}
                       </p>
+<<<<<<< HEAD
                       <div className="flex items-center text-sm text-green-600">
                         <ArrowUpRight className="w-3 h-3 mr-1" />
                         +8.7% from last month
                       </div>
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                     </div>
                   </div>
                 </CardContent>
               </Card>
+<<<<<<< HEAD
 
               <Card>
                 <CardContent className="p-6">
@@ -304,11 +409,22 @@ export const AdminAnalyticsDashboard: React.FC = () => {
                         <ArrowDownRight className="w-3 h-3 mr-1" />
                         -2.1% from last month
                       </div>
+=======
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-500">Active Lawyers</p>
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {analytics.overview.totalLawyers}
+                      </p>
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
+<<<<<<< HEAD
 
             {/* Additional Metrics */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -345,24 +461,68 @@ export const AdminAnalyticsDashboard: React.FC = () => {
                     {analytics.overview.totalLawyers}
                   </div>
                   <p className="text-gray-600">Verified legal practitioners</p>
+=======
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pending Verifications</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {analytics.overview.pendingVerifications}
+                  </div>
+                  <p className="text-gray-600">Lawyer applications awaiting review</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Active Consultations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {analytics.overview.activeConsultations}
+                  </div>
+                  <p className="text-gray-600">Ongoing legal consultations</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Monthly Revenue</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {formatCurrency(analytics.overview.monthlyRevenue)}
+                  </div>
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                 </CardContent>
               </Card>
             </div>
           </div>
         )}
+<<<<<<< HEAD
 
         {/* User Behavior Tab */}
         {activeTab === 'behavior' && analytics && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Page Views */}
+=======
+        {/* User Behavior Tab */}
+        {activeTab === 'behavior' && userBehavior && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
               <Card>
                 <CardHeader>
                   <CardTitle>Top Page Views</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
+<<<<<<< HEAD
                     {analytics.userBehavior.pageViews.map((page, index) => (
+=======
+                    {userBehavior.pageViews.map((page, index) => (
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                       <div key={index} className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900">{page.page}</p>
@@ -377,15 +537,22 @@ export const AdminAnalyticsDashboard: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
+<<<<<<< HEAD
 
               {/* Drop-off Points */}
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
               <Card>
                 <CardHeader>
                   <CardTitle>User Drop-off Analysis</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
+<<<<<<< HEAD
                     {analytics.userBehavior.dropOffPoints.map((point, index) => (
+=======
+                    {userBehavior.dropOffPoints.map((point, index) => (
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                       <div key={index} className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900">{point.step}</p>
@@ -405,23 +572,33 @@ export const AdminAnalyticsDashboard: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+<<<<<<< HEAD
 
             {/* User Flow */}
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
             <Card>
               <CardHeader>
                 <CardTitle>User Flow Analysis</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<<<<<<< HEAD
                   {analytics.userBehavior.userFlows.map((flow, index) => (
+=======
+                  {userBehavior.userFlows.map((flow, index) => (
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                     <div key={index} className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">From: {flow.from}</span>
                         <span className="font-semibold text-gray-900">{flow.count}</span>
                       </div>
+<<<<<<< HEAD
                       <div className="text-center my-2">
                         <ArrowUpRight className="w-4 h-4 mx-auto text-gray-400" />
                       </div>
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                       <div className="text-sm text-gray-600 text-center">To: {flow.to}</div>
                     </div>
                   ))}
@@ -430,6 +607,7 @@ export const AdminAnalyticsDashboard: React.FC = () => {
             </Card>
           </div>
         )}
+<<<<<<< HEAD
 
         {/* Platform Metrics Tab */}
         {activeTab === 'platform' && analytics && (
@@ -535,16 +713,33 @@ export const AdminAnalyticsDashboard: React.FC = () => {
           </div>
         )}
 
+=======
+        {/* Platform Metrics Tab */}
+        {activeTab === 'platform' && (
+          <div className="space-y-6 text-center text-gray-500">
+            <div className="py-12">
+              <div className="mx-auto mb-4 w-12 h-12 bg-gray-200 rounded-full" />
+              <div className="text-lg">No platform metrics available.</div>
+              <div className="text-sm mt-2">This section will display more detailed platform metrics when available from the backend.</div>
+            </div>
+          </div>
+        )}
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         {/* Trends Tab */}
         {activeTab === 'trends' && analytics && (
           <div className="space-y-6">
             <Card>
               <CardHeader>
+<<<<<<< HEAD
                 <CardTitle>Growth Trends</CardTitle>
+=======
+                <CardTitle>User & Revenue Growth</CardTitle>
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
+<<<<<<< HEAD
                     <h4 className="text-lg font-semibold mb-4">User Growth (30 days)</h4>
                     <div className="space-y-2">
                       <div className="text-2xl font-bold text-blue-600">
@@ -564,12 +759,33 @@ export const AdminAnalyticsDashboard: React.FC = () => {
                       </div>
                       <div className="text-sm text-gray-600">
                         {formatPercentage(8.7)} increase from previous period
+=======
+                    <h4 className="text-lg font-semibold mb-4">User Growth</h4>
+                    <div className="space-y-2">
+                      <div className="text-2xl font-bold text-blue-600">
+                        +{analytics.userGrowth.length > 1 ? analytics.userGrowth[analytics.userGrowth.length-1].users - analytics.userGrowth[0].users : 0} users
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {analytics.userGrowth.length} days tracked
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold mb-4">Revenue Growth</h4>
+                    <div className="space-y-2">
+                      <div className="text-2xl font-bold text-green-600">
+                        +{analytics.revenue.length > 1 ? formatCurrency(analytics.revenue[analytics.revenue.length-1].amount - analytics.revenue[0].amount) : formatCurrency(0)}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {analytics.revenue.length} months tracked
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                       </div>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+<<<<<<< HEAD
 
             <Card>
               <CardHeader>
@@ -594,11 +810,20 @@ export const AdminAnalyticsDashboard: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+=======
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           </div>
         )}
       </div>
     </div>
   );
+<<<<<<< HEAD
 };
 
 export default AdminAnalyticsDashboard;
+=======
+}
+
+export default AdminAnalyticsDashboard;
+// Removed duplicate and stray JSX after export. File now ends cleanly after export default.
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))

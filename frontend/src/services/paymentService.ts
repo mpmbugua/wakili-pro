@@ -13,23 +13,7 @@ const apiClient = axios.create({
   }
 });
 
-// Add token to requests
-apiClient.interceptors.request.use((config) => {
-  const authData = localStorage.getItem('wakili-auth-storage');
-  if (authData) {
-    try {
-      const parsed = JSON.parse(authData);
-      const token = parsed.state?.accessToken;
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch {
-      // Ignore JSON parse errors
-    }
-  }
-  return config;
-});
-
+// Interfaces
 interface PaymentIntent {
   id: string;
   bookingId: string;
@@ -61,12 +45,47 @@ interface BankDetails {
 }
 
 interface PaymentProcessResult {
-  paymentId: string;
-  status: 'SUCCESS' | 'FAILED' | 'PENDING';
-  transactionId?: string;
-  receiptUrl?: string;
-  message?: string;
+// ...existing code...
+
+class PaymentServiceClass {
+  // Update app settings (admin-configured, e.g., surcharge, commission)
+  async updateAppSettings(data: { emergency_surcharge: string; booking_commission_percent: string }): Promise<ApiResponse<Record<string, string>>> {
+    try {
+      const response = await apiClient.patch('/app-settings', data);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return error.response.data;
+      }
+      throw error;
+    }
+  }
+  // ...other methods...
 }
+
+export const paymentService = new PaymentServiceClass();
+      return {
+        success: false,
+        message: 'Failed to update app settings'
+      };
+    }
+  }
+  // Fetch app settings (admin-configured, e.g., surcharge, commission)
+  async getAppSettings(): Promise<ApiResponse<Record<string, string>>> {
+    try {
+      const response = await apiClient.get('/app-settings');
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return error.response.data;
+      }
+      return {
+        success: false,
+        message: 'Failed to fetch app settings'
+      };
+    }
+  }
+
 
 interface PaymentHistory {
   id: string;

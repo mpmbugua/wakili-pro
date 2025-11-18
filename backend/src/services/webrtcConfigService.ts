@@ -203,7 +203,7 @@ class WebRTCConfigurationService {
   /**
    * Get media constraints for specific quality profile
    */
-  getMediaConstraints(qualityProfile: string = 'medium', isScreenShare: boolean = false): any {
+  getMediaConstraints(qualityProfile: string = 'medium', isScreenShare: boolean = false): MediaStreamConstraints {
     const profile = isScreenShare ? 
       this.qualityProfiles.get('screen') : 
       this.qualityProfiles.get(qualityProfile) || this.qualityProfiles.get('medium');
@@ -232,7 +232,7 @@ class WebRTCConfigurationService {
   /**
    * Get display media constraints for screen sharing
    */
-  getDisplayMediaConstraints(): any {
+  getDisplayMediaConstraints(): MediaStreamConstraints {
     const screenProfile = this.qualityProfiles.get('screen')!;
     
     return {
@@ -296,7 +296,7 @@ class WebRTCConfigurationService {
   /**
    * Get RTP encoding parameters for simulcast
    */
-  getSimulcastEncodings(): any[] {
+  getSimulcastEncodings(): RTCRtpEncodingParameters[] {
     return [
       {
         rid: 'high',

@@ -17,41 +17,7 @@ import {
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
-
-interface LawyerApplication {
-  id: string;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  location?: string;
-  appliedAt: string;
-  status: 'PENDING' | 'UNDER_REVIEW' | 'VERIFIED' | 'REJECTED';
-  reviewedBy?: string;
-  reviewedAt?: string;
-  rejectionReason?: string;
-  
-  // Professional Details
-  licenseNumber: string;
-  barAssociation: string;
-  yearsExperience: number;
-  specializations: string[];
-  education: string;
-  currentFirm?: string;
-  
-  // Documents
-  documents: {
-    license: { url: string; uploaded: boolean };
-    certificate: { url: string; uploaded: boolean };
-    id: { url: string; uploaded: boolean };
-    cv: { url: string; uploaded: boolean };
-  };
-  
-  // Reviews & Notes
-  adminNotes?: string;
-  internalScore?: number;
-}
+import { adminService, LawyerApplication } from '@/services/adminService';
 
 export const LawyerVerification: React.FC = () => {
   const [applications, setApplications] = useState<LawyerApplication[]>([]);
@@ -66,11 +32,7 @@ export const LawyerVerification: React.FC = () => {
 
   useEffect(() => {
     loadApplications();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [applications, statusFilter, searchTerm]);
+  }, [statusFilter, searchTerm]);
 
   const loadApplications = async () => {
     try {
@@ -156,37 +118,16 @@ export const LawyerVerification: React.FC = () => {
       ];
       
       setApplications(mockApplications);
-    } catch (err) {
-      console.error('Load applications error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const applyFilters = () => {
-    let filtered = applications;
-
-    if (statusFilter) {
-      filtered = filtered.filter(app => app.status === statusFilter);
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(app =>
-        app.firstName.toLowerCase().includes(term) ||
-        app.lastName.toLowerCase().includes(term) ||
-        app.email.toLowerCase().includes(term) ||
-        app.licenseNumber.toLowerCase().includes(term)
-      );
-    }
-
-    // Sort by date (newest first)
-    filtered.sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime());
-
-    setFilteredApplications(filtered);
-  };
-
-  const handleReviewAction = async (applicationId: string, action: 'approve' | 'reject', notes?: string) => {
+          const { applications: fetchedApplications } = await adminService.getLawyerApplications({
+            search: searchTerm,
+            status: statusFilter,
+          });
+          setApplications(fetchedApplications);
+          setFilteredApplications(fetchedApplications);
+        } catch (err) {
+          console.error('Load applications error:', err);
+          setApplications([]);
+          setFilteredApplications([]);
     try {
       setIsReviewing(true);
       
@@ -208,55 +149,13 @@ export const LawyerVerification: React.FC = () => {
       }));
 
       setShowDetails(false);
-      setReviewNotes('');
-    } catch (err) {
-      console.error('Review action error:', err);
-    } finally {
-      setIsReviewing(false);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-KE', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getStatusColor = (status: LawyerApplication['status']) => {
-    switch (status) {
-      case 'VERIFIED':
-        return 'bg-green-100 text-green-800';
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'UNDER_REVIEW':
-        return 'bg-blue-100 text-blue-800';
-      case 'REJECTED':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status: LawyerApplication['status']) => {
-    switch (status) {
-      case 'VERIFIED':
-        return <CheckCircle className="w-4 h-4" />;
-      case 'PENDING':
-        return <Clock className="w-4 h-4" />;
-      case 'UNDER_REVIEW':
-        return <Eye className="w-4 h-4" />;
-      case 'REJECTED':
-        return <XCircle className="w-4 h-4" />;
-      default:
-        return <AlertTriangle className="w-4 h-4" />;
-    }
-  };
-
-  if (loading) {
+        const handleReviewAction = async (applicationId: string, action: 'approve' | 'reject', notes?: string) => {
+          try {
+            setIsReviewing(true);
+            await adminService.reviewLawyerApplication(applicationId, action, notes);
+            await loadApplications();
+          } catch (err) {
+            console.error(`Error ${action} application:`, err);
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

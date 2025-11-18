@@ -2,8 +2,8 @@ import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { AuthenticatedRequest } from '../middleware/auth';
-import type { ApiResponse } from '@wakili-pro/shared';
-import { UpdateUserProfileSchema, LawyerOnboardingSchema } from '@wakili-pro/shared';
+import type { ApiResponse } from '@shared';
+import { UpdateUserProfileSchema, LawyerOnboardingSchema } from '@shared';
 
 const prisma = new PrismaClient();
 
@@ -211,8 +211,8 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
         userId,
         licenseNumber: onboardingData.licenseNumber,
         yearOfAdmission: onboardingData.yearOfAdmission,
-        specializations: onboardingData.specializations as any, // Prisma Json type
-        location: onboardingData.location as any, // Prisma Json type
+  specializations: onboardingData.specializations as Record<string, unknown>, // Prisma Json type
+  location: onboardingData.location as Record<string, unknown>, // Prisma Json type
         bio: onboardingData.bio,
         yearsOfExperience: onboardingData.yearsOfExperience,
         profileImageUrl: onboardingData.profileImageUrl,

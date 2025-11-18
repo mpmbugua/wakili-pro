@@ -29,9 +29,25 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-type CreateServiceData = any;
-type CreateBookingData = any;
-type CreateReviewData = any;
+// TODO: Replace with actual types from shared if available
+interface CreateServiceData {
+  title: string;
+  description: string;
+  price: number;
+  // Add other fields as needed
+}
+interface CreateBookingData {
+  serviceId: string;
+  clientId: string;
+  date: string;
+  // Add other fields as needed
+}
+interface CreateReviewData {
+  bookingId: string;
+  rating: number;
+  comment: string;
+  // Add other fields as needed
+}
 
 interface MarketplaceService {
   id: string;

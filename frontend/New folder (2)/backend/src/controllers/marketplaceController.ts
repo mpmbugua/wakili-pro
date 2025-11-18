@@ -285,7 +285,7 @@ export const searchServices = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
     
     // Build where clause
-    const where: any = {
+  const where: Record<string, unknown> = {
       status: "ACTIVE"
     };
 

@@ -1,137 +1,135 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import io from 'socket.io-client';
-import SimplePeer from 'simple-peer';
-import { useAuthStore } from '../store/authStore';
+          stats.forEach((report: RTCStatsReport | { type: string; kind?: string; bytesReceived?: number; packetsLost?: number; packetsReceived?: number; state?: string; currentRoundTripTime?: number }) => {
+            if (report.type === 'inbound-rtp' && report.kind === 'video') {
+              totalBytesReceived += report.bytesReceived || 0;
+              totalPacketsLost += report.packetsLost || 0;
+              totalPacketsReceived += report.packetsReceived || 0;
+            }
+            if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+              rtt = report.currentRoundTripTime * 1000 || 0;
+            }
+          });
 
-export interface VideoConsultation {
-  id: string;
-  roomId: string;
-  status: 'SCHEDULED' | 'WAITING_FOR_PARTICIPANTS' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
-  lawyerId: string;
-  clientId: string;
-  scheduledAt: string;
-  startedAt?: string;
-  endedAt?: string;
-  isRecorded: boolean;
-  participantCount: number;
-}
+          const packetLoss = totalPacketsReceived > 0 
+            ? (totalPacketsLost / totalPacketsReceived) * 100 
+            : 0;
 
-export interface Participant {
-  userId: string;
-  email: string;
-  socketId: string;
-  hasVideo: boolean;
-  hasAudio: boolean;
-  isScreenSharing?: boolean;
-  connectionQuality?: 'excellent' | 'good' | 'fair' | 'poor';
-}
+          const newStats = {
+            bandwidth: totalBytesReceived * 8, // Convert to bits
+            packetLoss,
+            jitter: 0, // Would need more complex calculation
+            rtt
+          };
 
-export interface VideoSettings {
-  hasVideo: boolean;
-  hasAudio: boolean;
-  isScreenSharing: boolean;
-  qualityProfile: 'low' | 'medium' | 'high' | 'auto';
-  resolution: string;
-  bitrate: number;
-}
+          setConnectionStats(newStats);
+                    stats.forEach((report: RTCStatsReport | { type: string; kind?: string; bytesReceived?: number; packetsLost?: number; packetsReceived?: number; state?: string; currentRoundTripTime?: number }) => {
+                      if (report.type === 'inbound-rtp' && report.kind === 'video') {
+                        totalBytesReceived += report.bytesReceived || 0;
+                        totalPacketsLost += report.packetsLost || 0;
+                        totalPacketsReceived += report.packetsReceived || 0;
+                      }
+                      if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                        rtt = report.currentRoundTripTime * 1000 || 0;
+                      }
+                    });
 
-export interface ConnectionStats {
-  bandwidth: number;
-  packetLoss: number;
-  jitter: number;
-  rtt: number;
-}
+                    const packetLoss = totalPacketsReceived > 0 
+                      ? (totalPacketsLost / totalPacketsReceived) * 100 
+                      : 0;
 
-interface UseEnhancedVideoConsultationOptions {
-  consultationId: string;
-  enableAdaptiveQuality?: boolean;
-  enableRecording?: boolean;
-  onParticipantJoined?: (participant: Participant) => void;
-  onParticipantLeft?: (userId: string) => void;
-  onConsultationEnded?: () => void;
-  onConnectionQualityChanged?: (quality: string) => void;
-  onError?: (error: string) => void;
-}
+                    const newStats = {
+                      bandwidth: totalBytesReceived * 8, // Convert to bits
+                      packetLoss,
+                      jitter: 0, // Would need more complex calculation
+                      rtt
+                    };
 
-export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultationOptions) => {
-  const { user, accessToken: token } = useAuthStore();
-  const {
-    consultationId,
-    enableAdaptiveQuality = true,
-    enableRecording = false,
-    onParticipantJoined,
-    onConnectionQualityChanged,
-    onError
-  } = options;
+                    setConnectionStats(newStats);
+                    adjustQualityBasedOnStats(newStats);
 
-  // State
-  const [isConnected, setIsConnected] = useState(false);
-  const [consultation] = useState<VideoConsultation | null>(null);
-  const [participants, setParticipants] = useState<Map<string, Participant>>(new Map());
-  const [peers, setPeers] = useState<Map<string, SimplePeer.Instance>>(new Map());
-  const [videoSettings, setVideoSettings] = useState<VideoSettings>({
-    hasVideo: true,
-    hasAudio: true,
-    isScreenSharing: false,
-    qualityProfile: 'auto',
-    resolution: '1280x720',
-    bitrate: 800000
-  });
-  const [connectionStats, setConnectionStats] = useState<ConnectionStats>({
-    bandwidth: 0,
-    packetLoss: 0,
-    jitter: 0,
-    rtt: 0
-  });
-  const [isRecording, setIsRecording] = useState(false);
-  const [isJoining, setIsJoining] = useState(false);
-  const [networkQuality, setNetworkQuality] = useState<'excellent' | 'good' | 'fair' | 'poor'>('good');
+                    // Update participant connection quality
+                    const quality: 'excellent' | 'good' | 'fair' | 'poor' = packetLoss < 1 ? 'excellent' 
+                      : packetLoss < 3 ? 'good'
+                      : packetLoss < 5 ? 'fair' : 'poor';
 
-  // Refs
-  const socketRef = useRef<ReturnType<typeof io> | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const screenShareStreamRef = useRef<MediaStream | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recordingChunksRef = useRef<Blob[]>([]);
-  const connectionStatsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+                    setParticipants(prev => {
+                      const participant = prev.get(socketId);
+                      if (participant && participant.connectionQuality !== quality) {
+                        const updated = { ...participant, connectionQuality: quality };
+                        onConnectionQualityChanged?.(quality);
+                        return new Map(prev.set(socketId, updated));
+                      }
+                      return prev;
+                    });
 
-  // Quality profiles for adaptive streaming
-  const qualityProfiles = {
-    low: {
-      video: {
-        width: { min: 320, max: 480 },
-        height: { min: 240, max: 360 },
-        frameRate: { max: 15 }
-      },
-      bitrate: 300000
-    },
-    medium: {
-      video: {
-        width: { min: 640, max: 960 },
-        height: { min: 480, max: 720 },
-        frameRate: { max: 24 }
-      },
-      bitrate: 800000
-    },
-    high: {
-      video: {
-        width: { min: 960, max: 1920 },
-        height: { min: 720, max: 1080 },
-        frameRate: { max: 30 }
-      },
-      bitrate: 1500000
-    }
-  };
+                  } catch (error) {
+                    console.error('Error collecting connection stats:', error);
+                  }
+                }
+              }, 5000); // Check every 5 seconds
+            }, [peers, adjustQualityBasedOnStats, onConnectionQualityChanged]);
 
-  // ICE servers configuration with STUN/TURN
-  const iceServers = [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    // Add TURN servers for production
-    ...(process.env.REACT_APP_TURN_SERVER_URL ? [{
-      urls: process.env.REACT_APP_TURN_SERVER_URL,
-      username: process.env.REACT_APP_TURN_USERNAME,
+            // Update video quality
+            const updateVideoQuality = useCallback(async (profile: string) => {
+              if (profile === 'auto') {
+                profile = detectNetworkQuality();
+              }
+
+              const qualityConfig = qualityProfiles[profile as keyof typeof qualityProfiles];
+              if (!qualityConfig) return;
+
+              try {
+                // Update local stream constraints
+                if (localStreamRef.current) {
+                  const videoTrack = localStreamRef.current.getVideoTracks()[0];
+                  if (videoTrack) {
+                    await videoTrack.applyConstraints(qualityConfig.video);
+                  }
+                }
+
+                // Update peer connection encodings
+                peers.forEach(async (peer) => {
+                  try {
+                    const peerConnection = (peer as unknown as { _pc?: RTCPeerConnection })._pc;
+                    if (!peerConnection) return;
+
+                    const senders = peerConnection.getSenders();
+                    for (const sender of senders) {
+                      if (sender.track && sender.track.kind === 'video') {
+                        const params: RTCRtpSendParameters = sender.getParameters();
+                        if (params.encodings && params.encodings.length > 0) {
+                          params.encodings[0].maxBitrate = qualityConfig.bitrate;
+                          await sender.setParameters(params);
+                        }
+                      }
+                    }
+                  } catch (error) {
+                    console.error('Error updating peer encoding parameters:', error);
+                  }
+                });
+
+                setVideoSettings(prev => ({
+                  ...prev,
+                  qualityProfile: profile as 'low' | 'medium' | 'high' | 'auto',
+                  bitrate: qualityConfig.bitrate
+                }));
+
+              } catch (error) {
+                console.error('Error updating video quality:', error);
+                onError?.(`Failed to update video quality: ${error}`);
+              }
+            }, [detectNetworkQuality, peers, onError]);
+
+            // Enhanced peer connection creation with simulcast support
+            const createEnhancedPeerConnection = useCallback((socketId: string, initiator: boolean) => {
+              if (!localStreamRef.current) return;
+
+              const peer = new SimplePeer({
+                initiator,
+                trickle: false,
+                stream: localStreamRef.current,
+                config: {
       credential: process.env.REACT_APP_TURN_PASSWORD
     }] : [])
   ];
@@ -205,7 +203,8 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
           let totalPacketsReceived = 0;
           let rtt = 0;
 
-          stats.forEach((report: any) => {
+<<<<<<< HEAD
+          stats.forEach((report: RTCStatsReport | { type: string; kind?: string; bytesReceived?: number; packetsLost?: number; packetsReceived?: number; state?: string; currentRoundTripTime?: number }) => {
             if (report.type === 'inbound-rtp' && report.kind === 'video') {
               totalBytesReceived += report.bytesReceived || 0;
               totalPacketsLost += report.packetsLost || 0;
@@ -279,9 +278,15 @@ export const useEnhancedVideoConsultation = (options: UseEnhancedVideoConsultati
           const senders = peerConnection.getSenders();
           for (const sender of senders) {
             if (sender.track && sender.track.kind === 'video') {
-              const params = sender.getParameters();
-              if ((params as any).encodings && (params as any).encodings.length > 0) {
-                (params as any).encodings[0].maxBitrate = qualityConfig.bitrate;
+<<<<<<< HEAD
+              const params: RTCRtpSendParameters = sender.getParameters();
+              if (params.encodings && params.encodings.length > 0) {
+                params.encodings[0].maxBitrate = qualityConfig.bitrate;
+=======
+              const params: RTCRtpSendParameters = sender.getParameters();
+              if (params.encodings && params.encodings.length > 0) {
+                params.encodings[0].maxBitrate = qualityConfig.bitrate;
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
                 await sender.setParameters(params);
               }
             }

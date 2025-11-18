@@ -490,11 +490,19 @@ describe('Database Integration Tests', () => {
       // Verify the relationship
       const userWithProfile = await prisma.user.findUnique({
         where: { id: user.id },
+<<<<<<< HEAD
         include: { profile: true }
       });
 
       expect(userWithProfile?.profile).toBeDefined();
       expect(userWithProfile?.profile?.id).toBe(profile.id);
+=======
+        include: { userProfile: true }
+      });
+
+      expect(userWithProfile?.userProfile).toBeDefined();
+      expect(userWithProfile?.userProfile?.id).toBe(profile.id);
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     });
 
     test('should handle cascade deletions properly', async () => {
@@ -568,7 +576,11 @@ describe('Database Integration Tests', () => {
             password: 'hashedpassword',
             firstName: 'Invalid',
             lastName: 'Role',
+<<<<<<< HEAD
             role: 'INVALID_ROLE' as any,
+=======
+              role: 'INVALID_ROLE',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
             emailVerified: true
           }
         })

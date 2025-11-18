@@ -154,24 +154,21 @@ export const getRevenueAnalytics = async (req: AuthenticatedRequest, res: Respon
       by: ['bookingId'],
       where: {
         ...whereClause.payment,
-        status: 'PAID'
+        status: 'COMPLETED'
       },
       _sum: { amount: true }
-    }).then(async (payments: any[]) => {
+    }).then(async (payments: Array<{ bookingId: string; _sum: { amount: number } }>) => {
       const serviceRevenue = new Map();
-      
       for (const payment of payments) {
         const booking = await prisma.serviceBooking.findUnique({
           where: { id: payment.bookingId },
           include: { service: { select: { type: true } } }
         });
-        
         if (booking?.service) {
           const current = serviceRevenue.get(booking.service.type) || 0;
           serviceRevenue.set(booking.service.type, current + (payment._sum.amount || 0));
         }
       }
-      
       return Array.from(serviceRevenue.entries()).map(([type, revenue]) => ({
         serviceType: type,
         revenue
@@ -183,7 +180,7 @@ export const getRevenueAnalytics = async (req: AuthenticatedRequest, res: Respon
       by: ['method'],
       where: {
         ...whereClause.payment,
-        status: 'PAID'
+        status: 'COMPLETED'
       },
       _count: { method: true },
       _sum: { amount: true }
@@ -364,7 +361,7 @@ export const getUserBehaviorAnalytics = async (req: AuthenticatedRequest, res: R
 
     // AI query analytics
     const aiQueryStats = await prisma.aIQuery.groupBy({
-      by: ['type', 'context'],
+  by: ['type'],
       where: {
         ...(filters.dateRange && {
           createdAt: {
@@ -414,7 +411,7 @@ export const getUserBehaviorAnalytics = async (req: AuthenticatedRequest, res: R
 };
 
 // Helper function to build where clauses based on user role and filters
-function buildWhereClause(filters: any, userId: string, userRole?: string) {
+function buildWhereClause(filters: Record<string, unknown>, userId: string, userRole?: string) {
   const baseWhere = filters.dateRange ? {
     createdAt: {
       gte: new Date(filters.dateRange.start),

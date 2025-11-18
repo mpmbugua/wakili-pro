@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { PrismaClient } from '@prisma/client';
-import { WebRTCSignalSchema, ScreenShareRequestSchema, VideoSettingsUpdateSchema } from '@wakili-pro/shared';
+import { WebRTCSignalSchema, ScreenShareRequestSchema, VideoSettingsUpdateSchema } from '@shared';
 
 const prisma = new PrismaClient();
 
@@ -43,20 +43,17 @@ export class VideoSignalingServer {
       }
 
       try {
-        const decoded = jwt.verify(token, JWT_SECRET) as any;
-        
+  const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string; role: string };
         this.authenticatedSockets.set(socket.id, {
           userId: decoded.userId,
           email: decoded.email,
           role: decoded.role
         });
-
         socket.data = {
           userId: decoded.userId,
           email: decoded.email,
           role: decoded.role
         };
-
         next();
       } catch (error) {
         logger.error('Socket authentication failed:', error);

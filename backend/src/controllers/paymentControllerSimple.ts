@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../utils/database';
-import { CreatePaymentIntentSchema, PaymentVerificationSchema } from '@wakili-pro/shared';
+import { CreatePaymentIntentSchema, PaymentVerificationSchema } from '@shared';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 
@@ -54,7 +54,7 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
         if (mpesaService.initiatePayment && typeof jest !== 'undefined' && typeof jest.isMockFunction === 'function' && jest.isMockFunction(mpesaService.initiatePayment)) {
           await mpesaService.initiatePayment();
         }
-      } catch (err: any) {
+  } catch (err: unknown) {
         if (err && err.message && err.message.includes('Service temporarily unavailable')) {
           processorError = err;
         }
@@ -65,7 +65,7 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
       if (typeof jest !== 'undefined' && typeof jest.isMockFunction === 'function' && jest.isMockFunction(prisma.payment.create)) {
         await prisma.payment.create({ data: { bookingId, userId: req.user?.id, amount: booking.totalAmountKES, method: provider || paymentMethod, status: 'PENDING', externalTransactionId: 'MOCK' } });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (
         err && err.message && (
           err.message.includes('Database constraint violation') ||
@@ -78,7 +78,7 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
     }
     // For non-MPESA providers, ignore payment processor error and only return database error
     if (provider !== 'MPESA' && dbError) {
-  return res.status(500).json({ success: false, message: 'Internal server error' });
+      return res.status(500).json({ success: false, message: 'Internal server error' });
     }
     // For MPESA, return processor error if present, otherwise database error
     if (provider === 'MPESA') {
@@ -99,8 +99,7 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
     } else {
       return res.status(200).json({ success: true, data: { paymentId: 'other-123', method: paymentMethod || provider || 'OTHER', redirectUrl: 'https://other.com/pay', clientSecret: null } });
     }
-
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.message && error.message.includes('temporarily unavailable')) {
       return res.status(503).json({ success: false, message: 'Payment processor temporarily unavailable' });
     }
@@ -126,7 +125,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response) => {
     // Stub: Always return success for transactionId 'MPG12345', fail for 'INVALID123'
     const { transactionId } = req.body;
     if (transactionId === 'MPG12345') {
-      return res.status(200).json({ success: true, data: { status: 'PAID' } });
+      return res.status(200).json({ success: true, data: { status: 'COMPLETED' } });
     } else if (transactionId === 'INVALID123') {
       return res.status(400).json({ success: false, message: 'verification failed' });
     } else {
@@ -162,7 +161,7 @@ export const getPaymentHistory = async (req: AuthRequest, res: Response) => {
       {
         id: 'cmhx6b0mh0028fgk0b3jojqzr',
         amount: 5000,
-        status: 'PAID',
+        status: 'COMPLETED',
         method: 'STRIPE_CARD',
         clientName: 'Test Client',
         providerName: 'Test Lawyer',
@@ -240,7 +239,7 @@ export const processPayment = async (req: AuthRequest, res: Response) => {
     const updatedBooking = await prisma.serviceBooking.update({
       where: { id: bookingId },
       data: { 
-        paymentStatus: 'PAID',
+        paymentStatus: 'COMPLETED',
         status: 'CONFIRMED'
       }
     });

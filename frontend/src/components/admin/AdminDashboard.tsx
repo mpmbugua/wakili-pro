@@ -18,6 +18,7 @@ import { useAuthStore } from '../../store/authStore';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 
+<<<<<<< HEAD
 interface AdminStats {
   totalUsers: number;
   totalLawyers: number;
@@ -36,14 +37,31 @@ interface ActivityItem {
   timestamp: string;
   status: 'success' | 'pending' | 'failed';
 }
+=======
+import { adminService, AdminStats } from '@/services/adminService';
+
+type AdminActivityLog = {
+  id: string;
+  userId: string;
+  action: string;
+  details: Record<string, unknown>;
+  timestamp: string;
+  ipAddress: string;
+};
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuthStore();
   const [stats, setStats] = useState<AdminStats | null>(null);
+<<<<<<< HEAD
+=======
+  const [activity, setActivity] = useState<AdminActivityLog[]>([]);
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+<<<<<<< HEAD
     loadAdminStats();
   }, []);
 
@@ -96,6 +114,28 @@ export const AdminDashboard: React.FC = () => {
       setStats(mockStats);
     } catch (err) {
       setError('Failed to load admin statistics');
+=======
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const statsData = await adminService.getAdminStats();
+      setStats(statsData);
+      // Optionally fetch activity logs if needed
+      try {
+        const activityRes = await adminService.getActivityLogs({ limit: 10 });
+        setActivity(activityRes.logs);
+      } catch (activityErr) {
+        setActivity([]);
+      }
+    } catch (err) {
+      setError('Failed to load admin statistics');
+      setStats(null);
+      setActivity([]);
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       console.error('Admin stats error:', err);
     } finally {
       setLoading(false);
@@ -119,6 +159,7 @@ export const AdminDashboard: React.FC = () => {
     return `${minutes}m ago`;
   };
 
+<<<<<<< HEAD
   const getActivityIcon = (type: ActivityItem['type']) => {
     switch (type) {
       case 'user_registration':
@@ -145,6 +186,21 @@ export const AdminDashboard: React.FC = () => {
       default:
         return 'text-gray-600';
     }
+=======
+  // Map backend activity log actions to icons/colors
+  const getActivityIcon = (action: string) => {
+    if (action.includes('user')) return <Users className="w-4 h-4" />;
+    if (action.includes('lawyer')) return <UserCheck className="w-4 h-4" />;
+    if (action.includes('consultation')) return <Calendar className="w-4 h-4" />;
+    if (action.includes('payment')) return <DollarSign className="w-4 h-4" />;
+    return <Activity className="w-4 h-4" />;
+  };
+  const getStatusColor = (status: string) => {
+    if (status === 'success') return 'text-green-600';
+    if (status === 'pending') return 'text-yellow-600';
+    if (status === 'failed') return 'text-red-600';
+    return 'text-gray-600';
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
   };
 
   if (loading) {
@@ -166,7 +222,11 @@ export const AdminDashboard: React.FC = () => {
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Dashboard</h3>
             <p className="text-gray-600 mb-4">{error}</p>
+<<<<<<< HEAD
             <Button onClick={loadAdminStats}>Try Again</Button>
+=======
+            <Button onClick={loadDashboard}>Try Again</Button>
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           </CardContent>
         </Card>
       </div>
@@ -372,6 +432,7 @@ export const AdminDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+<<<<<<< HEAD
                 {stats?.recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-3">
                     <div className={`flex-shrink-0 ${getStatusColor(activity.status)}`}>
@@ -387,6 +448,27 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                 ))}
+=======
+                {activity.length === 0 ? (
+                  <div className="text-gray-500 text-sm">No recent activity.</div>
+                ) : (
+                  activity.map((log) => (
+                    <div key={log.id} className="flex items-start space-x-3">
+                      <div className={`flex-shrink-0 ${getStatusColor(log.status || log.action)}`}>
+                        {getActivityIcon(log.action)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-900">
+                          {log.details?.description || log.action}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatTimeAgo(log.timestamp)}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
               </div>
               
               <div className="mt-4 pt-4 border-t">

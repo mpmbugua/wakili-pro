@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Volume2, VolumeX, User, Brain, BookOpen, FileText, Users } from 'lucide-react';
 import { aiService } from '../../services/aiService';
+<<<<<<< HEAD
+=======
+import { analyticsService } from '../../services/analyticsService';
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 import { cn } from '../../lib/utils';
 
 interface AIMessage {
@@ -33,6 +37,15 @@ interface QueryLimits {
   isAuthenticated: boolean;
 }
 
+<<<<<<< HEAD
+=======
+
+const SUPPORTED_LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'sw', label: 'Swahili' }
+];
+
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 const AILegalAssistant: React.FC = () => {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -43,9 +56,17 @@ const AILegalAssistant: React.FC = () => {
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const [queryLimits, setQueryLimits] = useState<QueryLimits | null>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+<<<<<<< HEAD
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isAuthenticated = false; // TODO: Get from auth store when available
+=======
+  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'sw'>('en');
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // TODO: Replace with actual auth state from store
+  const isAuthenticated = false;
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 
   useEffect(() => {
     // Load initial greeting and query limits
@@ -97,6 +118,10 @@ How can I help you today? You can type your question or use the microphone 🎤 
   };
 
   const handleSendMessage = async () => {
+<<<<<<< HEAD
+=======
+    analyticsService.logEvent({ type: 'ai_chat_message_sent', details: { language: selectedLanguage } });
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     if (!inputMessage.trim() || isLoading) return;
 
     const userMessage: AIMessage = {
@@ -196,16 +221,14 @@ How can I help you today? You can type your question or use the microphone 🎤 
   };
 
   const processVoiceQuery = async (audioBlob: Blob) => {
-    setIsLoading(true);
-    
+      setIsLoading(true);
     try {
       // Convert blob to base64
       const reader = new FileReader();
-      reader.onload = async () => {
+            reader.onload = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
-        
-        const response = await aiService.processVoiceQuery(base64Audio);
-        
+        // Pass selectedLanguage to backend
+        const response = await aiService.processVoiceQuery(base64Audio, selectedLanguage);
         if (response.success && response.data) {
           const userMessage: AIMessage = {
             id: `voice-user-${Date.now()}`,
@@ -214,7 +237,6 @@ How can I help you today? You can type your question or use the microphone 🎤 
             timestamp: new Date(),
             isVoiceMessage: true
           };
-
           const aiMessage: AIMessage = {
             id: response.data.id,
             content: response.data.answer,
@@ -224,13 +246,11 @@ How can I help you today? You can type your question or use the microphone 🎤 
             sources: response.data.sources,
             consultationSuggestion: response.data.consultationSuggestion
           };
-
           setMessages(prev => [...prev, userMessage, aiMessage]);
         } else {
           throw new Error(response.message || 'Voice processing failed');
         }
       };
-      
       reader.readAsDataURL(audioBlob);
     } catch (error) {
       console.error('Voice processing error:', error);
@@ -246,7 +266,9 @@ How can I help you today? You can type your question or use the microphone 🎤 
     }
   };
 
+  const [swahiliTTSUnavailable, setSwahiliTTSUnavailable] = useState(false);
   const playAudioResponse = async (messageId: string) => {
+    analyticsService.logEvent({ type: 'ai_chat_audio_played', details: { messageId, language: selectedLanguage } });
     try {
       if (currentAudio) {
         currentAudio.pause();
@@ -259,28 +281,61 @@ How can I help you today? You can type your question or use the microphone 🎤 
       }
 
       setPlayingAudio(messageId);
+<<<<<<< HEAD
       const audioResponse = await aiService.getVoiceResponse(messageId);
       
+=======
+      const audioResponse = await aiService.getVoiceResponse(messageId, selectedLanguage);
+
+      if (!audioResponse && selectedLanguage === 'sw') {
+        setSwahiliTTSUnavailable(true);
+        setPlayingAudio(null);
+        return;
+      } else {
+        setSwahiliTTSUnavailable(false);
+      }
+
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       if (audioResponse) {
         const audio = new Audio();
         const audioUrl = URL.createObjectURL(audioResponse);
         audio.src = audioUrl;
+<<<<<<< HEAD
         
         setCurrentAudio(audio);
         
+=======
+
+        setCurrentAudio(audio);
+
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         audio.onended = () => {
           setPlayingAudio(null);
           URL.revokeObjectURL(audioUrl);
         };
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         audio.onerror = () => {
           setPlayingAudio(null);
           console.error('Audio playback error');
         };
+<<<<<<< HEAD
         
         await audio.play();
       }
     } catch (error) {
+=======
+
+        await audio.play();
+      }
+    } catch (error) {
+      if (selectedLanguage === 'sw') {
+        setSwahiliTTSUnavailable(true);
+      }
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       console.error('Audio playback error:', error);
       setPlayingAudio(null);
     }
@@ -306,6 +361,24 @@ How can I help you today? You can type your question or use the microphone 🎤 
             </div>
           </div>
           
+<<<<<<< HEAD
+=======
+          {/* Language Selector */}
+          <div className="ml-6">
+            <label htmlFor="language-select" className="text-xs font-semibold mr-2">Language:</label>
+            <select
+              id="language-select"
+              value={selectedLanguage}
+              onChange={e => setSelectedLanguage(e.target.value as 'en' | 'sw')}
+              className="text-gray-900 rounded px-2 py-1 text-xs focus:outline-none"
+            >
+              {SUPPORTED_LANGUAGES.map(lang => (
+                <option key={lang.code} value={lang.code}>{lang.label}</option>
+              ))}
+            </select>
+          </div>
+
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           {/* Query Limits Display */}
           {queryLimits && (
             <div className="text-right">
@@ -472,6 +545,14 @@ How can I help you today? You can type your question or use the microphone 🎤 
 
       {/* Input Area */}
       <div className="border-t bg-white p-4">
+<<<<<<< HEAD
+=======
+        {swahiliTTSUnavailable && (
+          <div className="mb-3 p-3 bg-amber-100 border border-amber-300 rounded text-amber-900 text-sm">
+            <strong>Notice:</strong> Swahili voice output is not currently supported. You can still use Swahili for text and voice input, but audio replies will only be available in English.
+          </div>
+        )}
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
             <input

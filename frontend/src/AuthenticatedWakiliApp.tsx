@@ -1,9 +1,16 @@
+import { PremiumBadge } from './components/PremiumBadge';
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import Marketplace from './components/marketplace/Marketplace';
+import { useSubscriptionStatus } from './hooks/useSubscriptionStatus';
+import LawyerSubscriptionPage from './pages/LawyerSubscriptionPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
 import { UserProfile } from './components/UserProfile';
 import { User, LogOut } from 'lucide-react';
+import { SubscriptionStatusBanner } from './components/SubscriptionStatusBanner';
 
 // Fixed deployment time to prevent re-renders
 const DEPLOY_TIME = new Date().toISOString();
@@ -40,7 +47,9 @@ export default function AuthenticatedWakiliApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100">
+    <Router>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100">
+        <SubscriptionStatusBanner />
       {/* SUCCESS BANNER */}
       <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white text-center py-6 font-bold text-2xl shadow-lg">
         🎉 WAKILI PRO - AUTHENTICATION SYSTEM ACTIVE! 🎉
@@ -150,50 +159,50 @@ export default function AuthenticatedWakiliApp() {
           </div>
         </div>
 
-        {/* Features Grid */}
-        <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div className="bg-white p-10 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105 border-t-8 border-green-500">
-            <div className="w-24 h-24 bg-green-100 rounded-3xl flex items-center justify-center mb-8 text-5xl mx-auto shadow-lg">
-              📞
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center">Video Consultations</h3>
-            <p className="text-gray-600 leading-relaxed text-center text-lg">Schedule and conduct secure video calls with qualified lawyers. Get legal advice from the comfort of your home or office.</p>
-            <button 
-              onClick={() => isAuthenticated ? alert('📞 Video Consultations - Feature coming soon!') : setShowLogin(true)}
-              className="mt-8 text-green-600 font-bold hover:text-green-700 block mx-auto text-lg"
-            >
-              {isAuthenticated ? 'Schedule Consultation →' : 'Login to Access →'}
-            </button>
-          </div>
-          
-          <div className="bg-white p-10 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105 border-t-8 border-blue-500">
-            <div className="w-24 h-24 bg-blue-100 rounded-3xl flex items-center justify-center mb-8 text-5xl mx-auto shadow-lg">
-              📄
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center">Document Review</h3>
-            <p className="text-gray-600 leading-relaxed text-center text-lg">Get your legal documents professionally reviewed by experienced lawyers. Ensure your contracts and agreements are legally sound.</p>
-            <button 
-              onClick={() => isAuthenticated ? alert('📄 Document Review - Feature coming soon!') : setShowLogin(true)}
-              className="mt-8 text-blue-600 font-bold hover:text-blue-700 block mx-auto text-lg"
-            >
-              {isAuthenticated ? 'Upload Document →' : 'Login to Access →'}
-            </button>
-          </div>
-          
-          <div className="bg-white p-10 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105 border-t-8 border-purple-500">
-            <div className="w-24 h-24 bg-purple-100 rounded-3xl flex items-center justify-center mb-8 text-5xl mx-auto shadow-lg">
-              💼
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center">Legal Marketplace</h3>
-            <p className="text-gray-600 leading-relaxed text-center text-lg">Browse and purchase legal services at transparent, competitive prices. Find the right legal solution for your needs.</p>
-            <button 
-              onClick={() => isAuthenticated ? alert('💼 Legal Marketplace - Feature coming soon!') : setShowLogin(true)}
-              className="mt-8 text-purple-600 font-bold hover:text-purple-700 block mx-auto text-lg"
-            >
-              {isAuthenticated ? 'Browse Services →' : 'Login to Access →'}
-            </button>
-          </div>
-        </div>
+        {/* Subscription status for premium protection */}
+        {(() => {
+          const user = useAuthStore.getState().user;
+          const userId = user?.id || 'mock-user';
+          const { status: subscriptionStatus } = useSubscriptionStatus(userId);
+          return (
+            <Routes>
+              <Route path="/marketplace" element={
+                <ProtectedRoute requireSubscription subscriptionStatus={subscriptionStatus}>
+                  <Marketplace />
+                </ProtectedRoute>
+              } />
+              <Route path="/subscribe" element={
+                <ProtectedRoute>
+                  <LawyerSubscriptionPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/" element={
+                <ProtectedRoute requireSubscription subscriptionStatus={subscriptionStatus}>
+                  <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div className="bg-white p-10 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105 border-t-8 border-green-500">
+                      <div className="w-24 h-24 bg-green-100 rounded-3xl flex items-center justify-center mb-8 text-5xl mx-auto shadow-lg">📞</div>
+                      <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center">Video Consultations <PremiumBadge /></h3>
+                      <p className="text-gray-600 leading-relaxed text-center text-lg">Schedule and conduct secure video calls with qualified lawyers. Get legal advice from the comfort of your home or office.</p>
+                      <button className="mt-8 text-green-600 font-bold hover:text-green-700 block mx-auto text-lg">Schedule Consultation →</button>
+                    </div>
+                    <div className="bg-white p-10 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105 border-t-8 border-blue-500">
+                      <div className="w-24 h-24 bg-blue-100 rounded-3xl flex items-center justify-center mb-8 text-5xl mx-auto shadow-lg">📄</div>
+                      <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center">Document Review <PremiumBadge /></h3>
+                      <p className="text-gray-600 leading-relaxed text-center text-lg">Get your legal documents professionally reviewed by experienced lawyers. Ensure your contracts and agreements are legally sound.</p>
+                      <button className="mt-8 text-blue-600 font-bold hover:text-blue-700 block mx-auto text-lg">Upload Document →</button>
+                    </div>
+                    <div className="bg-white p-10 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105 border-t-8 border-purple-500">
+                      <div className="w-24 h-24 bg-purple-100 rounded-3xl flex items-center justify-center mb-8 text-5xl mx-auto shadow-lg">💼</div>
+                      <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center">Legal Marketplace <PremiumBadge /></h3>
+                      <p className="text-gray-600 leading-relaxed text-center text-lg">Browse and purchase legal services at transparent, competitive prices. Find the right legal solution for your needs.</p>
+                      <button className="mt-8 text-purple-600 font-bold hover:text-purple-700 block mx-auto text-lg">Browse Services →</button>
+                    </div>
+                  </div>
+                </ProtectedRoute>
+              } />
+            </Routes>
+          );
+        })()}
 
         {/* Why Choose Wakili Pro */}
         <div className="mt-32 bg-gradient-to-r from-green-50 to-blue-50 rounded-3xl p-12 shadow-2xl">
@@ -311,6 +320,7 @@ export default function AuthenticatedWakiliApp() {
           }}
         />
       )}
-    </div>
+      </div>
+    </Router>
   );
 }

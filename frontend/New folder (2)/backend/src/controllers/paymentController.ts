@@ -547,7 +547,11 @@ export const getPaymentHistory = async (req: AuthRequest, res: Response) => {
     const { page = 1, limit = 10, status, method } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
+<<<<<<< HEAD
     const where: any = { userId };
+=======
+    const where: Record<string, unknown> = { userId };
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     if (status) where.status = status;
     if (method) where.method = method;
 

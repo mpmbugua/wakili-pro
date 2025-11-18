@@ -221,6 +221,10 @@ describe('Enhanced Payment Processing', () => {
       mockMpesaService.verifyPayment = (jest.fn() as any).mockResolvedValue({
         success: true,
         status: 'PAID',
+<<<<<<< HEAD
+=======
+          status: 'COMPLETED',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
         transactionId: 'MPG12345',
         amount: 5000
       });
@@ -237,6 +241,10 @@ describe('Enhanced Payment Processing', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.status).toBe('PAID');
+<<<<<<< HEAD
+=======
+        expect(response.body.data.status).toBe('COMPLETED');
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     });
 
     test('should handle payment verification failure', async () => {
@@ -273,6 +281,10 @@ describe('Enhanced Payment Processing', () => {
           amount: 5000,
           method: 'STRIPE_CARD',
           status: 'PAID',
+<<<<<<< HEAD
+=======
+            status: 'COMPLETED',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           externalTransactionId: 'pi_test123',
           verifiedAt: new Date()
         }
@@ -356,6 +368,10 @@ describe('Enhanced Payment Processing', () => {
             amount: 5000,
             method: 'MPESA',
             status: 'PAID',
+<<<<<<< HEAD
+=======
+              status: 'COMPLETED',
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
             externalTransactionId: 'MPG1',
             verifiedAt: new Date()
           },
@@ -393,6 +409,10 @@ describe('Enhanced Payment Processing', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveLength(1);
       expect(response.body.data[0].status).toBe('PAID');
+<<<<<<< HEAD
+=======
+        expect(response.body.data[0].status).toBe('COMPLETED');
+>>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     });
 
     test('should paginate results', async () => {

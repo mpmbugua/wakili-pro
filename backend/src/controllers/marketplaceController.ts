@@ -1,91 +1,44 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { CreateServiceSchema, CreateBookingSchema, UpdateBookingStatusSchema, CreateReviewSchema, ServiceSearchSchema } from '@wakili-pro/shared';
+import { CreateServiceSchema, CreateBookingSchema, UpdateBookingStatusSchema, CreateReviewSchema, ServiceSearchSchema } from '@shared';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
-
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
-}
-
-export const createService = async (req: AuthRequest, res: Response) => {
+import { createNotification } from './notificationController';
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
+      return res.status(401).json({ success: false, message: 'Authentication required' });
     }
-
-    // Validate lawyer profile exists
-    const lawyer = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { lawyerProfile: true }
-    });
-
-    if (!lawyer?.lawyerProfile) {
-      return res.status(400).json({
-        success: false,
-        message: 'Lawyer profile required to create services'
-      });
+    const validatedData = CreateReviewSchema.parse(req.body);
+    const service = await prisma.marketplaceService.findUnique({ where: { id: validatedData.serviceId } });
+    if (!service) {
+      return res.status(404).json({ success: false, message: 'Service not found' });
     }
-
-    const validatedData = CreateServiceSchema.parse(req.body);
-
-    const service = await prisma.marketplaceService.create({
+    const review = await prisma.serviceReview.create({
       data: {
-        ...validatedData,
-        providerId: userId,
-        type: validatedData.type,
-      },
-      include: {
-        provider: {
-          select: {
-            firstName: true,
-            lastName: true,
-            // profilePicture: true // TODO: Add to User model,
-            lawyerProfile: {
-              select: {
-                rating: true,
-                reviewCount: true,
-                specializations: true,
-                location: true,
-                isVerified: true,
-              }
-            }
-          }
-        }
+        serviceId: validatedData.serviceId,
+        authorId: userId,
+        targetId: service.providerId,
+        rating: validatedData.rating,
+        comment: validatedData.comment
       }
     });
-
-    res.status(201).json({
+    await createNotification(
+      service.providerId,
+      'SERVICE_REVIEW',
+      'New Service Review',
+      'You have received a new review for your service.',
+      { serviceId: validatedData.serviceId, reviewId: review.id }
+    );
+    return res.status(201).json({
       success: true,
-      data: service,
-      message: 'Service created successfully'
+      data: review,
+      message: 'Review created successfully'
     });
-
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: error.errors
-      });
-    }
-
-    console.error('Create service error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    console.error('Create review error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
-};
+
 
 export const getMyServices = async (req: AuthRequest, res: Response) => {
   try {
@@ -138,7 +91,7 @@ export const getMyServices = async (req: AuthRequest, res: Response) => {
       message: 'Internal server error'
     });
   }
-};
+}
 
 export const updateService = async (req: AuthRequest, res: Response) => {
   try {
@@ -510,7 +463,7 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
         serviceId: validatedData.serviceId,
         clientId: userId,
         providerId: service.providerId,
-        scheduledAt: validatedData.scheduledAt ? new Date(validatedData.scheduledAt) : null,
+  scheduledAt: validatedData.scheduledAt ? new Date(validatedData.scheduledAt) : null,
         clientRequirements: validatedData.clientRequirements,
         totalAmountKES: service.priceKES,
         status: 'PENDING',
@@ -518,6 +471,15 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
       }
     });
 
+      // Notify provider of new booking
+      const client = await prisma.user.findUnique({ where: { id: userId } });
+      await createNotification(
+        service.providerId,
+        'BOOKING_CREATED',
+        'New Booking Request',
+        `${client?.firstName || 'A client'} has requested a booking for your service: ${service.title}`,
+        { bookingId: booking.id, serviceId: service.id }
+      );
     res.status(201).json({
       success: true,
       data: booking,
@@ -631,6 +593,7 @@ export const updateBookingStatus = async (req: AuthRequest, res: Response) => {
       });
     }
 
+      // ...existing code...
     const updatedBooking = await prisma.serviceBooking.update({
       where: { id: bookingId },
       data: {
@@ -639,6 +602,28 @@ export const updateBookingStatus = async (req: AuthRequest, res: Response) => {
       }
     });
 
+      // Notify client of booking status change
+      const client = await prisma.user.findUnique({ where: { id: booking.clientId } });
+      let notifType = 'BOOKING_CONFIRMED';
+    // Notify client of booking status change
+    let notifTitle = 'Booking Status Updated';
+    let notifMsg = `Your booking status was updated to ${validatedData.status}`;
+    if (validatedData.status === 'CANCELLED') {
+      notifType = 'BOOKING_CANCELLED';
+      notifTitle = 'Booking Cancelled';
+      notifMsg = 'Your booking was cancelled by the provider.';
+    } else if (validatedData.status === 'COMPLETED') {
+      notifType = 'BOOKING_CONFIRMED';
+      notifTitle = 'Booking Completed';
+      notifMsg = 'Your booking has been marked as completed.';
+    }
+    await createNotification(
+      booking.clientId,
+      notifType,
+      notifTitle,
+      notifMsg,
+      { bookingId: booking.id, status: validatedData.status }
+    );
     res.json({
       success: true,
       data: updatedBooking,
@@ -717,6 +702,7 @@ export const createReview = async (req: AuthRequest, res: Response) => {
       });
     }
 
+      // ...existing code...
     const review = await prisma.serviceReview.create({
       data: {
         serviceId: validatedData.serviceId,
@@ -727,29 +713,23 @@ export const createReview = async (req: AuthRequest, res: Response) => {
       }
     });
 
-    // Update lawyer's overall rating
-    await updateLawyerRating(completedBooking.providerId);
-
-    res.status(201).json({
-      success: true,
-      data: review,
-      message: 'Review created successfully'
-    });
-
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: error.errors
+      // Notify provider/lawyer of new review
+      await createNotification(
+        service.providerId,
+        'SERVICE_REVIEW',
+        'New Service Review',
+        'You have received a new review for your service.',
+        { serviceId: validatedData.serviceId, reviewId: review.id }
+      );
+      // ...existing code...
+      return res.status(201).json({
+        success: true,
+        data: review,
+        message: 'Review created successfully'
       });
-    }
-
+  } catch (error) {
     console.error('Create review error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
