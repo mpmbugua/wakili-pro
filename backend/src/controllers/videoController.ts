@@ -131,10 +131,13 @@ export const createVideoConsultation = async (
     const videoConsultation = await prisma.videoConsultation.create({
       data: {
         bookingId: validatedData.bookingId,
-        lawyerId: String(booking.providerId),
+        lawyerId: String(booking.service.providerId),
         clientId: String(booking.clientId ?? userId),
+        roomId: roomId,
+        scheduledAt: new Date(),
         isRecorded: validatedData.isRecorded,
         status: 'SCHEDULED',
+        participantCount: 0
       },
       include: {
         booking: {
