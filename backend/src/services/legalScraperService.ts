@@ -5,22 +5,22 @@ export async function scrapeJudiciaryEvents() {
   const url = 'https://www.judiciary.go.ke/events/'; // Example events page
   const res = await axios.get(url);
   const $ = cheerio.load(res.data);
-  const events: Array<{ title: string; date: string; url: string }> = [];
+  const events: Array<{ title: string; eventDate: string; eventType?: string; sourceUrl: string }> = [];
   // Example selector: update for real site structure
   $('.event-listing').each((_, el) => {
     const title = $(el).find('.event-title').text().trim();
-    const date = $(el).find('.event-date').text().trim();
+    const eventDate = $(el).find('.event-date').text().trim();
     const href = $(el).find('a').attr('href');
-    if (title && date && href) {
-      events.push({ title, date, url: href });
+    if (title && eventDate && href) {
+      events.push({ title, eventDate, sourceUrl: href });
     }
   });
   for (const event of events) {
-    if (event.title && event.date && event.url) {
+    if (event.title && event.eventDate && event.sourceUrl) {
       await prisma.legalEvent.upsert({
-        where: { url: event.url },
-        update: { title: event.title, date: new Date(event.date), source: 'Judiciary of Kenya' },
-        create: { title: event.title, date: new Date(event.date), url: event.url, source: 'Judiciary of Kenya' },
+        where: { sourceUrl: event.sourceUrl },
+        update: { title: event.title, eventDate: new Date(event.eventDate), eventType: 'Judiciary Event', sourceUrl: event.sourceUrl },
+        create: { title: event.title, eventDate: new Date(event.eventDate), eventType: 'Judiciary Event', sourceUrl: event.sourceUrl },
       });
     }
   }
@@ -32,22 +32,22 @@ export async function scrapeKenyanLawReviewEvents() {
   const url = 'https://www.kenyalaw.org/kl/index.php?id=453'; // Example events/news page
   const res = await axios.get(url);
   const $ = cheerio.load(res.data);
-  const events: Array<{ title: string; date?: string; url: string }> = [];
+  const events: Array<{ title: string; eventDate?: string; eventType?: string; sourceUrl: string }> = [];
   // Example selector: update for real site structure
   $('.event-listing, .news-listing').each((_, el) => {
     const title = $(el).find('.event-title, .news-title').text().trim();
-    const date = $(el).find('.event-date, .news-date').text().trim();
+    const eventDate = $(el).find('.event-date, .news-date').text().trim();
     const href = $(el).find('a').attr('href');
     if (title && href) {
-      events.push({ title, date, url: href });
+      events.push({ title, eventDate, eventType: 'Law Review Event', sourceUrl: href });
     }
   });
   for (const event of events) {
-    if (event.title && event.url) {
+    if (event.title && event.sourceUrl) {
       await prisma.legalEvent.upsert({
-        where: { url: event.url },
-        update: { title: event.title, date: event.date ? new Date(event.date) : new Date(), source: 'Kenyan Law Review' },
-        create: { title: event.title, date: event.date ? new Date(event.date) : new Date(), url: event.url, source: 'Kenyan Law Review' },
+        where: { sourceUrl: event.sourceUrl },
+        update: { title: event.title, eventDate: event.eventDate ? new Date(event.eventDate) : new Date(), eventType: event.eventType, sourceUrl: event.sourceUrl },
+        create: { title: event.title, eventDate: event.eventDate ? new Date(event.eventDate) : new Date(), eventType: event.eventType, sourceUrl: event.sourceUrl },
       });
     }
   }
@@ -58,22 +58,22 @@ export async function scrapeLawSocietyEvents() {
   const url = 'https://lsk.or.ke/events/'; // Example events page
   const res = await axios.get(url);
   const $ = cheerio.load(res.data);
-  const events: Array<{ title: string; date: string; url: string }> = [];
+  const events: Array<{ title: string; eventDate: string; eventType?: string; sourceUrl: string }> = [];
   // Example selector: update for real site structure
   $('.event-listing').each((_, el) => {
     const title = $(el).find('.event-title').text().trim();
-    const date = $(el).find('.event-date').text().trim();
+    const eventDate = $(el).find('.event-date').text().trim();
     const href = $(el).find('a').attr('href');
-    if (title && date && href) {
-      events.push({ title, date, url: href });
+    if (title && eventDate && href) {
+      events.push({ title, eventDate, eventType: 'LSK Event', sourceUrl: href });
     }
   });
   for (const event of events) {
-    if (event.title && event.date && event.url) {
+    if (event.title && event.eventDate && event.sourceUrl) {
       await prisma.legalEvent.upsert({
-        where: { url: event.url },
-        update: { title: event.title, date: new Date(event.date), source: 'Law Society of Kenya' },
-        create: { title: event.title, date: new Date(event.date), url: event.url, source: 'Law Society of Kenya' },
+        where: { sourceUrl: event.sourceUrl },
+        update: { title: event.title, eventDate: new Date(event.eventDate), eventType: event.eventType, sourceUrl: event.sourceUrl },
+        create: { title: event.title, eventDate: new Date(event.eventDate), eventType: event.eventType, sourceUrl: event.sourceUrl },
       });
     }
   }

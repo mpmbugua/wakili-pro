@@ -1,4 +1,11 @@
-// PasswordPolicy removed: not in shared package.
+// PasswordPolicy type is not in shared package, so define locally
+type PasswordPolicy = {
+  minLength: number;
+  requireUppercase: boolean;
+  requireLowercase: boolean;
+  requireNumber: boolean;
+  requireSymbol: boolean;
+};
 
 // Example strong policy
 export const defaultPasswordPolicy: PasswordPolicy = {

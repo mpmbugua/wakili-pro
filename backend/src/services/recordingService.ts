@@ -381,7 +381,7 @@ export class RecordingService {
     try {
       return await prisma.consultationRecording.findMany({
         where: { consultationId },
-        orderBy: { uploadedAt: 'desc' }
+        orderBy: { createdAt: 'desc' }
       });
     } catch (error) {
       logger.error('Failed to get consultation recordings:', error);
@@ -403,7 +403,7 @@ export class RecordingService {
       }
 
       // Delete from storage
-      await this.storageProvider.deleteFile(recording.storageKey);
+      await this.storageProvider.deleteFile(recording.url);
 
       // Delete from database
       await prisma.consultationRecording.delete({

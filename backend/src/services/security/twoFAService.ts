@@ -1,4 +1,5 @@
-// TwoFAMethod removed: not in shared package.
+// TwoFAMethod type is not in shared package, so define locally
+type TwoFAMethod = 'totp' | 'email' | 'sms';
 
 // Mock/in-memory store for demo
 const user2FA: Record<string, { enabled: boolean; method?: TwoFAMethod; secret?: string; verified?: boolean }> = {};

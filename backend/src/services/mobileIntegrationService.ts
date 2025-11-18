@@ -75,9 +75,10 @@ class MobileIntegrationService {
     appVersion: string = '1.0.0'
   ): Promise<void> {
     try {
-      const deviceId = `${userId}_${platform}_${deviceToken.substr(-8)}`;
-      
-      const device: MobileDevice = {
+      const deviceId = `${userId}_${deviceToken.substr(-8)}`;
+
+      // Store in memory (in production, use database)
+      this.registeredDevices.set(deviceId, {
         id: deviceId,
         userId,
         deviceToken,
@@ -85,25 +86,24 @@ class MobileIntegrationService {
         appVersion,
         isActive: true,
         lastSeen: new Date()
-      };
+      });
 
-      // Store in memory (in production, use database)
-      this.registeredDevices.set(deviceId, device);
-
-      // Store in database
+      // Store in database (only fields present in schema)
       await prisma.deviceRegistration.upsert({
-        where: { deviceToken },
+        where: { id: deviceId },
         update: {
-          isActive: true,
-          lastSeen: new Date(),
-          appVersion
+          userId,
+          deviceId,
+          token: deviceToken,
+          updatedAt: new Date()
         },
         create: {
+          id: deviceId,
           userId,
-          deviceToken,
-          platform,
-          appVersion,
-          isActive: true
+          deviceId,
+          token: deviceToken,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       });
 
