@@ -14,16 +14,6 @@ export interface AIQuery {
   createdAt: Date;
 }
 
-export interface DocumentTemplate {
-  id: string;
-  type: DocumentType;
-  name: string;
-  description: string;
-  template: string;
-  variables: DocumentVariable[];
-  priceKES: number;
-  isPublic: boolean;
-}
 
 export type DocumentType = 
   | 'CONTRACT'

@@ -1,3 +1,4 @@
+export type { DocumentTemplate } from './documentTemplate';
 
 // Force TypeScript to emit this file at runtime
 export const __types_runtime_marker = true;
