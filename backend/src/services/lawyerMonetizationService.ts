@@ -1,4 +1,4 @@
-
+import { PrismaClient } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
@@ -19,9 +19,7 @@ export async function featureProfile(userId: string, durationDays: number) {
   });
 }
 
-  // publishArticle removed: article model does not exist in schema.
-  return null;
-}
+// publishArticle removed: article model does not exist in schema.
 
 export async function payForMonetization(userId: string, { type, targetId, amount }: { type: string; targetId?: string; amount: number }) {
   // TODO: Integrate with payment provider
