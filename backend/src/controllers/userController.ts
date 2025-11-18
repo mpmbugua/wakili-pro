@@ -2,8 +2,8 @@ import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { AuthenticatedRequest } from '../middleware/auth';
-import type { ApiResponse } from '@shared';
-import { UpdateUserProfileSchema, LawyerOnboardingSchema } from '@shared';
+import type { ApiResponse } from '@wakili-pro/shared';
+import { UpdateUserProfileSchema, LawyerOnboardingSchema } from '@wakili-pro/shared';
 
 const prisma = new PrismaClient();
 

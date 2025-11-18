@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { PrismaClient } from '@prisma/client';
-import { WebRTCSignalSchema, ScreenShareRequestSchema, VideoSettingsUpdateSchema } from '@shared';
+import { WebRTCSignalSchema, ScreenShareRequestSchema, VideoSettingsUpdateSchema } from '@wakili-pro/shared';
 
 const prisma = new PrismaClient();
 
@@ -103,23 +103,16 @@ export class VideoSignalingServer {
           // Update participant status in database
           await prisma.videoParticipant.upsert({
             where: {
-              consultationId_userId: {
-                consultationId: consultationId,
-                userId: user.userId
-              }
+              // Use unique constraint fields from schema
+              id: `${consultationId}_${user.userId}`
             },
             update: {
-              connectionStatus: 'CONNECTED',
               joinedAt: new Date()
             },
             create: {
               consultationId: consultationId,
               userId: user.userId,
-              participantType: consultation.lawyerId === user.userId ? 'LAWYER' : 'CLIENT',
-              connectionStatus: 'CONNECTED',
-              joinedAt: new Date(),
-              hasVideo: true,
-              hasAudio: true
+              joinedAt: new Date()
             }
           });
 

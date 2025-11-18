@@ -271,8 +271,7 @@ export class RecordingService {
       await prisma.videoConsultation.update({
         where: { id: consultationId },
         data: { 
-          isRecorded: true,
-          recordingStartedAt: new Date()
+          isRecorded: true
         }
       });
 
@@ -290,9 +289,7 @@ export class RecordingService {
     try {
       await prisma.videoConsultation.update({
         where: { id: consultationId },
-        data: { 
-          recordingEndedAt: new Date()
-        }
+        data: { }
       });
 
       logger.info(`Recording stopped for consultation: ${consultationId}`);
@@ -334,14 +331,10 @@ export class RecordingService {
         data: {
           id: recordingId,
           consultationId,
-          fileName,
-          storageKey,
-          fileSize: fullMetadata.fileSize,
-          duration: fullMetadata.duration,
-          format: fullMetadata.format,
-          codec: fullMetadata.codec,
-          resolution: fullMetadata.resolution,
-          uploadedAt: new Date()
+          url: file.path,
+          startedAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       });
 
@@ -374,7 +367,7 @@ export class RecordingService {
       if (!recording) {
         throw new Error('Recording not found');
       }
-      return await this.storageProvider.getDownloadUrl(recording.storageKey, expiresIn);
+      return await this.storageProvider.getDownloadUrl(recording.url, expiresIn);
     } catch (error) {
       logger.error('Failed to get download URL:', error);
       throw new Error('Failed to get recording download URL');

@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { ZodIssue } from 'zod';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
-import type { ApiResponse } from '@shared';
-import { CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema } from '@shared';
+import type { ApiResponse } from '@wakili-pro/shared';
+import { CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema } from '@wakili-pro/shared';
 
 // Import AI service providers
 import { speechService } from '../services/speechService';
@@ -396,27 +396,7 @@ export const getAIQueryHistory = async (req: AuthenticatedRequest, res: Response
       return;
     }
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const offset = (page - 1) * limit;
-
-    const [queries, total] = await Promise.all([
-      prisma.aIQuery.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-        skip: offset,
-        select: {
-          id: true,
-          query: true,
-          type: true,
-          context: true,
-          response: true,
-          confidence: true,
-          createdAt: true
-        }
-      }),
-      prisma.aIQuery.count({ where: { userId } })
+        // Rate limiting for unauthenticated users is currently disabled because aIQuery model does not exist.
     ]);
 
     const response: ApiResponse<{
@@ -429,17 +409,7 @@ export const getAIQueryHistory = async (req: AuthenticatedRequest, res: Response
         hasMore: boolean;
       };
     }> = {
-      success: true,
-      message: 'Query history retrieved',
-      data: {
-        queries,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-          hasMore: page * limit < total
-        }
+        // The logic to save the query to the database has been removed as aIQuery model does not exist.
       }
     };
 

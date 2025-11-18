@@ -12,7 +12,7 @@ export const endVideoConsultation = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ success: false, message: 'Authentication required' });
   }
-  res.status(200).json({ success: true, data: { status: 'COMPLETED' } });
+  res.status(200).json({ success: true, data: { status: 'COMPLETED' as const } });
 };
 
 export const startRecording = async (req: AuthRequest, res: Response) => {
@@ -136,7 +136,7 @@ export const createVideoConsultation = async (
         roomId: roomId,
         scheduledAt: new Date(),
         isRecorded: validatedData.isRecorded,
-        status: 'SCHEDULED',
+        status: 'SCHEDULED' as const,
         participantCount: 0
       },
       include: {
@@ -410,7 +410,7 @@ export const leaveVideoConsultation = async (
       await prisma.videoConsultation.update({
         where: { id: consultationId },
         data: {
-          status: 'COMPLETED',
+          status: 'COMPLETED' as const,
           endedAt: new Date(),
           participantCount: 0
         }
@@ -558,7 +558,7 @@ export const controlMeeting = async (
     switch (validatedData.action) {
       case 'end_meeting':
         updateData = {
-          status: 'COMPLETED',
+          status: 'COMPLETED' as const,
           endedAt: new Date()
         };
         message = 'Meeting ended successfully';

@@ -1,4 +1,4 @@
-import { UserRole } from '@shared';
+import { UserRole } from '@wakili-pro/shared';
 
 // Mock/in-memory user store for demo
 let users = [

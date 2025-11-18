@@ -128,10 +128,7 @@ class PerformanceTestingService {
             serviceId: 'test-service-id',
             providerId: 'test-lawyer-id',
             status: 'CONFIRMED',
-            scheduledAt: new Date(),
-            totalAmountKES: 0,
-            clientRequirements: 'Test requirements',
-            paymentStatus: 'PAID'
+            scheduledAt: new Date()
           }
         });
 
@@ -143,7 +140,7 @@ class PerformanceTestingService {
             clientId: 'test-client-id',
             roomId: `test-room-${i}-${Date.now()}`,
             scheduledAt: new Date(),
-            status: 'WAITING_FOR_PARTICIPANTS'
+            status: 'SCHEDULED'
           }
         });
 
@@ -179,10 +176,12 @@ class PerformanceTestingService {
 
     const totalParticipants = test.createdRooms.length * config.maxParticipantsPerRoom;
     
-    for (let i = 0; i < totalParticipants; i++) {
-      setTimeout(() => {
-        this.simulateParticipantJoin(testId, i);
-      }, i * config.participantJoinIntervalMs);
+    if (Array.isArray(test.createdRooms)) {
+      for (let i = 0; i < totalParticipants; i++) {
+        setTimeout(() => {
+          this.simulateParticipantJoin(testId, i);
+        }, i * config.participantJoinIntervalMs);
+      }
     }
 
     logger.info(`Scheduled ${totalParticipants} simulated participants`);
@@ -195,6 +194,7 @@ class PerformanceTestingService {
     const test = this.activeTests.get(testId);
     if (!test || test.status !== 'running') return;
 
+    if (!Array.isArray(test.createdRooms)) return;
     const roomIndex = participantIndex % test.createdRooms.length;
     const roomId = test.createdRooms[roomIndex];
     
@@ -206,7 +206,9 @@ class PerformanceTestingService {
       lastMessage: new Date()
     };
 
-    test.simulatedParticipants.push(participant);
+    if (Array.isArray(test.simulatedParticipants)) {
+      test.simulatedParticipants.push(participant);
+    }
 
     // Update room metrics
     const roomMetrics = this.roomMetrics.get(roomId);

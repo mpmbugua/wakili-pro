@@ -1,4 +1,4 @@
-import { LawyerDocumentTemplate } from '@shared';
+import { LawyerDocumentTemplate } from '@wakili-pro/shared';
 
 const templates: LawyerDocumentTemplate[] = [];
 

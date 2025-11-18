@@ -1,4 +1,4 @@
-import { TwoFAMethod } from '@shared';
+import { TwoFAMethod } from '@wakili-pro/shared';
 
 // Mock/in-memory store for demo
 const user2FA: Record<string, { enabled: boolean; method?: TwoFAMethod; secret?: string; verified?: boolean }> = {};

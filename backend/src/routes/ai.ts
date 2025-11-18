@@ -26,7 +26,7 @@ router.post('/research', optionalAuth, researchLegalTopic);
 router.use(authenticateToken);
 router.post('/generate-document', generateDocument);
 router.post('/analyze-contract', analyzeContract);
-router.get('/history', getAIQueryHistory);
+// router.get('/history', getAIQueryHistory); // Disabled: aIQuery model does not exist
 router.get('/quota', getFreeQueryLimit);
 
 export default router;

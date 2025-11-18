@@ -1,4 +1,4 @@
-import { PasswordPolicy } from '@shared';
+import { PasswordPolicy } from '@wakili-pro/shared';
 
 // Example strong policy
 export const defaultPasswordPolicy: PasswordPolicy = {

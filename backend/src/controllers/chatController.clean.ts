@@ -59,7 +59,7 @@ export const createChatRoom = async (req: AuthRequest, res: Response) => {
           bookingId,
           clientId: booking.clientId,
           lawyerId: booking.providerId,
-          status: 'ACTIVE',
+          status: 'ACTIVE' as const,
         },
       });
     }
@@ -127,7 +127,7 @@ export const getUserChatRooms = async (req: AuthRequest, res: Response) => {
       bookingId: booking.id,
       clientId: booking.clientId,
       lawyerId: booking.providerId,
-      status: 'ACTIVE',
+      status: 'ACTIVE' as const,
       lastActivity: booking.updatedAt,
       service: booking.service,
       client: userMap[booking.clientId] || { 
@@ -307,7 +307,7 @@ export const getUserNotifications = async (req: AuthRequest, res: Response) => {
       {
         id: 'notif_1',
         userId: userId,
-        type: 'MESSAGE_RECEIVED',
+        type: 'MESSAGE_RECEIVED' as const,
         title: 'New Message',
         message: 'You have a new message from Jane Smith',
         data: { roomId: 'chat_booking_123' },
@@ -317,7 +317,7 @@ export const getUserNotifications = async (req: AuthRequest, res: Response) => {
       {
         id: 'notif_2',
         userId: userId,
-        type: 'BOOKING_CONFIRMED',
+        type: 'BOOKING_CONFIRMED' as const,
         title: 'Booking Confirmed',
         message: 'Your legal consultation has been confirmed',
         data: { bookingId: 'booking_123' },

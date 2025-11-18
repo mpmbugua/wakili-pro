@@ -53,7 +53,7 @@ async function main() {
         password,
         firstName: 'Regular',
         lastName: 'User',
-        role: 'USER',
+        role: 'PUBLIC',
       },
     });
     console.log('Regular user seeded.');

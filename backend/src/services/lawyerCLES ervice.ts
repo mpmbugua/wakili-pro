@@ -1,4 +1,4 @@
-import { CLECourse, CLEEnrollment, CLEProgress, CLECertificate } from '@shared';
+import { CLECourse, CLEEnrollment, CLEProgress, CLECertificate } from '@wakili-pro/shared';
 
 const courses: CLECourse[] = [];
 const enrollments: CLEEnrollment[] = [];

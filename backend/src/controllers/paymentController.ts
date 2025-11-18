@@ -2,7 +2,7 @@ import { createNotification } from './notificationController';
 import { calculateBookingAmounts } from '../services/bookingPricingService';
 import Stripe from 'stripe';
 import axios from 'axios';
-import { CreatePaymentIntentSchema, PaymentVerificationSchema, RefundRequestSchema, EscrowReleaseSchema, PaymentWebhookSchema, CreatePaymentIntentData } from '@shared';
+import { CreatePaymentIntentSchema, PaymentVerificationSchema, RefundRequestSchema, EscrowReleaseSchema, PaymentWebhookSchema, CreatePaymentIntentData } from '@wakili-pro/shared';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 

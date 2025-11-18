@@ -1,4 +1,4 @@
-import { Price } from '@shared';
+import { Price } from '@wakili-pro/shared';
 
 let prices: Price[] = [];
 

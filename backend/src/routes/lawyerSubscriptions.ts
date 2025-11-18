@@ -2,62 +2,8 @@ import { Router } from 'express';
 
 const router = Router();
 
-// Mock subscription plans
-const subscriptionPlans = [
-  { plan: 'MONTHLY', priceKES: 3499, label: 'Monthly', duration: '1 month' },
-  { plan: 'YEARLY', priceKES: 39999, label: 'Yearly', duration: '12 months' },
-];
-
-// In-memory mock subscriptions (keyed by userId)
-const userSubscriptions: Record<string, any> = {};
-
-// 1. Get available subscription plans
-router.get('/subscriptions/plans', (req, res) => {
-  res.json({
-    success: true,
-    plans: subscriptionPlans
-  });
-});
-
-// 2. Get current user's subscription status (with plan details)
-router.get('/subscriptions/status', (req, res) => {
-  // In real app, get userId from auth middleware
-  const userId = req.query.userId as string || 'mock-user';
-  const sub = userSubscriptions[userId] || null;
-  let planInfo = null;
-  if (sub) {
-    planInfo = subscriptionPlans.find(p => p.plan === sub.plan) || null;
-  }
-  res.json({
-    success: true,
-    subscription: sub,
-    plan: planInfo,
-    isActive: !!(sub && sub.status === 'ACTIVE'),
-    isExpired: !!(sub && sub.endDate && new Date(sub.endDate) < new Date()),
-    isCancelled: !!(sub && sub.status === 'CANCELLED'),
-    expiresAt: sub ? sub.endDate : null,
-    cancelledAt: sub ? sub.cancelledAt || null : null
-  });
-});
-// 2b. Get subscription history (mocked)
-router.get('/subscriptions/history', (req, res) => {
-  // In a real app, fetch from DB. Here, return all user's subscriptions (just one in mock)
-  const userId = req.query.userId as string || 'mock-user';
-  const sub = userSubscriptions[userId] ? [userSubscriptions[userId]] : [];
-  res.json({
-    success: true,
-    history: sub
-  });
-});
-// 3b. Renew subscription (if expired or cancelled)
-router.post('/subscriptions/renew', (req, res) => {
-  const { userId = 'mock-user', plan } = req.body;
-  const planInfo = subscriptionPlans.find(p => p.plan === plan);
-  if (!planInfo) {
-    return res.status(400).json({ success: false, error: 'Invalid plan selected.' });
-  }
-  const existing = userSubscriptions[userId];
-  if (existing && existing.status === 'ACTIVE') {
+// This route is deprecated. The lawyerSubscription model and related enums do not exist in the current schema.
+// If you need to implement subscription logic, please define the model in schema.prisma and update this route accordingly.
     return res.status(409).json({
       success: false,
       error: 'You already have an active subscription.',

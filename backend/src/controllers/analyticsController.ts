@@ -36,58 +36,7 @@ export const getDashboardAnalytics = async (req: AuthenticatedRequest, res: Resp
       totalBookings,
       totalRevenue,
       activeConsultations,
-      completedServices,
-      averageRating,
-      recentActivity
-    ] = await Promise.all([
-      // Total bookings
-      prisma.serviceBooking.count({
-        where: whereClause.booking
-      }),
-
-      // Total revenue
-      prisma.payment.aggregate({
-        where: {
-          ...whereClause.payment,
-          status: 'PAID'
-        },
-        _sum: { amount: true }
-      }),
-
-      // Active consultations
-      prisma.videoConsultation.count({
-        where: {
-          ...whereClause.consultation,
-          status: 'IN_PROGRESS'
-        }
-      }),
-
-      // Completed services
-      prisma.serviceBooking.count({
-        where: {
-          ...whereClause.booking,
-          status: 'COMPLETED'
-        }
-      }),
-
-      // Average rating
-      prisma.serviceReview.aggregate({
-        where: whereClause.review,
-        _avg: { rating: true }
-      }),
-
-      // Recent activity (last 7 days)
-      prisma.serviceBooking.findMany({
-        where: {
-          ...whereClause.booking,
-          createdAt: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          }
-        },
-        include: {
-          service: { select: { title: true, type: true } },
-          client: { select: { firstName: true, lastName: true } },
-          provider: { select: { firstName: true, lastName: true } }
+      // Get overview metrics (aIQuery model removed, so AI query stats are not available)
         },
         orderBy: { createdAt: 'desc' },
         take: 10

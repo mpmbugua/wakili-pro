@@ -1,4 +1,4 @@
-import { LawyerMessage, LawyerReferral, ForumPost } from '@shared';
+import { LawyerMessage, LawyerReferral, ForumPost } from '@wakili-pro/shared';
 
 const messages: LawyerMessage[] = [];
 const referrals: LawyerReferral[] = [];

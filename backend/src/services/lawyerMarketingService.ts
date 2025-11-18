@@ -1,4 +1,4 @@
-import { LawyerProfile, LawyerReview, SEOAnalytics } from '@shared';
+import { LawyerProfile, LawyerReview, SEOAnalytics } from '@wakili-pro/shared';
 
 const profiles: LawyerProfile[] = [];
 const reviews: LawyerReview[] = [];

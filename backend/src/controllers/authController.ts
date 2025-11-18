@@ -8,8 +8,8 @@ import {
   AuthenticatedRequest,
   JWTPayload
 } from '../middleware/auth';
-import type { ApiResponse } from '@shared';
-import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '@shared';
+import type { ApiResponse } from '@wakili-pro/shared';
+import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '@wakili-pro/shared';
 import { validatePassword } from '../services/security/passwordPolicyService';
 
 const prisma = new PrismaClient();
@@ -430,7 +430,7 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response): 
   }
 };
 
-import { ForgotPasswordSchema, ResetPasswordSchema } from '@shared';
+import { ForgotPasswordSchema, ResetPasswordSchema } from '@wakili-pro/shared';
 import crypto from 'crypto';
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
