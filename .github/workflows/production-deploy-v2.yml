@@ -43,9 +43,9 @@ jobs:
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.19.4
-          cache: yarn
-          cache-dependency-path: yarn.lock
+           node-version: 20.19.4
+           cache: npm
+           cache-dependency-path: package-lock.json
 
       - name: 📦 Install Dependencies (Monorepo Strategy)
         run: |
@@ -57,7 +57,7 @@ jobs:
           echo "📦 Installing ALL workspace dependencies from root..."
           # Install all workspaces and their dependencies from root
           # This ensures proper hoisting and dependency resolution
-          yarn install --frozen-lockfile --verbose
+            npm install --verbose
           
           echo "🔍 Verifying workspace installations..."
           echo "📁 Frontend node_modules:"
@@ -144,8 +144,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.19.4
-          cache: 'npm'
-          cache-dependency-path: 'yarn.lock'
+            cache: 'npm'
+            cache-dependency-path: 'package-lock.json'
 
       - name: 📦 Install Dependencies (Workspace from Root)
         run: |
