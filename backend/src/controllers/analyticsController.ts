@@ -37,9 +37,6 @@ export const getDashboardAnalytics = async (req: AuthenticatedRequest, res: Resp
       totalRevenue,
       activeConsultations,
       // Get overview metrics (aIQuery model removed, so AI query stats are not available)
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 10
       })
     ]);
 

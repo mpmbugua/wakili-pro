@@ -76,8 +76,7 @@ import paymentsRouter from './routes/payments';
 app.use('/api/payments', paymentsRouter);
 
 // Mount lawyer subscriptions router
-import lawyerSubscriptionsRouter from './routes/lawyerSubscriptions';
-app.use('/api/lawyer-subscriptions', lawyerSubscriptionsRouter);
+// Deprecated: lawyerSubscriptionsRouter removed
 
 // Mount document marketplace router
 import documentMarketplaceRouter from './routes/documentMarketplace';
