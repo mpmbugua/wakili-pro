@@ -1,4 +1,4 @@
-import { LawyerDocumentTemplate } from '@wakili-pro/shared';
+// LawyerDocumentTemplate removed: not in shared package.
 
 const templates: LawyerDocumentTemplate[] = [];
 

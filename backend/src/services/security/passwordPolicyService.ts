@@ -1,4 +1,4 @@
-import { PasswordPolicy } from '@wakili-pro/shared';
+// PasswordPolicy removed: not in shared package.
 
 // Example strong policy
 export const defaultPasswordPolicy: PasswordPolicy = {

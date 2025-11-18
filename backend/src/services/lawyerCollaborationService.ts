@@ -1,4 +1,4 @@
-import { LawyerMessage, LawyerReferral, ForumPost } from '@wakili-pro/shared';
+// LawyerMessage, LawyerReferral, ForumPost removed: not in shared package.
 
 const messages: LawyerMessage[] = [];
 const referrals: LawyerReferral[] = [];

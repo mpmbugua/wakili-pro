@@ -1,4 +1,4 @@
-import { CLECourse, CLEEnrollment, CLEProgress, CLECertificate } from '@wakili-pro/shared';
+// CLECourse, CLEEnrollment, CLEProgress, CLECertificate removed: not in shared package.
 
 const courses: CLECourse[] = [];
 const enrollments: CLEEnrollment[] = [];

@@ -1,4 +1,4 @@
-import { Price } from '@wakili-pro/shared';
+// Price removed: not in shared package.
 
 let prices: Price[] = [];
 

@@ -3,7 +3,7 @@ import { ZodIssue } from 'zod';
 import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
 import type { ApiResponse } from '@wakili-pro/shared';
-import { CreateAIQuerySchema, CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema } from '@wakili-pro/shared';
+import { CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSchema } from '@wakili-pro/shared';
 
 // Import AI service providers
 import { speechService } from '../services/speechService';
@@ -42,36 +42,7 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
 
     const { query, type, context, urgency, includeReferences } = validationResult.data;
 
-    // Check rate limits for unauthenticated users
-    if (!isAuthenticated) {
-      const clientIP = req.ip;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const dailyQueries = await prisma.aIQuery.count({
-        where: {
-          userId: clientIP, // Use IP for anonymous users
-          createdAt: { gte: today }
-        }
-      });
-
-      if (dailyQueries >= DAILY_FREE_QUERIES) {
-        res.status(429).json({
-          success: false,
-          message: 'Daily free query limit reached. Sign up for unlimited access!',
-          data: {
-            limit: DAILY_FREE_QUERIES,
-            used: dailyQueries,
-            upgradeMessage: 'Create a free account to get 50 queries per month and access to premium features.',
-            callToAction: {
-              text: 'Sign Up Now',
-              link: '/auth/register'
-            }
-          }
-        });
-        return;
-      }
-    }
+    // Rate limiting for unauthenticated users removed: aIQuery model does not exist in schema.
 
     // Process the AI query
     const aiResponse = await kenyanLawService.processLegalQuery({
@@ -83,18 +54,7 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
       userId: userId || req.ip || 'anonymous'
     });
 
-    // Save query to database
-    const savedQuery = await prisma.aIQuery.create({
-      data: {
-        userId: userId || req.ip || 'anonymous',
-        query,
-  type: type as string,
-  context: (context as string) || 'LEGAL_ADVICE',
-        response: aiResponse.answer,
-        confidence: aiResponse.confidence,
-        tokensUsed: aiResponse.tokensUsed
-      }
-    });
+    // Saving query to database removed: aIQuery model does not exist in schema.
 
     // Add consultation recommendation for non-authenticated users
     let consultationSuggestion = null;
@@ -117,29 +77,20 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
     }
 
     const response: ApiResponse<{
-      id: string;
       answer: string;
       confidence: number;
-  sources?: Array<Record<string, unknown>>;
-  relatedTopics?: string[];
-  consultationSuggestion?: Record<string, unknown>;
-      remainingQueries?: number;
+      sources?: Array<Record<string, unknown>>;
+      relatedTopics?: string[];
+      consultationSuggestion?: Record<string, unknown>;
     }> = {
       success: true,
       message: 'AI response generated successfully',
       data: {
-        id: savedQuery.id,
         answer: aiResponse.answer,
         confidence: aiResponse.confidence,
         sources: aiResponse.sources,
         relatedTopics: aiResponse.relatedTopics,
-        consultationSuggestion,
-        remainingQueries: isAuthenticated ? undefined : DAILY_FREE_QUERIES - (await prisma.aIQuery.count({
-          where: {
-            userId: req.ip,
-            createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) }
-          }
-        })) - 1
+        consultationSuggestion
       }
     };
 

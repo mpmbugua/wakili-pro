@@ -1,4 +1,4 @@
-import { LawyerProfile, LawyerReview, SEOAnalytics } from '@wakili-pro/shared';
+// LawyerProfile, LawyerReview, SEOAnalytics removed: not in shared package.
 
 const profiles: LawyerProfile[] = [];
 const reviews: LawyerReview[] = [];
