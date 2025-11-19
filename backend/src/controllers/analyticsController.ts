@@ -91,7 +91,6 @@ export const getRevenueAnalytics = async (req: AuthenticatedRequest, res: Respon
     }
 
     const filters = AnalyticsFiltersSchema.parse(req.query);
-    const whereClause = buildWhereClause(filters, userId, userRole);
 
     // Revenue by month (last 12 months)
     const monthlyRevenue = await prisma.$queryRaw`
@@ -108,12 +107,18 @@ export const getRevenueAnalytics = async (req: AuthenticatedRequest, res: Respon
       ORDER BY month DESC
     `;
 
-    // Revenue by service type (simplified: group by bookingId, then join to service type)
+    // Revenue by service type (group by bookingId, then join to service type)
+    const paymentWhere: any = { status: 'PAID' };
+    if (userRole === 'LAWYER') paymentWhere.userId = userId;
+    if (filters.paymentStatus) paymentWhere.status = filters.paymentStatus;
+    if (filters.dateRange) {
+      paymentWhere.createdAt = {
+        gte: new Date(filters.dateRange.start),
+        lte: new Date(filters.dateRange.end)
+      };
+    }
     const payments = await prisma.payment.findMany({
-      where: {
-        ...whereClause.payment,
-        status: 'PAID'
-      },
+      where: paymentWhere,
       select: { bookingId: true, amount: true }
     });
     const serviceRevenue = new Map();
@@ -137,7 +142,7 @@ export const getRevenueAnalytics = async (req: AuthenticatedRequest, res: Respon
     const paymentMethodStats = await prisma.payment.groupBy({
       by: ['method'],
       where: {
-        ...whereClause.payment,
+        ...paymentWhere,
         status: 'COMPLETED'
       },
       _count: { method: true },

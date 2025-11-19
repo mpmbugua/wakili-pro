@@ -129,8 +129,12 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
     const updatedProfile = await prisma.lawyerProfile.update({
       where: { userId },
       data: {
-        ...(updateData.specializations && { specializations: updateData.specializations as Record<string, unknown> }),
-        ...(updateData.location && { location: updateData.location as Record<string, unknown> })
+        ...(updateData.specializations && { specializations: updateData.specializations as string[] }),
+        ...(updateData.location && { location: updateData.location as string }),
+        ...(updateData.licenseNumber && { licenseNumber: updateData.licenseNumber }),
+        ...(updateData.yearOfAdmission && { yearOfAdmission: updateData.yearOfAdmission }),
+        ...(updateData.tier && { tier: updateData.tier }),
+        ...(updateData.phoneNumber && { phoneNumber: updateData.phoneNumber })
       },
       include: {
         user: {
@@ -140,7 +144,6 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
             firstName: true,
             lastName: true,
             phoneNumber: true
-            // profilePicture: true // TODO: Add to User model
           }
         }
       }
@@ -198,22 +201,11 @@ export const updateAvailability = async (req: AuthenticatedRequest, res: Respons
 
     const { availability } = validationResult.data;
 
-    const updatedProfile = await prisma.lawyerProfile.update({
-      where: { userId },
-      data: {
-        availability: availability as Record<string, unknown> // Prisma Json type
-      }
+    // Availability is not a field in LawyerProfile; respond with error or ignore
+    res.status(400).json({
+      success: false,
+      message: 'Availability is not supported in the current schema.'
     });
-
-    const response: ApiResponse<{ availability: typeof availability }> = {
-            success: true,
-            message: 'Availability updated successfully',
-            data: {
-        availability: updatedProfile.availability as Record<string, unknown>
-      }
-    };
-
-    res.json(response);
   } catch (error) {
     console.error('Update availability error:', error);
     res.status(500).json({
@@ -250,7 +242,6 @@ export const getPublicLawyerProfile = async (req: Request, res: Response): Promi
           select: {
             firstName: true,
             lastName: true
-            // profilePicture: true // TODO: Add to User model
           }
         }
       }
@@ -305,10 +296,7 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
     };
 
     if (specialization) {
-      where.specializations = {
-        path: '$[*].name',
-        array_contains: specialization
-      };
+      where.specializations = { has: specialization };
     }
 
     if (minRating) {

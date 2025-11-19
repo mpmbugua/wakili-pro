@@ -6,7 +6,8 @@ import { createNotification } from './notificationController';
 
 const prisma = new PrismaClient();
 
-interface AuthRequest extends Request {
+// AuthRequest is already defined below if needed, but ensure it's exported for use in routes
+export interface AuthRequest extends Request {
   user?: { id: string };
 }
 
@@ -258,31 +259,18 @@ export const searchServices = async (req: Request, res: Response) => {
     }
 
     if (priceMin !== undefined || priceMax !== undefined) {
-      where.priceKES = {};
-      if (priceMin !== undefined) where.priceKES.gte = priceMin;
-      if (priceMax !== undefined) where.priceKES.lte = priceMax;
+      where.price = {};
+      if (priceMin !== undefined) where.price.gte = priceMin;
+      if (priceMax !== undefined) where.price.lte = priceMax;
     }
 
     // Location-based search (if provided)
-    if (location) {
-      // This would require geographic search capabilities
-      // For now, we'll implement a basic location filter
-      where.provider = {
-        lawyerProfile: {
-          location: {
-            path: ['latitude'],
-            // You would implement proper geographic distance calculation here
-          }
-        }
-      };
-    }
+    // Skipped: location is a string, not a geo object. Implement if/when geo search is supported.
 
     // Rating filter
     if (rating) {
       where.provider = {
-        ...where.provider,
         lawyerProfile: {
-          ...where.provider?.lawyerProfile,
           rating: { gte: rating }
         }
       };
@@ -371,16 +359,13 @@ export const getService = async (req: Request, res: Response) => {
           select: {
             firstName: true,
             lastName: true,
-            // profilePicture: true // TODO: Add to User model,
             lawyerProfile: {
               select: {
                 rating: true,
                 reviewCount: true,
                 specializations: true,
                 location: true,
-                isVerified: true,
-                bio: true,
-                // credentials: true // TODO: Add to LawyerProfile
+                isVerified: true
               }
             }
           }
@@ -390,8 +375,7 @@ export const getService = async (req: Request, res: Response) => {
             author: {
               select: {
                 firstName: true,
-                lastName: true,
-                // profilePicture: true // TODO: Add to User model
+                lastName: true
               }
             }
           },

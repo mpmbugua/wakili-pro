@@ -29,7 +29,6 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
         phoneNumber: true,
         role: true,
         emailVerified: true,
-        // profilePicture: true // TODO: Add to User model,
         verificationStatus: true,
         createdAt: true,
         updatedAt: true,
@@ -208,8 +207,8 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
         userId,
         licenseNumber: onboardingData.licenseNumber,
         yearOfAdmission: onboardingData.yearOfAdmission,
-        specializations: onboardingData.specializations as Record<string, unknown>, // Prisma Json type
-        location: onboardingData.location as Record<string, unknown>, // Prisma Json type
+        specializations: onboardingData.specializations as string[],
+        location: onboardingData.location as string,
         isVerified: false,
         rating: 0,
         reviewCount: 0
@@ -221,8 +220,7 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
             email: true,
             firstName: true,
             lastName: true,
-            phoneNumber: true,
-            // profilePicture: true // TODO: Add to User model
+            phoneNumber: true
           }
         }
       }

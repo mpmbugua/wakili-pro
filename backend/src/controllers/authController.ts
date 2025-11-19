@@ -240,7 +240,6 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     // Verify refresh token exists in database
     const storedToken = await prisma.refreshToken.findFirst({
       where: { token },
-      include: { user: true }
     });
     if (!storedToken) {
       res.status(401).json({
@@ -253,10 +252,18 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     // Verify JWT
     try {
       const decoded = verifyRefreshToken(token);
-      
-      const user = storedToken.user;
 
-      if (!user || user.id !== decoded.userId) {
+      if (storedToken.userId !== decoded.userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Invalid refresh token'
+        });
+        return;
+      }
+
+      // Get user for payload
+      const user = await prisma.user.findUnique({ where: { id: storedToken.userId } });
+      if (!user) {
         res.status(401).json({
           success: false,
           message: 'Invalid refresh token'

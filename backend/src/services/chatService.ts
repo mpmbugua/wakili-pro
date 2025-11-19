@@ -217,7 +217,6 @@ export class ChatService {
         data: {
           roomId: data.roomId,
           senderId: socket.userId,
-          clientId: socket.userId, // required by schema, adjust as needed
           content: data.content,
           messageType: (data.messageType as MessageType) || MessageType.TEXT,
           fileUrl: data.fileUrl,

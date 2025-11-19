@@ -1,4 +1,12 @@
-// Price removed: not in shared package.
+
+// Inline type for price objects (customize as needed)
+interface Price {
+  id: string;
+  amount: number;
+  currency: string;
+  description?: string;
+  updatedAt?: string;
+}
 
 let prices: Price[] = [];
 
