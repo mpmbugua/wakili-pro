@@ -303,35 +303,29 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
     const pageRaw = req.query.page;
     const limitRaw = req.query.limit;
 
-    const specialization = Array.isArray(specializationRaw)
-      ? specializationRaw[0]
-      : typeof specializationRaw === 'string'
-      ? specializationRaw
-      : undefined;
+    const getString = (val: unknown): string | undefined => {
+      if (typeof val === 'string') return val;
+      if (Array.isArray(val) && typeof val[0] === 'string') return val[0];
+      return undefined;
+    };
 
-    const minRating = Array.isArray(minRatingRaw)
-      ? parseFloat(minRatingRaw[0])
-      : typeof minRatingRaw === 'string'
-      ? parseFloat(minRatingRaw)
-      : typeof minRatingRaw === 'number'
-      ? minRatingRaw
-      : 0;
+    const getNumber = (val: unknown, fallback: number): number => {
+      if (typeof val === 'number') return val;
+      if (typeof val === 'string') {
+        const n = Number(val);
+        return isNaN(n) ? fallback : n;
+      }
+      if (Array.isArray(val) && typeof val[0] === 'string') {
+        const n = Number(val[0]);
+        return isNaN(n) ? fallback : n;
+      }
+      return fallback;
+    };
 
-    const page = Array.isArray(pageRaw)
-      ? parseInt(pageRaw[0])
-      : typeof pageRaw === 'string'
-      ? parseInt(pageRaw)
-      : typeof pageRaw === 'number'
-      ? pageRaw
-      : 1;
-
-    const limit = Array.isArray(limitRaw)
-      ? parseInt(limitRaw[0])
-      : typeof limitRaw === 'string'
-      ? parseInt(limitRaw)
-      : typeof limitRaw === 'number'
-      ? limitRaw
-      : 10;
+    const specialization = getString(specializationRaw);
+    const minRating = getNumber(minRatingRaw, 0);
+    const page = getNumber(pageRaw, 1);
+    const limit = getNumber(limitRaw, 10);
 
     const skip = (page - 1) * limit;
 

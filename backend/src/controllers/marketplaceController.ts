@@ -11,43 +11,7 @@ export interface AuthRequest extends Request {
   user?: { id: string };
 }
 
-export const createReview = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ success: false, message: 'Authentication required' });
-    }
-    const validatedData = CreateReviewSchema.parse(req.body);
-    const service = await prisma.marketplaceService.findUnique({ where: { id: validatedData.serviceId } });
-    if (!service) {
-      return res.status(404).json({ success: false, message: 'Service not found' });
-    }
-    const review = await prisma.serviceReview.create({
-      data: {
-        serviceId: validatedData.serviceId,
-        authorId: userId,
-        targetId: service.providerId,
-        rating: validatedData.rating,
-        comment: validatedData.comment
-      }
-    });
-    await createNotification(
-      service.providerId,
-      'SERVICE_REVIEW',
-      'New Service Review',
-      'You have received a new review for your service.',
-      { serviceId: validatedData.serviceId, reviewId: review.id }
-    );
-    return res.status(201).json({
-      success: true,
-      data: review,
-      message: 'Review created successfully'
-    });
-  } catch (error) {
-    console.error('Create review error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-};
+
 
 
 export const getMyServices = async (req: AuthRequest, res: Response) => {
@@ -457,7 +421,7 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
         clientId: userId,
         providerId: service.providerId,
   scheduledAt: validatedData.scheduledAt ? new Date(validatedData.scheduledAt) : null,
-        clientRequirements: validatedData.clientRequirements,
+        // clientRequirements: validatedData.clientRequirements, // Removed: not in schema
         totalAmountKES: service.priceKES,
         status: 'PENDING',
         paymentStatus: 'PENDING'
@@ -591,7 +555,7 @@ export const updateBookingStatus = async (req: AuthRequest, res: Response) => {
       where: { id: bookingId },
       data: {
         status: validatedData.status,
-        providerNotes: validatedData.providerNotes
+        // providerNotes: validatedData.providerNotes // Removed: not in schema
       }
     });
 
