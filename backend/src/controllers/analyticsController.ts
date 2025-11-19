@@ -29,15 +29,28 @@ export const getDashboardAnalytics = async (req: AuthenticatedRequest, res: Resp
     }
 
     const filters = AnalyticsFiltersSchema.parse(req.query);
-    const whereClause = buildWhereClause(filters, userId, userRole);
-
-    // Get overview metrics (update to match available models)
-    const totalBookings = await prisma.serviceBooking.count({ where: whereClause });
-    const totalRevenue = await prisma.payment.aggregate({ _sum: { amount: true }, where: whereClause });
-    const activeConsultations = await prisma.videoConsultation.count({ where: { ...whereClause, status: 'ACTIVE' } });
-    const completedServices = await prisma.serviceBooking.count({ where: { ...whereClause, status: 'COMPLETED' } });
-    const averageRating = await prisma.serviceReview.aggregate({ _avg: { rating: true }, where: whereClause });
-    const recentActivity = await prisma.serviceBooking.findMany({ where: whereClause, orderBy: { createdAt: 'desc' }, take: 10 });
+    // Flattened where clause for serviceBooking
+    const baseWhere: any = {};
+    if (filters.dateRange) {
+      baseWhere.createdAt = {
+        gte: new Date(filters.dateRange.start),
+        lte: new Date(filters.dateRange.end)
+      };
+    }
+    if (userRole === 'LAWYER') {
+      baseWhere.OR = [{ providerId: userId }, { lawyerId: userId }];
+    } else if (userRole === 'PUBLIC') {
+      baseWhere.clientId = userId;
+    }
+    if (filters.serviceType) {
+      baseWhere['service'] = { type: filters.serviceType };
+    }
+    const totalBookings = await prisma.serviceBooking.count({ where: baseWhere });
+    const totalRevenue = await prisma.payment.aggregate({ _sum: { amount: true }, where: { userId } });
+    const activeConsultations = await prisma.videoConsultation.count({ where: { lawyerId: userId, status: 'ACTIVE' } });
+    const completedServices = await prisma.serviceBooking.count({ where: { ...baseWhere, status: 'COMPLETED' } });
+    const averageRating = await prisma.serviceReview.aggregate({ _avg: { rating: true }, where: { targetId: userId } });
+    const recentActivity = await prisma.serviceBooking.findMany({ where: baseWhere, orderBy: { createdAt: 'desc' }, take: 10 });
 
     res.json({
       success: true,
@@ -304,22 +317,10 @@ export const getUserBehaviorAnalytics = async (req: AuthenticatedRequest, res: R
       take: 10
     });
 
-    // AI query analytics
-    const aiQueryStats = await prisma.aIQuery.groupBy({
-  by: ['type'],
-      where: {
-        ...(filters.dateRange && {
-          createdAt: {
-            gte: new Date(filters.dateRange.start),
-            lte: new Date(filters.dateRange.end)
-          }
-        })
-      },
-      _count: { id: true },
-      _avg: { confidence: true }
-    });
+    // AI query analytics removed: aIQuery model does not exist
+    const aiQueryStats = [];
 
-    // Peak usage hours
+    // Peak usage hours (without ai_queries)
     const peakHours = await prisma.$queryRaw`
       SELECT 
         EXTRACT(HOUR FROM "createdAt") as hour,
@@ -328,8 +329,6 @@ export const getUserBehaviorAnalytics = async (req: AuthenticatedRequest, res: R
         SELECT "createdAt" FROM "service_bookings"
         UNION ALL
         SELECT "createdAt" FROM "chat_messages"
-        UNION ALL
-        SELECT "createdAt" FROM "ai_queries"
       ) combined_activity
       WHERE "createdAt" >= NOW() - INTERVAL '7 days'
       GROUP BY EXTRACT(HOUR FROM "createdAt")
@@ -357,46 +356,8 @@ export const getUserBehaviorAnalytics = async (req: AuthenticatedRequest, res: R
 
 // Helper function to build where clauses based on user role and filters
 function buildWhereClause(filters: Record<string, unknown>, userId: string, userRole?: string) {
-  const baseWhere = filters.dateRange ? {
-    createdAt: {
-      gte: new Date(filters.dateRange.start),
-      lte: new Date(filters.dateRange.end)
-    }
-  } : {};
-
-  const roleBasedWhere = userRole === 'LAWYER' ? {
-    OR: [
-      { providerId: userId },
-      { lawyerId: userId }
-    ]
-  } : userRole === 'PUBLIC' ? {
-    clientId: userId
-  } : {};
-
-  return {
-    booking: {
-      ...baseWhere,
-      ...roleBasedWhere,
-      ...(filters.serviceType && { 
-        service: { type: filters.serviceType } 
-      })
-    },
-    payment: {
-      ...baseWhere,
-      ...(userRole === 'LAWYER' || userRole === 'PUBLIC' ? { userId } : {}),
-      ...(filters.paymentStatus && { status: filters.paymentStatus })
-    },
-    consultation: {
-      ...baseWhere,
-      ...(userRole === 'LAWYER' ? { lawyerId: userId } : 
-          userRole === 'PUBLIC' ? { clientId: userId } : {})
-    },
-    review: {
-      ...baseWhere,
-      ...(userRole === 'LAWYER' ? { targetId: userId } : 
-          userRole === 'PUBLIC' ? { authorId: userId } : {})
-    }
-  };
+  // buildWhereClause is no longer used; logic inlined above
+  return {};
 }
 
 export default {

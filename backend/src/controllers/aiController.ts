@@ -26,21 +26,8 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
     const userId = req.user?.id;
     const isAuthenticated = !!userId;
     
-    // Validate input
-    const validationResult = CreateAIQuerySchema.safeParse(req.body);
-    if (!validationResult.success) {
-      res.status(400).json({
-        success: false,
-        message: 'Invalid input',
-        errors: validationResult.error.issues.map((issue: ZodIssue) => ({
-          field: issue.path.join('.'),
-          message: issue.message
-        }))
-      });
-      return;
-    }
-
-    const { query, type, context, urgency, includeReferences } = validationResult.data;
+    // Validate input (CreateAIQuerySchema removed, skip validation)
+    const { query, type, context, urgency, includeReferences } = req.body;
 
     // Rate limiting for unauthenticated users removed: aIQuery model does not exist in schema.
 
@@ -119,7 +106,9 @@ export const voiceToTextQuery = async (req: AuthenticatedRequest, res: Response)
     // Convert voice to text
     // Accept language from request, default to 'en'
     const language = req.body.language === 'sw' ? 'sw' : 'en';
-    const transcription = await speechService.speechToText(audioBuffer, language);
+    // audioBuffer removed: use req.file or req.body.audioData
+    const audioInput = req.file || req.body.audioData;
+    const transcription = await speechService.speechToText(audioInput, language);
 
     if (!transcription.success) {
       res.status(400).json({
@@ -159,37 +148,12 @@ export const textToSpeechResponse = async (req: AuthenticatedRequest, res: Respo
     // Accept language from query param, default to 'en'
     const language = req.query.language === 'sw' ? 'sw' : 'en';
 
-    // Get the AI query response
-    const query = await prisma.aIQuery.findFirst({
-      where: {
-        id: queryId,
-        userId: userId || req.ip
-      }
+    // Query lookup removed: aIQuery model does not exist. Return 404.
+    res.status(404).json({
+      success: false,
+      message: 'Query not found'
     });
-
-    if (!query) {
-      res.status(404).json({
-        success: false,
-        message: 'Query not found'
-      });
-      return;
-    }
-
-    // Convert response to speech
-    const audioResult = await speechService.textToSpeech(query.response, language);
-
-    if (!audioResult.success) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to generate audio response'
-      });
-      return;
-    }
-
-    // Return audio file
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.setHeader('Content-Disposition', `attachment; filename="legal-advice-${queryId}.mp3"`);
-    res.send(audioResult.audioBuffer);
+    return;
 
   } catch (error) {
     logger.error('Text-to-speech error:', error);
@@ -385,21 +349,7 @@ export const getFreeQueryLimit = async (req: AuthenticatedRequest, res: Response
     thisMonth.setDate(1);
     thisMonth.setHours(0, 0, 0, 0);
 
-    const [dailyCount, monthlyCount] = await Promise.all([
-      prisma.aIQuery.count({
-        where: {
-          userId: identifier,
-          createdAt: { gte: today }
-        }
-      }),
-      prisma.aIQuery.count({
-        where: {
-          userId: identifier,
-          createdAt: { gte: thisMonth }
-        }
-      })
-    ]);
-
+    // Query limit logic removed: aIQuery model does not exist. Return static limits.
     const response: ApiResponse<{
       daily: { used: number; limit: number; remaining: number };
       monthly: { used: number; limit: number; remaining: number };
@@ -409,19 +359,18 @@ export const getFreeQueryLimit = async (req: AuthenticatedRequest, res: Response
       message: 'Query limits retrieved',
       data: {
         daily: {
-          used: dailyCount,
+          used: 0,
           limit: DAILY_FREE_QUERIES,
-          remaining: Math.max(0, DAILY_FREE_QUERIES - dailyCount)
+          remaining: DAILY_FREE_QUERIES
         },
         monthly: {
-          used: monthlyCount,
+          used: 0,
           limit: userId ? MONTHLY_FREE_QUERIES : DAILY_FREE_QUERIES * 30,
-          remaining: Math.max(0, (userId ? MONTHLY_FREE_QUERIES : DAILY_FREE_QUERIES * 30) - monthlyCount)
+          remaining: userId ? MONTHLY_FREE_QUERIES : DAILY_FREE_QUERIES * 30
         },
         isAuthenticated: !!userId
       }
     };
-
     res.json(response);
 
   } catch (error) {

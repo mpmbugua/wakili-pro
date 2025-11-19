@@ -14,17 +14,11 @@ interface LegalQueryRequest {
   userId: string;
 }
 
-interface LegalSource {
-  type: 'statute' | 'constitution';
-  title: string;
-  jurisdiction: string;
-}
 
-interface LegalQueryResponse {
   answer: string;
   confidence: number;
   tokensUsed: number;
-  sources: LegalSource[];
+  sources: Array<{ type: string; title: string; jurisdiction: string }>;
   relatedTopics: string[];
   recommendsLawyer: boolean;
 }
@@ -368,8 +362,8 @@ Keep the response accessible to non-lawyers while being legally accurate.
     return Math.max(0.1, Math.min(0.95, confidence));
   }
 
-  private extractSources(response: string): LegalSource[] {
-    const sources: LegalSource[] = [];
+  private extractSources(response: string): Array<{ type: string; title: string; jurisdiction: string }> {
+    const sources: Array<{ type: string; title: string; jurisdiction: string }> = [];
     
     // Extract Act references
     const actMatches = response.match(/([A-Z][a-zA-Z\s]+Act\s+\d{4}|\d{4})/g);

@@ -8,7 +8,7 @@ import {
   AuthenticatedRequest,
   JWTPayload
 } from '../middleware/auth';
-import type { ApiResponse } from '@wakili-pro/shared';
+import type { ApiResponse, UserRole } from '@wakili-pro/shared';
 import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '@wakili-pro/shared';
 import { validatePassword } from '../services/security/passwordPolicyService';
 
@@ -86,7 +86,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const tokenPayload = {
       userId: user.id,
       email: user.email,
-      role: user.role as import('../../shared').UserRole
+      role: user.role as UserRole
     };
 
     const accessToken = generateAccessToken(tokenPayload);
@@ -180,7 +180,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const tokenPayload = {
       userId: user.id,
       email: user.email,
-      role: user.role as import('../../shared').UserRole
+      role: user.role as UserRole
     };
 
     const accessToken = generateAccessToken(tokenPayload);
@@ -271,7 +271,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
       const tokenPayload: JWTPayload = {
         userId: user.id,
         email: user.email,
-        role: user.role as import('../../shared').UserRole
+        role: user.role as UserRole
       };
 
       const newAccessToken = generateAccessToken(tokenPayload);

@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middleware/auth';
-import type { ApiResponse } from '@wakili-pro/shared';
+import type { ApiResponse, UserRole } from '@wakili-pro/shared';
 import { LawyerOnboardingSchema, UpdateAvailabilitySchema } from '@wakili-pro/shared';
 
 const prisma = new PrismaClient();
@@ -64,7 +64,7 @@ export const getLawyerProfile = async (req: AuthenticatedRequest, res: Response)
 export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
-    const userRole = req.user?.role;
+    const userRole = req.user?.role as UserRole | undefined;
 
     if (!userId) {
       res.status(401).json({
@@ -168,7 +168,7 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
 export const updateAvailability = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
-    const userRole = req.user?.role;
+    const userRole = req.user?.role as UserRole | undefined;
 
     if (!userId) {
       res.status(401).json({
