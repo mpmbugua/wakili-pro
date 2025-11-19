@@ -4,6 +4,7 @@
   "description": "Wakili Pro Backend - Minimal Version",
   "main": "dist/index.js",
   "scripts": {
+    "prebuild": "cd ../shared && npm run build",
     "build": "tsc --skipLibCheck",
     "start": "node --max-old-space-size=4096 dist/index.js",
     "dev": "node --max-old-space-size=4096 dist/index.js",
