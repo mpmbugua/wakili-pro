@@ -4,9 +4,8 @@ services:
     runtime: node
     region: oregon
     plan: free
-    rootDir: backend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: npm install && cd shared && npm run build && cd ../backend && npm install && npm run build
+    startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -19,6 +18,18 @@ services:
       - key: JWT_REFRESH_SECRET
         generateValue: true
     healthCheckPath: /api/health
+
+  - type: web
+    name: wakili-pro-frontend
+    runtime: static
+    region: oregon
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
 
 databases:
   - name: wakili-pro-db
