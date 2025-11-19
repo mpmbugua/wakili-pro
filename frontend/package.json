@@ -62,13 +62,13 @@
     "eslint": "8",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
-    "happy-dom": "^12.10.3",
+    "happy-dom": "^15.11.7",
     "npm-force-resolutions": "^0.0.10",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.6",
     "typescript": "^5.9.3",
-    "vite": "^5.0.0",
-    "vitest": "^0.34.6"
+    "vite": "^6.1.7",
+    "vitest": "^2.2.2"
   },
   "engines": {
     "node": ">=20.0.0"
