@@ -6,10 +6,11 @@ const fs = require('fs');
 
 // Determine correct path to index.js
 const possiblePaths = [
-  path.join(__dirname, 'dist', 'index.js'),           // Normal: backend/dist/index.js
-  path.join(__dirname, '..', 'backend', 'dist', 'index.js'), // If running from root
-  path.join(process.cwd(), 'dist', 'index.js'),       // Using current working dir
-  path.join(process.cwd(), 'backend', 'dist', 'index.js')   // From project root
+  path.join(__dirname, 'dist', 'index.js'),                    // When running from backend/
+  path.join(__dirname, 'index.js'),                            // When already in dist/
+  path.join(process.cwd(), 'dist', 'index.js'),                // From backend/ with cwd
+  path.join(process.cwd(), 'backend', 'dist', 'index.js'),     // From project root
+  path.join(__dirname, '..', 'dist', 'index.js')               // If script is in subfolder
 ];
 
 let indexPath = null;
