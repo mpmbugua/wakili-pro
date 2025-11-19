@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Volume2, VolumeX, User, Brain, BookOpen, FileText, Users } from 'lucide-react';
 import { aiService } from '../../services/aiService';
-<<<<<<< HEAD
-=======
 import { analyticsService } from '../../services/analyticsService';
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 import { cn } from '../../lib/utils';
 
 interface AIMessage {
@@ -37,15 +34,10 @@ interface QueryLimits {
   isAuthenticated: boolean;
 }
 
-<<<<<<< HEAD
-=======
-
 const SUPPORTED_LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'sw', label: 'Swahili' }
 ];
-
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 const AILegalAssistant: React.FC = () => {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -118,10 +110,7 @@ How can I help you today? You can type your question or use the microphone 🎤 
   };
 
   const handleSendMessage = async () => {
-<<<<<<< HEAD
-=======
     analyticsService.logEvent({ type: 'ai_chat_message_sent', details: { language: selectedLanguage } });
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     if (!inputMessage.trim() || isLoading) return;
 
     const userMessage: AIMessage = {

@@ -227,28 +227,6 @@ export const AdminDashboard: React.FC = () => {
 =======
             <Button onClick={loadDashboard}>Try Again</Button>
 >>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-                <Shield className="w-6 h-6 mr-2 text-indigo-600" />
-                Admin Dashboard
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Welcome back, {user?.firstName}. Here's what's happening on Wakili Pro.
-              </p>
-            </div>
-            
             <div className="flex items-center space-x-3">
               <div className={`flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                 stats?.systemHealth === 'healthy' 
@@ -257,7 +235,8 @@ export const AdminDashboard: React.FC = () => {
                   ? 'bg-yellow-100 text-yellow-800'
                   : 'bg-red-100 text-red-800'
               }`}>
-                <div className={`w-2 h-2 rounded-full mr-2 ${
+          import { adminService, AdminStats } from '@/services/adminService';
+
                   stats?.systemHealth === 'healthy' 
                     ? 'bg-green-500'
                     : stats?.systemHealth === 'warning'
@@ -432,27 +411,10 @@ export const AdminDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-<<<<<<< HEAD
-                {stats?.recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-start space-x-3">
-                    <div className={`flex-shrink-0 ${getStatusColor(activity.status)}`}>
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900">
-                        {activity.description}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatTimeAgo(activity.timestamp)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-=======
-                {activity.length === 0 ? (
+                {Array.isArray(activity) && activity.length === 0 ? (
                   <div className="text-gray-500 text-sm">No recent activity.</div>
                 ) : (
-                  activity.map((log) => (
+                  (activity || []).map((log) => (
                     <div key={log.id} className="flex items-start space-x-3">
                       <div className={`flex-shrink-0 ${getStatusColor(log.status || log.action)}`}>
                         {getActivityIcon(log.action)}
@@ -468,7 +430,6 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   ))
                 )}
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
               </div>
               
               <div className="mt-4 pt-4 border-t">

@@ -343,7 +343,6 @@ const LawyerOnboarding: React.FC = () => {
               />
               {errors.bio && (
                 <p id="bio-error" className="mt-1 text-sm text-red-600 transition-all duration-300 animate-fade-in">{errors.bio.message}</p>
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
               )}
               <p className="mt-1 text-sm text-gray-500">
                 Minimum 100 characters. This helps clients understand your expertise and approach.

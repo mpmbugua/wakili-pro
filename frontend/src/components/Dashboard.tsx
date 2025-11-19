@@ -8,13 +8,8 @@ import chatService from '../services/chatService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card';
 import { Button } from './ui/Button';
 
-const Dashboard: React.FC = () => {
-  const { user, isAuthenticated } = useAuthStore();
-<<<<<<< HEAD
-=======
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [stats, setStats] = useState<{
     appointments: number;
     messages: number;
@@ -65,7 +60,6 @@ const Dashboard: React.FC = () => {
     };
     fetchStats();
   }, [user]);
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 
   // Redirect to login if not authenticated
   if (!isAuthenticated || !user) {

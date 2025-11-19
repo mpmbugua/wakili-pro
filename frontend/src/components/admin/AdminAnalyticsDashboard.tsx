@@ -1,63 +1,41 @@
 import React, { useState, useEffect } from 'react';
-<<<<<<< HEAD
-import {
-  TrendingUp,
-  Users,
-  DollarSign,
-  Activity,
-  Download,
-  BarChart3,
-  LineChart,
-  Eye,
-  ArrowUpRight,
-  ArrowDownRight
-} from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { adminService } from '@/services/adminService';
+import type { AdminAnalytics, UserBehaviorAnalytics } from '@/services/adminService';
 
-interface AdminAnalytics {
-  overview: {
-    totalUsers: number;
-    totalLawyers: number;
-    totalRevenue: number;
-    monthlyActiveUsers: number;
-    conversionRate: number;
-    averageSessionDuration: number;
-  };
-  userBehavior: {
-    pageViews: { page: string; views: number; avgTime: number }[];
-    userFlows: { from: string; to: string; count: number }[];
-    dropOffPoints: { step: string; dropOffRate: number }[];
-  };
-  platformMetrics: {
-    consultationStats: {
-      total: number;
-      completed: number;
-      cancelled: number;
-      avgDuration: number;
-      satisfaction: number;
-    };
-    paymentStats: {
-      totalTransactions: number;
-      successRate: number;
-      avgTransactionValue: number;
-      refundRate: number;
-    };
-    lawyerMetrics: {
-      averageRating: number;
-      responseTime: number;
-      completionRate: number;
-    };
-  };
-  timeSeriesData: {
-    userGrowth: { date: string; users: number; lawyers: number }[];
-    revenueGrowth: { date: string; revenue: number; transactions: number }[];
-    engagementMetrics: { date: string; sessions: number; duration: number }[];
-  };
-}
+const TABS = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'behavior', label: 'User Behavior' },
+  { key: 'platform', label: 'Platform Metrics' },
+  { key: 'trends', label: 'Trends' }
+];
 
-export const AdminAnalyticsDashboard: React.FC = () => {
+function AdminAnalyticsDashboard() {
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
+  const [userBehavior, setUserBehavior] = useState<UserBehaviorAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState('30d');
+  const [activeTab, setActiveTab] = useState<'overview' | 'behavior' | 'platform' | 'trends'>('overview');
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      adminService.getAdminAnalytics(dateRange),
+      adminService.getUserBehaviorAnalytics(dateRange)
+    ])
+      .then(([analyticsData, userBehaviorData]) => {
+        setAnalytics(analyticsData);
+        setUserBehavior(userBehaviorData);
+      })
+      .catch((err) => {
+        setError('Failed to load analytics');
+        console.error('Load analytics error:', err);
+      })
+      .finally(() => setLoading(false));
+  }, [dateRange]);
   const [loading, setLoading] = useState(true);
 =======
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
@@ -170,26 +148,19 @@ function AdminAnalyticsDashboard() {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
-=======
-    setLoading(true);
-    setError(null);
-    Promise.all([
-      adminService.getAdminAnalytics(dateRange),
-      adminService.getUserBehaviorAnalytics(dateRange)
-    ])
-      .then(([analyticsData, behaviorData]) => {
-        setAnalytics(analyticsData);
-        setUserBehavior(behaviorData);
-      })
-      .catch((err) => setError(err?.message || 'Failed to load analytics'))
-      .finally(() => setLoading(false));
-  }, [dateRange]);
-
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-KE', {
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
+    const formatCurrency = (amount: number) =>
+      new Intl.NumberFormat('en-KE', {
+        style: 'currency',
+        currency: 'KES',
+        minimumFractionDigits: 0
+      }).format(amount);
+    const formatPercentage = (value: number) => `${value.toFixed(1)}%`;
+    const formatDuration = (minutes: number) => {
+      if (minutes < 60) return `${minutes.toFixed(1)}m`;
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours}h ${mins.toFixed(0)}m`;
+    };
       style: 'currency',
       currency: 'KES',
       minimumFractionDigits: 0
