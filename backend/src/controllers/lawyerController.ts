@@ -145,8 +145,8 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
     }
     if (updateData.licenseNumber) updatePayload.licenseNumber = updateData.licenseNumber;
     if (updateData.yearOfAdmission) updatePayload.yearOfAdmission = updateData.yearOfAdmission;
-    if (updateData.tier) updatePayload.tier = updateData.tier;
-    if (updateData.phoneNumber) updatePayload.phoneNumber = updateData.phoneNumber;
+    if ('tier' in updateData && updateData.tier) updatePayload.tier = updateData.tier;
+    if ('phoneNumber' in updateData && updateData.phoneNumber) updatePayload.phoneNumber = updateData.phoneNumber;
 
     const updatedProfile = await prisma.lawyerProfile.update({
       where: { userId },
