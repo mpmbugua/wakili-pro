@@ -4,8 +4,15 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: npm install && npm run build:backend-only
-    startCommand: node backend/dist/index.js
+    rootDir: .
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: chmod +x start.sh && ./start.sh
+    env: node
+    buildFilter:
+      paths:
+        - backend/**
+        - shared/**
+        - package.json
     envVars:
       - key: NODE_ENV
         value: production
