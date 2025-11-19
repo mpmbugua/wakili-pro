@@ -7,7 +7,9 @@
   "scripts": {
     "prebuild": "cd ../shared && npm run build",
     "build": "tsc --skipLibCheck",
-    "start": "node --max-old-space-size=4096 dist/index.js",
+    "postbuild": "node -e \"console.log('Build complete. Dist folder:', require('fs').existsSync('./dist') ? 'EXISTS' : 'MISSING'); if (require('fs').existsSync('./dist/index.js')) console.log('index.js found!'); else console.error('ERROR: index.js not found!');\"",
+    "start": "node --max-old-space-size=4096 start.js",
+    "start:direct": "node --max-old-space-size=4096 dist/index.js",
     "dev": "node --max-old-space-size=4096 dist/index.js",
     "lint": "echo 'Backend linting skipped - no ESLint config present. Will add proper linting later.'",
     "test": "node --max-old-space-size=4096 ./node_modules/.bin/jest",
