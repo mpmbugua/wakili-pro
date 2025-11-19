@@ -1,13 +1,13 @@
+import { Request, Response } from 'express';
 import { createNotification } from './notificationController';
 import { calculateBookingAmounts } from '../services/bookingPricingService';
 import Stripe from 'stripe';
 import axios from 'axios';
 import { CreatePaymentIntentSchema, PaymentVerificationSchema, RefundRequestSchema, EscrowReleaseSchema, PaymentWebhookSchema } from '@wakili-pro/shared';
 import type { CreatePaymentIntentData } from '@wakili-pro/shared/src/schemas/payment';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, PaymentStatus } from '@prisma/client';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
-import { PaymentStatus } from '@wakili-pro/shared/src/types/marketplace';
 
 const prisma = new PrismaClient();
 
@@ -29,7 +29,8 @@ const MPESA_CONFIG = {
 interface AuthRequest extends Request {
   user?: {
     id: string;
-  }
+  };
+  query: any;
 }
 
 // ...existing code...
@@ -123,7 +124,7 @@ export const processRefund = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    if (payment.status !== PaymentStatus.COMPLETED) {
+    if (payment.status !== PaymentStatus.PAID) {
       return res.status(400).json({
         success: false,
         message: 'Can only refund completed payments'
@@ -163,7 +164,8 @@ export const processRefund = async (req: AuthRequest, res: Response) => {
     // Create refund record
     const refund = await prisma.refund.create({
       data: {
-        paymentId: payment.id,
+        payment: { connect: { id: payment.id } },
+        user: { connect: { id: userId! } },
         amount: refundAmount,
         reason: validatedData.reason,
         status: 'PENDING', // RefundStatus.PENDING as string
@@ -212,7 +214,7 @@ export const releaseEscrow = async (req: AuthRequest, res: Response) => {
     const payment = await prisma.payment.findFirst({
       where: {
         bookingId: validatedData.bookingId,
-        status: PaymentStatus.COMPLETED
+        status: PaymentStatus.PAID
       }
     });
 
@@ -224,7 +226,7 @@ export const releaseEscrow = async (req: AuthRequest, res: Response) => {
     }
 
     // Find the escrow transaction for this payment
-    // @ts-expect-error: escrowTransaction may not be in generated client if schema is out of sync
+    // Note: escrowTransaction model not in current schema, using any cast
     const escrow = await (prisma as any).escrowTransaction?.findFirst({
       where: {
         paymentId: payment.id,
@@ -245,7 +247,7 @@ export const releaseEscrow = async (req: AuthRequest, res: Response) => {
     const lawyerPayout = validatedData.releaseAmount - platformFee;
 
     // Release escrow
-    // @ts-expect-error: escrowTransaction may not be in generated client if schema is out of sync
+    // Note: escrowTransaction model not in current schema, using any cast
     await (prisma as any).escrowTransaction?.update({
       where: { id: escrow.id },
       data: {
@@ -361,7 +363,7 @@ export const handlePaymentWebhook = async (req: Request, res: Response) => {
       // Handle M-Pesa callback
       const { transactionId, status } = validatedData;
       
-      // @ts-expect-error: externalTransactionId may not be in generated client if schema is out of sync
+      // Note: externalTransactionId field may not be in schema, using any cast
       const payment = await (prisma as any).payment.findFirst({
         where: { externalTransactionId: transactionId },
         include: {
@@ -374,9 +376,9 @@ export const handlePaymentWebhook = async (req: Request, res: Response) => {
       });
       
       if (payment) {
-        // Map webhook status to PaymentStatus enum
+        // Map webhook status to Prisma PaymentStatus enum
         let paymentStatus: PaymentStatus = PaymentStatus.PENDING;
-        if (status === 'COMPLETED') paymentStatus = PaymentStatus.COMPLETED;
+        if (status === 'COMPLETED') paymentStatus = PaymentStatus.PAID;
         else if (status === 'FAILED') paymentStatus = PaymentStatus.FAILED;
         else if (status === 'REFUNDED') paymentStatus = PaymentStatus.REFUNDED;
 
@@ -384,12 +386,12 @@ export const handlePaymentWebhook = async (req: Request, res: Response) => {
           where: { id: payment.id },
           data: { 
             status: paymentStatus,
-            ...(paymentStatus === PaymentStatus.COMPLETED ? { verifiedAt: new Date() } : {})
+            ...(paymentStatus === PaymentStatus.PAID ? { verifiedAt: new Date() } : {})
           }
         });
 
         // Notify users based on webhook status
-        if (paymentStatus === 'COMPLETED') {
+        if (paymentStatus === PaymentStatus.PAID) {
           // Fetch booking and service details for notifications
           const booking = payment.bookingId
             ? await prisma.serviceBooking.findUnique({

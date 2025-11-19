@@ -222,14 +222,14 @@ class SpeechService {
   // Generate audio with different voices for different contexts
   async generateContextualAudio(text: string, context: 'legal_advice' | 'explanation' | 'greeting' = 'legal_advice'): Promise<TextToSpeechResult> {
     const voiceMap = {
-      'legal_advice': 'nova', // Professional female voice
-      'explanation': 'alloy', // Clear neutral voice
-      'greeting': 'echo' // Friendly voice
-    } as const;
+      'legal_advice': 'en' as const, // Professional English voice
+      'explanation': 'en' as const, // Clear English voice
+      'greeting': 'sw' as const // Friendly Swahili voice
+    };
 
-    const selectedVoice = voiceMap[context];
+    const selectedLanguage = voiceMap[context];
     
-    return await this.textToSpeech(text, selectedVoice);
+    return await this.textToSpeech(text, selectedLanguage);
   }
 }
 

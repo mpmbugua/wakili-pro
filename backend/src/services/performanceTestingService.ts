@@ -174,7 +174,8 @@ class PerformanceTestingService {
     const test = this.activeTests.get(testId);
     if (!test) return;
 
-    const totalParticipants = test.createdRooms.length * config.maxParticipantsPerRoom;
+    const createdRooms = (test.createdRooms || []) as string[];
+    const totalParticipants = createdRooms.length * config.maxParticipantsPerRoom;
     
     if (Array.isArray(test.createdRooms)) {
       for (let i = 0; i < totalParticipants; i++) {
@@ -378,7 +379,8 @@ class PerformanceTestingService {
     // Cleanup test data
     try {
       // Delete test consultations and bookings
-      for (const roomId of test.createdRooms) {
+      const createdRooms = (test.createdRooms || []) as string[];
+      for (const roomId of createdRooms) {
         const consultation = await prisma.videoConsultation.findFirst({
           where: { roomId }
         });

@@ -194,16 +194,8 @@ export class VideoSignalingServer {
           const validatedData = VideoSettingsUpdateSchema.parse(data);
           
           // Update participant settings in database
-          await prisma.videoParticipant.updateMany({
-            where: {
-              consultationId: validatedData.consultationId,
-              userId: user.userId
-            },
-            data: {
-              hasVideo: validatedData.hasVideo,
-              hasAudio: validatedData.hasAudio
-            }
-          });
+          // Note: hasVideo and hasAudio are not in VideoParticipant schema
+          // These settings are managed client-side in real-time via Socket.io
 
           // Notify other participants
           const consultation = await prisma.videoConsultation.findUnique({
@@ -280,10 +272,9 @@ export class VideoSignalingServer {
           await prisma.videoParticipant.updateMany({
             where: {
               userId: user.userId,
-              connectionStatus: 'CONNECTED'
+              leftAt: null
             },
             data: {
-              connectionStatus: 'DISCONNECTED',
               leftAt: new Date()
             }
           });

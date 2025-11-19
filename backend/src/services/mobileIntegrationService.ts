@@ -189,12 +189,23 @@ class MobileIntegrationService {
         }
       };
 
-  const response = await (admin.messaging() as admin.messaging.Messaging).sendMulticast(message);
+      // Send notification to each token individually
+      const sendPromises = tokens.map(token => 
+        admin.messaging().send({ ...message, token })
+          .then(() => ({ success: true }))
+          .catch(err => ({ success: false, error: err }))
+      );
+      const responses = await Promise.all(sendPromises);
+      const response = {
+        successCount: responses.filter(r => r.success === true).length,
+        failureCount: responses.filter(r => r.success === false).length,
+        responses: responses as any[]
+      };
       
       // Handle failed tokens
       if (response.failureCount > 0) {
         const failedTokens: string[] = [];
-  response.responses.forEach((resp: admin.messaging.SendResponse, idx: number) => {
+        response.responses.forEach((resp: any, idx: number) => {
           if (!resp.success) {
             failedTokens.push(tokens[idx]);
             logger.warn(`Failed to send notification to token ${tokens[idx]}:`, resp.error);
@@ -339,8 +350,9 @@ class MobileIntegrationService {
 
       if (!consultation) return;
 
-      const duration = consultation.endedAt && consultation.startedAt
-        ? Math.round((consultation.endedAt.getTime() - consultation.startedAt.getTime()) / (1000 * 60))
+      // Calculate duration from createdAt to endedAt (startedAt not in schema)
+      const duration = consultation.endedAt
+        ? Math.round((consultation.endedAt.getTime() - consultation.createdAt.getTime()) / (1000 * 60))
         : 0;
 
       const notifications = [
@@ -416,12 +428,10 @@ class MobileIntegrationService {
    */
   private async deactivateTokens(tokens: string[]): Promise<void> {
     try {
-      await prisma.deviceRegistration.updateMany({
+      // Delete device registrations with failed tokens (isActive field not in schema)
+      await prisma.deviceRegistration.deleteMany({
         where: {
-          deviceToken: { in: tokens }
-        },
-        data: {
-          isActive: false
+          token: { in: tokens }
         }
       });
 
