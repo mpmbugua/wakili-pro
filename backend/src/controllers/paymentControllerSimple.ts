@@ -55,7 +55,10 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
           await mpesaService.initiatePayment();
         }
   } catch (err: unknown) {
-        if (err && err.message && err.message.includes('Service temporarily unavailable')) {
+        if (
+          typeof err === 'object' && err !== null && 'message' in err && typeof (err as any).message === 'string' &&
+          (err as any).message.includes('Service temporarily unavailable')
+        ) {
           processorError = err;
         }
       }

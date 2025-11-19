@@ -7,6 +7,7 @@ import type { CreatePaymentIntentData } from '@wakili-pro/shared/src/schemas/pay
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
+import { PaymentStatus } from '@wakili-pro/shared/src/types/marketplace';
 
 const prisma = new PrismaClient();
 
@@ -165,7 +166,7 @@ export const processRefund = async (req: AuthRequest, res: Response) => {
         paymentId: payment.id,
         amount: refundAmount,
         reason: validatedData.reason,
-        status: RefundStatus.PENDING,
+        status: 'PENDING', // RefundStatus.PENDING as string
         // externalRefundId: refundResult?.externalRefundId || null, // Uncomment if in schema
         requestedBy: userId!
       }
@@ -262,7 +263,7 @@ export const releaseEscrow = async (req: AuthRequest, res: Response) => {
         type: 'PAYOUT',
         amount: lawyerPayout,
         description: `Payout for service`,
-        status: TransactionStatus.COMPLETED
+        status: 'COMPLETED' // TransactionStatus.COMPLETED as string
       }
     });
 
@@ -296,7 +297,9 @@ export const getPaymentHistory = async (req: AuthRequest, res: Response) => {
     }
 
     const { page = 1, limit = 10, status: paymentStatus, method } = req.query;
-    const skip = (Number(page) - 1) * Number(limit);
+    const pageNum = typeof page === 'string' ? parseInt(page, 10) : Number(page);
+    const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : Number(limit);
+    const skip = (pageNum - 1) * limitNum;
 
     const where: any = { userId };
     if (paymentStatus) where.status = paymentStatus;
@@ -318,21 +321,21 @@ export const getPaymentHistory = async (req: AuthRequest, res: Response) => {
           }
         },
         skip,
-        take: Number(limit),
+        take: limitNum,
         orderBy: { createdAt: 'desc' }
       }),
       prisma.payment.count({ where })
     ]);
 
-    const totalPages = Math.ceil(total / Number(limit));
+    const totalPages = Math.ceil(total / limitNum);
 
     res.json({
       success: true,
       data: {
         payments,
         pagination: {
-          page: Number(page),
-          limit: Number(limit),
+          page: pageNum,
+          limit: limitNum,
           total,
           totalPages
         }
