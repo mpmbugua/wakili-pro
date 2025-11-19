@@ -14,7 +14,7 @@ interface LegalQueryRequest {
   userId: string;
 }
 
-
+interface LegalQueryResponse {
   answer: string;
   confidence: number;
   tokensUsed: number;
