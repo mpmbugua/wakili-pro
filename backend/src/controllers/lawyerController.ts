@@ -296,19 +296,50 @@ export const getPublicLawyerProfile = async (req: Request, res: Response): Promi
 };
 export const searchLawyers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      specialization,
-      minRating = 0,
-      page = 1,
-      limit = 10
-    } = req.query;
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    // Safely extract and cast query params
+    const specializationRaw = req.query.specialization;
+    const minRatingRaw = req.query.minRating;
+    const pageRaw = req.query.page;
+    const limitRaw = req.query.limit;
+
+    const specialization = Array.isArray(specializationRaw)
+      ? specializationRaw[0]
+      : typeof specializationRaw === 'string'
+      ? specializationRaw
+      : undefined;
+
+    const minRating = Array.isArray(minRatingRaw)
+      ? parseFloat(minRatingRaw[0])
+      : typeof minRatingRaw === 'string'
+      ? parseFloat(minRatingRaw)
+      : typeof minRatingRaw === 'number'
+      ? minRatingRaw
+      : 0;
+
+    const page = Array.isArray(pageRaw)
+      ? parseInt(pageRaw[0])
+      : typeof pageRaw === 'string'
+      ? parseInt(pageRaw)
+      : typeof pageRaw === 'number'
+      ? pageRaw
+      : 1;
+
+    const limit = Array.isArray(limitRaw)
+      ? parseInt(limitRaw[0])
+      : typeof limitRaw === 'string'
+      ? parseInt(limitRaw)
+      : typeof limitRaw === 'number'
+      ? limitRaw
+      : 10;
+
+    const skip = (page - 1) * limit;
 
     // Build where clause
   const where: Record<string, unknown> = {
       isVerified: true
     };
+
 
     if (specialization) {
       where.specializations = { has: specialization };
@@ -316,7 +347,7 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
 
     if (minRating) {
       where.rating = {
-        gte: parseFloat(minRating)
+        gte: minRating
       };
     }
 
@@ -341,7 +372,7 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
         }
       },
       skip,
-      take: parseInt(limit),
+      take: limit,
       orderBy: [
         { rating: 'desc' },
         { reviewCount: 'desc' }
@@ -350,6 +381,7 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
 
     // Get total count
     const total = await prisma.lawyerProfile.count({ where });
+
 
     const response: ApiResponse<{
       lawyers: typeof lawyers;
@@ -365,10 +397,10 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
       data: {
         lawyers,
         pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
+          page,
+          limit,
           total,
-          totalPages: Math.ceil(total / parseInt(limit))
+          totalPages: Math.ceil(total / limit)
         }
       }
     };
