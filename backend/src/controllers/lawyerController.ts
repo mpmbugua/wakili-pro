@@ -112,10 +112,10 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
 
     // Check if license number is being updated and ensure it's unique
     if (updateData.licenseNumber && updateData.licenseNumber !== existingProfile.licenseNumber) {
-      const existingLicense = await prisma.lawyerProfile.findUnique({
+      // Prisma's unique input for findUnique is either id or userId, not licenseNumber directly
+      const existingLicense = await prisma.lawyerProfile.findFirst({
         where: { licenseNumber: updateData.licenseNumber }
       });
-
       if (existingLicense) {
         res.status(409).json({
           success: false,
@@ -126,16 +126,31 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
     }
 
     // Update lawyer profile
+    const updatePayload: any = {};
+    if (updateData.specializations) {
+      // If specializations is array of objects, map to string[]
+      if (Array.isArray(updateData.specializations) && typeof updateData.specializations[0] === 'object') {
+        updatePayload.specializations = updateData.specializations.map((s: any) => s.name);
+      } else {
+        updatePayload.specializations = updateData.specializations;
+      }
+    }
+    if (updateData.location) {
+      // If location is an object, stringify or pick a string property
+      if (typeof updateData.location === 'object' && updateData.location !== null) {
+        updatePayload.location = JSON.stringify(updateData.location);
+      } else {
+        updatePayload.location = updateData.location;
+      }
+    }
+    if (updateData.licenseNumber) updatePayload.licenseNumber = updateData.licenseNumber;
+    if (updateData.yearOfAdmission) updatePayload.yearOfAdmission = updateData.yearOfAdmission;
+    if (updateData.tier) updatePayload.tier = updateData.tier;
+    if (updateData.phoneNumber) updatePayload.phoneNumber = updateData.phoneNumber;
+
     const updatedProfile = await prisma.lawyerProfile.update({
       where: { userId },
-      data: {
-        ...(updateData.specializations && { specializations: updateData.specializations as string[] }),
-        ...(updateData.location && { location: updateData.location as string }),
-        ...(updateData.licenseNumber && { licenseNumber: updateData.licenseNumber }),
-        ...(updateData.yearOfAdmission && { yearOfAdmission: updateData.yearOfAdmission }),
-        ...(updateData.tier && { tier: updateData.tier }),
-        ...(updateData.phoneNumber && { phoneNumber: updateData.phoneNumber })
-      },
+      data: updatePayload,
       include: {
         user: {
           select: {
