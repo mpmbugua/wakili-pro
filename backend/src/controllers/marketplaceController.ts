@@ -1,3 +1,7 @@
+// TEMP: Stub to unblock route imports. Replace with real implementation.
+export async function createService(req: any, res: any) {
+  res.status(501).json({ success: false, message: 'Not implemented: createService' });
+}
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { CreateServiceSchema, CreateBookingSchema, UpdateBookingStatusSchema, CreateReviewSchema, ServiceSearchSchema } from '@wakili-pro/shared';
