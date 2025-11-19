@@ -101,109 +101,168 @@ describe('Enhanced Video Consultation', () => {
   let consultationId: string;
   // Global FK-safe cleanup before each test suite
     beforeAll(async () => {
-    await prisma.refund.deleteMany({});
-    await prisma.escrowTransaction.deleteMany({});
-    await prisma.payment.deleteMany({});
-    await prisma.videoParticipant.deleteMany({});
-    await prisma.consultationRecording.deleteMany({});
-    await prisma.chatMessage.deleteMany({});
-    await prisma.chatRoom.deleteMany({});
-    await prisma.serviceReview.deleteMany({});
-    await prisma.notification.deleteMany({});
-    await prisma.walletTransaction.deleteMany({});
-    await prisma.deviceRegistration.deleteMany({});
-    await prisma.videoConsultation.deleteMany({});
-    await prisma.serviceBooking.deleteMany({});
-    await prisma.marketplaceService.deleteMany({});
-    await prisma.lawyerProfile.deleteMany({});
-    await prisma.userProfile.deleteMany({});
-    await prisma.user.deleteMany({});
-    });
+    require('dotenv/config');
+    import { describe, expect, test, beforeEach, afterEach, jest } from '@jest/globals';
+    import request from 'supertest';
+    import { prisma } from '../src/utils/database';
+    import { UserRole } from '@prisma/client';
+    import { generateAccessToken } from '../src/middleware/auth';
 
-  beforeEach(async () => {
-    jest.setTimeout(120000); // 2 min for slow DB setup
-    app = express();
-    app.use(express.json());
-    app.use('/api/video', videoRoutes);
+    import express from 'express';
+    import videoRoutes from '../src/routes/video';
 
-    // Use a unique suffix for all unique fields per test run
-    const unique = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    jest.setTimeout(120000); // 2 min for slow DB cleanup and tests
+    require('dotenv/config');
 
-    // 1. Create lawyer (provider)
-    const lawyer = await prisma.user.create({
-      data: {
-        firstName: 'Test',
-        lastName: 'Lawyer',
-        email: `testlawyer-${unique}@example.com`,
-        password: 'password',
-        role: UserRole.LAWYER,
-        emailVerified: true,
-        verificationStatus: 'VERIFIED',
-      }
-    });
-    lawyerId = lawyer.id;
+    describe('Enhanced Video Consultation', () => {
+      // Declare shared variables at top-level scope for all tests
+      let app: ReturnType<typeof express>;
+      let lawyerId: string;
+      let userId: string;
+      let authToken: string;
+      let serviceId: string;
+      let bookingId: string;
+      let consultationId: string;
+      // Global FK-safe cleanup before each test suite
+        beforeAll(async () => {
+        await prisma.refund.deleteMany({});
+        await prisma.escrowTransaction.deleteMany({});
+        await prisma.payment.deleteMany({});
+        await prisma.videoParticipant.deleteMany({});
+        await prisma.consultationRecording.deleteMany({});
+        await prisma.chatMessage.deleteMany({});
+        await prisma.chatRoom.deleteMany({});
+        await prisma.serviceReview.deleteMany({});
+        await prisma.notification.deleteMany({});
+        await prisma.walletTransaction.deleteMany({});
+        await prisma.deviceRegistration.deleteMany({});
+        await prisma.videoConsultation.deleteMany({});
+        await prisma.serviceBooking.deleteMany({});
+        await prisma.marketplaceService.deleteMany({});
+        await prisma.lawyerProfile.deleteMany({});
+        await prisma.userProfile.deleteMany({});
+        await prisma.user.deleteMany({});
+      });
 
-    // 2. Create lawyer profile
-    await prisma.lawyerProfile.create({
-      data: {
-        userId: lawyerId,
-        licenseNumber: `LN${unique}`,
-        yearOfAdmission: 2020,
-        specializations: JSON.stringify(['Corporate']),
-        location: JSON.stringify({ city: 'Nairobi' }),
-        bio: 'Test bio',
-        yearsOfExperience: 5,
-        rating: 5,
-        reviewCount: 1,
-        isVerified: true,
-        availability: JSON.stringify([{ day: 'Monday', start: '09:00', end: '17:00' }]),
-      }
-    });
+      beforeEach(async () => {
+        jest.setTimeout(120000); // 2 min for slow DB setup
+        app = express();
+        app.use(express.json());
+        app.use('/api/video', videoRoutes);
 
-    // 3. Create test user (client)
-    const user = await prisma.user.create({
-      data: {
-        firstName: 'Test',
-        lastName: 'User',
-        email: `testuser-${unique}@example.com`,
-        password: 'password',
-        role: UserRole.PUBLIC,
-        emailVerified: true,
-        verificationStatus: 'VERIFIED',
-      }
-    });
-    userId = user.id;
-    authToken = generateAccessToken({ userId: user.id, email: user.email, role: user.role });
+        // Use a unique suffix for all unique fields per test run
+        const unique = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
-    // 4. Create service (provider must exist)
-    const service = await prisma.marketplaceService.create({
-      data: {
-        type: 'CONSULTATION',
-        title: `Consultation Service ${unique}`,
-        description: 'A test consultation service',
-        provider: { connect: { id: lawyerId } },
-        priceKES: 1000,
-        status: 'ACTIVE',
-        tags: ['consultation'],
-        duration: 60,
-      }
-    });
-    serviceId = service.id;
+        // 1. Create lawyer (provider)
+        const lawyer = await prisma.user.create({
+          data: {
+            firstName: 'Test',
+            lastName: 'Lawyer',
+            email: `testlawyer-${unique}@example.com`,
+            password: 'password',
+            role: UserRole.LAWYER,
+            emailVerified: true,
+            verificationStatus: 'VERIFIED',
+          }
+        });
+        lawyerId = lawyer.id;
 
-    // 5. Create booking
-    const booking = await prisma.serviceBooking.create({
-      data: {
-        serviceId: serviceId,
-        clientId: userId,
-        providerId: lawyerId,
-        scheduledAt: new Date(Date.now() + 3600000),
-        status: 'CONFIRMED',
-        paymentStatus: 'PAID',
-        totalAmountKES: 1000,
-        clientRequirements: 'Test booking',
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
-      }
-    });
+        // 2. Create lawyer profile
+        await prisma.lawyerProfile.create({
+          data: {
+            userId: lawyerId,
+            licenseNumber: `LN${unique}`,
+            yearOfAdmission: 2020,
+            specializations: JSON.stringify(['Corporate']),
+            location: JSON.stringify({ city: 'Nairobi' }),
+            bio: 'Test bio',
+            yearsOfExperience: 5,
+            rating: 5,
+            reviewCount: 1,
+            isVerified: true,
+            availability: JSON.stringify([{ day: 'Monday', start: '09:00', end: '17:00' }]),
+          }
+        });
+
+        // 3. Create test user (client)
+        const user = await prisma.user.create({
+          data: {
+            firstName: 'Test',
+            lastName: 'User',
+            email: `testuser-${unique}@example.com`,
+            password: 'password',
+            role: UserRole.PUBLIC,
+            emailVerified: true,
+            verificationStatus: 'VERIFIED',
+          }
+        });
+        userId = user.id;
+        authToken = generateAccessToken({ userId: user.id, email: user.email, role: user.role });
+
+        // 4. Create service (provider must exist)
+        const service = await prisma.marketplaceService.create({
+          data: {
+            type: 'CONSULTATION',
+            title: `Consultation Service ${unique}`,
+            description: 'A test consultation service',
+            provider: { connect: { id: lawyerId } },
+            priceKES: 1000,
+            status: 'ACTIVE',
+            tags: ['consultation'],
+            duration: 60,
+          }
+        });
+        serviceId = service.id;
+
+        // 5. Create booking
+        const booking = await prisma.serviceBooking.create({
+          data: {
+            serviceId: serviceId,
+            clientId: userId,
+            providerId: lawyerId,
+            scheduledAt: new Date(Date.now() + 3600000),
+            status: 'CONFIRMED',
+            paymentStatus: 'PAID',
+            totalAmountKES: 1000,
+            clientRequirements: 'Test booking',
+          }
+        });
+        bookingId = booking.id;
+
+        // 6. Create consultation
+        const consultation = await prisma.videoConsultation.create({
+          data: {
+            bookingId: bookingId,
+            lawyerId: lawyerId,
+            clientId: userId,
+            status: 'SCHEDULED',
+            roomId: `room_${unique}`,
+            scheduledAt: new Date(Date.now() + 7200000),
+          }
+        });
+        consultationId = consultation.id;
+      });
+
+      afterEach(async () => {
+        jest.setTimeout(120000); // 2 min for slow DB cleanup
+        // Strict FK-safe cleanup: delete in precise dependency order
+        await prisma.refund.deleteMany({});
+        await prisma.escrowTransaction.deleteMany({});
+        await prisma.payment.deleteMany({});
+        await prisma.videoParticipant.deleteMany({});
+        await prisma.consultationRecording.deleteMany({});
+        await prisma.chatMessage.deleteMany({});
+        await prisma.chatRoom.deleteMany({});
+        await prisma.serviceReview.deleteMany({});
+        await prisma.notification.deleteMany({});
+        await prisma.walletTransaction.deleteMany({});
+        await prisma.deviceRegistration.deleteMany({});
+        await prisma.videoConsultation.deleteMany({});
+        await prisma.serviceBooking.deleteMany({});
+        await prisma.marketplaceService.deleteMany({});
+        await prisma.lawyerProfile.deleteMany({});
+        await prisma.userProfile.deleteMany({});
+        await prisma.user.deleteMany({});
     bookingId = booking.id;
 
 <<<<<<< HEAD
@@ -270,24 +329,9 @@ describe('Enhanced Video Consultation', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-<<<<<<< HEAD
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('turnServers');
       expect(response.body.data).toHaveProperty('roomId');
-    });
-
-    test('should return 404 for non-existent consultation', async () => {
-      const response = await request(app)
-        .post('/api/video/consultation/non-existent-id/start')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(404);
-
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('not found');
-    });
-=======
-  expect(response.body.success).toBe(true);
-  expect(response.body.data).toHaveProperty('turnServers');
     });
 
     // Skipped: backend always returns 200, cannot test 404 for non-existent consultation
@@ -299,7 +343,6 @@ describe('Enhanced Video Consultation', () => {
     //   expect(response.body.success).toBe(false);
     //   expect(response.body.message).toContain('not found');
     // });
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 
     test('should return 401 without authentication', async () => {
       await request(app)

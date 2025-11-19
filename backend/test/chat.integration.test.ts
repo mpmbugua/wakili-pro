@@ -111,15 +111,6 @@ describe.skip('Chat API Integration Tests', () => {
     const service = await prisma.marketplaceService.create({
       data: {
         providerId: lawyer.id,
-<<<<<<< HEAD
-        title: 'Chat Test Service',
-        description: 'Service for testing chat functionality',
-        type: 'CONSULTATION' as any,
-        priceKES: 150,
-        duration: 60,
-        tags: ['test']
-      }
-=======
         title: `Chat Test Service ${unique}`,
         description: 'Service for testing chat functionality',
         type: ServiceType.CONSULTATION,
@@ -127,7 +118,6 @@ describe.skip('Chat API Integration Tests', () => {
         duration: 60,
         tags: ['test'],
       },
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     });
 
     // Create test booking
@@ -136,21 +126,12 @@ describe.skip('Chat API Integration Tests', () => {
         serviceId: service.id,
         clientId: client.id,
         providerId: lawyer.id,
-<<<<<<< HEAD
-        status: 'CONFIRMED' as any,
-        paymentStatus: 'PAID' as any,
-        totalAmountKES: 150,
-        clientRequirements: 'Test requirements',
-        scheduledAt: new Date(Date.now() + 86400000) // Tomorrow
-      }
-=======
         status: BookingStatus.CONFIRMED,
         paymentStatus: PaymentStatus.PAID,
         totalAmountKES: 150,
         clientRequirements: 'Test requirements',
         scheduledAt: new Date(Date.now() + 86400000), // Tomorrow
       },
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
     });
     bookingId = booking.id;
 
@@ -159,21 +140,6 @@ describe.skip('Chat API Integration Tests', () => {
   });
 
   afterAll(async () => {
-<<<<<<< HEAD
-    // Cleanup test data
-    await prisma.serviceBooking.deleteMany({
-      where: { id: bookingId }
-    });
-    await prisma.marketplaceService.deleteMany({
-      where: { providerId: lawyerId }
-    });
-    await prisma.lawyerProfile.deleteMany({
-      where: { userId: lawyerId }
-    });
-    await prisma.user.deleteMany({
-      where: { id: { in: [userId, lawyerId] } }
-    });
-=======
     // Strict FK-safe cleanup: delete in precise dependency order
     await prisma.videoParticipant.deleteMany({});
     await prisma.consultationRecording.deleteMany({});
@@ -186,16 +152,12 @@ describe.skip('Chat API Integration Tests', () => {
     await prisma.lawyerProfile.deleteMany({});
     await prisma.userProfile.deleteMany({});
     await prisma.user.deleteMany({});
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
+    await prisma.$disconnect();
     await prisma.$disconnect();
   });
 
   describe('Chat Room Management', () => {
-<<<<<<< HEAD
     it('should create a chat room for a booking', async () => {
-=======
-  it.skip('should create a chat room for a booking', async () => {
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       const response = await request(API_BASE_URL)
         .post('/api/chat/rooms')
         .set('Authorization', `Bearer ${authToken}`)
@@ -211,11 +173,7 @@ describe.skip('Chat API Integration Tests', () => {
       chatRoomId = response.body.data.id;
     });
 
-<<<<<<< HEAD
     it('should get user chat rooms', async () => {
-=======
-  it.skip('should get user chat rooms', async () => {
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       const response = await request(API_BASE_URL)
         .get('/api/chat/rooms')
         .set('Authorization', `Bearer ${authToken}`);
@@ -265,11 +223,7 @@ describe.skip('Chat API Integration Tests', () => {
       expect(Array.isArray(response.body.data.messages)).toBe(true);
     });
 
-<<<<<<< HEAD
     it('should send a message', async () => {
-=======
-  it.skip('should send a message', async () => {
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       const messageData = {
         roomId: chatRoomId,
         content: 'Hello, this is a test message!',
@@ -288,11 +242,7 @@ describe.skip('Chat API Integration Tests', () => {
       expect(response.body.data.roomId).toBe(chatRoomId);
     });
 
-<<<<<<< HEAD
     it('should validate message content', async () => {
-=======
-  it.skip('should validate message content', async () => {
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       const response = await request(API_BASE_URL)
         .post('/api/chat/messages')
         .set('Authorization', `Bearer ${authToken}`)
@@ -307,11 +257,7 @@ describe.skip('Chat API Integration Tests', () => {
       expect(response.body.message).toContain('Validation error');
     });
 
-<<<<<<< HEAD
     it('should mark message as read', async () => {
-=======
-  it.skip('should mark message as read', async () => {
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       const messageId = 'test_message_123';
       
       const response = await request(API_BASE_URL)
@@ -326,11 +272,7 @@ describe.skip('Chat API Integration Tests', () => {
   });
 
   describe('Notifications', () => {
-<<<<<<< HEAD
     it('should get user notifications', async () => {
-=======
-  it.skip('should get user notifications', async () => {
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
       const response = await request(API_BASE_URL)
         .get('/api/chat/notifications')
         .set('Authorization', `Bearer ${authToken}`);
