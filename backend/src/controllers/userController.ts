@@ -196,8 +196,18 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
         userId,
         licenseNumber: onboardingData.licenseNumber,
         yearOfAdmission: onboardingData.yearOfAdmission,
-        specializations: onboardingData.specializations,
-        location: onboardingData.location,
+        specializations: Array.isArray(onboardingData.specializations)
+          ? onboardingData.specializations.map((s: any) =>
+              typeof s === 'string'
+                ? s
+                : (s.id ? String(s.id) : s.name ? String(s.name) : '')
+            ).filter((s: string) => !!s)
+          : [],
+        location: typeof onboardingData.location === 'string'
+          ? onboardingData.location
+          : onboardingData.location && typeof onboardingData.location === 'object'
+            ? JSON.stringify(onboardingData.location)
+            : '',
         isVerified: false,
         rating: 0,
         reviewCount: 0

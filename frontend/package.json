@@ -12,7 +12,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 100",
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "preview": "vite preview",
-    "test": "vitest --root ./frontend",
+    "test": "vitest",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit -p ./tsconfig.json",
     "dedupe": "yarn install --force && yarn run type-check",

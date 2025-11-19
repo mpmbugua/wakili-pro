@@ -67,13 +67,16 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
       }
     } catch (err: unknown) {
       if (
-        err && err.message && (
-          err.message.includes('Database constraint violation') ||
-          err.message.toLowerCase().includes('rollback') ||
-          err.message.toLowerCase().includes('transaction failed')
-        )
+        typeof err === 'object' && err && 'message' in err && typeof (err as any).message === 'string'
       ) {
-        dbError = err;
+        const errMsg = (err as any).message as string;
+        if (
+          errMsg.includes('Database constraint violation') ||
+          errMsg.toLowerCase().includes('rollback') ||
+          errMsg.toLowerCase().includes('transaction failed')
+        ) {
+          dbError = err;
+        }
       }
     }
     // For non-MPESA providers, ignore payment processor error and only return database error
@@ -100,11 +103,14 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
       return res.status(200).json({ success: true, data: { paymentId: 'other-123', method: paymentMethod || provider || 'OTHER', redirectUrl: 'https://other.com/pay', clientSecret: null } });
     }
   } catch (error: unknown) {
-    if (error.message && error.message.includes('temporarily unavailable')) {
-      return res.status(503).json({ success: false, message: 'Payment processor temporarily unavailable' });
-    }
-    if (error.message && error.message.includes('Database constraint violation')) {
-      return res.status(500).json({ success: false, message: 'Internal server error' });
+    if (typeof error === 'object' && error && 'message' in error && typeof (error as any).message === 'string') {
+      const errMsg = (error as any).message as string;
+      if (errMsg.includes('temporarily unavailable')) {
+        return res.status(503).json({ success: false, message: 'Payment processor temporarily unavailable' });
+      }
+      if (errMsg.includes('Database constraint violation')) {
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+      }
     }
     if (error instanceof z.ZodError) {
       return res.status(400).json({

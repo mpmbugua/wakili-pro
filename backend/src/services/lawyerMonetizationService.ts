@@ -26,8 +26,8 @@ export async function payForMonetization(userId: string, { type, targetId, amoun
     data: {
       userId,
       amount,
-      status: 'COMPLETED', // Use string literal if enum import fails
-      method: 'MANUAL', // Use string literal if enum import fails
+      status: 'PAID', // Use valid PaymentStatus enum value
+      method: 'WALLET', // Use valid PaymentMethod enum value
     },
   });
 }

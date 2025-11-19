@@ -39,5 +39,10 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }))
 
+// Mock scrollIntoView for happy-dom/jsdom
+if (!HTMLElement.prototype.scrollIntoView) {
+  HTMLElement.prototype.scrollIntoView = vi.fn();
+}
+
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = vi.fn()

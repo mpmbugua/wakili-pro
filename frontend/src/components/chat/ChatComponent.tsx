@@ -11,86 +11,11 @@ const useAuth = () => ({
   }
 });
 
+
 interface ChatComponentProps {
   roomId: string;
   room: ChatRoom;
-  onClose: () => void;
 }
-
-export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onClose }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [typingUsers, setTypingUsers] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isConnected, setIsConnected] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const { user } = useAuth();
-
-  // Scroll to bottom of messages
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  // Load chat messages
-  const loadMessages = async () => {
-    try {
-      setIsLoading(true);
-      const response = await chatService.getChatMessages(roomId);
-      if (response.success && response.data) {
-        setMessages(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Initialize socket and load messages
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const socket = chatService.initializeSocket(token);
-      
-      socket.on('connect', () => {
-        setIsConnected(true);
-        chatService.joinRoom(roomId);
-      });
-
-      socket.on('disconnect', () => {
-        setIsConnected(false);
-      });
-
-      // Listen for new messages
-      chatService.onNewMessage((message: ChatMessage) => {
-        if (message.roomId === roomId) {
-          setMessages(prev => [...prev, message]);
-        }
-      });
-
-      // Listen for typing indicators
-      chatService.onUserTyping(({ userId, isTyping: userIsTyping }: { userId: string; isTyping: boolean }) => {
-        if (userId !== user?.id) {
-          setTypingUsers(prev => {
-            if (userIsTyping) {
-              return prev.includes(userId) ? prev : [...prev, userId];
-            } else {
-              return prev.filter(id => id !== userId);
-            }
-          });
-        }
-      });
-
-      loadMessages();
-    }
-
-    return () => {
-      chatService.leaveRoom(roomId);
-      chatService.disconnect();
-    };
-  }, [roomId, user?.id]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -276,3 +201,5 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ roomId, room, onCl
     </div>
   );
 };
+
+export { ChatComponent };

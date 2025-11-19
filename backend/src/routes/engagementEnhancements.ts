@@ -1,8 +1,10 @@
+
 import express from 'express';
 import * as engagementController from '../controllers/engagementEnhancementsController';
-import { authenticateToken } from '../middleware/authMiddleware';
+import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
+
 
 // Favorites
 router.get('/favorites', authenticateToken, engagementController.listFavorites);
@@ -18,17 +20,17 @@ router.get('/loyalty', authenticateToken, engagementController.getLoyaltyPoints)
 
 // Notifications
 router.get('/notifications', authenticateToken, engagementController.listNotifications);
-router.post('/notifications/read', authenticate, engagementController.markNotificationRead);
+router.post('/notifications/read', authenticateToken, engagementController.markNotificationRead);
 
 // Badges
-router.get('/badges', authenticate, engagementController.listBadges);
+router.get('/badges', authenticateToken, engagementController.listBadges);
 
 // Onboarding Progress
-router.get('/onboarding', authenticate, engagementController.getOnboardingProgress);
-router.post('/onboarding', authenticate, engagementController.updateOnboardingProgress);
+router.get('/onboarding', authenticateToken, engagementController.getOnboardingProgress);
+router.post('/onboarding', authenticateToken, engagementController.updateOnboardingProgress);
 
 // AI Chat History
-router.get('/ai-chat', authenticate, engagementController.getAIChatHistory);
-router.post('/ai-chat', authenticate, engagementController.addAIChatMessage);
+router.get('/ai-chat', authenticateToken, engagementController.getAIChatHistory);
+router.post('/ai-chat', authenticateToken, engagementController.addAIChatMessage);
 
 export default router;

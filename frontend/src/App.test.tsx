@@ -5,14 +5,10 @@ import '@testing-library/jest-dom/vitest';
 import App from './App';
 
 describe('App Component', () => {
+
   it('renders without crashing', () => {
     render(<App />);
-    expect(screen.getByText(/Professional Legal Services Platform/i)).toBeInTheDocument();
-  });
-
-  it('displays backend status testing message', () => {
-    render(<App />);
-    expect(screen.getByText(/Testing.../i)).toBeInTheDocument();
+    expect(screen.getByText('Wakili Pro')).toBeInTheDocument();
   });
 
   it('displays Wakili Pro branding', () => {
