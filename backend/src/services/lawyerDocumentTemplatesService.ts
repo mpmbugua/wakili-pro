@@ -1,14 +1,14 @@
 // LawyerDocumentTemplate removed: not in shared package.
 
-const templates: LawyerDocumentTemplate[] = [];
+const templates: any[] = [];
 
 export const LawyerDocumentTemplateService = {
   getAll: () => templates,
-  create: (data: LawyerDocumentTemplate) => {
+  create: (data: any) => {
     templates.push(data);
     return data;
   },
-  update: (id: string, data: Partial<LawyerDocumentTemplate>) => {
+  update: (id: string, data: any) => {
     const idx = templates.findIndex(t => t.id === id);
     if (idx !== -1) {
       templates[idx] = { ...templates[idx], ...data };

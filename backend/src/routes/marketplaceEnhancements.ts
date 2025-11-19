@@ -1,21 +1,21 @@
 import express from 'express';
 import * as marketplaceEnhancementsController from '../controllers/marketplaceEnhancementsController';
-import { authenticate } from '../middleware/authMiddleware';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 // Advanced filtering/search
-router.get('/templates', authenticate, marketplaceEnhancementsController.advancedSearchTemplates);
+router.get('/templates', authenticateToken, marketplaceEnhancementsController.advancedSearchTemplates);
 
 // Document ratings/reviews
-router.post('/templates/:id/review', authenticate, marketplaceEnhancementsController.addReview);
-router.get('/templates/:id/reviews', authenticate, marketplaceEnhancementsController.listReviews);
+router.post('/templates/:id/review', authenticateToken, marketplaceEnhancementsController.addReview);
+router.get('/templates/:id/reviews', authenticateToken, marketplaceEnhancementsController.listReviews);
 
 // Popularity analytics
-router.get('/templates/:id/analytics', authenticate, marketplaceEnhancementsController.getAnalytics);
+router.get('/templates/:id/analytics', authenticateToken, marketplaceEnhancementsController.getAnalytics);
 
 // Real payment integration (stub)
-router.post('/purchase', authenticate, marketplaceEnhancementsController.purchaseDocument);
+router.post('/purchase', authenticateToken, marketplaceEnhancementsController.purchaseDocument);
 
 // Purchase limits
 router.get('/purchase/limits', authenticate, marketplaceEnhancementsController.getPurchaseLimits);

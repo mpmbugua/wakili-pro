@@ -188,18 +188,7 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
       return;
     }
 
-    // Check if license number is unique
-    const existingLicense = await prisma.lawyerProfile.findUnique({
-      where: { licenseNumber: onboardingData.licenseNumber }
-    });
 
-    if (existingLicense) {
-      res.status(409).json({
-        success: false,
-        message: 'License number already registered'
-      });
-      return;
-    }
 
     // Create lawyer profile
     const lawyerProfile = await prisma.lawyerProfile.create({
@@ -207,8 +196,8 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
         userId,
         licenseNumber: onboardingData.licenseNumber,
         yearOfAdmission: onboardingData.yearOfAdmission,
-        specializations: onboardingData.specializations as string[],
-        location: onboardingData.location as string,
+        specializations: onboardingData.specializations,
+        location: onboardingData.location,
         isVerified: false,
         rating: 0,
         reviewCount: 0

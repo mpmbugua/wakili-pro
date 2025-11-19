@@ -1,9 +1,9 @@
 // CLECourse, CLEEnrollment, CLEProgress, CLECertificate removed: not in shared package.
 
-const courses: CLECourse[] = [];
-const enrollments: CLEEnrollment[] = [];
-const progress: CLEProgress[] = [];
-const certificates: CLECertificate[] = [];
+const courses: any[] = [];
+const enrollments: any[] = [];
+const progress: any[] = [];
+const certificates: any[] = [];
 
 export const LawyerCLEService = {
   getAllCourses: () => courses,

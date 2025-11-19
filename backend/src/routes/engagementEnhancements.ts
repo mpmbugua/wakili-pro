@@ -1,23 +1,23 @@
 import express from 'express';
 import * as engagementController from '../controllers/engagementEnhancementsController';
-import { authenticate } from '../middleware/authMiddleware';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 // Favorites
-router.get('/favorites', authenticate, engagementController.listFavorites);
-router.post('/favorites', authenticate, engagementController.addFavorite);
-router.delete('/favorites/:id', authenticate, engagementController.removeFavorite);
+router.get('/favorites', authenticateToken, engagementController.listFavorites);
+router.post('/favorites', authenticateToken, engagementController.addFavorite);
+router.delete('/favorites/:id', authenticateToken, engagementController.removeFavorite);
 
 // Referrals
-router.get('/referrals', authenticate, engagementController.listReferrals);
-router.post('/referrals', authenticate, engagementController.createReferral);
+router.get('/referrals', authenticateToken, engagementController.listReferrals);
+router.post('/referrals', authenticateToken, engagementController.createReferral);
 
 // Loyalty Points
-router.get('/loyalty', authenticate, engagementController.getLoyaltyPoints);
+router.get('/loyalty', authenticateToken, engagementController.getLoyaltyPoints);
 
 // Notifications
-router.get('/notifications', authenticate, engagementController.listNotifications);
+router.get('/notifications', authenticateToken, engagementController.listNotifications);
 router.post('/notifications/read', authenticate, engagementController.markNotificationRead);
 
 // Badges

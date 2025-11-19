@@ -12,10 +12,6 @@ import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = Router();
 
 // Feature event logging (all authenticated users)
-router.post('/event', logFeatureEvent);
-
-// Feature event analytics (admin only)
-router.get('/feature-events', authorizeRoles('ADMIN'), getFeatureEventStats);
 
 // Protect all analytics routes
 router.use(authenticateToken);

@@ -2,7 +2,9 @@ import { createNotification } from './notificationController';
 import { calculateBookingAmounts } from '../services/bookingPricingService';
 import Stripe from 'stripe';
 import axios from 'axios';
-import { CreatePaymentIntentSchema, PaymentVerificationSchema, RefundRequestSchema, EscrowReleaseSchema, PaymentWebhookSchema, CreatePaymentIntentData } from '@wakili-pro/shared';
+import { CreatePaymentIntentSchema, PaymentVerificationSchema, RefundRequestSchema, EscrowReleaseSchema, PaymentWebhookSchema } from '@wakili-pro/shared';
+import type { CreatePaymentIntentData } from '@wakili-pro/shared/src/schemas/payment';
+import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { logger } from '../utils/logger';
 

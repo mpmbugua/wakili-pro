@@ -1,12 +1,12 @@
 // LawyerProfile, LawyerReview, SEOAnalytics removed: not in shared package.
 
-const profiles: LawyerProfile[] = [];
-const reviews: LawyerReview[] = [];
-const analytics: SEOAnalytics[] = [];
+const profiles: any[] = [];
+const reviews: any[] = [];
+const analytics: any[] = [];
 
 export const LawyerMarketingService = {
   getProfile: (lawyerId: string) => profiles.find(p => p.id === lawyerId),
-  updateProfile: (lawyerId: string, data: Partial<LawyerProfile>) => {
+  updateProfile: (lawyerId: string, data: any) => {
     const idx = profiles.findIndex(p => p.id === lawyerId);
     if (idx !== -1) {
       profiles[idx] = { ...profiles[idx], ...data };
@@ -15,7 +15,7 @@ export const LawyerMarketingService = {
     return null;
   },
   getReviews: (lawyerId: string) => reviews.filter(r => r.lawyerId === lawyerId),
-  addReview: (lawyerId: string, data: LawyerReview) => {
+  addReview: (lawyerId: string, data: any) => {
     reviews.push({ ...data, lawyerId });
     return data;
   },

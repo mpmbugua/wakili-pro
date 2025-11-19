@@ -422,7 +422,7 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
         providerId: service.providerId,
   scheduledAt: validatedData.scheduledAt ? new Date(validatedData.scheduledAt) : null,
         // clientRequirements: validatedData.clientRequirements, // Removed: not in schema
-        totalAmountKES: service.priceKES,
+        // totalAmountKES: service.priceKES, // Removed: not in schema
         status: 'PENDING',
         paymentStatus: 'PENDING'
       }

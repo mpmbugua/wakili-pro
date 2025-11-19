@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function upgradeTier(userId: string, tier: 'LITE' | 'PRO') {
@@ -27,8 +26,8 @@ export async function payForMonetization(userId: string, { type, targetId, amoun
     data: {
       userId,
       amount,
-      status: 'COMPLETED',
-      method: 'MANUAL',
+      status: 'COMPLETED', // Use string literal if enum import fails
+      method: 'MANUAL', // Use string literal if enum import fails
     },
   });
 }
