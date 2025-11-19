@@ -29,13 +29,24 @@ export default function AuthenticatedWakiliApp() {
     // Use the same API base URL for consistency
     const API_BASE = 'https://wakili-pro.onrender.com';
     
-    fetch(`${API_BASE}/health`)
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
+    fetch(`${API_BASE}/health`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
+        clearTimeout(timeoutId);
         setBackendStatus('✅ Backend Connected Successfully!');
         setBackendData(data);
       })
-      .catch(() => setBackendStatus('❌ Backend Connection Failed'));
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        console.warn('Backend health check failed:', error.message);
+        setBackendStatus('⚠️ Backend Offline (App still functional)');
+      });
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleLogout = async () => {
