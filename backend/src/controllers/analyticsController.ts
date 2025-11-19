@@ -47,7 +47,8 @@ export const getDashboardAnalytics = async (req: AuthenticatedRequest, res: Resp
     }
     const totalBookings = await prisma.serviceBooking.count({ where: baseWhere });
     const totalRevenue = await prisma.payment.aggregate({ _sum: { amount: true }, where: { userId } });
-    const activeConsultations = await prisma.videoConsultation.count({ where: { lawyerId: userId, status: 'ACTIVE' } });
+    // VideoConsultation does not have a status field; count all for this lawyer
+    const activeConsultations = await prisma.videoConsultation.count({ where: { lawyerId: userId } });
     const completedServices = await prisma.serviceBooking.count({ where: { ...baseWhere, status: 'COMPLETED' } });
     const averageRating = await prisma.serviceReview.aggregate({ _avg: { rating: true }, where: { targetId: userId } });
     const recentActivity = await prisma.serviceBooking.findMany({ where: baseWhere, orderBy: { createdAt: 'desc' }, take: 10 });
@@ -107,31 +108,30 @@ export const getRevenueAnalytics = async (req: AuthenticatedRequest, res: Respon
       ORDER BY month DESC
     `;
 
-    // Revenue by service type
-    const revenueByService = await prisma.payment.groupBy({
-      by: ['bookingId'],
+    // Revenue by service type (simplified: group by bookingId, then join to service type)
+    const payments = await prisma.payment.findMany({
       where: {
         ...whereClause.payment,
-        status: 'COMPLETED'
+        status: 'PAID'
       },
-      _sum: { amount: true }
-    }).then(async (payments: Array<{ bookingId: string; _sum: { amount: number } }>) => {
-      const serviceRevenue = new Map();
-      for (const payment of payments) {
-        const booking = await prisma.serviceBooking.findUnique({
-          where: { id: payment.bookingId },
-          include: { service: { select: { type: true } } }
-        });
-        if (booking?.service) {
-          const current = serviceRevenue.get(booking.service.type) || 0;
-          serviceRevenue.set(booking.service.type, current + (payment._sum.amount || 0));
-        }
-      }
-      return Array.from(serviceRevenue.entries()).map(([type, revenue]) => ({
-        serviceType: type,
-        revenue
-      }));
+      select: { bookingId: true, amount: true }
     });
+    const serviceRevenue = new Map();
+    for (const payment of payments) {
+      if (!payment.bookingId) continue;
+      const booking = await prisma.serviceBooking.findUnique({
+        where: { id: payment.bookingId },
+        include: { service: { select: { type: true } } }
+      });
+      if (booking?.service) {
+        const current = serviceRevenue.get(booking.service.type) || 0;
+        serviceRevenue.set(booking.service.type, current + (payment.amount || 0));
+      }
+    }
+    const revenueByService = Array.from(serviceRevenue.entries()).map(([type, revenue]) => ({
+      serviceType: type,
+      revenue
+    }));
 
     // Payment method distribution
     const paymentMethodStats = await prisma.payment.groupBy({
@@ -178,7 +178,7 @@ export const getPerformanceAnalytics = async (req: AuthenticatedRequest, res: Re
 
     const filters = AnalyticsFiltersSchema.parse(req.query);
 
-    // Consultation metrics
+    // Consultation metrics (VideoConsultation has no duration field, only count)
     const consultationStats = await prisma.videoConsultation.aggregate({
       where: {
         lawyerId: userId,
@@ -189,9 +189,7 @@ export const getPerformanceAnalytics = async (req: AuthenticatedRequest, res: Re
           }
         })
       },
-      _count: { id: true },
-      _avg: { duration: true },
-      _sum: { duration: true }
+      _count: { id: true }
     });
 
     // Client satisfaction (reviews)
@@ -250,9 +248,7 @@ export const getPerformanceAnalytics = async (req: AuthenticatedRequest, res: Re
       success: true,
       data: {
         consultations: {
-          total: consultationStats._count.id,
-          averageDuration: consultationStats._avg.duration,
-          totalDuration: consultationStats._sum.duration
+          total: consultationStats._count.id
         },
         satisfaction: {
           totalReviews: satisfactionStats._count.id,

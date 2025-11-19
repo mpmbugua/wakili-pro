@@ -43,6 +43,19 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
         client: { select: { email: true, firstName: true, lastName: true } }
       }
     });
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found'
+      });
+    }
+    const userId = req.user?.id;
+    if (booking.clientId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to pay for this booking'
+      });
+    }
     // Determine if this is an emergency booking (e.g., via validatedData or booking)
     // For this example, assume validatedData.isEmergency is sent from frontend
     const isEmergency = Boolean(validatedData.isEmergency);
@@ -66,18 +79,6 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ success: false, message: 'Failed to create payment intent' });
   }
 };
-    if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: 'Booking not found'
-      });
-    }
-    if (booking.clientId !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to pay for this booking'
-      });
-    }
     if (booking.paymentStatus === 'COMPLETED') {
       return res.status(400).json({
         success: false,

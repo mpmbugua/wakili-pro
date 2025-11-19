@@ -18,13 +18,6 @@ export async function featureProfile(req: AuthenticatedRequest, res: Response) {
   res.json(result);
 }
 
-export async function publishArticle(req: AuthenticatedRequest, res: Response) {
-  // Accepts { title, content, isPremium, premiumDays }
-  const { title, content, isPremium, premiumDays } = req.body;
-  const userId = req.user!.id;
-  const result = await lawyerMonetizationService.publishArticle(userId, { title, content, isPremium, premiumDays });
-  res.json(result);
-}
 
 export async function payForMonetization(req: AuthenticatedRequest, res: Response) {
   // Accepts { type: 'feature' | 'article', targetId, amount }

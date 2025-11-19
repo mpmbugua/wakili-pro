@@ -26,11 +26,9 @@ export async function payForMonetization(userId: string, { type, targetId, amoun
   return prisma.payment.create({
     data: {
       userId,
-      type,
-      targetId,
       amount,
-  status: 'COMPLETED',
-      provider: 'manual',
+      status: 'COMPLETED',
+      method: 'MANUAL',
     },
   });
 }

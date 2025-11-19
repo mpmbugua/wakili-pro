@@ -24,23 +24,12 @@ export async function purchaseDocument(templateId: string, userId: string, aiInp
   const template = await prisma.documentTemplate.findUnique({ where: { id: templateId } });
   if (!template) throw new Error('Template not found');
 
-  // Ensure required scalar fields per schema are provided. The schema requires `template` (string) and `documentId` (relation)
-  const purchaseData = {
-    userId,
-    documentId: templateId,
-    // Use priceKES (Int?) as amount (Float) - cast to number
-    amount: Number(template.priceKES ?? 0),
-    // Type is a string in schema
-    type: template.type ?? 'CONTRACT',
-    // content will be filled after generation; for now keep empty
-    content: '',
-    status: 'PENDING',
-    description: template.description ?? '',
-    // The schema requires a `template` string field - use the template content or name snapshot
-    template: template.template ?? template.name ?? template.id,
-  };
-
-  const purchase = await prisma.documentPurchase.create({ data: purchaseData });
+  const purchase = await prisma.documentPurchase.create({
+    data: {
+      userId,
+      templateId
+    }
+  });
 
   // Initiate payment (stub) - replace with real integration
   // const paymentResult = await processPayment(userId, purchase.amount, ...aiInput);

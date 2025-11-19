@@ -38,13 +38,10 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
             id: true,
             licenseNumber: true,
             specializations: true,
-            yearsOfExperience: true,
             location: true,
-            bio: true,
             isVerified: true,
             rating: true,
-            reviewCount: true,
-            availability: true
+            reviewCount: true
           }
         }
       }
@@ -211,12 +208,8 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
         userId,
         licenseNumber: onboardingData.licenseNumber,
         yearOfAdmission: onboardingData.yearOfAdmission,
-  specializations: onboardingData.specializations as Record<string, unknown>, // Prisma Json type
-  location: onboardingData.location as Record<string, unknown>, // Prisma Json type
-        bio: onboardingData.bio,
-        yearsOfExperience: onboardingData.yearsOfExperience,
-        profileImageUrl: onboardingData.profileImageUrl,
-        availability: [], // Default empty availability
+        specializations: onboardingData.specializations as Record<string, unknown>, // Prisma Json type
+        location: onboardingData.location as Record<string, unknown>, // Prisma Json type
         isVerified: false,
         rating: 0,
         reviewCount: 0

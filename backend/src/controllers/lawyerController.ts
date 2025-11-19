@@ -130,10 +130,7 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
       where: { userId },
       data: {
         ...(updateData.specializations && { specializations: updateData.specializations as Record<string, unknown> }),
-        ...(updateData.location && { location: updateData.location as Record<string, unknown> }),
-        ...(updateData.bio && { bio: updateData.bio }),
-        ...(updateData.yearsOfExperience && { yearsOfExperience: updateData.yearsOfExperience }),
-        ...(updateData.profileImageUrl && { profileImageUrl: updateData.profileImageUrl })
+        ...(updateData.location && { location: updateData.location as Record<string, unknown> })
       },
       include: {
         user: {
@@ -142,7 +139,7 @@ export const updateLawyerProfile = async (req: AuthenticatedRequest, res: Respon
             email: true,
             firstName: true,
             lastName: true,
-            phoneNumber: true,
+            phoneNumber: true
             // profilePicture: true // TODO: Add to User model
           }
         }
@@ -246,17 +243,13 @@ export const getPublicLawyerProfile = async (req: Request, res: Response): Promi
         yearOfAdmission: true,
         specializations: true,
         location: true,
-        bio: true,
-        yearsOfExperience: true,
         rating: true,
         reviewCount: true,
         isVerified: true,
-        profileImageUrl: true,
-        availability: true,
         user: {
           select: {
             firstName: true,
-            lastName: true,
+            lastName: true
             // profilePicture: true // TODO: Add to User model
           }
         }
@@ -333,16 +326,13 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
         yearOfAdmission: true,
         specializations: true,
         location: true,
-        bio: true,
-        yearsOfExperience: true,
         rating: true,
         reviewCount: true,
-        profileImageUrl: true,
         user: {
           select: {
             id: true,
             firstName: true,
-            lastName: true,
+            lastName: true
             // profilePicture: true // TODO: Add to User model
           }
         }

@@ -17,11 +17,17 @@ export async function scrapeJudiciaryEvents() {
   });
   for (const event of events) {
     if (event.title && event.eventDate && event.sourceUrl) {
-      await prisma.legalEvent.upsert({
-        where: { sourceUrl: event.sourceUrl },
-        update: { title: event.title, eventDate: new Date(event.eventDate), eventType: 'Judiciary Event', sourceUrl: event.sourceUrl },
-        create: { title: event.title, eventDate: new Date(event.eventDate), eventType: 'Judiciary Event', sourceUrl: event.sourceUrl },
-      });
+      const existing = await prisma.legalEvent.findFirst({ where: { sourceUrl: event.sourceUrl } });
+      if (existing) {
+        await prisma.legalEvent.update({
+          where: { id: existing.id },
+          data: { title: event.title, eventDate: new Date(event.eventDate), eventType: 'Judiciary Event', sourceUrl: event.sourceUrl }
+        });
+      } else {
+        await prisma.legalEvent.create({
+          data: { title: event.title, eventDate: new Date(event.eventDate), eventType: 'Judiciary Event', sourceUrl: event.sourceUrl }
+        });
+      }
     }
   }
   return events;
@@ -44,11 +50,17 @@ export async function scrapeKenyanLawReviewEvents() {
   });
   for (const event of events) {
     if (event.title && event.sourceUrl) {
-      await prisma.legalEvent.upsert({
-        where: { sourceUrl: event.sourceUrl },
-        update: { title: event.title, eventDate: event.eventDate ? new Date(event.eventDate) : new Date(), eventType: event.eventType, sourceUrl: event.sourceUrl },
-        create: { title: event.title, eventDate: event.eventDate ? new Date(event.eventDate) : new Date(), eventType: event.eventType, sourceUrl: event.sourceUrl },
-      });
+      const existing = await prisma.legalEvent.findFirst({ where: { sourceUrl: event.sourceUrl } });
+      if (existing) {
+        await prisma.legalEvent.update({
+          where: { id: existing.id },
+          data: { title: event.title, eventDate: event.eventDate ? new Date(event.eventDate) : new Date(), eventType: event.eventType, sourceUrl: event.sourceUrl }
+        });
+      } else {
+        await prisma.legalEvent.create({
+          data: { title: event.title, eventDate: event.eventDate ? new Date(event.eventDate) : new Date(), eventType: event.eventType, sourceUrl: event.sourceUrl }
+        });
+      }
     }
   }
   return events;
@@ -70,11 +82,17 @@ export async function scrapeLawSocietyEvents() {
   });
   for (const event of events) {
     if (event.title && event.eventDate && event.sourceUrl) {
-      await prisma.legalEvent.upsert({
-        where: { sourceUrl: event.sourceUrl },
-        update: { title: event.title, eventDate: new Date(event.eventDate), eventType: event.eventType, sourceUrl: event.sourceUrl },
-        create: { title: event.title, eventDate: new Date(event.eventDate), eventType: event.eventType, sourceUrl: event.sourceUrl },
-      });
+      const existing = await prisma.legalEvent.findFirst({ where: { sourceUrl: event.sourceUrl } });
+      if (existing) {
+        await prisma.legalEvent.update({
+          where: { id: existing.id },
+          data: { title: event.title, eventDate: new Date(event.eventDate), eventType: event.eventType, sourceUrl: event.sourceUrl }
+        });
+      } else {
+        await prisma.legalEvent.create({
+          data: { title: event.title, eventDate: new Date(event.eventDate), eventType: event.eventType, sourceUrl: event.sourceUrl }
+        });
+      }
     }
   }
   return events;

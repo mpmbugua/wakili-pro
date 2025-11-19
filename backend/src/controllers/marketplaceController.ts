@@ -3,6 +3,14 @@ import { PrismaClient } from '@prisma/client';
 import { CreateServiceSchema, CreateBookingSchema, UpdateBookingStatusSchema, CreateReviewSchema, ServiceSearchSchema } from '@wakili-pro/shared';
 import { z } from 'zod';
 import { createNotification } from './notificationController';
+
+const prisma = new PrismaClient();
+
+interface AuthRequest extends Request {
+  user?: { id: string };
+}
+
+export const createReview = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -38,6 +46,7 @@ import { createNotification } from './notificationController';
     console.error('Create review error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
+};
 
 
 export const getMyServices = async (req: AuthRequest, res: Response) => {

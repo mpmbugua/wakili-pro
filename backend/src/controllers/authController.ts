@@ -96,8 +96,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     await prisma.refreshToken.create({
       data: {
         token: refreshToken,
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+        userId: user.id
       }
     });
 
@@ -190,8 +189,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     await prisma.refreshToken.create({
       data: {
         token: refreshToken,
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+        userId: user.id
       }
     });
 
@@ -239,16 +237,15 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
     const { refreshToken: token } = validationResult.data;
 
-    // Verify refresh token exists in database and hasn't expired
-    const storedToken = await prisma.refreshToken.findUnique({
+    // Verify refresh token exists in database
+    const storedToken = await prisma.refreshToken.findFirst({
       where: { token },
       include: { user: true }
     });
-
-    if (!storedToken || storedToken.expiresAt < new Date()) {
+    if (!storedToken) {
       res.status(401).json({
         success: false,
-        message: 'Invalid or expired refresh token'
+        message: 'Invalid refresh token'
       });
       return;
     }
@@ -279,10 +276,9 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
       // Update refresh token in database
       await prisma.refreshToken.update({
-        where: { token },
+        where: { id: storedToken.id },
         data: {
-          token: newRefreshToken,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+          token: newRefreshToken
         }
       });
 
