@@ -43,10 +43,10 @@ export const EmergencyFeeBreakdown: React.FC<EmergencyFeeBreakdownProps> = ({ la
     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
       <h3 className="font-bold text-lg mb-2">Emergency Booking Fee Breakdown</h3>
       <div className="flex flex-col gap-1">
-        <div>Lawyer's Standard Fee: <span className="font-semibold">KES {lawyerFee}</span></div>
+        <div>Lawyer&apos;s Standard Fee: <span className="font-semibold">KES {lawyerFee}</span></div>
         <div>Emergency Surcharge: <span className="font-semibold">KES {surcharge}</span></div>
         <div className="font-bold mt-2">Total: <span className="text-indigo-700">KES {total}</span></div>
-        <div className="text-xs text-gray-500 mt-1">* Commission ({commission}%) is deducted from the lawyer's fee. Surcharge is app revenue.</div>
+        <div className="text-xs text-gray-500 mt-1">* Commission ({commission}%) is deducted from the lawyer&apos;s fee. Surcharge is app revenue.</div>
       </div>
       <button
         className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"

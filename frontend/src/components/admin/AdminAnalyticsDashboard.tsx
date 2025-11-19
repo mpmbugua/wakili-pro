@@ -36,26 +36,6 @@ function AdminAnalyticsDashboard() {
       })
       .finally(() => setLoading(false));
   }, [dateRange]);
-  const [loading, setLoading] = useState(true);
-=======
-import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
-import { Button } from '../ui/Button';
-import { adminService } from '@/services/adminService';
-import type { AdminAnalytics, UserBehaviorAnalytics } from '@/services/adminService';
-
-const TABS = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'behavior', label: 'User Behavior' },
-  { key: 'platform', label: 'Platform Metrics' },
-  { key: 'trends', label: 'Trends' }
-];
-
-function AdminAnalyticsDashboard() {
-  const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
-  const [userBehavior, setUserBehavior] = useState<UserBehaviorAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
   const [dateRange, setDateRange] = useState('30d');
   const [activeTab, setActiveTab] = useState<'overview' | 'behavior' | 'platform' | 'trends'>('overview');
 

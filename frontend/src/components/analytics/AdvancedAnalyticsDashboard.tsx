@@ -90,11 +90,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
   });
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'performance'>('overview');
 
-  useEffect(() => {
-    loadAnalyticsData();
-  }, [dateRange]);
-
-  const loadAnalyticsData = async () => {
+  const loadAnalyticsData = React.useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -135,7 +131,11 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateRange]);
+
+  React.useEffect(() => {
+    loadAnalyticsData();
+  }, [dateRange, loadAnalyticsData]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {

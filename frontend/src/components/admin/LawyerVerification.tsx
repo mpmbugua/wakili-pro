@@ -30,6 +30,7 @@ export const LawyerVerification: React.FC = () => {
   const [reviewNotes, setReviewNotes] = useState('');
   const [isReviewing, setIsReviewing] = useState(false);
 
+
   useEffect(() => {
     loadApplications();
   }, [statusFilter, searchTerm]);
@@ -37,7 +38,6 @@ export const LawyerVerification: React.FC = () => {
   const loadApplications = async () => {
     try {
       setLoading(true);
-      
       // Mock data - will integrate with backend API
       const mockApplications: LawyerApplication[] = [
         {
@@ -116,55 +116,35 @@ export const LawyerVerification: React.FC = () => {
           internalScore: 45
         }
       ];
-      
       setApplications(mockApplications);
-          const { applications: fetchedApplications } = await adminService.getLawyerApplications({
-            search: searchTerm,
-            status: statusFilter,
-          });
-          setApplications(fetchedApplications);
-          setFilteredApplications(fetchedApplications);
-        } catch (err) {
-          console.error('Load applications error:', err);
-          setApplications([]);
-          setFilteredApplications([]);
+      // Uncomment below to use backend API
+      // const { applications: fetchedApplications } = await adminService.getLawyerApplications({
+      //   search: searchTerm,
+      //   status: statusFilter,
+      // });
+      // setApplications(fetchedApplications);
+      // setFilteredApplications(fetchedApplications);
+      setLoading(false);
+    } catch (err) {
+      console.error('Load applications error:', err);
+      setApplications([]);
+      setFilteredApplications([]);
+      setLoading(false);
+    }
+  };
+
+  const handleReviewAction = async (applicationId: string, action: 'approve' | 'reject', notes?: string) => {
     try {
       setIsReviewing(true);
-      
-      // Mock API call - will integrate with backend
-      console.log(`${action} application ${applicationId}`, { notes });
-      
-      setApplications(prev => prev.map(app => {
-        if (app.id === applicationId) {
-          return {
-            ...app,
-            status: action === 'approve' ? 'VERIFIED' : 'REJECTED',
-            reviewedBy: 'current-admin@wakili.pro',
-            reviewedAt: new Date().toISOString(),
-            rejectionReason: action === 'reject' ? notes : undefined,
-            adminNotes: notes
-          };
-        }
-        return app;
-      }));
-
+      await adminService.reviewLawyerApplication(applicationId, action, notes);
+      await loadApplications();
       setShowDetails(false);
-        const handleReviewAction = async (applicationId: string, action: 'approve' | 'reject', notes?: string) => {
-          try {
-            setIsReviewing(true);
-            await adminService.reviewLawyerApplication(applicationId, action, notes);
-            await loadApplications();
-          } catch (err) {
-            console.error(`Error ${action} application:`, err);
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading applications...</p>
-        </div>
-      </div>
-    );
-  }
+    } catch (err) {
+      console.error(`Error ${action} application:`, err);
+    } finally {
+      setIsReviewing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">

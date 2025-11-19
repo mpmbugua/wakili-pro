@@ -1,6 +1,7 @@
+import React from 'react';
 import { PremiumBadge } from './components/PremiumBadge';
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Marketplace from './components/marketplace/Marketplace';
 import { useSubscriptionStatus } from './hooks/useSubscriptionStatus';
 import LawyerSubscriptionPage from './pages/LawyerSubscriptionPage';
@@ -131,7 +132,7 @@ export default function AuthenticatedWakiliApp() {
               <div className="flex items-center justify-center space-x-2">
                 <User className="h-6 w-6" />
                 <span className="font-semibold">
-                  Welcome back, {user?.firstName}! You're logged in as a {user?.role.toLowerCase()}.
+                  Welcome back, {user?.firstName}! You&apos;re logged in as a {user?.role.toLowerCase()}.
                 </span>
               </div>
             </div>

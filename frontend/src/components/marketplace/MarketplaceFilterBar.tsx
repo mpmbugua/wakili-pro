@@ -12,7 +12,7 @@ export const MarketplaceFilterBar: React.FC<MarketplaceFilterBarProps> = ({ onFi
 
   React.useEffect(() => {
     if (onFilterChange) onFilterChange({ search, category, price, rating });
-  }, [search, category, price, rating]);
+  }, [search, category, price, rating, onFilterChange]);
 
   return (
     <div className="flex flex-wrap gap-4 p-4 bg-white rounded shadow">

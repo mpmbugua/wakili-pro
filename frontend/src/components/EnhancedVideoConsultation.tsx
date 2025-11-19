@@ -77,15 +77,19 @@ export const EnhancedVideoConsultation: React.FC = () => {
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   // Mock functions
-  const leaveConsultation = cleanup;
-  const toggleVideo = () => {};
-  const toggleAudio = () => {};
-  const toggleScreenShare = () => {};
-  const sendChatMessage = () => {
+  const leaveConsultation = React.useCallback(() => {
+    cleanup();
+  }, [cleanup]);
+  const toggleVideo = React.useCallback(() => {}, []);
+  const toggleAudio = React.useCallback(() => {}, []);
+  const toggleScreenShare = React.useCallback(() => {}, []);
+  const sendChatMessage = React.useCallback(() => {
     // Mock implementation - no message handling needed for demo
-  };
-  const changeVideoQuality = updateVideoQuality;
-  const getRecordings = () => Promise.resolve([]);
+  }, []);
+  const changeVideoQuality = React.useCallback(() => {
+    updateVideoQuality();
+  }, [updateVideoQuality]);
+  const getRecordings = React.useCallback(() => Promise.resolve([]), []);
 
   // Component state
   const [showSettings, setShowSettings] = useState(false);

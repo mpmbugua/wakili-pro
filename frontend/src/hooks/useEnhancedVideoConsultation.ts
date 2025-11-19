@@ -203,7 +203,6 @@ import io from 'socket.io-client';
           let totalPacketsReceived = 0;
           let rtt = 0;
 
-<<<<<<< HEAD
           stats.forEach((report: RTCStatsReport | { type: string; kind?: string; bytesReceived?: number; packetsLost?: number; packetsReceived?: number; state?: string; currentRoundTripTime?: number }) => {
             if (report.type === 'inbound-rtp' && report.kind === 'video') {
               totalBytesReceived += report.bytesReceived || 0;
@@ -278,7 +277,6 @@ import io from 'socket.io-client';
           const senders = peerConnection.getSenders();
           for (const sender of senders) {
             if (sender.track && sender.track.kind === 'video') {
-<<<<<<< HEAD
               const params: RTCRtpSendParameters = sender.getParameters();
               if (params.encodings && params.encodings.length > 0) {
                 params.encodings[0].maxBitrate = qualityConfig.bitrate;

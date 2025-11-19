@@ -24,7 +24,7 @@ const EmergencyConnectPage: React.FC = () => {
       <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 mb-6">
         <h1 className="text-2xl font-bold text-red-700 mb-2 text-center">Emergency Lawyer Connect</h1>
         <p className="text-gray-700 text-center mb-4">
-          Instantly connect to a qualified lawyer for urgent legal help. You will be charged an emergency fee in addition to the lawyer's standard rate. Please proceed only if you require immediate assistance.
+          Instantly connect to a qualified lawyer for urgent legal help. You will be charged an emergency fee in addition to the lawyer&apos;s standard rate. Please proceed only if you require immediate assistance.
         </p>
         <button
           className="mb-6 text-blue-600 hover:underline text-sm"

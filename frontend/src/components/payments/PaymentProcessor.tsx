@@ -162,7 +162,7 @@ export const PaymentProcessor: React.FC<PaymentProcessorProps> = ({
                 <br />
                 1. Enter your M-Pesa registered phone number
                 <br />
-                2. Click "Pay with M-Pesa" 
+                2. Click &quot;Pay with M-Pesa&quot; 
                 <br />
                 3. Enter your M-Pesa PIN when prompted
               </p>

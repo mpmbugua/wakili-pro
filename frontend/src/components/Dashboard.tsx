@@ -132,12 +132,7 @@ import { Button } from './ui/Button';
             <p className="text-sm text-gray-600">Unread messages</p>
           </CardContent>
         </Card>
-
-<<<<<<< HEAD
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-=======
         <Card className="hover:shadow-lg transition-shadow cursor-pointer" aria-label="Documents">
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center space-x-2">
               <FileText className="h-5 w-5 text-purple-600" />

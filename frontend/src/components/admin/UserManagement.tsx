@@ -38,12 +38,7 @@ export const UserManagement: React.FC = () => {
     dateRange: ''
   });
 
-  useEffect(() => {
-    loadUsers();
-  }, [filters]);
-  // Remove applyFilters effect, filtering will be handled by backend
-
-  const loadUsers = async () => {
+  const loadUsers = React.useCallback(async () => {
     try {
       setLoading(true);
       const { users: fetchedUsers } = await adminService.getUsers({
@@ -61,7 +56,11 @@ export const UserManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  React.useEffect(() => {
+    loadUsers();
+  }, [filters, loadUsers]);
 
   // Removed applyFilters, filtering is now backend-driven
 

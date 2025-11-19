@@ -15,19 +15,7 @@ import { useOnboardingProgress, useUpdateOnboardingProgress } from '@/hooks/enga
 import { useAIChatHistory, useAddAIChatMessage } from '@/hooks/engagement/useAIChatHistory';
 
 export const UserEngagementDashboard: React.FC = () => {
-  const { data: favorites } = useFavorites();
-  const { data: referrals } = useReferrals();
-  const { data: loyalty } = useLoyaltyPoints();
-  const { data: notifications } = useNotifications();
-  const { data: badges } = useBadges();
-  const { data: onboarding } = useOnboardingProgress();
-  const { data: aiChats } = useAIChatHistory();
-  const addFavorite = useAddFavorite();
-  const removeFavorite = useRemoveFavorite();
-  const createReferral = useCreateReferral();
-  const markNotificationRead = useMarkNotificationRead();
-  const updateOnboarding = useUpdateOnboardingProgress();
-  const addAIChatMessage = useAddAIChatMessage();
+  // Removed unused variables per lint
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">

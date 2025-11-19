@@ -2,7 +2,7 @@ import React from 'react';
 import { useLawyerCollaboration } from '@/hooks/lawyerServices/useLawyerCollaboration';
 
 export const LawyerCollaborationHub: React.FC = () => {
-  const { messages, sendMessage, referrals, createReferral, forumPosts, addForumPost, isLoading } = useLawyerCollaboration();
+  const { messages, referrals, forumPosts, isLoading } = useLawyerCollaboration();
 
   return (
     <div className="p-4">

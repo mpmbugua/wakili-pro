@@ -17,29 +17,6 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
-
-<<<<<<< HEAD
-interface AdminStats {
-  totalUsers: number;
-  totalLawyers: number;
-  pendingVerifications: number;
-  activeConsultations: number;
-  totalRevenue: number;
-  monthlyRevenue: number;
-  systemHealth: 'healthy' | 'warning' | 'critical';
-  recentActivity: ActivityItem[];
-}
-
-interface ActivityItem {
-  id: string;
-  type: 'user_registration' | 'lawyer_application' | 'consultation_completed' | 'payment_processed';
-  description: string;
-  timestamp: string;
-  status: 'success' | 'pending' | 'failed';
-}
-=======
-import { adminService, AdminStats } from '@/services/adminService';
-
 type AdminActivityLog = {
   id: string;
   userId: string;
@@ -48,7 +25,6 @@ type AdminActivityLog = {
   timestamp: string;
   ipAddress: string;
 };
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuthStore();

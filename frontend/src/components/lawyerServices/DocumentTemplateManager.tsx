@@ -2,7 +2,7 @@ import React from 'react';
 import { useLawyerDocumentTemplates } from '@/hooks/lawyerServices/useLawyerDocumentTemplates';
 
 export const DocumentTemplateManager: React.FC = () => {
-  const { templates, createTemplate, updateTemplate, deleteTemplate, isLoading } = useLawyerDocumentTemplates();
+  const { templates, deleteTemplate, isLoading } = useLawyerDocumentTemplates();
 
   return (
     <div className="p-4">

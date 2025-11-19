@@ -39,12 +39,7 @@ export interface EventStats {
   timeline: Array<{ date: string; aiChat: number; emergency: number }>;
 }
 
-interface AnalyticsQuery {
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-}
+// Removed unused AnalyticsQuery interface
 
 interface RecentActivity {
   id: string;
@@ -146,7 +141,5 @@ interface UserBehaviorAnalytics {
   peakHours: PeakHour[];
 }
 
-interface DashboardAnalytics extends OverviewAnalytics, RevenueAnalytics, UserBehaviorAnalytics {
-  performance: PerformanceAnalytics;
-}
+// Removed unused DashboardAnalytics interface
 

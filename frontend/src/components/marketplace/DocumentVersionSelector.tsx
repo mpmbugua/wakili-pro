@@ -15,7 +15,7 @@ export const DocumentVersionSelector: React.FC<DocumentVersionSelectorProps> = (
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   React.useEffect(() => {
     if (versions.length > 0) onSelect(versions[selectedIndex]);
-  }, [selectedIndex]);
+  }, [selectedIndex, versions, onSelect]);
   return (
     <div className="mt-4">
       <label htmlFor="version-select" className="block font-semibold mb-1">Select Version:</label>

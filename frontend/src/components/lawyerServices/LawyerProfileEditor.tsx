@@ -2,7 +2,7 @@ import React from 'react';
 import { useLawyerProfile } from '@/hooks/lawyerServices/useLawyerProfile';
 
 export const LawyerProfileEditor: React.FC = () => {
-  const { profile, updateProfile, isLoading } = useLawyerProfile();
+  const { profile, isLoading } = useLawyerProfile();
 
   return (
     <div className="p-4">

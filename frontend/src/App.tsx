@@ -1,7 +1,6 @@
+import React from 'react';
 
 export default function App() {
-  const [backendStatus, setBackendStatus] = useState('Testing...');
-  const [backendData, setBackendData] = useState(null);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Alert Banner */}
@@ -34,4 +33,3 @@ export default function App() {
     </div>
   );
 }
-import React, { useState, useEffect } from 'react';

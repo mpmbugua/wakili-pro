@@ -15,7 +15,7 @@ import { useAuditLogs } from '@/hooks/marketplace/useAuditLogs';
 import { useDocumentVersions } from '@/hooks/marketplace/useDocumentVersions';
 
 export const MarketplacePage: React.FC = () => {
-  const [filters, setFilters] = useState({});
+  const [filters] = useState({});
   const { data: templatesData, isLoading: loadingTemplates } = useMarketplaceFilter(filters);
   const { data: auditLogs } = useAuditLogs();
   const { data: purchaseLimits } = usePurchaseLimits();
@@ -23,11 +23,7 @@ export const MarketplacePage: React.FC = () => {
   // For demo, pick the first template as selected
   const selectedTemplate = templatesData?.templates?.[0];
   const documentId = selectedTemplate?.id || 'mock-doc';
-  const { data: reviews } = useDocumentReviews(documentId);
-  const { data: analytics } = useDocumentAnalytics(documentId);
-  const { data: versions } = useDocumentVersions(documentId);
-  const purchaseMutation = useDocumentPurchase();
-  const addReviewMutation = useAddReview(documentId);
+  // Removed unused variables per lint
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">

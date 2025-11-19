@@ -211,7 +211,7 @@ const Login: React.FC = () => {
                   </Link>
                 </div>
                 <div className="text-sm text-gray-600">
-                  Don't have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <Link 
                     to="/register" 
                     className="font-medium text-sky-600 hover:text-sky-500 transition-colors"

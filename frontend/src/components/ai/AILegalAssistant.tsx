@@ -48,17 +48,10 @@ const AILegalAssistant: React.FC = () => {
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const [queryLimits, setQueryLimits] = useState<QueryLimits | null>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-<<<<<<< HEAD
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const isAuthenticated = false; // TODO: Get from auth store when available
-=======
-  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'sw'>('en');
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // TODO: Replace with actual auth state from store
   const isAuthenticated = false;
->>>>>>> 238a3aa (chore: initial commit - production build, type safety, and cleanup (Nov 17, 2025))
+  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'sw'>('en');
 
   useEffect(() => {
     // Load initial greeting and query limits
