@@ -1,8 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 import { Gavel, MessageSquare, ShoppingBag, BookOpen, ArrowRight, Star, MapPin } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
+  const { isAuthenticated, user } = useAuthStore();
+  
   return (
     <div className="min-h-screen bg-white">
       {/* Header/Navigation */}
@@ -16,16 +19,28 @@ export const LandingPage: React.FC = () => {
             <nav className="hidden md:flex space-x-8">
               <Link to="/ai" className="text-slate-700 hover:text-primary transition-colors">AI Assistant</Link>
               <Link to="/lawyers" className="text-slate-700 hover:text-primary transition-colors">Find Lawyers</Link>
-              <Link to="/marketplace" className="text-slate-700 hover:text-primary transition-colors">Marketplace</Link>
-              <a href="#resources" className="text-slate-700 hover:text-primary transition-colors">Resources</a>
+              <Link to="/marketplace" className="text-slate-700 hover:text-primary transition-colors">Legal Documents</Link>
+              <Link to="/services" className="text-slate-700 hover:text-primary transition-colors">Legal Services</Link>
+              <Link to="/resources" className="text-slate-700 hover:text-primary transition-colors">Resources</Link>
             </nav>
-            <div className="flex space-x-4">
-              <Link to="/login" className="text-slate-700 hover:text-primary font-medium transition-colors">
-                Login
-              </Link>
-              <Link to="/register" className="btn-primary">
-                Get Started
-              </Link>
+            <div className="flex items-center space-x-4">
+              {isAuthenticated ? (
+                <>
+                  <span className="text-slate-600">Welcome, {user?.firstName}</span>
+                  <Link to="/dashboard" className="btn-primary">
+                    Dashboard
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="text-slate-700 hover:text-primary font-medium transition-colors">
+                    Log In
+                  </Link>
+                  <Link to="/register" className="btn-primary">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

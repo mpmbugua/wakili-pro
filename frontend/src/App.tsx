@@ -6,6 +6,8 @@ import { LandingPage } from './pages/LandingPage';
 import { AIAssistant } from './pages/AIAssistant';
 import { LawyersBrowse } from './pages/LawyersBrowse';
 import { MarketplaceBrowse } from './pages/MarketplaceBrowse';
+import { ResourcesPage } from './pages/ResourcesPage';
+import { ServicesPage } from './pages/ServicesPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -40,6 +42,8 @@ function App() {
         <Route path="/ai" element={<AIAssistant />} />
         <Route path="/lawyers" element={<LawyersBrowse />} />
         <Route path="/marketplace" element={<MarketplaceBrowse />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
         
         {/* Auth Routes */}
         <Route 

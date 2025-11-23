@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { Navigate, Link } from 'react-router-dom';
-import { User, Scale, Shield, Calendar, MessageSquare, FileText, BarChart3 } from 'lucide-react';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
+import { User, Scale, Shield, Calendar, MessageSquare, FileText, BarChart3, LogOut, Settings, BookOpen } from 'lucide-react';
 import { VideoConsultationDashboard } from './VideoConsultationDashboard';
 import { analyticsService } from '../services/analyticsService';
 import chatService from '../services/chatService';
@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/Button';
 
 export default function Dashboard() {
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<{
@@ -69,19 +70,58 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8" aria-label="User Dashboard">
-      {loading && (
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <span className="ml-2 text-gray-600">Loading dashboard...</span>
+    <div className="min-h-screen bg-gradient-secondary">
+      {/* Navigation Header */}
+      <header className="navbar sticky top-0 z-50 bg-white shadow-sm">
+        <div className="container">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="text-2xl font-display font-bold text-primary">
+              Wakili Pro
+            </Link>
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link to="/ai" className="text-slate-700 hover:text-primary transition-colors">AI Assistant</Link>
+              <Link to="/lawyers" className="text-slate-700 hover:text-primary transition-colors">Find Lawyers</Link>
+              <Link to="/marketplace" className="text-slate-700 hover:text-primary transition-colors">Documents</Link>
+              <Link to="/services" className="text-slate-700 hover:text-primary transition-colors">Services</Link>
+              <Link to="/resources" className="text-slate-700 hover:text-primary transition-colors">Resources</Link>
+              <Link to="/dashboard" className="text-primary font-semibold transition-colors">Dashboard</Link>
+            </nav>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/settings')}
+                className="text-slate-600 hover:text-primary transition-colors"
+                title="Settings"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+              <button
+                onClick={async () => {
+                  await logout();
+                  navigate('/');
+                }}
+                className="btn-outline inline-flex items-center"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
-      )}
-      {error && (
-        <div className="flex items-center justify-center py-8 text-red-600">
-          <span>{error}</span>
-          <Button variant="outline" size="sm" className="ml-4" onClick={() => window.location.reload()}>Retry</Button>
-        </div>
-      )}
+      </header>
+
+      <div className="container py-8 space-y-8" aria-label="User Dashboard">
+        {loading && (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <span className="ml-2 text-gray-600">Loading dashboard...</span>
+          </div>
+        )}
+        {error && (
+          <div className="flex items-center justify-center py-8 text-red-600">
+            <span>{error}</span>
+            <Button variant="outline" size="sm" className="ml-4" onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+        )}
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 rounded-2xl p-8 text-white">
         <div className="flex items-center space-x-4">
