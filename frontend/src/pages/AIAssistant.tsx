@@ -115,7 +115,26 @@ export const AIAssistant: React.FC = () => {
       }
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${data.message || response.statusText}`);
+        // Extract detailed error message from backend
+        const errorMsg = data.message || response.statusText;
+        const errorCode = data.errorCode || 'UNKNOWN_ERROR';
+        const errorDetails = data.error; // Development mode error details
+        
+        console.error('Backend error:', { errorCode, errorMsg, errorDetails });
+        
+        // Create user-friendly error message
+        let userMessage = errorMsg;
+        if (errorCode === 'OPENAI_API_KEY_MISSING') {
+          userMessage = '🔧 The AI service is not properly configured. Our team has been notified.';
+        } else if (errorCode === 'OPENAI_AUTH_FAILED') {
+          userMessage = '🔑 AI service authentication failed. Please contact support or try again later.';
+        } else if (errorCode === 'RATE_LIMIT_EXCEEDED') {
+          userMessage = '⏳ Too many requests. Please wait a moment and try again.';
+        } else if (errorCode === 'VECTOR_DB_ERROR') {
+          userMessage = '📚 AI knowledge base is updating. Please try again in a few moments.';
+        }
+        
+        throw new Error(userMessage);
       }
 
       if (data.success && data.data) {
@@ -134,11 +153,11 @@ export const AIAssistant: React.FC = () => {
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // Show error message to user
+      // Show detailed error message to user
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `⚠️ Sorry, I encountered an error processing your request. Please try again.\n\nError: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        content: `⚠️ ${error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'}`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
