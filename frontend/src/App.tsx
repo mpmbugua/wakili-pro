@@ -8,6 +8,7 @@ import { LawyersBrowse } from './pages/LawyersBrowse';
 import { MarketplaceBrowse } from './pages/MarketplaceBrowse';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import Dashboard from './components/Dashboard';
 
 const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com';
 
@@ -55,24 +56,7 @@ function App() {
           path="/dashboard" 
           element={
             <ProtectedRoute>
-              <div style={{ padding: '40px', fontFamily: 'Arial' }}>
-                <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>✅ Welcome to Your Dashboard</h1>
-                <p style={{ fontSize: '18px', marginBottom: '20px' }}>You are successfully logged in!</p>
-                <button 
-                  onClick={() => logout()} 
-                  style={{ 
-                    padding: '12px 24px', 
-                    fontSize: '16px', 
-                    backgroundColor: '#dc2626', 
-                    color: 'white', 
-                    border: 'none', 
-                    borderRadius: '8px', 
-                    cursor: 'pointer' 
-                  }}
-                >
-                  Logout
-                </button>
-              </div>
+              <Dashboard />
             </ProtectedRoute>
           } 
         />

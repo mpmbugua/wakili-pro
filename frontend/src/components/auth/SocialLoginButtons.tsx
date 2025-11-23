@@ -2,7 +2,8 @@ import React from 'react';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import FacebookLogin from '@greatsumini/react-facebook-login';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useAuthStore } from '../../store/authStore';
+import api from '../../services/api';
 
 interface SocialLoginButtonsProps {
   onGoogleLogin?: (credentialResponse: CredentialResponse) => void;
@@ -24,18 +25,22 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
         return;
       }
       
-      // Send credential to backend
-      const response = await axios.post('https://wakili-pro.onrender.com/api/auth/google', {
+      // Send credential to backend using api instance
+      const response = await api.post('/auth/google', {
         idToken: credentialResponse.credential,
       });
       
       if (response.data.success) {
         const { user, accessToken, refreshToken } = response.data.data;
         
-        // Store tokens in localStorage
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-        localStorage.setItem('user', JSON.stringify(user));
+        // Update authStore (which also persists to localStorage via zustand persist)
+        useAuthStore.setState({
+          user,
+          accessToken,
+          refreshToken,
+          isAuthenticated: true,
+          error: null
+        });
         
         // Navigate to dashboard
         navigate('/dashboard');
@@ -60,18 +65,22 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
       }
 
       if (response.accessToken) {
-        // Send access token to backend
-        const result = await axios.post('https://wakili-pro.onrender.com/api/auth/facebook', {
+        // Send access token to backend using api instance
+        const result = await api.post('/auth/facebook', {
           accessToken: response.accessToken,
         });
         
         if (result.data.success) {
           const { user, accessToken, refreshToken } = result.data.data;
           
-          // Store tokens in localStorage
-          localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', refreshToken);
-          localStorage.setItem('user', JSON.stringify(user));
+          // Update authStore (which also persists to localStorage via zustand persist)
+          useAuthStore.setState({
+            user,
+            accessToken,
+            refreshToken,
+            isAuthenticated: true,
+            error: null
+          });
           
           // Navigate to dashboard
           navigate('/dashboard');
