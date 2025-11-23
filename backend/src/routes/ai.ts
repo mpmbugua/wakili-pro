@@ -49,6 +49,15 @@ const userUpload = multer({
   }
 });
 
+// Test endpoint to verify router is loaded
+router.get('/test', (_req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'AI router is working',
+    endpoints: ['/ask', '/voice-query', '/research', '/generate-document']
+  });
+});
+
 // Public AI endpoints (with rate limiting for free users)
 router.post('/ask', optionalAuth, userUpload.array('attachments', 5), askAIQuestion);
 router.post('/voice-query', optionalAuth, voiceToTextQuery);
