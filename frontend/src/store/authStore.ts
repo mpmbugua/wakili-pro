@@ -41,11 +41,14 @@ export const useAuthStore = create<AuthStore>()(
         try {
           set({ isLoading: true, error: null });
 
+          console.log('[AuthStore] Attempting login with:', credentials.email);
           const response = await authService.login(credentials);
+          console.log('[AuthStore] Login response:', response);
           
           if (response.success && response.data) {
             const { user, accessToken, refreshToken } = response.data;
             
+            console.log('[AuthStore] Login successful, setting auth state');
             set({
               user,
               accessToken,
@@ -57,6 +60,7 @@ export const useAuthStore = create<AuthStore>()(
 
             return true;
           } else {
+            console.log('[AuthStore] Login failed:', response.message);
             set({
               isLoading: false,
               error: response.message || 'Login failed'
@@ -64,6 +68,7 @@ export const useAuthStore = create<AuthStore>()(
             return false;
           }
         } catch (error) {
+          console.error('[AuthStore] Login error:', error);
           const errorMessage = error instanceof Error ? error.message : 'Login failed';
           set({
             isLoading: false,

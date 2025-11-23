@@ -4,7 +4,9 @@ import {
   login, 
   refreshToken, 
   logout, 
-  changePassword 
+  changePassword,
+  googleOAuth,
+  facebookOAuth
 } from '../controllers/authController';
 import { authenticateToken } from '../middleware/auth';
 
@@ -67,5 +69,21 @@ router.post('/forgot-password', forgotPassword);
  * @body    { token, newPassword }
  */
 router.post('/reset-password', resetPassword);
+
+/**
+ * @route   POST /api/auth/google
+ * @desc    Google OAuth login
+ * @access  Public
+ * @body    { idToken }
+ */
+router.post('/google', googleOAuth);
+
+/**
+ * @route   POST /api/auth/facebook
+ * @desc    Facebook OAuth login
+ * @access  Public
+ * @body    { accessToken }
+ */
+router.post('/facebook', facebookOAuth);
 
 export default router;

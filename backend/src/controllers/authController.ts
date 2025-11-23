@@ -11,6 +11,12 @@ import {
 import type { ApiResponse, UserRole } from '@wakili-pro/shared';
 import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '@wakili-pro/shared';
 import { validatePassword } from '../services/security/passwordPolicyService';
+import { 
+  verifyGoogleToken, 
+  verifyFacebookToken, 
+  findOrCreateGoogleUser, 
+  findOrCreateFacebookUser 
+} from '../services/oauthService';
 
 const prisma = new PrismaClient();
 
@@ -521,5 +527,137 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
   } catch (error) {
     console.error('Reset password error:', error);
     res.status(500).json({ success: false, message: 'Internal server error during password reset' });
+  }
+};
+
+/**
+ * Google OAuth Login
+ * POST /api/auth/google
+ */
+export const googleOAuth = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { idToken } = req.body;
+    
+    if (!idToken) {
+      res.status(400).json({
+        success: false,
+        message: 'Google ID token is required',
+      });
+      return;
+    }
+    
+    // Verify token with Google
+    const payload = await verifyGoogleToken(idToken);
+    
+    // Find or create user
+    const user = await findOrCreateGoogleUser(payload);
+    
+    // Generate JWT tokens
+    const tokenPayload: JWTPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role as UserRole,
+    };
+    
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+    
+    // Store refresh token
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+      },
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Google login successful',
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          emailVerified: user.emailVerified,
+          profile: user.profile,
+        },
+        accessToken,
+        refreshToken,
+      },
+    });
+  } catch (error: any) {
+    console.error('Google OAuth error:', error);
+    res.status(401).json({
+      success: false,
+      message: error.message || 'Google authentication failed',
+    });
+  }
+};
+
+/**
+ * Facebook OAuth Login
+ * POST /api/auth/facebook
+ */
+export const facebookOAuth = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { accessToken } = req.body;
+    
+    if (!accessToken) {
+      res.status(400).json({
+        success: false,
+        message: 'Facebook access token is required',
+      });
+      return;
+    }
+    
+    // Verify token with Facebook
+    const fbData = await verifyFacebookToken(accessToken);
+    
+    // Find or create user
+    const user = await findOrCreateFacebookUser(fbData);
+    
+    // Generate JWT tokens
+    const tokenPayload: JWTPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role as UserRole,
+    };
+    
+    const jwtAccessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+    
+    // Store refresh token
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+      },
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Facebook login successful',
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          emailVerified: user.emailVerified,
+          profile: user.profile,
+        },
+        accessToken: jwtAccessToken,
+        refreshToken,
+      },
+    });
+  } catch (error: any) {
+    console.error('Facebook OAuth error:', error);
+    res.status(401).json({
+      success: false,
+      message: error.message || 'Facebook authentication failed',
+    });
   }
 };

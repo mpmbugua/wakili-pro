@@ -1,8 +1,11 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-
 import helmet from 'helmet';
 import type { Express } from 'express';
+
+// Import routes
+import authRoutes from './routes/auth';
+
 const app: Express = express();
 const port = parseInt(process.env.PORT || '5000', 10);
 
@@ -94,28 +97,62 @@ app.use('/api/admin/legal-materials', adminLegalMaterialsRouter);
 import adminLegalScraperRouter from './routes/admin/legalScraperRoutes';
 app.use('/api/admin/legal-scraper', adminLegalScraperRouter);
 
-// Basic auth endpoints (mock for now)
-app.post('/api/auth/login', (_req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: 'Login endpoint ready',
-    token: 'mock-token-for-testing'
-  });
-});
+// Mount AI assistant routes
+import aiRouter from './routes/ai';
+app.use('/api/ai', aiRouter);
 
-app.post('/api/auth/register', (_req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: 'Register endpoint ready'
-  });
-});
+// Mount lawyers routes
+import lawyersRouter from './routes/lawyers';
+app.use('/api/lawyers', lawyersRouter);
 
-// Catch all
+// Mount marketplace routes
+import marketplaceRouter from './routes/marketplace';
+app.use('/api/marketplace', marketplaceRouter);
+
+// Mount video consultation routes
+import videoRouter from './routes/video';
+app.use('/api/video', videoRouter);
+
+// Mount users routes
+import usersRouter from './routes/users';
+app.use('/api/users', usersRouter);
+
+// Mount analytics routes
+import analyticsRouter from './routes/analytics';
+app.use('/api/analytics', analyticsRouter);
+
+// Mount subscription routes (Three-Tier Monetization)
+import subscriptionRouter from './routes/subscriptions';
+app.use('/api/subscriptions', subscriptionRouter);
+
+// Mount certification routes (Document Certification Workflow)
+import certificationRouter from './routes/certifications';
+app.use('/api/certifications', certificationRouter);
+
+// Auth routes (real implementation)
+app.use('/api/auth', authRoutes);
+
+// Root API endpoint
 app.use('*', (_req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     message: 'Endpoint not found',
-    availableEndpoints: ['/health', '/api', '/api/auth/login', '/api/auth/register']
+    availableEndpoints: [
+      '/health',
+      '/api',
+      '/api/auth/*',
+      '/api/ai/*',
+      '/api/lawyers/*',
+      '/api/marketplace/*',
+      '/api/video/*',
+      '/api/users/*',
+      '/api/analytics/*',
+      '/api/payments/*',
+      '/api/documents/*',
+      '/api/notifications/*',
+      '/api/subscriptions/*',
+      '/api/certifications/*'
+    ]
   });
 });
 

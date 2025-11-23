@@ -10,7 +10,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { user, isAuthenticated } = useAuthStore();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (user?.role !== 'ADMIN') {

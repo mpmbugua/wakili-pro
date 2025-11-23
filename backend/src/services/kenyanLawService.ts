@@ -1,9 +1,13 @@
 import OpenAI from 'openai';
 import { logger } from '../utils/logger';
+import { ragService } from './ai/ragService';
+import { PrismaClient } from '@prisma/client';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+const prisma = new PrismaClient();
 
 interface LegalQueryRequest {
   query: string;
@@ -80,6 +84,122 @@ Be conversational but professional, accurate but accessible to laypeople.
 
   async processLegalQuery(request: LegalQueryRequest): Promise<LegalQueryResponse> {
     try {
+      logger.info(`Processing legal query with RAG: "${request.query.substring(0, 50)}..."`);
+
+      // Get conversation history if userId provided
+      let conversationHistory: Array<{ role: string; content: string }> = [];
+      if (request.userId) {
+        const recentConversation = await prisma.conversationHistory.findFirst({
+          where: {
+            userId: request.userId,
+            lastActivity: {
+              gte: new Date(Date.now() - 30 * 60 * 1000) // Last 30 minutes
+            }
+          },
+          orderBy: { lastActivity: 'desc' }
+        });
+
+        if (recentConversation) {
+          conversationHistory = (recentConversation.messages as any[]) || [];
+        }
+      }
+
+      // Use RAG service to get answer with legal document context
+      const ragResponse = await ragService.query(request.query, conversationHistory);
+
+      // Save query to database
+      await prisma.aIQuery.create({
+        data: {
+          userId: request.userId || null,
+          query: request.query,
+          queryType: request.type || 'LEGAL_ADVICE',
+          context: request.context || null,
+          response: ragResponse.answer,
+          confidence: ragResponse.confidence,
+          tokensUsed: ragResponse.tokensUsed,
+          modelUsed: ragResponse.modelUsed,
+          retrievedDocs: ragResponse.context.retrievedCount,
+          sources: ragResponse.context.sources.map(s => ({
+            title: s.title,
+            citation: s.citation,
+            section: s.section,
+            score: s.score
+          }))
+        }
+      });
+
+      // Update conversation history
+      if (request.userId) {
+        const sessionId = `user_${request.userId}_${new Date().toISOString().split('T')[0]}`;
+        const updatedMessages = [
+          ...conversationHistory.slice(-10), // Keep last 10 messages
+          { role: 'user', content: request.query, timestamp: new Date().toISOString() },
+          { role: 'assistant', content: ragResponse.answer, timestamp: new Date().toISOString(), sources: ragResponse.context.sources }
+        ];
+
+        // Try to find existing conversation for today
+        const existing = await prisma.conversationHistory.findFirst({
+          where: {
+            userId: request.userId,
+            sessionId
+          }
+        });
+
+        if (existing) {
+          await prisma.conversationHistory.update({
+            where: { id: existing.id },
+            data: {
+              messages: updatedMessages,
+              lastActivity: new Date()
+            }
+          });
+        } else {
+          await prisma.conversationHistory.create({
+            data: {
+              userId: request.userId,
+              sessionId,
+              messages: updatedMessages,
+              lastActivity: new Date()
+            }
+          });
+        }
+      }
+
+      // Analyze response to determine if lawyer consultation is recommended
+      const recommendsLawyer = this.shouldRecommendLawyer(request.query, ragResponse.answer);
+      
+      // Convert RAG sources to expected format
+      const sources = ragResponse.context.sources.map(s => ({
+        type: 'LEGAL_DOCUMENT',
+        title: s.title,
+        jurisdiction: 'KENYA',
+        citation: s.citation || '',
+        section: s.section || ''
+      }));
+
+      logger.info(`RAG query successful: ${ragResponse.context.retrievedCount} sources, ${ragResponse.tokensUsed} tokens, model: ${ragResponse.modelUsed}`);
+
+      return {
+        answer: ragResponse.answer,
+        confidence: ragResponse.confidence,
+        tokensUsed: ragResponse.tokensUsed,
+        sources,
+        relatedTopics: this.extractRelatedTopics(request.query),
+        recommendsLawyer
+      };
+
+    } catch (error) {
+      logger.error('RAG query processing error:', error);
+      
+      // Fallback to direct GPT if RAG fails
+      logger.warn('Falling back to direct GPT (RAG unavailable)');
+      return this.processLegalQueryFallback(request);
+    }
+  }
+
+  // Fallback method using direct GPT (original implementation)
+  private async processLegalQueryFallback(request: LegalQueryRequest): Promise<LegalQueryResponse> {
+    try {
       const prompt = this.buildQueryPrompt(request);
       
       const completion = await openai.chat.completions.create({
@@ -110,7 +230,7 @@ Be conversational but professional, accurate but accessible to laypeople.
       };
 
     } catch (error) {
-      logger.error('AI query processing error:', error);
+      logger.error('Fallback AI query processing error:', error);
       throw new Error('Failed to process legal query');
     }
   }

@@ -5,23 +5,73 @@ model AppSetting {
 }
 
 model DocumentTemplate {
-    purchases DocumentPurchase[] @relation("TemplatePurchases")
   id          String   @id @default(cuid())
   name        String
   description String?
-  content     String
+  content     String   @db.Text
+  
+  // Document Classification
+  category    String   // EMPLOYMENT, PROPERTY, FAMILY, CORPORATE, etc.
+  complexity  Int      @default(1)  // 1-5 scale
+  
+  // Smart Fill
+  formFields  Json?    // JSON schema for fillable fields
+  
+  // Pricing
+  basePrice   Int      @default(500)  // KES for Basic tier
+  smartFillPrice Int   @default(1000) // KES for Filled tier
+  
+  // Platform Control
+  createdBy   String   @default("PLATFORM")  // Only platform creates templates
+  
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  purchases   DocumentPurchase[] @relation("TemplatePurchases")
 }
 
 model DocumentPurchase {
   id            String   @id @default(cuid())
   userId        String
   templateId    String
+  paymentId     String?  @unique  // Link to payment
+  
+  // Purchase Tier
+  tier          DocumentTier @default(BASIC)
+  
+  // Smart Fill Data
+  filledData    Json?    // User's form submission data
+  documentUrl   String?  // Generated PDF URL
+  
+  // Certification Workflow
+  status        DocumentStatus @default(DRAFT)
+  requiresCertification Boolean @default(false)
+  certifiedBy   String?
+  certificationFee Int?
+  certifiedDocUrl String?  // Certified PDF with letterhead
+  
+  // Video Consultation Integration
+  requiresConsultation Boolean @default(false)
+  consultationBookingId String?
+  consultationNotes String? @db.Text
+  
+  // Review Metrics
+  clientRating  Int?
+  clientFeedback String?
+  reviewTimeHours Float?
+  
   purchasedAt   DateTime @default(now())
+  certifiedAt   DateTime?
+  
   user          User     @relation("UserDocumentPurchases", fields: [userId], references: [id])
   template      DocumentTemplate @relation("TemplatePurchases", fields: [templateId], references: [id])
+  certifier     LawyerProfile? @relation("CertifiedByLawyer", fields: [certifiedBy], references: [userId])
+  payment       Payment? @relation("DocumentPayment", fields: [paymentId], references: [id])
+  
+  @@index([userId])
+  @@index([status])
+  @@index([certifiedBy])
 }
 
 model ConsultationRecording {
@@ -55,7 +105,39 @@ model LawyerProfile {
   id             String   @id @default(cuid())
   userId         String   @unique
   licenseNumber  String?
-  tier           LawyerTier @default(LITE)
+  
+  // Tier & Pricing
+  tier           LawyerTier @default(FREE)
+  pricingTier    PricingTier @default(ENTRY)
+  
+  // Tier Limits
+  maxSpecializations Int @default(1)  // FREE: 1, LITE: 2, PRO: unlimited
+  maxServicesPerMonth Int @default(0)  // FREE: 1, LITE: 5, PRO: unlimited
+  maxBookingsPerMonth Int @default(2)  // FREE: 2, LITE: 10, PRO: unlimited
+  maxCertificationsPerMonth Int @default(0)  // FREE: 0, LITE: 5, PRO: unlimited
+  
+  // Usage Tracking
+  monthlyBookings Int @default(0)
+  monthlyCertifications Int @default(0)
+  monthlyServices Int @default(0)
+  usageResetAt DateTime @default(now())
+  
+  // Certification Settings
+  acceptingCertifications Boolean @default(false)
+  maxCertificationsPerDay Int @default(5)
+  certificationCount Int @default(0)
+  certificationCompletionRate Float @default(0)
+  avgCertificationTimeHours Float @default(0)
+  
+  // Firm Details (PRO tier)
+  firmName String?
+  firmLetterhead String?  // URL to letterhead template
+  firmAddress String?
+  lskFirmNumber String?
+  
+  // Consultation Pricing
+  consultationRate Int?  // Lawyer sets their own hourly rate
+  
   specializations String[]
   phoneNumber    String?
   yearOfAdmission Int?
@@ -66,7 +148,10 @@ model LawyerProfile {
   isFeatured     Boolean @default(false)
   featuredUntil  DateTime?
   status         String? @default("ACTIVE")
+  
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptions  Subscription[]
+  certifications DocumentPurchase[] @relation("CertifiedByLawyer")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -83,11 +168,19 @@ datasource db {
 model User {
   id                 String   @id @default(cuid())
   email              String   @unique
-  password           String
+  password           String?  // Made optional for OAuth users
   role               UserRole
   firstName          String
   lastName           String
   phoneNumber        String?
+  
+  // OAuth Fields
+  googleId           String?  @unique
+  facebookId         String?  @unique
+  appleId            String?  @unique
+  provider           String?  // 'email', 'google', 'facebook', 'apple'
+  avatar             String?  // Profile picture URL from OAuth provider
+  
   verificationStatus VerificationStatus @default(PENDING)
   emailVerified      Boolean  @default(false)
   emailVerificationToken String?
@@ -115,6 +208,9 @@ model User {
   documentPurchases DocumentPurchase[] @relation("UserDocumentPurchases")
   deviceRegistrations DeviceRegistration[]
   refreshTokens RefreshToken[]
+  // AI & RAG Relations
+  aiQueries        AIQuery[]           @relation("UserAIQueries")
+  conversations    ConversationHistory[] @relation("UserConversations")
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
@@ -164,6 +260,16 @@ model MarketplaceService {
   tags        String[]
   status      ServiceStatus @default(ACTIVE)
   rating      Float? @default(0)
+  
+  // Marketplace Verification
+  approvalStatus ApprovalStatus @default(PENDING)
+  submittedAt DateTime @default(now())
+  reviewedBy  String?  // Admin user ID
+  reviewedAt  DateTime?
+  rejectionReason String?
+  isWakiliVerified Boolean @default(false)
+  qualityScore Int @default(0)  // 0-100 score
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   provider    User     @relation("ServiceProvider", fields: [providerId], references: [id], onDelete: Cascade)
@@ -208,15 +314,33 @@ model Payment {
   id          String   @id @default(cuid())
   userId      String
   bookingId   String?
-  amount      Float
+  
+  // Service Type
+  serviceType ServiceTypeEnum?
+  
+  // Amount Breakdown
+  amount      Float    // Total amount client pays
+  grossAmount Int?     // Amount before commissions (KES)
+  platformCommission Int?  // Platform's cut
+  lawyerShareBeforeWHT Int?  // Lawyer's share before tax
+  whtAmount   Int?     // 5% WHT withheld
+  lawyerNetPayout Int?  // Final amount lawyer receives
+  
+  // WHT Tracking
+  whtRemittedToKRA Boolean @default(false)
+  whtCertificateIssued Boolean @default(false)
+  whtRemittanceDate DateTime?
+  
   status      PaymentStatus
   method      PaymentMethod
   externalTransactionId String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
   user        User     @relation(fields: [userId], references: [id])
   booking     ServiceBooking? @relation(fields: [bookingId], references: [id])
   refunds     Refund[]
+  documentPurchase DocumentPurchase? @relation("DocumentPayment")
 }
 
 model Refund {
@@ -305,8 +429,55 @@ enum VerificationStatus {
 }
 
 enum LawyerTier {
+  FREE
   LITE
   PRO
+}
+
+enum PricingTier {
+  ENTRY
+  STANDARD
+  PREMIUM
+  ELITE
+}
+
+enum DocumentTier {
+  BASIC
+  FILLED
+  CERTIFIED
+}
+
+enum DocumentStatus {
+  DRAFT
+  FILLED
+  PENDING_REVIEW
+  UNDER_REVIEW
+  CONSULTATION_REQUIRED
+  CONSULTATION_SCHEDULED
+  REVISION_NEEDED
+  CERTIFIED
+  REJECTED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FLAGGED
+}
+
+enum ServiceTypeEnum {
+  VIDEO_CONSULTATION
+  MARKETPLACE_SERVICE
+  DOCUMENT_CERTIFICATION
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  SUSPENDED
+  PENDING
 }
 
 enum ServiceType {
@@ -406,6 +577,12 @@ enum NotificationType {
   MESSAGE_RECEIVED
   SERVICE_REVIEW
   SYSTEM_ANNOUNCEMENT
+  CERTIFICATION_AVAILABLE
+  CERTIFICATION_COMPLETED
+  CERTIFICATION_REJECTED
+  REVISION_REQUESTED
+  CONSULTATION_SCHEDULED
+  CONSULTATION_COMPLETED
 }
 
 enum ChatStatus {
@@ -422,3 +599,142 @@ enum MessageType {
   SYSTEM
 }
 
+// ==============================================
+// RAG & AI MODELS FOR INTELLIGENT LEGAL ASSISTANT
+// ==============================================
+
+model AIQuery {
+  id            String   @id @default(cuid())
+  userId        String?
+  query         String   @db.Text
+  queryType     String   // LEGAL_ADVICE, DOCUMENT_SEARCH, CASE_LAW, etc.
+  context       String?  @db.Text
+  response      String   @db.Text
+  confidence    Float
+  tokensUsed    Int
+  modelUsed     String   // gpt-4, gpt-3.5-turbo, etc.
+  retrievedDocs Int      @default(0)
+  sources       Json?    // Array of cited legal documents
+  createdAt     DateTime @default(now())
+  user          User?    @relation("UserAIQueries", fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([queryType])
+}
+
+model LegalDocument {
+  id            String              @id @default(cuid())
+  title         String
+  content       String              @db.Text
+  documentType  LegalDocumentType
+  jurisdiction  String              @default("KENYA")
+  category      String              // STATUTE, REGULATION, CASE_LAW, PROCEDURE
+  citation      String?             // e.g., "Cap 63", "Act No. 11 of 2007"
+  sourceUrl     String?
+  effectiveDate DateTime?
+  uploadedAt    DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  embeddings    DocumentEmbedding[]
+  
+  @@index([documentType])
+  @@index([category])
+  @@index([jurisdiction])
+}
+
+model DocumentEmbedding {
+  id            String         @id @default(cuid())
+  documentId    String
+  chunkText     String         @db.Text
+  chunkIndex    Int
+  vectorId      String         @unique // Pinecone vector ID
+  metadata      Json?          // {section, page, title, etc.}
+  createdAt     DateTime       @default(now())
+  document      LegalDocument  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  
+  @@index([documentId])
+  @@index([vectorId])
+}
+
+model ConversationHistory {
+  id            String   @id @default(cuid())
+  userId        String
+  sessionId     String   // Group related queries
+  messages      Json     // Array of {role, content, timestamp, sources}
+  lastActivity  DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation("UserConversations", fields: [userId], references: [id])
+  
+  @@unique([userId, sessionId])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([lastActivity])
+}
+
+enum LegalDocumentType {
+  CONSTITUTION
+  ACT
+  REGULATION
+  CASE_LAW
+  PROCEDURE
+  FORM
+  GUIDELINE
+  TREATY
+}
+
+// ==============================================
+// SUBSCRIPTION & MONETIZATION MODELS
+// ==============================================
+
+model Subscription {
+  id          String   @id @default(cuid())
+  lawyerId    String
+  tier        LawyerTier
+  status      SubscriptionStatus @default(ACTIVE)
+  
+  // Billing Cycle
+  currentPeriodStart DateTime @default(now())
+  currentPeriodEnd DateTime
+  cancelAt    DateTime?
+  cancelledAt DateTime?
+  
+  // Payment
+  monthlyFee  Int      // KES 0 (FREE), 1999 (LITE), 4999 (PRO)
+  paymentMethod PaymentMethod @default(MPESA)
+  lastPaymentId String?
+  nextBillingDate DateTime?
+  
+  // Tracking
+  upgradesFrom LawyerTier?
+  downgradesFrom LawyerTier?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  lawyer      LawyerProfile @relation(fields: [lawyerId], references: [userId])
+  
+  @@index([lawyerId])
+  @@index([status])
+}
+
+model MonthlyWHTReport {
+  id          String   @id @default(cuid())
+  month       Int      // 1-12
+  year        Int
+  
+  // Totals
+  totalWHTCollected Int  // KES
+  totalPayments Int
+  paymentIds  String[]  // Array of payment IDs included
+  
+  // KRA Submission
+  remittedToKRA Boolean @default(false)
+  remittanceDate DateTime?
+  kraReceiptNumber String?
+  
+  generatedAt DateTime @default(now())
+  generatedBy String   // Admin user ID
+  
+  @@unique([month, year])
+}

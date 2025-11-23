@@ -8,6 +8,8 @@ import chatService from '../services/chatService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card';
 import { Button } from './ui/Button';
 
+export default function Dashboard() {
+  const { user, isAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<{
@@ -61,9 +63,9 @@ import { Button } from './ui/Button';
     fetchStats();
   }, [user]);
 
-  // Redirect to login if not authenticated
+  // Redirect to homepage if not authenticated (where login modal can be opened)
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (
@@ -299,6 +301,4 @@ import { Button } from './ui/Button';
       )}
     </div>
   );
-};
-
-export default Dashboard;
+}

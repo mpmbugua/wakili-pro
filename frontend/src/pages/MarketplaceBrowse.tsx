@@ -1,0 +1,598 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+
+interface Document {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  price: number;
+  downloads: number;
+  rating: number;
+  reviewCount: number;
+  pages: number;
+  format: string;
+  lastUpdated: string;
+  features: string[];
+  previewAvailable: boolean;
+}
+
+// Sample marketplace data (will be replaced with backend API)
+const sampleDocuments: Document[] = [
+  {
+    id: '1',
+    title: 'Employment Contract Template',
+    category: 'Employment',
+    description: 'Comprehensive employment agreement template compliant with Kenya Employment Act 2007. Includes clauses for salary, benefits, termination, and confidentiality.',
+    price: 1200,
+    downloads: 487,
+    rating: 4.8,
+    reviewCount: 92,
+    pages: 8,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-01',
+    features: ['Legally vetted', 'Editable format', 'Includes instructions', 'Valid in Kenya'],
+    previewAvailable: true
+  },
+  {
+    id: '2',
+    title: 'Land Sale Agreement',
+    category: 'Property',
+    description: 'Standard land purchase agreement for property transactions in Kenya. Covers payment terms, title transfer, and dispute resolution.',
+    price: 1500,
+    downloads: 623,
+    rating: 4.9,
+    reviewCount: 145,
+    pages: 12,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-01',
+    features: ['Land Act 2012 compliant', 'Editable terms', 'Transfer procedure guide', 'Stamp duty info'],
+    previewAvailable: true
+  },
+  {
+    id: '3',
+    title: 'Divorce Petition Guide',
+    category: 'Family Law',
+    description: 'Step-by-step guide to filing for divorce in Kenya, including petition templates, process timeline, and required documents.',
+    price: 800,
+    downloads: 234,
+    rating: 4.7,
+    reviewCount: 58,
+    pages: 15,
+    format: 'PDF',
+    lastUpdated: '2023-12',
+    features: ['Marriage Act 2014 aligned', 'Court filing checklist', 'Custody considerations', 'Asset division guide'],
+    previewAvailable: false
+  },
+  {
+    id: '4',
+    title: 'Business Partnership Agreement',
+    category: 'Corporate',
+    description: 'Detailed partnership agreement template for business ventures. Includes profit sharing, decision-making, and exit provisions.',
+    price: 2000,
+    downloads: 356,
+    rating: 5.0,
+    reviewCount: 67,
+    pages: 10,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-02',
+    features: ['Partnership Act compliant', 'Customizable clauses', 'Dispute resolution', 'IP protection'],
+    previewAvailable: true
+  },
+  {
+    id: '5',
+    title: 'Tenant Lease Agreement',
+    category: 'Property',
+    description: 'Residential lease agreement for landlords and tenants. Covers rent, deposits, maintenance, and termination procedures.',
+    price: 600,
+    downloads: 892,
+    rating: 4.6,
+    reviewCount: 178,
+    pages: 6,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-01',
+    features: ['Rent Restriction Act aligned', 'Deposit protection', 'Eviction procedure', 'Maintenance terms'],
+    previewAvailable: true
+  },
+  {
+    id: '6',
+    title: 'Will and Testament Template',
+    category: 'Succession',
+    description: 'Legally valid will template for estate planning in Kenya. Includes executor appointment, asset distribution, and guardianship.',
+    price: 1000,
+    downloads: 445,
+    rating: 4.9,
+    reviewCount: 103,
+    pages: 7,
+    format: 'PDF + DOCX',
+    lastUpdated: '2023-11',
+    features: ['Law of Succession Act compliant', 'Witness requirements', 'Executor guide', 'Asset inventory'],
+    previewAvailable: false
+  },
+  {
+    id: '7',
+    title: 'Non-Disclosure Agreement (NDA)',
+    category: 'Corporate',
+    description: 'Standard NDA for protecting confidential business information. Suitable for employees, contractors, and business partners.',
+    price: 500,
+    downloads: 721,
+    rating: 4.5,
+    reviewCount: 134,
+    pages: 4,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-02',
+    features: ['Enforceable in Kenya', 'Mutual or unilateral', 'Customizable duration', 'Penalty clauses'],
+    previewAvailable: true
+  },
+  {
+    id: '8',
+    title: 'Loan Agreement Template',
+    category: 'Financial',
+    description: 'Personal or business loan agreement with repayment schedule, interest terms, and default provisions.',
+    price: 900,
+    downloads: 567,
+    rating: 4.7,
+    reviewCount: 89,
+    pages: 9,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-01',
+    features: ['Interest rate calculator', 'Repayment schedule', 'Collateral terms', 'Default procedure'],
+    previewAvailable: true
+  },
+  {
+    id: '9',
+    title: 'Vehicle Sale Agreement',
+    category: 'Transport',
+    description: 'Motor vehicle sale agreement for private car sales. Includes transfer procedures, NTSA requirements, and warranty clauses.',
+    price: 700,
+    downloads: 1234,
+    rating: 4.8,
+    reviewCount: 267,
+    pages: 5,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['NTSA CR12 guide', 'Warranty template', 'Payment terms', 'Transfer checklist'],
+    previewAvailable: true
+  },
+  {
+    id: '10',
+    title: 'Power of Attorney',
+    category: 'Legal',
+    description: 'General or specific power of attorney document. Authorize someone to act on your behalf for property, financial, or legal matters.',
+    price: 800,
+    downloads: 423,
+    rating: 4.6,
+    reviewCount: 95,
+    pages: 4,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-02',
+    features: ['Notarization guide', 'Revocation clause', 'Specific vs general', 'Witness requirements'],
+    previewAvailable: true
+  },
+  {
+    id: '11',
+    title: 'Prenuptial Agreement',
+    category: 'Family Law',
+    description: 'Pre-marriage agreement to protect assets and define property rights. Compliant with Matrimonial Property Act 2013.',
+    price: 1800,
+    downloads: 156,
+    rating: 4.9,
+    reviewCount: 34,
+    pages: 11,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-01',
+    features: ['Asset protection', 'Debt allocation', 'Inheritance rights', 'Financial disclosure'],
+    previewAvailable: false
+  },
+  {
+    id: '12',
+    title: 'Service Agreement Contract',
+    category: 'Corporate',
+    description: 'Professional services contract for consultants, freelancers, and contractors. Includes scope of work, payment terms, and deliverables.',
+    price: 950,
+    downloads: 678,
+    rating: 4.7,
+    reviewCount: 143,
+    pages: 7,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-02',
+    features: ['Scope of work template', 'Milestone payments', 'IP ownership', 'Termination clause'],
+    previewAvailable: true
+  },
+  {
+    id: '13',
+    title: 'Company Incorporation Guide',
+    category: 'Corporate',
+    description: 'Complete guide to registering a limited company in Kenya. Includes Memorandum, Articles of Association, and BRS filing steps.',
+    price: 2500,
+    downloads: 389,
+    rating: 5.0,
+    reviewCount: 78,
+    pages: 20,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['eCitizen process', 'CR1 forms', 'Director resolutions', 'KRA PIN application'],
+    previewAvailable: true
+  },
+  {
+    id: '14',
+    title: 'Demand Letter Template',
+    category: 'Legal',
+    description: 'Professional demand letter for debt recovery, contract breach, or dispute resolution. Multiple templates for different scenarios.',
+    price: 400,
+    downloads: 892,
+    rating: 4.5,
+    reviewCount: 201,
+    pages: 3,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-02',
+    features: ['Multiple scenarios', 'Legal language', 'Timeline guidance', 'Follow-up templates'],
+    previewAvailable: true
+  },
+  {
+    id: '15',
+    title: 'Affidavit Template',
+    category: 'Legal',
+    description: 'Sworn affidavit template for court proceedings, name change, lost documents, and other legal purposes.',
+    price: 300,
+    downloads: 1456,
+    rating: 4.4,
+    reviewCount: 312,
+    pages: 2,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-01',
+    features: ['Commissioner of oaths guide', 'Multiple use cases', 'Proper formatting', 'Evidence rules'],
+    previewAvailable: true
+  },
+  {
+    id: '16',
+    title: 'Property Rental Agreement (Commercial)',
+    category: 'Property',
+    description: 'Commercial property lease for offices, shops, and business premises. Includes rent review, fit-out, and business use clauses.',
+    price: 1300,
+    downloads: 267,
+    rating: 4.8,
+    reviewCount: 56,
+    pages: 14,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-02',
+    features: ['Rent escalation', 'Service charge', 'Permitted use', 'Renewal terms'],
+    previewAvailable: true
+  },
+  {
+    id: '17',
+    title: 'Child Custody Agreement',
+    category: 'Family Law',
+    description: 'Co-parenting agreement for separated or divorced parents. Covers visitation, financial support, and decision-making.',
+    price: 1100,
+    downloads: 334,
+    rating: 4.9,
+    reviewCount: 72,
+    pages: 8,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-01',
+    features: ['Best interests framework', 'Visitation schedule', 'Child support', 'Education decisions'],
+    previewAvailable: false
+  },
+  {
+    id: '18',
+    title: 'Supplier Agreement',
+    category: 'Corporate',
+    description: 'Business-to-business supply agreement for goods and services. Includes quality standards, delivery terms, and payment conditions.',
+    price: 1400,
+    downloads: 423,
+    rating: 4.6,
+    reviewCount: 89,
+    pages: 10,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['Quality specs', 'Delivery terms', 'Payment schedule', 'Breach remedies'],
+    previewAvailable: true
+  },
+  {
+    id: '19',
+    title: 'Statutory Demand',
+    category: 'Financial',
+    description: 'Formal demand for payment of debt under Insolvency Act. Precursor to bankruptcy or liquidation proceedings.',
+    price: 600,
+    downloads: 198,
+    rating: 4.7,
+    reviewCount: 41,
+    pages: 3,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-02',
+    features: ['21-day notice', 'Insolvency Act compliant', 'Service requirements', 'Dispute procedure'],
+    previewAvailable: true
+  },
+  {
+    id: '20',
+    title: 'Share Purchase Agreement',
+    category: 'Corporate',
+    description: 'Agreement for buying or selling company shares. Includes warranties, indemnities, and completion conditions.',
+    price: 3000,
+    downloads: 145,
+    rating: 5.0,
+    reviewCount: 28,
+    pages: 18,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['Warranties & indemnities', 'Due diligence checklist', 'Completion mechanics', 'Escrow arrangement'],
+    previewAvailable: false
+  }
+];
+
+const categories = ['All Categories', 'Employment', 'Property', 'Family Law', 'Corporate', 'Succession', 'Financial', 'Transport', 'Legal'];
+
+export const MarketplaceBrowse: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'popular' | 'price-low' | 'price-high' | 'rating'>('popular');
+
+  // Filter and sort documents
+  const filteredDocuments = sampleDocuments
+    .filter(doc =>
+      (selectedCategory === 'All Categories' || doc.category === selectedCategory) &&
+      (searchQuery === '' || 
+        doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+    .sort((a, b) => {
+      if (sortBy === 'popular') return b.downloads - a.downloads;
+      if (sortBy === 'price-low') return a.price - b.price;
+      if (sortBy === 'price-high') return b.price - a.price;
+      if (sortBy === 'rating') return b.rating - a.rating;
+      return 0;
+    });
+
+  const handlePurchaseDocument = (docId: string, docTitle: string) => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem('pendingPurchase', JSON.stringify({ docId, docTitle }));
+      navigate('/login', { state: { from: '/marketplace', message: 'Please log in to purchase documents' } });
+    } else {
+      navigate(`/checkout/${docId}`);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/')}
+                className="text-gray-600 hover:text-gray-900 font-medium"
+              >
+                ← Back to Home
+              </button>
+              <div className="border-l border-gray-300 h-6"></div>
+              <h1 className="text-2xl font-bold text-gray-900">Legal Documents Marketplace</h1>
+            </div>
+            {!isAuthenticated && (
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-600">Ready to purchase?</span>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Log In
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Search and Filters */}
+      <div className="bg-white border-b border-gray-200 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Search Documents
+              </label>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by title or keywords..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort By */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sort By
+              </label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="popular">Most Popular</option>
+                <option value="rating">Highest Rated</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm text-gray-600">
+            <span className="font-semibold text-gray-900">{filteredDocuments.length}</span> documents available
+          </p>
+        </div>
+      </div>
+
+      {/* Documents Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredDocuments.map((doc) => (
+            <div
+              key={doc.id}
+              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden flex flex-col"
+            >
+              {/* Document Header */}
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+                <div className="flex items-start justify-between mb-2">
+                  <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
+                    {doc.category}
+                  </span>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-yellow-300">★</span>
+                    <span className="text-sm font-semibold">{doc.rating}</span>
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold mt-3">{doc.title}</h3>
+              </div>
+
+              {/* Document Details */}
+              <div className="p-6 flex-1 flex flex-col">
+                <p className="text-sm text-gray-700 mb-4 line-clamp-3">{doc.description}</p>
+
+                {/* Features */}
+                <div className="space-y-2 mb-4">
+                  {doc.features.slice(0, 3).map((feature, idx) => (
+                    <div key={idx} className="flex items-center text-sm text-gray-600">
+                      <svg className="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      {feature}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Document Info */}
+                <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-gray-200 text-center text-sm mb-4">
+                  <div>
+                    <p className="text-gray-500 text-xs">Pages</p>
+                    <p className="font-semibold text-gray-900">{doc.pages}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-xs">Format</p>
+                    <p className="font-semibold text-gray-900 text-xs">{doc.format}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-xs">Downloads</p>
+                    <p className="font-semibold text-gray-900">{doc.downloads}</p>
+                  </div>
+                </div>
+
+                {/* Price and CTA */}
+                <div className="mt-auto">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="text-xs text-gray-500">One-time payment</p>
+                      <p className="text-2xl font-bold text-gray-900">KES {doc.price.toLocaleString()}</p>
+                    </div>
+                    {doc.previewAvailable && (
+                      <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                        Preview →
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => handlePurchaseDocument(doc.id, doc.title)}
+                    className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+                  >
+                    Purchase Document
+                  </button>
+
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    {doc.reviewCount} verified reviews • Updated {doc.lastUpdated}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredDocuments.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No documents found matching your search.</p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory('All Categories');
+              }}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Trust Badges */}
+      <div className="bg-white border-t border-gray-200 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div className="text-4xl mb-2">🔒</div>
+              <h3 className="font-semibold text-gray-900 mb-1">Secure Downloads</h3>
+              <p className="text-sm text-gray-600">Encrypted transactions and instant access</p>
+            </div>
+            <div>
+              <div className="text-4xl mb-2">⚖️</div>
+              <h3 className="font-semibold text-gray-900 mb-1">Legally Vetted</h3>
+              <p className="text-sm text-gray-600">All documents reviewed by qualified lawyers</p>
+            </div>
+            <div>
+              <div className="text-4xl mb-2">📝</div>
+              <h3 className="font-semibold text-gray-900 mb-1">Editable Templates</h3>
+              <p className="text-sm text-gray-600">Customize documents to fit your needs</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      {!isAuthenticated && (
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-12">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl font-bold mb-4">Ready to Access Legal Documents?</h2>
+            <p className="text-lg mb-6 text-purple-100">
+              Create a free account to purchase documents, save favorites, and get instant downloads.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => navigate('/register')}
+                className="px-8 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-gray-100 transition"
+              >
+                Create Free Account
+              </button>
+              <button
+                onClick={() => navigate('/login')}
+                className="px-8 py-3 bg-purple-700 text-white font-semibold rounded-lg hover:bg-purple-800 transition border-2 border-white"
+              >
+                Log In
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

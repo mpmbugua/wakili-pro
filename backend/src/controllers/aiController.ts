@@ -8,6 +8,9 @@ import { CreateDocumentGenerationSchema, LegalResearchSchema, ContractAnalysisSc
 // Import AI service providers
 import { speechService } from '../services/speechService';
 import { kenyanLawService } from '../services/kenyanLawService';
+import { documentIngestionService } from '../services/ai/documentIngestionService';
+import { vectorDbService } from '../services/ai/vectorDatabaseService';
+import { LegalDocumentType } from '@prisma/client';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -26,14 +29,40 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
     const userId = req.user?.id;
     const isAuthenticated = !!userId;
     
+    // Get uploaded files
+    const files = req.files as Express.Multer.File[];
+    
     // Validate input (CreateAIQuerySchema removed, skip validation)
-    const { query, type, context, urgency, includeReferences } = req.body;
+    const { question, query, type, context, urgency, includeReferences } = req.body;
+    const userQuery = question || query;
+
+    // Process attachments if any
+    let attachmentContext = '';
+    if (files && files.length > 0) {
+      logger.info(`Processing ${files.length} attachments`);
+      
+      for (const file of files) {
+        const isImage = file.mimetype.startsWith('image/');
+        
+        if (isImage) {
+          // For images, add context that an image was attached
+          attachmentContext += `\n\n[User attached an image: ${file.originalname}. `;
+          attachmentContext += `This could be a legal document, contract, or evidence. `;
+          attachmentContext += `Provide guidance on how to proceed with image-based legal documents.]`;
+        } else {
+          // For documents (PDF, DOC), mention document analysis
+          attachmentContext += `\n\n[User attached a document: ${file.originalname}. `;
+          attachmentContext += `This appears to be a legal document. `;
+          attachmentContext += `Provide guidance on document review and next steps.]`;
+        }
+      }
+    }
 
     // Rate limiting for unauthenticated users removed: aIQuery model does not exist in schema.
 
-    // Process the AI query
+    // Process the AI query with attachment context
     const aiResponse = await kenyanLawService.processLegalQuery({
-      query,
+      query: userQuery + attachmentContext,
       type,
       context,
       urgency,
@@ -69,6 +98,7 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
       sources?: Array<Record<string, unknown>>;
       relatedTopics?: string[];
       consultationSuggestion?: Record<string, unknown>;
+      attachmentsProcessed?: number;
     }> = {
       success: true,
       message: 'AI response generated successfully',
@@ -77,7 +107,8 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
         confidence: aiResponse.confidence,
         sources: aiResponse.sources,
         relatedTopics: aiResponse.relatedTopics,
-        consultationSuggestion
+        consultationSuggestion,
+        attachmentsProcessed: files?.length || 0
       }
     };
 
@@ -378,6 +409,227 @@ export const getFreeQueryLimit = async (req: AuthenticatedRequest, res: Response
     res.status(500).json({
       success: false,
       message: 'Failed to check query limits'
+    });
+  }
+};
+
+// =====================================================
+// RAG DOCUMENT MANAGEMENT ENDPOINTS
+// =====================================================
+
+/**
+ * Upload and ingest legal document into knowledge base
+ * Admin only endpoint
+ */
+export const ingestLegalDocument = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    // Check if user is admin
+    if (req.user?.role !== 'ADMIN') {
+      res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+      return;
+    }
+
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+      return;
+    }
+
+    const { title, documentType, category, citation, sourceUrl, effectiveDate } = req.body;
+
+    if (!title || !documentType || !category) {
+      res.status(400).json({
+        success: false,
+        message: 'Missing required fields: title, documentType, category'
+      });
+      return;
+    }
+
+    // Validate document type
+    if (!Object.values(LegalDocumentType).includes(documentType)) {
+      res.status(400).json({
+        success: false,
+        message: `Invalid document type. Must be one of: ${Object.values(LegalDocumentType).join(', ')}`
+      });
+      return;
+    }
+
+    // Determine file type
+    const fileExtension = req.file.originalname.split('.').pop()?.toLowerCase();
+    let fileType: 'pdf' | 'docx';
+    
+    if (fileExtension === 'pdf') {
+      fileType = 'pdf';
+    } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+      fileType = 'docx';
+    } else {
+      res.status(400).json({
+        success: false,
+        message: 'Unsupported file type. Only PDF and DOCX files are supported.'
+      });
+      return;
+    }
+
+    logger.info(`Ingesting ${fileType} document: ${title}`);
+
+    // Ingest document
+    const result = await documentIngestionService.ingestDocumentFile(
+      req.file.path,
+      fileType,
+      {
+        title,
+        documentType,
+        category,
+        citation,
+        sourceUrl,
+        effectiveDate: effectiveDate ? new Date(effectiveDate) : undefined
+      }
+    );
+
+    res.json({
+      success: true,
+      message: 'Document ingested successfully',
+      data: result
+    });
+
+  } catch (error) {
+    logger.error('Document ingestion error:', error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to ingest document'
+    });
+  }
+};
+
+/**
+ * Get list of documents in knowledge base
+ */
+export const getKnowledgeBase = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { documentType, category, limit } = req.query;
+
+    const documents = await documentIngestionService.listDocuments({
+      documentType: documentType as LegalDocumentType | undefined,
+      category: category as string | undefined,
+      limit: limit ? parseInt(limit as string) : 50
+    });
+
+    res.json({
+      success: true,
+      message: 'Knowledge base retrieved successfully',
+      data: {
+        documents,
+        total: documents.length
+      }
+    });
+
+  } catch (error) {
+    logger.error('Get knowledge base error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve knowledge base'
+    });
+  }
+};
+
+/**
+ * Delete document from knowledge base
+ * Admin only endpoint
+ */
+export const deleteLegalDocument = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    // Check if user is admin
+    if (req.user?.role !== 'ADMIN') {
+      res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+      return;
+    }
+
+    const { documentId } = req.params;
+
+    if (!documentId) {
+      res.status(400).json({
+        success: false,
+        message: 'Document ID is required'
+      });
+      return;
+    }
+
+    await documentIngestionService.deleteDocument(documentId);
+
+    res.json({
+      success: true,
+      message: 'Document deleted successfully'
+    });
+
+  } catch (error) {
+    logger.error('Delete document error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete document'
+    });
+  }
+};
+
+/**
+ * Get knowledge base statistics
+ */
+export const getKnowledgeBaseStats = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const stats = await documentIngestionService.getStats();
+    const vectorStats = await vectorDbService.getStats();
+
+    res.json({
+      success: true,
+      message: 'Statistics retrieved successfully',
+      data: {
+        database: stats,
+        vectorDb: vectorStats
+      }
+    });
+
+  } catch (error) {
+    logger.error('Get stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve statistics'
+    });
+  }
+};
+
+/**
+ * Initialize vector database (admin only, one-time setup)
+ */
+export const initializeVectorDb = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    // Check if user is admin
+    if (req.user?.role !== 'ADMIN') {
+      res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+      return;
+    }
+
+    await vectorDbService.initialize();
+
+    res.json({
+      success: true,
+      message: 'Vector database initialized successfully'
+    });
+
+  } catch (error) {
+    logger.error('Vector DB initialization error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to initialize vector database'
     });
   }
 };

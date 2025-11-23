@@ -1,35 +1,88 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useAuthStore } from './store/authStore';
+import { LandingPage } from './pages/LandingPage';
+import { AIAssistant } from './pages/AIAssistant';
+import { LawyersBrowse } from './pages/LawyersBrowse';
+import { MarketplaceBrowse } from './pages/MarketplaceBrowse';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
 
-export default function App() {
+const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com';
+
+// Protected Route component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuthStore();
+  
+  console.log('[ProtectedRoute] isAuthenticated:', isAuthenticated);
+  
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+function App() {
+  const { isAuthenticated, refreshAuth, accessToken, logout } = useAuthStore();
+
+  useEffect(() => {
+    // Try to refresh auth on app load if we have tokens
+    if (!isAuthenticated && accessToken) {
+      refreshAuth();
+    }
+  }, [isAuthenticated, accessToken, refreshAuth]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Alert Banner */}
-      <div className="bg-orange-600 text-white text-center py-2 font-bold text-lg">
-        🛠️ VERCEL EXPLICIT PARAMS v9.0 - {new Date().toISOString()} - DEPLOY TEST! 🛠️
-      </div>
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center flex-wrap">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-                W
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <Router>
+      <Routes>
+        {/* Public Routes - No Authentication Required */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/ai" element={<AIAssistant />} />
+        <Route path="/lawyers" element={<LawyersBrowse />} />
+        <Route path="/marketplace" element={<MarketplaceBrowse />} />
+        
+        {/* Auth Routes */}
+        <Route 
+          path="/login" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+        />
+        <Route 
+          path="/register" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} 
+        />
+
+        {/* Protected Routes - Authentication Required */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <div style={{ padding: '40px', fontFamily: 'Arial' }}>
+                <h1 style={{ fontSize: '32px', marginBottom: '20px' }}>✅ Welcome to Your Dashboard</h1>
+                <p style={{ fontSize: '18px', marginBottom: '20px' }}>You are successfully logged in!</p>
+                <button 
+                  onClick={() => logout()} 
+                  style={{ 
+                    padding: '12px 24px', 
+                    fontSize: '16px', 
+                    backgroundColor: '#dc2626', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer' 
+                  }}
+                >
+                  Logout
+                </button>
               </div>
-              <h1 className="ml-3 text-2xl font-bold text-gray-900">Wakili Pro</h1>
-            </div>
-            <div className="space-x-4 mt-4 sm:mt-0">
-              <a href="/ai-legal-assistant" className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">AI Legal Assistant</a>
-              <a href="/emergency-connect" className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Emergency Connect</a>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Login</button>
-              <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Register</button>
-            </div>
-          </div>
-        </div>
-      </header>
-      {/* Main Content - Routing */}
-      <main className="max-w-7xl mx-auto px-4 py-12">
-        {/* ...your routes and content here... */}
-      </main>
-    </div>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Catch-all - redirect to landing */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+    </GoogleOAuthProvider>
   );
 }
+
+export default App;

@@ -1,6 +1,15 @@
 # Wakili Pro
 
-Modern full-stack web application built with agile development practices, featuring React frontend, Node.js backend, and comprehensive development tooling.
+Modern full-stack web application built with agile development practices, featuring React frontend, Node.js backend, OAuth authentication, and comprehensive development tooling.
+
+## ✨ Features
+
+- 🔐 **OAuth Authentication**: Google, Facebook, and Apple login
+- 💼 **Lawyer Marketplace**: Three-tier subscription system (FREE, LITE, PRO)
+- 📄 **Smart Documents**: Document templates with certification workflow
+- 💰 **M-Pesa Integration**: Secure payment processing for Kenya
+- 📊 **Monetization**: Commission-based revenue model
+- 🎥 **Video Consultations**: WebRTC-powered lawyer consultations
 
 ## 🏗️ Architecture
 

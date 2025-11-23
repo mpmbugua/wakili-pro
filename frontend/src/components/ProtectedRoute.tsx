@@ -12,7 +12,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    // Redirect to homepage where login modal can be opened
+    return <Navigate to="/" replace />;
   }
 
   if (requireSubscription && subscriptionStatus !== 'ACTIVE') {

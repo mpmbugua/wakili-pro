@@ -1,18 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import AuthenticatedWakiliApp from './AuthenticatedWakiliApp.tsx'
+import App from './App.tsx'
 import './index.css'
 
-// Global error handlers
-window.addEventListener('error', (event) => {
-  console.error('Global error:', event.error);
-});
-
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
-});
-
-// Error boundary component
+// Error boundary to catch rendering errors
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
   constructor(props: {children: React.ReactNode}) {
     super(props);
@@ -30,12 +21,16 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{padding: '20px', fontFamily: 'sans-serif'}}>
-          <h1>⚠️ Something went wrong</h1>
-          <pre style={{background: '#f5f5f5', padding: '10px', overflow: 'auto'}}>
+        <div style={{padding: '20px', fontFamily: 'sans-serif', color: '#333'}}>
+          <h1>⚠️ Application Error</h1>
+          <pre style={{background: '#f5f5f5', padding: '10px', overflow: 'auto', fontSize: '12px'}}>
             {this.state.error?.toString()}
+            {'\n\n'}
+            {this.state.error?.stack}
           </pre>
-          <button onClick={() => window.location.reload()}>Reload Page</button>
+          <button onClick={() => window.location.reload()} style={{marginTop: '10px', padding: '8px 16px', cursor: 'pointer'}}>
+            Reload Page
+          </button>
         </div>
       );
     }
@@ -44,9 +39,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <AuthenticatedWakiliApp />
-    </ErrorBoundary>
-  </React.StrictMode>,
-)
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);

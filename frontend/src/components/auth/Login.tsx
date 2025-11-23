@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { WakiliLogo } from '../ui/WakiliLogo';
+import { Button } from '../ui/Button';
+import { Card, CardContent } from '../ui/Card';
+import { SocialLoginButtons } from './SocialLoginButtons';
 
 // Inline type to replace shared dependency
 interface LoginRequest {
   email: string;
   password: string;
 }
-import { WakiliLogo } from '../ui/WakiliLogo';
-import { Button } from '../ui/Button';
-import { Card, CardContent } from '../ui/Card';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -99,6 +100,9 @@ const Login: React.FC = () => {
                 Sign in to continue to your dashboard
               </p>
             </div>
+
+            {/* Social Login Buttons */}
+            <SocialLoginButtons />
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-4">

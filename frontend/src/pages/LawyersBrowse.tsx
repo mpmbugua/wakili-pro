@@ -1,0 +1,452 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+
+interface Lawyer {
+  id: string;
+  name: string;
+  specialty: string;
+  location: string;
+  rating: number;
+  reviewCount: number;
+  yearsExperience: number;
+  hourlyRate: number;
+  imageUrl: string;
+  bio: string;
+  languages: string[];
+  availability: 'Available' | 'Busy' | 'Offline';
+}
+
+// Sample data (will be replaced with backend API call)
+const sampleLawyers: Lawyer[] = [
+  {
+    id: '1',
+    name: 'Jane Wanjiru',
+    specialty: 'Employment Law',
+    location: 'Nairobi',
+    rating: 4.9,
+    reviewCount: 127,
+    yearsExperience: 12,
+    hourlyRate: 3500,
+    imageUrl: 'https://ui-avatars.com/api/?name=Jane+Wanjiru&background=3b82f6&color=fff&size=200',
+    bio: 'Specialized in employment disputes, wrongful dismissal, and labor law. Successfully represented over 200 clients.',
+    languages: ['English', 'Swahili'],
+    availability: 'Available'
+  },
+  {
+    id: '2',
+    name: 'David Kamau',
+    specialty: 'Property & Land Law',
+    location: 'Nairobi',
+    rating: 4.8,
+    reviewCount: 95,
+    yearsExperience: 15,
+    hourlyRate: 5000,
+    imageUrl: 'https://ui-avatars.com/api/?name=David+Kamau&background=10b981&color=fff&size=200',
+    bio: 'Expert in land transactions, title verification, and property disputes with extensive knowledge of Kenyan land law.',
+    languages: ['English', 'Swahili'],
+    availability: 'Available'
+  },
+  {
+    id: '3',
+    name: 'Sarah Ochieng',
+    specialty: 'Family Law',
+    location: 'Mombasa',
+    rating: 5.0,
+    reviewCount: 84,
+    yearsExperience: 10,
+    hourlyRate: 4000,
+    imageUrl: 'https://ui-avatars.com/api/?name=Sarah+Ochieng&background=8b5cf6&color=fff&size=200',
+    bio: 'Compassionate approach to divorce, child custody, and family matters. Certified mediator.',
+    languages: ['English', 'Swahili', 'Luo'],
+    availability: 'Busy'
+  },
+  {
+    id: '4',
+    name: 'Michael Kipchoge',
+    specialty: 'Criminal Defense',
+    location: 'Kisumu',
+    rating: 4.7,
+    reviewCount: 156,
+    yearsExperience: 18,
+    hourlyRate: 6000,
+    imageUrl: 'https://ui-avatars.com/api/?name=Michael+Kipchoge&background=ef4444&color=fff&size=200',
+    bio: 'Former prosecutor with deep understanding of criminal procedure. Aggressive defense representation.',
+    languages: ['English', 'Swahili', 'Kalenjin'],
+    availability: 'Available'
+  },
+  {
+    id: '5',
+    name: 'Grace Nyambura',
+    specialty: 'Corporate Law',
+    location: 'Nairobi',
+    rating: 4.9,
+    reviewCount: 68,
+    yearsExperience: 14,
+    hourlyRate: 7000,
+    imageUrl: 'https://ui-avatars.com/api/?name=Grace+Nyambura&background=f59e0b&color=fff&size=200',
+    bio: 'Business law specialist helping startups and SMEs with incorporation, contracts, and compliance.',
+    languages: ['English', 'Swahili'],
+    availability: 'Available'
+  },
+  {
+    id: '6',
+    name: 'James Mutua',
+    specialty: 'Immigration Law',
+    location: 'Nairobi',
+    rating: 4.6,
+    reviewCount: 42,
+    yearsExperience: 8,
+    hourlyRate: 3000,
+    imageUrl: 'https://ui-avatars.com/api/?name=James+Mutua&background=06b6d4&color=fff&size=200',
+    bio: 'Helping individuals and families navigate visa applications, work permits, and citizenship matters.',
+    languages: ['English', 'Swahili', 'Kamba'],
+    availability: 'Available'
+  }
+];
+
+const specialties = ['All Specialties', 'Employment Law', 'Property & Land Law', 'Family Law', 'Criminal Defense', 'Corporate Law', 'Immigration Law'];
+const locations = [
+  'All Locations',
+  'Nairobi',
+  'Mombasa',
+  'Kisumu',
+  'Nakuru',
+  'Eldoret',
+  'Thika',
+  'Malindi',
+  'Kitale',
+  'Garissa',
+  'Kakamega',
+  'Nyeri',
+  'Machakos',
+  'Meru',
+  'Kericho',
+  'Naivasha',
+  'Nanyuki',
+  'Voi',
+  'Embu',
+  'Bungoma',
+  'Kilifi',
+  'Lamu',
+  'Migori',
+  'Homa Bay',
+  'Bomet',
+  'Kajiado',
+  'Kiambu',
+  'Murang\'a',
+  'Nyahururu',
+  'Isiolo',
+  'Kitui',
+  'Makueni',
+  'Narok',
+  'Kapsabet',
+  'Maralal',
+  'Marsabit',
+  'Moyale',
+  'Mandera',
+  'Wajir',
+  'Lodwar',
+  'Kapenguria',
+  'Webuye',
+  'Mumias',
+  'Kimilili',
+  'Busia',
+  'Siaya',
+  'Kisii',
+  'Nyamira',
+  'Kerugoya',
+  'Karatina',
+  'Naro Moru',
+  'Mwingi',
+  'Taveta',
+  'Wundanyi',
+  'Kwale',
+  'Msambweni',
+  'Ukunda',
+  'Diani',
+  'Watamu',
+  'Chuka',
+  'Maua',
+  'Athi River',
+  'Kangundo',
+  'Ruiru',
+  'Limuru',
+  'Karuri',
+  'Juja',
+  'Githunguri',
+  'Kiambu Town',
+  'Ol Kalou',
+  'Naivasha Town',
+  'Gilgil',
+  'Molo',
+  'Njoro',
+  'Rongai',
+  'Narok Town',
+  'Kilgoris',
+  'Kapsabet Town',
+  'Nandi Hills',
+  'Burnt Forest',
+  'Turbo',
+  'Moi\'s Bridge',
+  'Chepseon',
+  'Lessos',
+  'Kabarnet',
+  'Eldama Ravine',
+  'Marigat',
+  'Mogotio',
+  'Kitengela',
+  'Ngong',
+  'Kiserian',
+  'Namanga'
+];
+
+export const LawyersBrowse: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+  const [selectedSpecialty, setSelectedSpecialty] = useState('All Specialties');
+  const [selectedLocation, setSelectedLocation] = useState('All Locations');
+  const [sortBy, setSortBy] = useState<'rating' | 'price' | 'experience'>('rating');
+
+  // Filter and sort lawyers
+  const filteredLawyers = sampleLawyers
+    .filter(lawyer => 
+      (selectedSpecialty === 'All Specialties' || lawyer.specialty === selectedSpecialty) &&
+      (selectedLocation === 'All Locations' || lawyer.location === selectedLocation)
+    )
+    .sort((a, b) => {
+      if (sortBy === 'rating') return b.rating - a.rating;
+      if (sortBy === 'price') return a.hourlyRate - b.hourlyRate;
+      if (sortBy === 'experience') return b.yearsExperience - a.yearsExperience;
+      return 0;
+    });
+
+  const handleBookConsultation = (lawyerId: string, lawyerName: string) => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem('pendingBooking', JSON.stringify({ lawyerId, lawyerName }));
+      navigate('/login', { state: { from: '/lawyers', message: 'Please log in to book a consultation' } });
+    } else {
+      navigate(`/booking/${lawyerId}`);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/')}
+                className="text-gray-600 hover:text-gray-900 font-medium"
+              >
+                ← Back to Home
+              </button>
+              <div className="border-l border-gray-300 h-6"></div>
+              <h1 className="text-2xl font-bold text-gray-900">Find a Lawyer</h1>
+            </div>
+            {!isAuthenticated && (
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-600">Ready to book?</span>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Log In
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Filters Section */}
+      <div className="bg-white border-b border-gray-200 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Specialty Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Practice Area
+              </label>
+              <select
+                value={selectedSpecialty}
+                onChange={(e) => setSelectedSpecialty(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {specialties.map(specialty => (
+                  <option key={specialty} value={specialty}>{specialty}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Location Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Location
+              </label>
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {locations.map(location => (
+                  <option key={location} value={location}>{location}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort By */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sort By
+              </label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'rating' | 'price' | 'experience')}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="rating">Highest Rated</option>
+                <option value="price">Lowest Price</option>
+                <option value="experience">Most Experienced</option>
+              </select>
+            </div>
+
+            {/* Results Count */}
+            <div className="flex items-end">
+              <p className="text-sm text-gray-600">
+                <span className="font-semibold text-gray-900">{filteredLawyers.length}</span> lawyers found
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Lawyers Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredLawyers.map((lawyer) => (
+            <div
+              key={lawyer.id}
+              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden"
+            >
+              {/* Lawyer Image */}
+              <div className="relative">
+                <img
+                  src={lawyer.imageUrl}
+                  alt={lawyer.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold ${
+                  lawyer.availability === 'Available' ? 'bg-green-500 text-white' :
+                  lawyer.availability === 'Busy' ? 'bg-yellow-500 text-white' :
+                  'bg-gray-500 text-white'
+                }`}>
+                  {lawyer.availability}
+                </div>
+              </div>
+
+              {/* Lawyer Details */}
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">{lawyer.name}</h3>
+                    <p className="text-sm text-blue-600 font-medium">{lawyer.specialty}</p>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-yellow-400">★</span>
+                    <span className="text-sm font-semibold">{lawyer.rating}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center text-sm text-gray-600 mb-3">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  </svg>
+                  {lawyer.location}
+                  <span className="mx-2">•</span>
+                  {lawyer.yearsExperience} years exp
+                </div>
+
+                <p className="text-sm text-gray-700 mb-4 line-clamp-2">{lawyer.bio}</p>
+
+                <div className="flex flex-wrap gap-1 mb-4">
+                  {lawyer.languages.map(lang => (
+                    <span key={lang} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                      {lang}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                  <div>
+                    <p className="text-xs text-gray-500">Consultation Fee</p>
+                    <p className="text-lg font-bold text-gray-900">KES {lawyer.hourlyRate.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">per session</p>
+                  </div>
+                  <button
+                    onClick={() => handleBookConsultation(lawyer.id, lawyer.name)}
+                    disabled={lawyer.availability === 'Offline'}
+                    className={`px-6 py-3 rounded-lg font-medium transition ${
+                      lawyer.availability === 'Offline'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {lawyer.availability === 'Offline' ? 'Unavailable' : 'Book Now'}
+                  </button>
+                </div>
+
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  {lawyer.reviewCount} verified reviews
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredLawyers.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No lawyers found matching your criteria.</p>
+            <button
+              onClick={() => {
+                setSelectedSpecialty('All Specialties');
+                setSelectedLocation('All Locations');
+              }}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              Reset Filters
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* CTA Section */}
+      {!isAuthenticated && (
+        <div className="bg-blue-600 text-white py-12 mt-12">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl font-bold mb-4">Ready to Get Legal Help?</h2>
+            <p className="text-lg mb-6 text-blue-100">
+              Create a free account to book consultations, message lawyers, and access your legal documents.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => navigate('/register')}
+                className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition"
+              >
+                Create Free Account
+              </button>
+              <button
+                onClick={() => navigate('/login')}
+                className="px-8 py-3 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition border-2 border-white"
+              >
+                Log In
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

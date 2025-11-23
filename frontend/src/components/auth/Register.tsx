@@ -6,6 +6,7 @@ import { Mail, Lock, User, Phone, Eye, EyeOff, Scale } from 'lucide-react';
 import { WakiliLogo } from '../ui/WakiliLogo';
 import { Button } from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';
+import { SocialLoginButtons } from './SocialLoginButtons';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -108,42 +109,19 @@ const Register: React.FC = () => {
             <div className="text-center mb-8">
               <WakiliLogo size="lg" className="mx-auto mb-6" />
               <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">
-                Join Wakili Pro
+                Create Your Account
               </h2>
               <p className="mt-2 text-sm text-gray-600">
-                Create your account to get started
+                Join Wakili Pro and get instant legal assistance
               </p>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                {/* Role Selection */}
-                <div>
-                  <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                    Account Type
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="role"
-                      name="role"
-                      value={formData.role}
-                      onChange={handleInputChange}
-                      className="w-full pl-4 pr-12 py-3 border-0 rounded-xl bg-gray-50 text-gray-900 focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all duration-200 focus:outline-none text-sm appearance-none"
-                    >
-                      <option value="PUBLIC">General Public</option>
-                      <option value="LAWYER">Legal Practitioner</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                      {formData.role === 'LAWYER' ? (
-                        <Scale className="h-5 w-5 text-gray-400" />
-                      ) : (
-                        <User className="h-5 w-5 text-gray-400" />
-                      )}
-                    </div>
-                  </div>
-                </div>
+            {/* Social Login Buttons */}
+            <SocialLoginButtons />
 
-                {/* Name Fields Row */}
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                {/* Name Fields - Side by Side */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -166,14 +144,11 @@ const Register: React.FC = () => {
                             ? 'ring-2 ring-red-500 bg-red-50' 
                             : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
                         } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
-                        placeholder="First name"
+                        placeholder="John"
                       />
                     </div>
                     {validationErrors.firstName && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center">
-                        <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
-                        {validationErrors.firstName}
-                      </p>
+                      <p className="mt-1 text-xs text-red-600">{validationErrors.firstName}</p>
                     )}
                   </div>
 
@@ -181,36 +156,28 @@ const Register: React.FC = () => {
                     <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
                       Last Name
                     </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="lastName"
-                        name="lastName"
-                        type="text"
-                        autoComplete="family-name"
-                        required
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        className={`w-full pl-12 pr-4 py-3 border-0 rounded-xl bg-gray-50 ${
-                          validationErrors.lastName 
-                            ? 'ring-2 ring-red-500 bg-red-50' 
-                            : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
-                        } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
-                        placeholder="Last name"
-                      />
-                    </div>
+                    <input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      autoComplete="family-name"
+                      required
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 border-0 rounded-xl bg-gray-50 ${
+                        validationErrors.lastName 
+                          ? 'ring-2 ring-red-500 bg-red-50' 
+                          : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
+                      } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
+                      placeholder="Doe"
+                    />
                     {validationErrors.lastName && (
-                      <p className="mt-2 text-sm text-red-600 flex items-center">
-                        <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
-                        {validationErrors.lastName}
-                      </p>
+                      <p className="mt-1 text-xs text-red-600">{validationErrors.lastName}</p>
                     )}
                   </div>
                 </div>
 
-                {/* Email */}
+                {/* Email Field */}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
@@ -232,7 +199,7 @@ const Register: React.FC = () => {
                           ? 'ring-2 ring-red-500 bg-red-50' 
                           : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
                       } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
-                      placeholder="Enter your email address"
+                      placeholder="john.doe@example.com"
                     />
                   </div>
                   {validationErrors.email && (
@@ -243,7 +210,7 @@ const Register: React.FC = () => {
                   )}
                 </div>
 
-                {/* Phone Number */}
+                {/* Phone Number Field */}
                 <div>
                   <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number <span className="text-gray-400 text-xs">(Optional)</span>
@@ -264,7 +231,7 @@ const Register: React.FC = () => {
                           ? 'ring-2 ring-red-500 bg-red-50' 
                           : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
                       } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
-                      placeholder="e.g., 0712345678"
+                      placeholder="+254712345678"
                     />
                   </div>
                   {validationErrors.phoneNumber && (
@@ -275,7 +242,7 @@ const Register: React.FC = () => {
                   )}
                 </div>
 
-                {/* Password */}
+                {/* Password Field */}
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                     Password
@@ -297,7 +264,7 @@ const Register: React.FC = () => {
                           ? 'ring-2 ring-red-500 bg-red-50' 
                           : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
                       } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
-                      placeholder="Create a strong password"
+                      placeholder="At least 8 characters"
                     />
                     <button
                       type="button"
@@ -317,9 +284,33 @@ const Register: React.FC = () => {
                       {validationErrors.password}
                     </p>
                   )}
-                  <p className="mt-2 text-xs text-gray-500">
-                    Must be at least 8 characters with uppercase, lowercase, and number
-                  </p>
+                </div>
+
+                {/* Account Type Field */}
+                <div>
+                  <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+                    I am a
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Scale className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <select
+                      id="role"
+                      name="role"
+                      value={formData.role}
+                      onChange={handleInputChange}
+                      className="w-full pl-12 pr-4 py-3 border-0 rounded-xl bg-gray-50 focus:ring-2 focus:ring-sky-500 focus:bg-white text-gray-900 transition-all duration-200 focus:outline-none text-sm appearance-none cursor-pointer"
+                    >
+                      <option value="PUBLIC">Client (Seeking Legal Services)</option>
+                      <option value="LAWYER">Lawyer (Providing Legal Services)</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -334,28 +325,28 @@ const Register: React.FC = () => {
               )}
 
               {/* Submit Button */}
-          <Button
-            type="submit"
-            isLoading={isLoading}
-            className="w-full"
-            size="lg"
-          >
-            {isLoading ? 'Creating account...' : 'Create Account'}
-          </Button>
-
-          {/* Links */}
-          <div className="text-center pt-4">
-            <div className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link 
-                to="/login" 
-                className="font-medium text-sky-600 hover:text-sky-500 transition-colors"
+              <Button
+                type="submit"
+                isLoading={isLoading}
+                className="w-full"
+                size="lg"
               >
-                Sign in here
-              </Link>
-            </div>
-          </div>
-        </form>
+                {isLoading ? 'Creating account...' : 'Create Account'}
+              </Button>
+
+              {/* Link to Login */}
+              <div className="text-center pt-4">
+                <div className="text-sm text-gray-600">
+                  Already have an account?{' '}
+                  <Link 
+                    to="/login" 
+                    className="font-medium text-sky-600 hover:text-sky-500 transition-colors"
+                  >
+                    Sign in here
+                  </Link>
+                </div>
+              </div>
+            </form>
           </CardContent>
         </Card>
       </div>
