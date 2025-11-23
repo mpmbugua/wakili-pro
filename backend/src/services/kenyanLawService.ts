@@ -91,11 +91,15 @@ Be conversational but professional, accurate but accessible to laypeople.
     try {
       logger.info(`Processing legal query with RAG: "${request.query.substring(0, 50)}..."`);
 
+      // TEMPORARY: Skip RAG and go directly to fallback for debugging
+      logger.warn('Temporarily bypassing RAG for debugging - using direct GPT');
+      return this.processLegalQueryFallback(request);
+
       // Conversation history disabled until ConversationHistory model is added to schema
-      const conversationHistory: Array<{ role: string; content: string }> = [];
+      // const conversationHistory: Array<{ role: string; content: string }> = [];
 
       // Use RAG service to get answer with legal document context
-      const ragResponse = await ragService.query(request.query, conversationHistory);
+      // const ragResponse = await ragService.query(request.query, conversationHistory);
 
       // Database save disabled until AIQuery schema is fixed (currently using 'aIQuery' which doesn't match 'AIQuery' model)
       // TODO: Fix model name mismatch and re-enable database logging
