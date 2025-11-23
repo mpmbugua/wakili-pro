@@ -5,7 +5,7 @@
   "description": "Modern full-stack web application built with agile development practices",
   "private": true,
   "engines": {
-    "node": ">=20.0.0",
+    "node": "20.11.0",
     "npm": ">=10.0.0"
   },
   "workspaces": [
