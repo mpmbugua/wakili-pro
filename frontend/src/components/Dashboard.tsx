@@ -40,6 +40,11 @@ export default function Dashboard() {
   });
   const [recentConsultations, setRecentConsultations] = useState<Consultation[]>([]);
   const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<Consultation[]>([]);
+  const [performanceData, setPerformanceData] = useState({
+    thisWeek: { consultations: 12, revenue: 45000 },
+    lastWeek: { consultations: 10, revenue: 38000 },
+  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -50,7 +55,6 @@ export default function Dashboard() {
         let consultations = 0;
         let messages = 0;
         let revenue = 0;
-        let clients = 0;
         
         try {
           const upcoming = await import('../services/videoConsultationService')
@@ -98,6 +102,13 @@ export default function Dashboard() {
           { id: '1', action: 'New consultation request from John Kamau', timestamp: '2 hours ago', user: 'John Kamau' },
           { id: '2', action: 'Document uploaded: Contract Draft', timestamp: '5 hours ago', user: 'Mary Wanjiku' },
           { id: '3', action: 'Payment received: KES 15,000', timestamp: '1 day ago', user: 'Peter Ochieng' },
+        ]);
+        
+        // Mock upcoming appointments
+        setUpcomingAppointments([
+          { id: '1', clientName: 'John Kamau', date: '2024-01-15', time: '10:00 AM', status: 'upcoming', type: 'Legal Advice' },
+          { id: '4', clientName: 'Sarah Njeri', date: '2024-01-15', time: '2:30 PM', status: 'upcoming', type: 'Contract Review' },
+          { id: '5', clientName: 'David Otieno', date: '2024-01-16', time: '11:00 AM', status: 'upcoming', type: 'Consultation' },
         ]);
         
       } finally {
@@ -180,8 +191,8 @@ export default function Dashboard() {
         }
       />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Main Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <StatCard
           title="Consultations"
           value={stats.consultations}
@@ -190,6 +201,7 @@ export default function Dashboard() {
           icon={Video}
           iconColor="text-blue-600"
           description="Active this month"
+          className="hover:shadow-lg transition-all duration-200"
         />
         <StatCard
           title="Messages"
@@ -197,8 +209,9 @@ export default function Dashboard() {
           change="+5"
           trend="up"
           icon={MessageSquare}
-          iconColor="text-green-600"
+          iconColor="text-emerald-600"
           description="Unread messages"
+          className="hover:shadow-lg transition-all duration-200"
         />
         <StatCard
           title="Documents"
@@ -206,10 +219,11 @@ export default function Dashboard() {
           change="3"
           trend="neutral"
           icon={FileText}
-          iconColor="text-purple-600"
+          iconColor="text-violet-600"
           description="Pending review"
+          className="hover:shadow-lg transition-all duration-200"
         />
-        {user?.role === 'LAWYER' && (
+        {user?.role === 'LAWYER' ? (
           <StatCard
             title="Revenue"
             value={`KES ${stats.revenue.toLocaleString()}`}
@@ -218,18 +232,29 @@ export default function Dashboard() {
             icon={DollarSign}
             iconColor="text-amber-600"
             description="This month"
+            className="hover:shadow-lg transition-all duration-200"
+          />
+        ) : (
+          <StatCard
+            title="Quick Actions"
+            value="4"
+            icon={TrendingUp}
+            iconColor="text-indigo-600"
+            description="Available services"
+            className="hover:shadow-lg transition-all duration-200"
           />
         )}
       </div>
 
       {/* Additional Stats for Lawyers */}
       {user?.role === 'LAWYER' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
           <StatCard
             title="Total Clients"
             value={stats.clients}
             icon={Users}
             iconColor="text-indigo-600"
+            className="hover:shadow-lg transition-all duration-200"
           />
           <StatCard
             title="Completion Rate"
@@ -237,7 +262,8 @@ export default function Dashboard() {
             change="+2%"
             trend="up"
             icon={CheckCircle}
-            iconColor="text-green-600"
+            iconColor="text-emerald-600"
+            className="hover:shadow-lg transition-all duration-200"
           />
           <StatCard
             title="Avg. Response Time"
@@ -245,22 +271,106 @@ export default function Dashboard() {
             change="-15%"
             trend="up"
             icon={Clock}
-            iconColor="text-blue-600"
+            iconColor="text-cyan-600"
+            className="hover:shadow-lg transition-all duration-200"
           />
         </div>
       )}
 
+      {/* Performance Overview & Upcoming Appointments */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        {/* Performance This Week */}
+        {user?.role === 'LAWYER' && (
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-900">This Week's Performance</h2>
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Consultations Completed</p>
+                  <p className="text-2xl font-bold text-slate-900">{performanceData.thisWeek.consultations}</p>
+                </div>
+                <div className="text-right">
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700">
+                    <TrendingUp className="h-3 w-3" />
+                    +{((performanceData.thisWeek.consultations - performanceData.lastWeek.consultations) / performanceData.lastWeek.consultations * 100).toFixed(0)}%
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Revenue Generated</p>
+                  <p className="text-2xl font-bold text-slate-900">KES {performanceData.thisWeek.revenue.toLocaleString()}</p>
+                </div>
+                <div className="text-right">
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700">
+                    <TrendingUp className="h-3 w-3" />
+                    +{((performanceData.thisWeek.revenue - performanceData.lastWeek.revenue) / performanceData.lastWeek.revenue * 100).toFixed(0)}%
+                  </div>
+                </div>
+              </div>
+              <div className="pt-4 border-t border-blue-200">
+                <p className="text-xs text-slate-600">Compared to last week: {performanceData.lastWeek.consultations} consultations, KES {performanceData.lastWeek.revenue.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Upcoming Appointments */}
+        <div className="bg-white rounded-lg border border-slate-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-900">Upcoming Appointments</h2>
+            <Link to="/consultations" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+              View all
+            </Link>
+          </div>
+          {upcomingAppointments.length > 0 ? (
+            <div className="space-y-3">
+              {upcomingAppointments.map((appointment) => (
+                <div 
+                  key={appointment.id} 
+                  className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/consultations/${appointment.id}`)}
+                >
+                  <div className="flex-shrink-0">
+                    <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <Calendar className="h-6 w-6 text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900 truncate">{appointment.clientName}</p>
+                    <p className="text-xs text-slate-600">{appointment.type}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-medium text-slate-900">{appointment.time}</p>
+                    <p className="text-xs text-slate-600">{new Date(appointment.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+              <p className="text-sm text-slate-600">No upcoming appointments</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Recent Consultations */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <div className="flex items-center justify-between p-6 pb-4 bg-slate-50 border-b border-slate-200">
               <h2 className="text-lg font-semibold text-slate-900">Recent Consultations</h2>
-              <Link to="/consultations" className="text-sm text-primary-600 hover:text-primary-700">
+              <Link to="/consultations" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
                 View all
               </Link>
             </div>
+            <div className="p-6 pt-4">
             {recentConsultations.length > 0 ? (
               <DataTable
                 data={recentConsultations}
@@ -279,22 +389,26 @@ export default function Dashboard() {
                 }}
               />
             )}
+            </div>
           </div>
         </div>
 
         {/* Recent Activity */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg border border-slate-200 p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h2>
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <div className="p-6 pb-4 bg-slate-50 border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-900">Recent Activity</h2>
+            </div>
+            <div className="p-6 pt-4">
             {recentActivity.length > 0 ? (
               <div className="space-y-4">
-                {recentActivity.map((activity) => (
+                {recentActivity.map((activity, index) => (
                   <div key={activity.id} className="flex gap-3">
                     <div className="flex-shrink-0 mt-1">
-                      <div className="h-2 w-2 rounded-full bg-primary-600"></div>
+                      <div className={`h-2 w-2 rounded-full ${index === 0 ? 'bg-blue-600' : 'bg-slate-300'}`}></div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-900">{activity.action}</p>
+                      <p className="text-sm text-slate-900 leading-relaxed">{activity.action}</p>
                       <p className="text-xs text-slate-500 mt-1">{activity.timestamp}</p>
                     </div>
                   </div>
@@ -307,65 +421,71 @@ export default function Dashboard() {
                 description="Recent activity will appear here."
               />
             )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        <div className="p-6 pb-4 bg-slate-50 border-b border-slate-200">
+          <h2 className="text-lg font-semibold text-slate-900">Quick Actions</h2>
+          <p className="text-sm text-slate-600 mt-1">Access key features and services</p>
+        </div>
+        <div className="p-6 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Link
             to="/ai"
-            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+            className="group flex items-center gap-3 p-4 border-2 border-slate-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all duration-200"
           >
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
               <TrendingUp className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-medium text-slate-900">AI Assistant</h3>
+              <h3 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">AI Assistant</h3>
               <p className="text-xs text-slate-600">Get legal guidance</p>
             </div>
           </Link>
           
           <Link
             to="/lawyers"
-            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+            className="group flex items-center gap-3 p-4 border-2 border-slate-200 rounded-lg hover:border-emerald-300 hover:shadow-md transition-all duration-200"
           >
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Users className="h-5 w-5 text-green-600" />
+            <div className="p-2 bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors">
+              <Users className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <h3 className="font-medium text-slate-900">Find Lawyers</h3>
+              <h3 className="font-semibold text-slate-900 group-hover:text-emerald-600 transition-colors">Find Lawyers</h3>
               <p className="text-xs text-slate-600">Browse legal experts</p>
             </div>
           </Link>
           
           <Link
             to="/marketplace"
-            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+            className="group flex items-center gap-3 p-4 border-2 border-slate-200 rounded-lg hover:border-violet-300 hover:shadow-md transition-all duration-200"
           >
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <FileText className="h-5 w-5 text-purple-600" />
+            <div className="p-2 bg-violet-100 rounded-lg group-hover:bg-violet-200 transition-colors">
+              <FileText className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <h3 className="font-medium text-slate-900">Documents</h3>
+              <h3 className="font-semibold text-slate-900 group-hover:text-violet-600 transition-colors">Documents</h3>
               <p className="text-xs text-slate-600">Legal templates</p>
             </div>
           </Link>
           
           <Link
             to="/resources"
-            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+            className="group flex items-center gap-3 p-4 border-2 border-slate-200 rounded-lg hover:border-amber-300 hover:shadow-md transition-all duration-200"
           >
-            <div className="p-2 bg-amber-100 rounded-lg">
+            <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
               <BarChart3 className="h-5 w-5 text-amber-600" />
             </div>
             <div>
-              <h3 className="font-medium text-slate-900">Resources</h3>
+              <h3 className="font-semibold text-slate-900 group-hover:text-amber-600 transition-colors">Resources</h3>
               <p className="text-xs text-slate-600">Legal information</p>
             </div>
           </Link>
+        </div>
         </div>
       </div>
     </div>
