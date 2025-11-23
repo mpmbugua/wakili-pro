@@ -24,8 +24,13 @@ services:
     runtime: static
     region: oregon
     plan: free
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: bash frontend/render-build.sh
     staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://wakili-pro.onrender.com/api
+      - key: NODE_ENV
+        value: production
     routes:
       - type: rewrite
         source: /*
