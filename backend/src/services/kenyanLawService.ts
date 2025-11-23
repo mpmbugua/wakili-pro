@@ -86,84 +86,14 @@ Be conversational but professional, accurate but accessible to laypeople.
     try {
       logger.info(`Processing legal query with RAG: "${request.query.substring(0, 50)}..."`);
 
-      // Get conversation history if userId provided
-      let conversationHistory: Array<{ role: string; content: string }> = [];
-      if (request.userId) {
-        const recentConversation = await prisma.conversationHistory.findFirst({
-          where: {
-            userId: request.userId,
-            lastActivity: {
-              gte: new Date(Date.now() - 30 * 60 * 1000) // Last 30 minutes
-            }
-          },
-          orderBy: { lastActivity: 'desc' }
-        });
-
-        if (recentConversation) {
-          conversationHistory = (recentConversation.messages as any[]) || [];
-        }
-      }
+      // Conversation history disabled until ConversationHistory model is added to schema
+      const conversationHistory: Array<{ role: string; content: string }> = [];
 
       // Use RAG service to get answer with legal document context
       const ragResponse = await ragService.query(request.query, conversationHistory);
 
-      // Save query to database
-      await prisma.aIQuery.create({
-        data: {
-          userId: request.userId || null,
-          query: request.query,
-          queryType: request.type || 'LEGAL_ADVICE',
-          context: request.context || null,
-          response: ragResponse.answer,
-          confidence: ragResponse.confidence,
-          tokensUsed: ragResponse.tokensUsed,
-          modelUsed: ragResponse.modelUsed,
-          retrievedDocs: ragResponse.context.retrievedCount,
-          sources: ragResponse.context.sources.map(s => ({
-            title: s.title,
-            citation: s.citation,
-            section: s.section,
-            score: s.score
-          }))
-        }
-      });
-
-      // Update conversation history
-      if (request.userId) {
-        const sessionId = `user_${request.userId}_${new Date().toISOString().split('T')[0]}`;
-        const updatedMessages = [
-          ...conversationHistory.slice(-10), // Keep last 10 messages
-          { role: 'user', content: request.query, timestamp: new Date().toISOString() },
-          { role: 'assistant', content: ragResponse.answer, timestamp: new Date().toISOString(), sources: ragResponse.context.sources }
-        ];
-
-        // Try to find existing conversation for today
-        const existing = await prisma.conversationHistory.findFirst({
-          where: {
-            userId: request.userId,
-            sessionId
-          }
-        });
-
-        if (existing) {
-          await prisma.conversationHistory.update({
-            where: { id: existing.id },
-            data: {
-              messages: updatedMessages,
-              lastActivity: new Date()
-            }
-          });
-        } else {
-          await prisma.conversationHistory.create({
-            data: {
-              userId: request.userId,
-              sessionId,
-              messages: updatedMessages,
-              lastActivity: new Date()
-            }
-          });
-        }
-      }
+      // Database save disabled until AIQuery schema is fixed (currently using 'aIQuery' which doesn't match 'AIQuery' model)
+      // TODO: Fix model name mismatch and re-enable database logging
 
       // Analyze response to determine if lawyer consultation is recommended
       const recommendsLawyer = this.shouldRecommendLawyer(request.query, ragResponse.answer);

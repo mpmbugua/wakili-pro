@@ -93,11 +93,28 @@ export const AIAssistant: React.FC = () => {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // Check if response has content before parsing JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Server returned ${response.status}: Expected JSON but got ${contentType}`);
       }
 
-      const data = await response.json();
+      const text = await response.text();
+      if (!text) {
+        throw new Error('Server returned empty response');
+      }
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('JSON parse error. Response text:', text);
+        throw new Error(`Invalid JSON response: ${text.substring(0, 100)}`);
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${data.message || response.statusText}`);
+      }
 
       if (data.success && data.data) {
         const aiMessage: Message = {

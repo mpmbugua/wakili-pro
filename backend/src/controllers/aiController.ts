@@ -116,9 +116,17 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
 
   } catch (error) {
     logger.error('AI query error:', error);
+    
+    // Ensure we always return valid JSON
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorDetails = error instanceof Error ? error.stack : String(error);
+    
+    logger.error('Full error details:', errorDetails);
+    
     res.status(500).json({
       success: false,
-      message: 'Failed to process AI query'
+      message: 'Failed to process AI query',
+      error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     });
   }
 };
