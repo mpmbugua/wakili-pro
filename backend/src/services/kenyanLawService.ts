@@ -3,8 +3,13 @@ import { logger } from '../utils/logger';
 import { ragService } from './ai/ragService';
 import { PrismaClient } from '@prisma/client';
 
+// Validate OpenAI API key at startup
+if (!process.env.OPENAI_API_KEY) {
+  logger.error('CRITICAL: OPENAI_API_KEY environment variable is not set');
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || 'missing-key',
 });
 
 const prisma = new PrismaClient();
@@ -130,7 +135,15 @@ Be conversational but professional, accurate but accessible to laypeople.
   // Fallback method using direct GPT (original implementation)
   private async processLegalQueryFallback(request: LegalQueryRequest): Promise<LegalQueryResponse> {
     try {
+      // Validate API key before making request
+      if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'missing-key') {
+        logger.error('OpenAI API key is not configured');
+        throw new Error('OPENAI_API_KEY not configured. Please set the environment variable.');
+      }
+
       const prompt = this.buildQueryPrompt(request);
+      
+      logger.info('Calling OpenAI API with fallback method...');
       
       const completion = await openai.chat.completions.create({
         model: 'gpt-4',
@@ -147,6 +160,8 @@ Be conversational but professional, accurate but accessible to laypeople.
       const response = completion.choices[0]?.message?.content || 'Unable to generate response';
       const tokensUsed = completion.usage?.total_tokens || 0;
 
+      logger.info(`OpenAI API call successful - ${tokensUsed} tokens used`);
+
       // Analyze response to determine if lawyer consultation is recommended
       const recommendsLawyer = this.shouldRecommendLawyer(request.query, response);
       
@@ -161,7 +176,24 @@ Be conversational but professional, accurate but accessible to laypeople.
 
     } catch (error) {
       logger.error('Fallback AI query processing error:', error);
-      throw new Error('Failed to process legal query');
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('OPENAI_API_KEY')) {
+          throw error; // Re-throw with original message
+        }
+        if (error.message.includes('401') || error.message.includes('Incorrect API key')) {
+          throw new Error('OpenAI API authentication failed. The API key may be invalid or expired.');
+        }
+        if (error.message.includes('429')) {
+          throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+        }
+        if (error.message.includes('quota')) {
+          throw new Error('OpenAI API quota exceeded. Please check your billing settings.');
+        }
+      }
+      
+      throw new Error('Failed to process legal query: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
 
