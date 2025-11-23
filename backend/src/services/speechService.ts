@@ -1,9 +1,9 @@
 import OpenAI from 'openai';
 import { logger } from '../utils/logger';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const openai = process.env.OPENAI_API_KEY 
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
 interface SpeechToTextResult {
   success: boolean;
@@ -22,6 +22,14 @@ interface TextToSpeechResult {
 class SpeechService {
   async speechToText(audioBuffer: Buffer, language: 'en' | 'sw' = 'en'): Promise<SpeechToTextResult> {
     try {
+      if (!openai) {
+        logger.warn('OpenAI API key not configured');
+        return {
+          success: false,
+          error: 'Speech-to-text service unavailable - OpenAI API key not configured'
+        };
+      }
+
       logger.info('Processing speech-to-text conversion');
 
       // Create a Blob-like object from the buffer for OpenAI API
