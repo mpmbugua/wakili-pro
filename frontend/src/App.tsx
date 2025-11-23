@@ -17,16 +17,44 @@ const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.goo
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, accessToken } = useAuthStore();
   
-  console.log('[ProtectedRoute] isAuthenticated:', isAuthenticated, 'user:', user);
+  console.log('[ProtectedRoute] Check:', { 
+    isAuthenticated, 
+    hasUser: !!user, 
+    hasToken: !!accessToken,
+    userEmail: user?.email 
+  });
   
-  if (!isAuthenticated) {
+  // Wait for auth state to be loaded from localStorage
+  const [isLoading, setIsLoading] = React.useState(true);
+  
+  React.useEffect(() => {
+    // Give zustand persist time to rehydrate from localStorage
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated || !user) {
     console.log('[ProtectedRoute] Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
   
-  console.log('[ProtectedRoute] Authenticated, rendering dashboard');
+  console.log('[ProtectedRoute] Authenticated, rendering protected content');
   return <>{children}</>;
 };
 
