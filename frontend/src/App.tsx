@@ -17,56 +17,47 @@ const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.goo
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, user, accessToken } = useAuthStore();
-  
-  console.log('[ProtectedRoute] Check:', { 
-    isAuthenticated, 
-    hasUser: !!user, 
-    hasToken: !!accessToken,
-    userEmail: user?.email 
-  });
-  
-  // Wait for auth state to be loaded from localStorage
-  const [isLoading, setIsLoading] = React.useState(true);
-  
-  React.useEffect(() => {
-    // Give zustand persist time to rehydrate from localStorage
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  const { isAuthenticated, user } = useAuthStore();
   
   if (!isAuthenticated || !user) {
     console.log('[ProtectedRoute] Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
   
-  console.log('[ProtectedRoute] Authenticated, rendering protected content');
   return <>{children}</>;
 };
 
 function App() {
-  const { isAuthenticated, refreshAuth, accessToken, logout } = useAuthStore();
+  const { isAuthenticated, refreshAuth, accessToken } = useAuthStore();
+  const [hydrated, setHydrated] = React.useState(false);
+
+  useEffect(() => {
+    // Wait for zustand to rehydrate from localStorage
+    const timer = setTimeout(() => {
+      setHydrated(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     // Try to refresh auth on app load if we have tokens
-    if (!isAuthenticated && accessToken) {
+    if (hydrated && !isAuthenticated && accessToken) {
       refreshAuth();
     }
-  }, [isAuthenticated, accessToken, refreshAuth]);
+  }, [hydrated, isAuthenticated, accessToken, refreshAuth]);
+
+  // Show loading state while hydrating auth from localStorage
+  if (!hydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading Wakili Pro...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
