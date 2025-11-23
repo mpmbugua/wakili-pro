@@ -1,6 +1,6 @@
 import { OAuth2Client } from 'google-auth-library';
 import axios from 'axios';
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -134,7 +134,7 @@ export async function findOrCreateGoogleUser(payload: GoogleTokenPayload) {
       firstName: payload.given_name || payload.name.split(' ')[0] || 'User',
       lastName: payload.family_name || payload.name.split(' ').slice(1).join(' ') || '',
       emailVerified: true,
-      role: UserRole.PUBLIC,
+      role: 'PUBLIC' as any,
       verificationStatus: 'VERIFIED',
     },
     include: { profile: true, lawyerProfile: true },
@@ -144,7 +144,6 @@ export async function findOrCreateGoogleUser(payload: GoogleTokenPayload) {
   await prisma.userProfile.create({
     data: {
       userId: user.id,
-      bio: '',
     },
   });
   
@@ -199,7 +198,7 @@ export async function findOrCreateFacebookUser(fbData: FacebookUserData) {
       firstName: fbData.first_name || fbData.name.split(' ')[0] || 'User',
       lastName: fbData.last_name || fbData.name.split(' ').slice(1).join(' ') || '',
       emailVerified: true,
-      role: UserRole.PUBLIC,
+      role: 'PUBLIC' as any,
       verificationStatus: 'VERIFIED',
     },
     include: { profile: true, lawyerProfile: true },
@@ -209,7 +208,6 @@ export async function findOrCreateFacebookUser(fbData: FacebookUserData) {
   await prisma.userProfile.create({
     data: {
       userId: user.id,
-      bio: '',
     },
   });
   
