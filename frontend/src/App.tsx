@@ -17,11 +17,17 @@ const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.goo
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   
-  console.log('[ProtectedRoute] isAuthenticated:', isAuthenticated);
+  console.log('[ProtectedRoute] isAuthenticated:', isAuthenticated, 'user:', user);
   
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    console.log('[ProtectedRoute] Not authenticated, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
+  
+  console.log('[ProtectedRoute] Authenticated, rendering dashboard');
+  return <>{children}</>;
 };
 
 function App() {

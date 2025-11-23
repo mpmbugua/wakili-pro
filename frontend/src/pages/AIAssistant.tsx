@@ -87,7 +87,8 @@ export const AIAssistant: React.FC = () => {
         formData.append('attachments', file);
       });
 
-      const response = await fetch('/api/ai/ask', {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/ai/ask`, {
         method: 'POST',
         credentials: 'include',
         body: formData,

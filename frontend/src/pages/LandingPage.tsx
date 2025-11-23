@@ -30,6 +30,15 @@ export const LandingPage: React.FC = () => {
                   <Link to="/dashboard" className="btn-primary">
                     Dashboard
                   </Link>
+                  <button
+                    onClick={async () => {
+                      await useAuthStore.getState().logout();
+                      window.location.reload();
+                    }}
+                    className="btn-outline"
+                  >
+                    Logout
+                  </button>
                 </>
               ) : (
                 <>

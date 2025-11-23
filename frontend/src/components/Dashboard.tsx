@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { Navigate, Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { User, Scale, Shield, Calendar, MessageSquare, FileText, BarChart3, LogOut, Settings, BookOpen } from 'lucide-react';
 import { VideoConsultationDashboard } from './VideoConsultationDashboard';
 import { analyticsService } from '../services/analyticsService';
@@ -63,11 +63,6 @@ export default function Dashboard() {
     };
     fetchStats();
   }, [user]);
-
-  // Redirect to homepage if not authenticated (where login modal can be opened)
-  if (!isAuthenticated || !user) {
-    return <Navigate to="/" replace />;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-secondary">
