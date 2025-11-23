@@ -25,7 +25,7 @@
 2. **Click Google Login**
    - Click the Google button
    - Google OAuth popup should appear
-   - Select your Google account (use: 635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com)
+   - Select your Google account
 
 3. **Verify Success**
    - Should redirect to `/dashboard`

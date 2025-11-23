@@ -41,8 +41,8 @@ NODE_ENV=production
 PORT=5000
 
 # Google OAuth
-GOOGLE_CLIENT_ID=635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_ID=<Your Google Client ID>
+GOOGLE_CLIENT_SECRET=<Your Google Client Secret>
 GOOGLE_CALLBACK_URL=https://<your-backend>.onrender.com/api/auth/google/callback
 
 # Facebook OAuth
@@ -114,7 +114,7 @@ cd backend && npx prisma migrate deploy && npx prisma generate
 3. **Environment Variables**
    ```env
    VITE_API_URL=https://<your-backend>.onrender.com
-   VITE_GOOGLE_CLIENT_ID=635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com
+   VITE_GOOGLE_CLIENT_ID=<Your Google Client ID>
    VITE_FACEBOOK_APP_ID=2239381283209458
    ```
 
