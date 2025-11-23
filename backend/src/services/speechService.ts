@@ -1,9 +1,17 @@
-import OpenAI from 'openai';
 import { logger } from '../utils/logger';
 
-const openai = process.env.OPENAI_API_KEY 
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  : null;
+// Lazy-load OpenAI to avoid initialization errors when API key is missing
+let openai: any = null;
+function getOpenAI() {
+  if (!process.env.OPENAI_API_KEY) {
+    return null;
+  }
+  if (!openai) {
+    const OpenAI = require('openai').default;
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return openai;
+}
 
 interface SpeechToTextResult {
   success: boolean;
@@ -22,7 +30,8 @@ interface TextToSpeechResult {
 class SpeechService {
   async speechToText(audioBuffer: Buffer, language: 'en' | 'sw' = 'en'): Promise<SpeechToTextResult> {
     try {
-      if (!openai) {
+      const client = getOpenAI();
+      if (!client) {
         logger.warn('OpenAI API key not configured');
         return {
           success: false,
@@ -35,7 +44,7 @@ class SpeechService {
       // Create a Blob-like object from the buffer for OpenAI API
             const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' });
 
-            const transcription = await openai.audio.transcriptions.create({
+            const transcription = await client.audio.transcriptions.create({
         file: audioBlob as File,
         model: 'whisper-1',
         language,
@@ -70,6 +79,15 @@ class SpeechService {
 
   async textToSpeech(text: string, language: 'en' | 'sw' = 'en', voice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' = 'alloy'): Promise<TextToSpeechResult> {
     try {
+      const client = getOpenAI();
+      if (!client) {
+        logger.warn('OpenAI API key not configured');
+        return {
+          success: false,
+          error: 'Text-to-speech service unavailable - OpenAI API key not configured'
+        };
+      }
+
       logger.info('Processing text-to-speech conversion');
 
       // Limit text length to prevent excessive audio generation
@@ -78,7 +96,7 @@ class SpeechService {
         ? text.substring(0, maxLength) + '... For the complete response, please refer to the text version.'
         : text;
   // OpenAI TTS supports Swahili, but only with some voices. We'll use 'alloy' for both for now.
-  const mp3 = await openai.audio.speech.create({
+  const mp3 = await client.audio.speech.create({
     model: 'tts-1',
     voice: voice,
     input: processedText,
