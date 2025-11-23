@@ -116,6 +116,8 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
         <div className="grid grid-cols-2 gap-3">
           <FacebookLogin
             appId="2239381283209458"
+            fields="id,email,first_name,last_name,name,picture"
+            scope="public_profile,email"
             onSuccess={handleFacebookResponse}
             onFail={(error: any) => {
               console.error('Facebook login failed:', error);
