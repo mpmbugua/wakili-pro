@@ -87,8 +87,9 @@ export const AIAssistant: React.FC = () => {
         formData.append('attachments', file);
       });
 
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/ai/ask`, {
+      // Use full backend URL in production
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://wakili-pro.onrender.com/api';
+      const response = await fetch(`${apiUrl}/ai/ask`, {
         method: 'POST',
         credentials: 'include',
         body: formData,

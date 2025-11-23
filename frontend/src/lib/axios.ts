@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use environment variable for API URL in production
-const baseURL = import.meta.env.VITE_API_URL || '/api';
+const baseURL = import.meta.env.VITE_API_URL || 'https://wakili-pro.onrender.com/api';
 
 const axiosInstance = axios.create({
   baseURL,
