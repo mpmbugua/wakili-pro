@@ -148,17 +148,17 @@ Be conversational but professional, accurate but accessible to laypeople.
       const prompt = this.buildQueryPrompt(request);
       
       logger.info('Calling OpenAI API with fallback method...');
+      logger.info(`API Key present: ${!!process.env.OPENAI_API_KEY}, starts with: ${process.env.OPENAI_API_KEY?.substring(0, 10)}...`);
       
+      // Try with gpt-3.5-turbo first (more reliable, cheaper)
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-3.5-turbo',
         messages: [
           { role: 'system', content: this.kenyanLawContext },
           { role: 'user', content: prompt }
         ],
         max_tokens: 1000,
         temperature: 0.3,
-        presence_penalty: 0.1,
-        frequency_penalty: 0.1
       });
 
       const response = completion.choices[0]?.message?.content || 'Unable to generate response';
