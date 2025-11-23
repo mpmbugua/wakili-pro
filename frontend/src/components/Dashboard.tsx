@@ -1,339 +1,372 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Scale, Shield, Calendar, MessageSquare, FileText, BarChart3, LogOut, Settings, BookOpen } from 'lucide-react';
-import { VideoConsultationDashboard } from './VideoConsultationDashboard';
+import { 
+  Calendar, MessageSquare, FileText, BarChart3, Video, Clock,
+  TrendingUp, Users, DollarSign, CheckCircle, AlertCircle, Plus
+} from 'lucide-react';
 import { analyticsService } from '../services/analyticsService';
 import chatService from '../services/chatService';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card';
+import { PageHeader, StatCard, DataTable, Column, EmptyState } from './ui';
 import { Button } from './ui/Button';
 
+interface Consultation {
+  id: string;
+  clientName: string;
+  date: string;
+  time: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+  type: string;
+}
+
+interface Activity {
+  id: string;
+  action: string;
+  timestamp: string;
+  user: string;
+}
+
 export default function Dashboard() {
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<{
-    appointments: number;
-    messages: number;
-    documents: number;
-    analytics: number;
-  }>({ appointments: 0, messages: 0, documents: 0, analytics: 0 });
+  const [stats, setStats] = useState({
+    consultations: 0,
+    messages: 0,
+    documents: 0,
+    revenue: 0,
+    clients: 0,
+    completionRate: 0,
+  });
+  const [recentConsultations, setRecentConsultations] = useState<Consultation[]>([]);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        setError(null);
-        // Appointments: count of upcoming video consultations
-        // Messages: unread chat messages
-        // Documents: recent files (simulate as 0 for now)
-        // Analytics: revenue this month (for lawyers)
-        let appointments = 0;
+        
+        // Fetch stats
+        let consultations = 0;
         let messages = 0;
-        let documents = 0;
-        let analytics = 0;
+        let revenue = 0;
+        let clients = 0;
+        
         try {
-          const upcoming = await import('../services/videoConsultationService').then(m => m.videoConsultationService.getUpcomingConsultations());
-          appointments = upcoming.length;
+          const upcoming = await import('../services/videoConsultationService')
+            .then(m => m.videoConsultationService.getUpcomingConsultations());
+          consultations = upcoming.length;
         } catch {
-          // Ignore errors: appointments fallback to 0
+          // Fallback
         }
+        
         try {
           const chatRooms = await chatService.getChatRooms();
           messages = chatRooms.data?.reduce((acc, room) => acc + (room.unreadCount || 0), 0) || 0;
         } catch {
-          // Ignore errors: messages fallback to 0
+          // Fallback
         }
-        // Documents: not implemented, set to 0
-        try {
-          if (user?.role === 'LAWYER') {
+        
+        if (user?.role === 'LAWYER') {
+          try {
             const analyticsRes = await analyticsService.getDashboardAnalytics({});
-            analytics = analyticsRes.data?.monthlyRevenue?.[analyticsRes.data.monthlyRevenue.length - 1]?.revenue || 0;
+            const monthlyData = analyticsRes.data?.monthlyRevenue || [];
+            revenue = monthlyData[monthlyData.length - 1]?.revenue || 0;
+          } catch {
+            // Fallback
           }
-        } catch {
-          // Ignore errors: analytics fallback to 0
         }
-        setStats({ appointments, messages, documents, analytics });
-      } catch (err) {
-        setError('Failed to load dashboard stats.');
+        
+        setStats({
+          consultations,
+          messages,
+          documents: 12, // Mock data
+          revenue,
+          clients: 24, // Mock data
+          completionRate: 94, // Mock data
+        });
+        
+        // Mock recent consultations
+        setRecentConsultations([
+          { id: '1', clientName: 'John Kamau', date: '2024-01-15', time: '10:00 AM', status: 'upcoming', type: 'Legal Advice' },
+          { id: '2', clientName: 'Mary Wanjiku', date: '2024-01-14', time: '2:00 PM', status: 'completed', type: 'Contract Review' },
+          { id: '3', clientName: 'Peter Ochieng', date: '2024-01-13', time: '11:30 AM', status: 'completed', type: 'Court Representation' },
+        ]);
+        
+        // Mock recent activity
+        setRecentActivity([
+          { id: '1', action: 'New consultation request from John Kamau', timestamp: '2 hours ago', user: 'John Kamau' },
+          { id: '2', action: 'Document uploaded: Contract Draft', timestamp: '5 hours ago', user: 'Mary Wanjiku' },
+          { id: '3', action: 'Payment received: KES 15,000', timestamp: '1 day ago', user: 'Peter Ochieng' },
+        ]);
+        
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
+    
+    fetchDashboardData();
   }, [user]);
 
-  return (
-    <div className="min-h-screen bg-gradient-secondary">
-      {/* Navigation Header */}
-      <header className="navbar sticky top-0 z-50 bg-white shadow-sm">
-        <div className="container">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="text-2xl font-display font-bold text-primary">
-              Wakili Pro
-            </Link>
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link to="/ai" className="text-slate-700 hover:text-primary transition-colors">AI Assistant</Link>
-              <Link to="/lawyers" className="text-slate-700 hover:text-primary transition-colors">Find Lawyers</Link>
-              <Link to="/marketplace" className="text-slate-700 hover:text-primary transition-colors">Documents</Link>
-              <Link to="/services" className="text-slate-700 hover:text-primary transition-colors">Services</Link>
-              <Link to="/resources" className="text-slate-700 hover:text-primary transition-colors">Resources</Link>
-              <Link to="/dashboard" className="text-primary font-semibold transition-colors">Dashboard</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate('/settings')}
-                className="text-slate-600 hover:text-primary transition-colors"
-                title="Settings"
-              >
-                <Settings className="h-5 w-5" />
-              </button>
-              <button
-                onClick={async () => {
-                  await logout();
-                  navigate('/');
-                }}
-                className="btn-outline inline-flex items-center"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+  // Table columns
+  const consultationColumns: Column<Consultation>[] = [
+    {
+      key: 'clientName',
+      label: 'Client',
+      sortable: true,
+    },
+    {
+      key: 'type',
+      label: 'Type',
+      sortable: true,
+    },
+    {
+      key: 'date',
+      label: 'Date',
+      sortable: true,
+    },
+    {
+      key: 'time',
+      label: 'Time',
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (item) => {
+        const colors = {
+          upcoming: 'bg-blue-100 text-blue-700',
+          completed: 'bg-green-100 text-green-700',
+          cancelled: 'bg-red-100 text-red-700',
+        };
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[item.status]}`}>
+            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+          </span>
+        );
+      },
+    },
+  ];
 
-      <div className="container py-8 space-y-8" aria-label="User Dashboard">
-        {loading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-            <span className="ml-2 text-gray-600">Loading dashboard...</span>
-          </div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <PageHeader
+        title={`Welcome back, ${user?.firstName}!`}
+        subtitle={user?.role === 'LAWYER' ? 'Lawyer Dashboard' : 'Client Dashboard'}
+        description={
+          user?.role === 'LAWYER' 
+            ? 'Manage your legal practice, consultations, and client relationships'
+            : 'Access legal services, track your consultations, and manage documents'
+        }
+        actions={
+          <>
+            <Button variant="outline" onClick={() => navigate('/consultations')}>
+              <Calendar className="h-4 w-4 mr-2" />
+              View Calendar
+            </Button>
+            <Button variant="primary" onClick={() => navigate('/consultations/new')}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Consultation
+            </Button>
+          </>
+        }
+      />
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="Consultations"
+          value={stats.consultations}
+          change="+12%"
+          trend="up"
+          icon={Video}
+          iconColor="text-blue-600"
+          description="Active this month"
+        />
+        <StatCard
+          title="Messages"
+          value={stats.messages}
+          change="+5"
+          trend="up"
+          icon={MessageSquare}
+          iconColor="text-green-600"
+          description="Unread messages"
+        />
+        <StatCard
+          title="Documents"
+          value={stats.documents}
+          change="3"
+          trend="neutral"
+          icon={FileText}
+          iconColor="text-purple-600"
+          description="Pending review"
+        />
+        {user?.role === 'LAWYER' && (
+          <StatCard
+            title="Revenue"
+            value={`KES ${stats.revenue.toLocaleString()}`}
+            change="+18%"
+            trend="up"
+            icon={DollarSign}
+            iconColor="text-amber-600"
+            description="This month"
+          />
         )}
-        {error && (
-          <div className="flex items-center justify-center py-8 text-red-600">
-            <span>{error}</span>
-            <Button variant="outline" size="sm" className="ml-4" onClick={() => window.location.reload()}>Retry</Button>
-          </div>
-        )}
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 rounded-2xl p-8 text-white">
-        <div className="flex items-center space-x-4">
-          <div className="flex-shrink-0">
-            {user.role === 'LAWYER' ? (
-              <Scale className="h-12 w-12 text-white" />
-            ) : user.role === 'ADMIN' ? (
-              <Shield className="h-12 w-12 text-white" />
+      </div>
+
+      {/* Additional Stats for Lawyers */}
+      {user?.role === 'LAWYER' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard
+            title="Total Clients"
+            value={stats.clients}
+            icon={Users}
+            iconColor="text-indigo-600"
+          />
+          <StatCard
+            title="Completion Rate"
+            value={`${stats.completionRate}%`}
+            change="+2%"
+            trend="up"
+            icon={CheckCircle}
+            iconColor="text-green-600"
+          />
+          <StatCard
+            title="Avg. Response Time"
+            value="2.5 hrs"
+            change="-15%"
+            trend="up"
+            icon={Clock}
+            iconColor="text-blue-600"
+          />
+        </div>
+      )}
+
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Consultations */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-900">Recent Consultations</h2>
+              <Link to="/consultations" className="text-sm text-primary-600 hover:text-primary-700">
+                View all
+              </Link>
+            </div>
+            {recentConsultations.length > 0 ? (
+              <DataTable
+                data={recentConsultations}
+                columns={consultationColumns}
+                searchable={false}
+                onRowClick={(item) => navigate(`/consultations/${item.id}`)}
+              />
             ) : (
-              <User className="h-12 w-12 text-white" />
+              <EmptyState
+                icon={Calendar}
+                title="No consultations yet"
+                description="Your recent consultations will appear here once you schedule or complete them."
+                action={{
+                  label: 'Schedule Consultation',
+                  onClick: () => navigate('/consultations/new'),
+                }}
+              />
             )}
           </div>
-          <div>
-            <h1 className="text-3xl font-bold">
-              Welcome back, {user.firstName}!
-            </h1>
-            <p className="text-blue-100 mt-1">
-              {user.role === 'LAWYER' ? 'Manage your legal practice' : 
-               user.role === 'ADMIN' ? 'System administration dashboard' : 
-               'Access legal services and consultations'}
-            </p>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h2>
+            {recentActivity.length > 0 ? (
+              <div className="space-y-4">
+                {recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex gap-3">
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="h-2 w-2 rounded-full bg-primary-600"></div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-slate-900">{activity.action}</p>
+                      <p className="text-xs text-slate-500 mt-1">{activity.timestamp}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={AlertCircle}
+                title="No activity"
+                description="Recent activity will appear here."
+              />
+            )}
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Quick Actions">
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" aria-label="Appointments">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-sky-600" />
-              <span>Appointments</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-      <p className="text-2xl font-bold text-gray-900">{stats.appointments}</p>
-      <p className="text-sm text-gray-600">Upcoming</p>
-    </CardContent>
-  </Card>
-
-  <Card className="hover:shadow-lg transition-shadow cursor-pointer" aria-label="Messages">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center space-x-2">
-              <MessageSquare className="h-5 w-5 text-green-600" />
-              <span>Messages</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-gray-900">{stats.messages}</p>
-            <p className="text-sm text-gray-600">Unread messages</p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" aria-label="Documents">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center space-x-2">
+      <div className="bg-white rounded-lg border border-slate-200 p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            to="/ai"
+            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+          >
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-slate-900">AI Assistant</h3>
+              <p className="text-xs text-slate-600">Get legal guidance</p>
+            </div>
+          </Link>
+          
+          <Link
+            to="/lawyers"
+            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+          >
+            <div className="p-2 bg-green-100 rounded-lg">
+              <Users className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-slate-900">Find Lawyers</h3>
+              <p className="text-xs text-slate-600">Browse legal experts</p>
+            </div>
+          </Link>
+          
+          <Link
+            to="/marketplace"
+            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+          >
+            <div className="p-2 bg-purple-100 rounded-lg">
               <FileText className="h-5 w-5 text-purple-600" />
-              <span>Documents</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-gray-900">{stats.documents}</p>
-            <p className="text-sm text-gray-600">Recent files</p>
-          </CardContent>
-        </Card>
-
-        {user.role === 'LAWYER' && (
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" aria-label="Analytics">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center space-x-2">
-                <BarChart3 className="h-5 w-5 text-amber-600" />
-                <span>Analytics</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold text-gray-900">KES {stats.analytics.toLocaleString()}</p>
-              <p className="text-sm text-gray-600">This month</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* User Profile Card */}
-      <Card className="bg-white">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <User className="h-5 w-5" />
-            <span>Profile Information</span>
-          </CardTitle>
-          <CardDescription>
-            Your account details and verification status
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <dl className="space-y-4">
-            <div className="flex justify-between">
-              <dt className="text-sm font-medium text-gray-500">Name:</dt>
-              <dd className="text-sm text-gray-900">{user.firstName} {user.lastName}</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-sm font-medium text-gray-500">Email:</dt>
-              <dd className="text-sm text-gray-900">{user.email}</dd>
+            <div>
+              <h3 className="font-medium text-slate-900">Documents</h3>
+              <p className="text-xs text-slate-600">Legal templates</p>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-sm font-medium text-gray-500">Role:</dt>
-              <dd className="text-sm text-gray-900">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                  user.role === 'LAWYER' 
-                    ? 'bg-sky-100 text-sky-800' 
-                    : user.role === 'ADMIN'
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'bg-green-100 text-green-800'
-                }`}>
-                  {user.role === 'LAWYER' ? 'Legal Practitioner' : 
-                   user.role === 'ADMIN' ? 'Administrator' : 'General Public'}
-                </span>
-              </dd>
+          </Link>
+          
+          <Link
+            to="/resources"
+            className="flex items-center gap-3 p-4 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+          >
+            <div className="p-2 bg-amber-100 rounded-lg">
+              <BarChart3 className="h-5 w-5 text-amber-600" />
             </div>
-            <div className="flex justify-between">
-              <dt className="text-sm font-medium text-gray-500">Status:</dt>
-              <dd className="text-sm text-gray-900">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                  user.verificationStatus === 'VERIFIED' 
-                    ? 'bg-green-100 text-green-800' 
-                    : user.verificationStatus === 'PENDING'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {user.verificationStatus}
-                </span>
-              </dd>
+            <div>
+              <h3 className="font-medium text-slate-900">Resources</h3>
+              <p className="text-xs text-slate-600">Legal information</p>
             </div>
-          </dl>
-        </CardContent>
-      </Card>
-
-      {/* Video Consultations */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Video Consultations</CardTitle>
-          <CardDescription>
-            Manage your legal consultations and video calls
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <VideoConsultationDashboard />
-        </CardContent>
-      </Card>
-
-      {/* Admin Access */}
-      {user.role === 'ADMIN' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Shield className="h-5 w-5" />
-              <span>System Administration</span>
-            </CardTitle>
-            <CardDescription>
-              Administrative tools and system management
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Link 
-                to="/admin/dashboard" 
-                className="group p-6 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105"
-              >
-                <div className="text-white">
-                  <Shield className="h-8 w-8 mb-3" />
-                  <h4 className="font-semibold text-lg mb-2">Admin Dashboard</h4>
-                  <p className="text-purple-100 text-sm">
-                    System overview and key metrics
-                  </p>
-                </div>
-              </Link>
-              
-              <Link 
-                to="/admin/users" 
-                className="group p-6 bg-white border-2 border-gray-200 rounded-xl hover:border-sky-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-              >
-                <User className="h-8 w-8 text-sky-600 mb-3" />
-                <h4 className="font-semibold text-gray-900 mb-2">User Management</h4>
-                <p className="text-gray-600 text-sm">
-                  Manage registered users
-                </p>
-              </Link>
-              
-              <Link 
-                to="/admin/lawyers" 
-                className="group p-6 bg-white border-2 border-gray-200 rounded-xl hover:border-amber-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-              >
-                <Scale className="h-8 w-8 text-amber-600 mb-3" />
-                <h4 className="font-semibold text-gray-900 mb-2">Lawyer Verification</h4>
-                <p className="text-gray-600 text-sm">
-                  Review lawyer applications
-                </p>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Lawyer Onboarding */}
-      {user.role === 'LAWYER' && user.verificationStatus !== 'VERIFIED' && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardHeader>
-            <CardTitle className="text-amber-800">Complete Your Profile</CardTitle>
-            <CardDescription className="text-amber-700">
-              Finish setting up your lawyer profile to start accepting clients
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link to="/lawyer/onboarding">
-              <Button>Complete Onboarding</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+          </Link>
+        </div>
       </div>
     </div>
   );
