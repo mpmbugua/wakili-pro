@@ -8,6 +8,7 @@ import { LawyersBrowse } from './pages/LawyersBrowse';
 import { MarketplaceBrowse } from './pages/MarketplaceBrowse';
 import { ResourcesPage } from './pages/ResourcesPage';
 import { ServicesPage } from './pages/ServicesPage';
+import { BookingPage } from './pages/BookingPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -44,6 +45,7 @@ function App() {
         <Route path="/marketplace" element={<MarketplaceBrowse />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/booking/:lawyerId" element={<BookingPage />} />
         
         {/* Auth Routes */}
         <Route 
