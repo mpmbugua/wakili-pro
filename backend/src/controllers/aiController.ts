@@ -123,9 +123,28 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
     
     logger.error('Full error details:', errorDetails);
     
+    // Provide helpful error messages for common issues
+    let userMessage = 'Failed to process AI query';
+    let errorCode = 'AI_QUERY_ERROR';
+    
+    if (errorMessage.includes('OPENAI_API_KEY')) {
+      userMessage = 'AI service is not properly configured. Please contact support.';
+      errorCode = 'OPENAI_API_KEY_MISSING';
+    } else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+      userMessage = 'AI service authentication failed. Please contact support.';
+      errorCode = 'OPENAI_AUTH_FAILED';
+    } else if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+      userMessage = 'AI service is temporarily unavailable due to high demand. Please try again in a moment.';
+      errorCode = 'RATE_LIMIT_EXCEEDED';
+    } else if (errorMessage.includes('vector') || errorMessage.includes('database')) {
+      userMessage = 'AI knowledge base is currently being updated. Please try again shortly.';
+      errorCode = 'VECTOR_DB_ERROR';
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Failed to process AI query',
+      message: userMessage,
+      errorCode,
       error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     });
   }
