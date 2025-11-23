@@ -13,7 +13,11 @@ import {
   CreditCard,
   Settings,
   HelpCircle,
-  X
+  X,
+  Briefcase,
+  BookOpen,
+  Award,
+  TrendingUp
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { Button } from '../ui/Button';
@@ -21,6 +25,7 @@ import { cn } from '../../utils/cn';
 
 interface SidebarProps {
   isOpen: boolean;
+  collapsed: boolean;
   onClose: () => void;
 }
 
@@ -37,9 +42,15 @@ const navigation: NavItem[] = [
   { name: 'Appointments', href: '/appointments', icon: Calendar },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Documents', href: '/documents', icon: FileText },
-  { name: 'Clients', href: '/clients', icon: Users, roles: ['LAWYER'] },
+  { name: 'AI Assistant', href: '/ai', icon: BookOpen },
+];
+
+const lawyerNavigation: NavItem[] = [
+  { name: 'My Clients', href: '/clients', icon: Users },
+  { name: 'Services', href: '/my-services', icon: Briefcase },
   { name: 'Billing', href: '/billing', icon: CreditCard },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3, roles: ['LAWYER'] },
+  { name: 'Analytics', href: '/analytics', icon: TrendingUp },
+  { name: 'Performance', href: '/performance', icon: Award },
 ];
 
 const adminNavigation: NavItem[] = [
@@ -55,16 +66,12 @@ const bottomNavigation: NavItem[] = [
   { name: 'Help & Support', href: '/help', icon: HelpCircle },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, collapsed, onClose }) => {
   const location = useLocation();
   const { user } = useAuthStore();
 
   const isAdmin = user?.role === 'ADMIN';
   const isLawyer = user?.role === 'LAWYER';
-
-  const filteredNavigation = navigation.filter(item => 
-    !item.roles || item.roles.includes(user?.role || '')
-  );
 
   const NavLink: React.FC<{ item: NavItem }> = ({ item }) => {
     const isActive = location.pathname === item.href || 
@@ -74,102 +81,103 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <Link
         to={item.href}
         className={cn(
-          "group flex items-center space-x-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
+          "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          collapsed ? "justify-center" : "space-x-3",
           isActive
-            ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/25"
-            : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            ? "bg-primary-50 text-primary-700 border-l-4 border-primary-600"
+            : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 border-l-4 border-transparent"
         )}
         onClick={() => onClose()}
+        title={collapsed ? item.name : undefined}
       >
         <item.icon className={cn(
           "h-5 w-5 flex-shrink-0 transition-colors",
-          isActive ? "text-white" : "text-gray-500 group-hover:text-gray-700"
+          isActive ? "text-primary-600" : "text-slate-500 group-hover:text-slate-700"
         )} />
-        <span>{item.name}</span>
+        {!collapsed && <span>{item.name}</span>}
       </Link>
     );
   };
 
+  const NavSection: React.FC<{ title: string; icon: React.ReactNode; items: NavItem[] }> = ({ title, icon, items }) => (
+    <div className="space-y-1">
+      {!collapsed && (
+        <div className="flex items-center space-x-2 px-3 py-2 mb-1">
+          {icon}
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            {title}
+          </h3>
+        </div>
+      )}
+      {items.map((item) => (
+        <NavLink key={item.name} item={item} />
+      ))}
+    </div>
+  );
+
   return (
     <>
-      {/* Overlay */}
+      {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black bg-opacity-25 lg:hidden" 
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden" 
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
-      <div className={cn(
-        "fixed left-0 top-16 z-50 h-[calc(100vh-4rem)] w-64 transform bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out",
+      <aside className={cn(
+        "fixed left-0 top-16 z-50 h-[calc(100vh-4rem)] bg-white border-r border-slate-200 transition-all duration-300 ease-in-out overflow-hidden",
+        collapsed ? "w-20" : "w-64",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         <div className="flex h-full flex-col">
           {/* Close button for mobile */}
-          <div className="flex items-center justify-between px-4 py-3 lg:hidden">
-            <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+          {!collapsed && (
+            <div className="flex items-center justify-between px-4 py-3 lg:hidden border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-900">Navigation</h2>
+              <Button variant="ghost" size="sm" onClick={onClose}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-6">
             {/* Main Navigation */}
-            <div className="space-y-1">
-              {filteredNavigation.map((item) => (
-                <NavLink key={item.name} item={item} />
-              ))}
-            </div>
+            <NavSection 
+              title="Main" 
+              icon={<Home className="h-4 w-4 text-slate-400" />}
+              items={navigation}
+            />
+
+            {/* Lawyer Section */}
+            {isLawyer && (
+              <NavSection 
+                title="Lawyer Tools" 
+                icon={<Scale className="h-4 w-4 text-slate-400" />}
+                items={lawyerNavigation}
+              />
+            )}
 
             {/* Admin Section */}
             {isAdmin && (
-              <>
-                <div className="pt-6">
-                  <div className="flex items-center space-x-2 px-3 py-2">
-                    <Shield className="h-4 w-4 text-gray-400" />
-                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Administration
-                    </h3>
-                  </div>
-                  <div className="space-y-1">
-                    {adminNavigation.map((item) => (
-                      <NavLink key={item.name} item={item} />
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Lawyer Badge */}
-            {isLawyer && (
-              <div className="pt-6">
-                <div className="mx-3 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 p-3">
-                  <div className="flex items-center space-x-2">
-                    <Scale className="h-4 w-4 text-amber-600" />
-                    <span className="text-xs font-medium text-amber-800">
-                      Verified Lawyer
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-amber-700">
-                    You have full access to legal practice features.
-                  </p>
-                </div>
-              </div>
+              <NavSection 
+                title="Administration" 
+                icon={<Shield className="h-4 w-4 text-slate-400" />}
+                items={adminNavigation}
+              />
             )}
           </nav>
 
           {/* Bottom Navigation */}
-          <div className="border-t border-gray-200 p-3">
-            <div className="space-y-1">
-              {bottomNavigation.map((item) => (
-                <NavLink key={item.name} item={item} />
-              ))}
-            </div>
+          <div className="border-t border-slate-200 p-3 space-y-1">
+            {bottomNavigation.map((item) => (
+              <NavLink key={item.name} item={item} />
+            ))}
           </div>
         </div>
-      </div>
+      </aside>
     </>
   );
 };

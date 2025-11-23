@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuthStore } from './store/authStore';
+import { AppShell } from './components/layout/AppShell';
 import { LandingPage } from './pages/LandingPage';
 import { AIAssistant } from './pages/AIAssistant';
 import { LawyersBrowse } from './pages/LawyersBrowse';
@@ -62,40 +63,42 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Router>
-      <Routes>
-        {/* Public Routes - No Authentication Required */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/ai" element={<AIAssistant />} />
-        <Route path="/lawyers" element={<LawyersBrowse />} />
-        <Route path="/marketplace" element={<MarketplaceBrowse />} />
-        <Route path="/services" element={<ServicesPage />} />
-        <Route path="/resources" element={<ResourcesPage />} />
-        <Route path="/booking/:lawyerId" element={<BookingPage />} />
-        
-        {/* Auth Routes */}
-        <Route 
-          path="/login" 
-          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
-        />
-        <Route 
-          path="/register" 
-          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} 
-        />
+        <AppShell>
+          <Routes>
+            {/* Public Routes - No Authentication Required */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/ai" element={<AIAssistant />} />
+            <Route path="/lawyers" element={<LawyersBrowse />} />
+            <Route path="/marketplace" element={<MarketplaceBrowse />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/booking/:lawyerId" element={<BookingPage />} />
+            
+            {/* Auth Routes */}
+            <Route 
+              path="/login" 
+              element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+            />
+            <Route 
+              path="/register" 
+              element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} 
+            />
 
-        {/* Protected Routes - Authentication Required */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
+            {/* Protected Routes - Authentication Required */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
 
-        {/* Catch-all - redirect to landing */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+            {/* Catch-all - redirect to landing */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AppShell>
+      </Router>
     </GoogleOAuthProvider>
   );
 }
