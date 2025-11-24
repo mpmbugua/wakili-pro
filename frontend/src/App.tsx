@@ -19,20 +19,16 @@ const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.goo
 function App() {
   const { isAuthenticated, refreshAuth, accessToken, user } = useAuthStore();
   const [hydrated, setHydrated] = React.useState(false);
+  const hasAttemptedRefresh = React.useRef(false);
 
   console.log('[App] Render - isAuthenticated:', isAuthenticated, 'user:', user, 'accessToken:', accessToken ? 'present' : 'null');
 
   // Protected Route component - defined inside App to access hydrated state
-  const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const ProtectedRoute: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => {
     const authState = useAuthStore();
     const { isAuthenticated, user } = authState;
     
-    console.log('[ProtectedRoute] Full auth state:', { 
-      hydrated, 
-      isAuthenticated, 
-      user: user ? { id: user.id, email: user.email, role: user.role } : null,
-      accessToken: authState.accessToken ? 'present' : 'null'
-    });
+    console.log('[ProtectedRoute] Render check - hydrated:', hydrated, 'isAuthenticated:', isAuthenticated, 'user:', user ? 'present' : 'null');
     
     // Wait for hydration before checking auth to prevent race conditions
     if (!hydrated) {
@@ -47,7 +43,7 @@ function App() {
     
     console.log('[ProtectedRoute] Authenticated, rendering children');
     return <>{children}</>;
-  };
+  });
 
   useEffect(() => {
     // Wait for zustand to rehydrate from localStorage
@@ -55,7 +51,7 @@ function App() {
     const timer = setTimeout(() => {
       console.log('[App] Hydration complete');
       setHydrated(true);
-    }, 200); // Increased timeout for reliable hydration
+    }, 50); // Reduced timeout to minimize blank screen
     
     return () => clearTimeout(timer);
   }, []);
@@ -63,11 +59,12 @@ function App() {
   useEffect(() => {
     // Try to refresh auth on app load if we have tokens
     console.log('[App] Hydrated effect triggered, hydrated:', hydrated, 'isAuthenticated:', isAuthenticated, 'accessToken:', accessToken ? 'present' : 'null');
-    if (hydrated && !isAuthenticated && accessToken) {
+    if (hydrated && !isAuthenticated && accessToken && !hasAttemptedRefresh.current) {
       console.log('[App] Attempting to refresh auth');
+      hasAttemptedRefresh.current = true;
       refreshAuth();
     }
-  }, [hydrated, isAuthenticated, accessToken, refreshAuth]);
+  }, [hydrated, isAuthenticated, accessToken]);
 
   // Show loading state while hydrating auth from localStorage
   if (!hydrated) {
