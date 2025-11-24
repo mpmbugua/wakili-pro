@@ -113,7 +113,8 @@ const DocumentMarketplacePage: React.FC = () => {
   if (error) return <div className="p-8 text-red-500">Error loading templates.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
+    <div className="min-h-screen bg-[#e7f3ff] py-8">
+      <div className="max-w-4xl mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">AI Document Marketplace</h1>
       {paymentInfo && (
         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded" role="status" aria-live="polite">

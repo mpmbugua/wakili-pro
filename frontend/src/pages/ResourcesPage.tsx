@@ -68,9 +68,9 @@ export const ResourcesPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-secondary">
+    <div className="min-h-screen bg-[#e7f3ff]">
       {/* Header */}
-      <header className="navbar">
+      <header className="bg-white shadow-sm border-b border-blue-200">
         <div className="container">
           <div className="flex items-center justify-between">
             <Link to="/" className="text-2xl font-display font-bold text-primary">
