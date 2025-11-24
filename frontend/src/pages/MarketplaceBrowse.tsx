@@ -188,6 +188,36 @@ const sampleDocuments: Document[] = [
   },
   {
     id: '12',
+    title: 'Machinery Lease Agreement',
+    category: 'Equipment',
+    description: 'Comprehensive machinery and equipment lease agreement for construction, agriculture, or industrial equipment. Includes maintenance, insurance, and liability terms.',
+    price: 1400,
+    downloads: 289,
+    rating: 4.8,
+    reviewCount: 56,
+    pages: 10,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['Maintenance obligations', 'Insurance requirements', 'Liability clauses', 'Repair procedures'],
+    previewAvailable: true
+  },
+  {
+    id: '13',
+    title: 'Machinery Sale Agreement',
+    category: 'Equipment',
+    description: 'Equipment and machinery purchase agreement for heavy machinery, industrial equipment, or agricultural tools. Covers warranty, inspection, and delivery terms.',
+    price: 1600,
+    downloads: 367,
+    rating: 4.9,
+    reviewCount: 78,
+    pages: 12,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['Warranty terms', 'Inspection checklist', 'Delivery conditions', 'Payment schedule'],
+    previewAvailable: true
+  },
+  {
+    id: '14',
     title: 'Service Agreement Contract',
     category: 'Corporate',
     description: 'Professional services contract for consultants, freelancers, and contractors. Includes scope of work, payment terms, and deliverables.',
@@ -202,7 +232,7 @@ const sampleDocuments: Document[] = [
     previewAvailable: true
   },
   {
-    id: '13',
+    id: '15',
     title: 'Company Incorporation Guide',
     category: 'Corporate',
     description: 'Complete guide to registering a limited company in Kenya. Includes Memorandum, Articles of Association, and BRS filing steps.',
@@ -217,7 +247,7 @@ const sampleDocuments: Document[] = [
     previewAvailable: true
   },
   {
-    id: '14',
+    id: '16',
     title: 'Demand Letter Template',
     category: 'Legal',
     description: 'Professional demand letter for debt recovery, contract breach, or dispute resolution. Multiple templates for different scenarios.',
@@ -232,7 +262,7 @@ const sampleDocuments: Document[] = [
     previewAvailable: true
   },
   {
-    id: '15',
+    id: '17',
     title: 'Affidavit Template',
     category: 'Legal',
     description: 'Sworn affidavit template for court proceedings, name change, lost documents, and other legal purposes.',
@@ -247,7 +277,7 @@ const sampleDocuments: Document[] = [
     previewAvailable: true
   },
   {
-    id: '16',
+    id: '18',
     title: 'Property Rental Agreement (Commercial)',
     category: 'Property',
     description: 'Commercial property lease for offices, shops, and business premises. Includes rent review, fit-out, and business use clauses.',
@@ -262,7 +292,7 @@ const sampleDocuments: Document[] = [
     previewAvailable: true
   },
   {
-    id: '17',
+    id: '19',
     title: 'Child Custody Agreement',
     category: 'Family Law',
     description: 'Co-parenting agreement for separated or divorced parents. Covers visitation, financial support, and decision-making.',
@@ -277,7 +307,7 @@ const sampleDocuments: Document[] = [
     previewAvailable: false
   },
   {
-    id: '18',
+    id: '20',
     title: 'Supplier Agreement',
     category: 'Corporate',
     description: 'Business-to-business supply agreement for goods and services. Includes quality standards, delivery terms, and payment conditions.',
@@ -292,7 +322,7 @@ const sampleDocuments: Document[] = [
     previewAvailable: true
   },
   {
-    id: '19',
+    id: '21',
     title: 'Statutory Demand',
     category: 'Financial',
     description: 'Formal demand for payment of debt under Insolvency Act. Precursor to bankruptcy or liquidation proceedings.',
@@ -307,7 +337,7 @@ const sampleDocuments: Document[] = [
     previewAvailable: true
   },
   {
-    id: '20',
+    id: '22',
     title: 'Share Purchase Agreement',
     category: 'Corporate',
     description: 'Agreement for buying or selling company shares. Includes warranties, indemnities, and completion conditions.',
@@ -323,7 +353,7 @@ const sampleDocuments: Document[] = [
   }
 ];
 
-const categories = ['All Categories', 'Employment', 'Property', 'Family Law', 'Corporate', 'Succession', 'Financial', 'Transport', 'Legal'];
+const categories = ['All Categories', 'Employment', 'Property', 'Family Law', 'Corporate', 'Succession', 'Financial', 'Transport', 'Equipment', 'Legal'];
 
 export const MarketplaceBrowse: React.FC = () => {
   const navigate = useNavigate();
