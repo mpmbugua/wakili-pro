@@ -9,13 +9,19 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'copy-redirects',
+      name: 'copy-spa-files',
       closeBundle() {
         try {
           copyFileSync('public/_redirects', 'dist/_redirects')
           console.log('✓ Copied _redirects to dist/')
         } catch (err) {
           console.warn('Could not copy _redirects:', err)
+        }
+        try {
+          copyFileSync('public/_headers', 'dist/_headers')
+          console.log('✓ Copied _headers to dist/')
+        } catch (err) {
+          console.warn('Could not copy _headers:', err)
         }
       }
     }

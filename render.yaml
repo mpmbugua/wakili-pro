@@ -33,9 +33,19 @@ services:
         value: https://wakili-pro.onrender.com/api
       - key: NODE_ENV
         value: production
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
     routes:
       - type: rewrite
-        source: /*
+        source: /(.*).js
+        destination: /$1.js
+      - type: rewrite
+        source: /(.*).css
+        destination: /$1.css
+      - type: rewrite
+        source: /(.*)
         destination: /index.html
 
 databases:
