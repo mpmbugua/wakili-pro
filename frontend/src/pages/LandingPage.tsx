@@ -192,12 +192,15 @@ export const LandingPage: React.FC = () => {
                   <p className="text-xs text-slate-600 mb-4">
                     Book video consultations with 500+ verified advocates across all practice areas.
                   </p>
-                <Link 
-                  to="/lawyers" 
-                  className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
-                >
-                  Browse lawyers <ArrowRight className="ml-1 h-3 w-3" />
-                </Link>                {/* Legal Documents */}
+                  <Link 
+                    to="/lawyers" 
+                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
+                  >
+                    Browse lawyers <ArrowRight className="ml-1 h-3 w-3" />
+                  </Link>
+                </div>
+
+                {/* Legal Documents */}
                 <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
