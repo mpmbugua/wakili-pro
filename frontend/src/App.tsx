@@ -9,6 +9,7 @@ import { LawyersBrowse } from './pages/LawyersBrowse';
 import { MarketplaceBrowse } from './pages/MarketplaceBrowse';
 import { ResourcesPage } from './pages/ResourcesPage';
 import { ServicesPage } from './pages/ServicesPage';
+import { LegalServicesPage } from './pages/LegalServicesPage';
 import { BookingPage } from './pages/BookingPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -78,8 +79,8 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/ai" element={<AIAssistant />} />
             <Route path="/lawyers" element={<LawyersBrowse />} />
+            <Route path="/services" element={<LegalServicesPage />} />
             <Route path="/marketplace" element={<MarketplaceBrowse />} />
-            <Route path="/services" element={<ServicesPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/booking/:lawyerId" element={<BookingPage />} />
             

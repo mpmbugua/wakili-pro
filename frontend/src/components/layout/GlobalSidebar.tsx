@@ -6,7 +6,8 @@ import {
   Scale, 
   ShoppingBag, 
   Book,
-  LayoutDashboard
+  LayoutDashboard,
+  Briefcase
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -24,6 +25,7 @@ export const GlobalSidebar: React.FC = () => {
     { path: '/', icon: Home, label: 'Home' },
     { path: '/ai', icon: MessageSquare, label: 'AI Legal Assistant' },
     { path: '/lawyers', icon: Scale, label: 'Expert Lawyers' },
+    { path: '/services', icon: Briefcase, label: 'Legal Services' },
     { path: '/marketplace', icon: ShoppingBag, label: 'Legal Documents' },
     { path: '/resources', icon: Book, label: 'Legal Resources' },
   ];
