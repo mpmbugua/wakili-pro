@@ -43,7 +43,6 @@ logs/
 # Tests
 test-results/
 playwright-report/
-.vercel
 =======
 # OSX
 #
