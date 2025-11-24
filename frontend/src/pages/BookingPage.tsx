@@ -21,6 +21,8 @@ export const BookingPage: React.FC = () => {
     description: '',
   });
   const [lawyerRate, setLawyerRate] = useState<number>(5000);
+  const [lawyerName, setLawyerName] = useState<string>('');
+  const [loadingLawyer, setLoadingLawyer] = useState<boolean>(true);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -29,6 +31,33 @@ export const BookingPage: React.FC = () => {
       navigate('/login');
     }
   }, [isAuthenticated, navigate, lawyerId]);
+
+  // Fetch lawyer's profile and consultation rate
+  useEffect(() => {
+    const fetchLawyerProfile = async () => {
+      if (!lawyerId) return;
+      
+      try {
+        setLoadingLawyer(true);
+        const response = await axiosInstance.get(`/api/lawyers/${lawyerId}`);
+        
+        if (response.data) {
+          const lawyer = response.data;
+          // Set the lawyer's hourly rate (consultation fee)
+          const rate = lawyer.hourlyRate || lawyer.consultationRate || 5000;
+          setLawyerRate(rate);
+          setLawyerName(`${lawyer.name || lawyer.user?.firstName + ' ' + lawyer.user?.lastName || 'Lawyer'}`);
+        }
+      } catch (err) {
+        console.error('Error fetching lawyer profile:', err);
+        // Keep default rate if fetch fails
+      } finally {
+        setLoadingLawyer(false);
+      }
+    };
+
+    fetchLawyerProfile();
+  }, [lawyerId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,9 +125,23 @@ export const BookingPage: React.FC = () => {
               <h1 className="text-3xl font-display font-bold text-slate-900 mb-2">
                 Book a Consultation
               </h1>
-              <p className="text-slate-600 mb-8">
-                Schedule your video consultation with a qualified lawyer
+              <p className="text-slate-600 mb-2">
+                {loadingLawyer ? (
+                  <span className="animate-pulse">Loading lawyer details...</span>
+                ) : lawyerName ? (
+                  <>Schedule your consultation with <span className="font-semibold text-blue-600">{lawyerName}</span></>
+                ) : (
+                  'Schedule your video consultation with a qualified lawyer'
+                )}
               </p>
+              {!loadingLawyer && lawyerName && (
+                <p className="text-sm text-slate-500 mb-6">
+                  60-minute session • KES {lawyerRate.toLocaleString()}
+                </p>
+              )}
+              {loadingLawyer && (
+                <div className="mb-6" />
+              )}
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
