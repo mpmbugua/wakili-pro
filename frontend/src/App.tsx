@@ -16,55 +16,46 @@ import Dashboard from './components/Dashboard';
 
 const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com';
 
+// Protected Route component outside App to prevent recreation
+const ProtectedRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = ({ children, hydrated }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  
+  // Wait for hydration before checking auth to prevent race conditions
+  if (!hydrated) {
+    return null;
+  }
+  
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 function App() {
-  const { isAuthenticated, refreshAuth, accessToken, user } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const refreshAuth = useAuthStore((state) => state.refreshAuth);
   const [hydrated, setHydrated] = React.useState(false);
   const hasAttemptedRefresh = React.useRef(false);
 
-  console.log('[App] Render - isAuthenticated:', isAuthenticated, 'user:', user, 'accessToken:', accessToken ? 'present' : 'null');
-
-  // Protected Route component - defined inside App to access hydrated state
-  const ProtectedRoute: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => {
-    const authState = useAuthStore();
-    const { isAuthenticated, user } = authState;
-    
-    console.log('[ProtectedRoute] Render check - hydrated:', hydrated, 'isAuthenticated:', isAuthenticated, 'user:', user ? 'present' : 'null');
-    
-    // Wait for hydration before checking auth to prevent race conditions
-    if (!hydrated) {
-      console.log('[ProtectedRoute] Still hydrating, showing nothing');
-      return null; // Return null during hydration to prevent premature redirects
-    }
-    
-    if (!isAuthenticated || !user) {
-      console.log('[ProtectedRoute] Not authenticated, redirecting to login');
-      return <Navigate to="/login" replace />;
-    }
-    
-    console.log('[ProtectedRoute] Authenticated, rendering children');
-    return <>{children}</>;
-  });
-
   useEffect(() => {
     // Wait for zustand to rehydrate from localStorage
-    console.log('[App] Starting hydration timer');
     const timer = setTimeout(() => {
-      console.log('[App] Hydration complete');
       setHydrated(true);
-    }, 50); // Reduced timeout to minimize blank screen
+    }, 50);
     
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     // Try to refresh auth on app load if we have tokens
-    console.log('[App] Hydrated effect triggered, hydrated:', hydrated, 'isAuthenticated:', isAuthenticated, 'accessToken:', accessToken ? 'present' : 'null');
     if (hydrated && !isAuthenticated && accessToken && !hasAttemptedRefresh.current) {
-      console.log('[App] Attempting to refresh auth');
       hasAttemptedRefresh.current = true;
       refreshAuth();
     }
-  }, [hydrated, isAuthenticated, accessToken]);
+  }, [hydrated, isAuthenticated, accessToken, refreshAuth]);
 
   // Show loading state while hydrating auth from localStorage
   if (!hydrated) {
@@ -106,7 +97,7 @@ function App() {
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute hydrated={hydrated}>
                   <Dashboard />
                 </ProtectedRoute>
               } 

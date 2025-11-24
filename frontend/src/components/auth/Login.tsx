@@ -14,12 +14,9 @@ interface LoginRequest {
 }
 
 const Login: React.FC = () => {
-  console.log('[Login] Component rendering');
-  console.log('[Login] TEST CREDENTIALS: admin@wakili.com / lawyer@wakili.com / user@wakili.com - Password: Password123!');
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isLoading, error, clearError } = useAuthStore();
-  console.log('[Login] Auth store loaded, isLoading:', isLoading, 'error:', error);
 
   const [formData, setFormData] = useState<LoginRequest>({
     email: '',
@@ -89,11 +86,8 @@ const Login: React.FC = () => {
     }
   };
 
-  console.log('[Login] About to render, formData:', formData);
-  
-  try {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full">
           <Card variant="glass" className="overflow-hidden">
             <CardContent className="px-8 py-8">
@@ -260,21 +254,7 @@ const Login: React.FC = () => {
         </Card>
       </div>
     </div>
-    );
-  } catch (renderError) {
-    console.error('[Login] Render error:', renderError);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-red-50">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Login Page Error</h2>
-          <p className="text-gray-700">An error occurred while loading the login page.</p>
-          <pre className="mt-4 p-4 bg-gray-100 rounded text-xs overflow-auto">
-            {renderError instanceof Error ? renderError.message : String(renderError)}
-          </pre>
-        </div>
-      </div>
-    );
-  }
+  );
 };
 
 export default Login;
