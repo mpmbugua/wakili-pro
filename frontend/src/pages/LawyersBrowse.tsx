@@ -223,11 +223,19 @@ export const LawyersBrowse: React.FC = () => {
     });
 
   const handleBookConsultation = (lawyerId: string, lawyerName: string) => {
+    const lawyer = sampleLawyers.find(l => l.id === lawyerId);
+    
     if (!isAuthenticated) {
-      sessionStorage.setItem('pendingBooking', JSON.stringify({ lawyerId, lawyerName }));
+      sessionStorage.setItem('pendingBooking', JSON.stringify({ lawyerId, lawyerName, hourlyRate: lawyer?.hourlyRate }));
       navigate('/login', { state: { from: '/lawyers', message: 'Please log in to book a consultation' } });
     } else {
-      navigate(`/booking/${lawyerId}`);
+      navigate(`/booking/${lawyerId}`, { 
+        state: { 
+          lawyerName: lawyer?.name,
+          hourlyRate: lawyer?.hourlyRate,
+          specialty: lawyer?.specialty
+        } 
+      });
     }
   };
 

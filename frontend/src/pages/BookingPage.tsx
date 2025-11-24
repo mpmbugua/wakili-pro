@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
 import { Calendar, Clock, Video, DollarSign, ArrowLeft, Check } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -8,6 +8,8 @@ import axiosInstance from '../lib/axios';
 export const BookingPage: React.FC = () => {
   const { lawyerId } = useParams<{ lawyerId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as { lawyerName?: string; hourlyRate?: number; specialty?: string } | null;
   const { isAuthenticated, user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -20,9 +22,9 @@ export const BookingPage: React.FC = () => {
     consultationType: 'video',
     description: '',
   });
-  const [lawyerRate, setLawyerRate] = useState<number>(5000);
-  const [lawyerName, setLawyerName] = useState<string>('');
-  const [loadingLawyer, setLoadingLawyer] = useState<boolean>(true);
+  const [lawyerRate, setLawyerRate] = useState<number>(locationState?.hourlyRate || 5000);
+  const [lawyerName, setLawyerName] = useState<string>(locationState?.lawyerName || '');
+  const [lawyerSpecialty, setLawyerSpecialty] = useState<string>(locationState?.specialty || '');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -31,33 +33,6 @@ export const BookingPage: React.FC = () => {
       navigate('/login');
     }
   }, [isAuthenticated, navigate, lawyerId]);
-
-  // Fetch lawyer's profile and consultation rate
-  useEffect(() => {
-    const fetchLawyerProfile = async () => {
-      if (!lawyerId) return;
-      
-      try {
-        setLoadingLawyer(true);
-        const response = await axiosInstance.get(`/api/lawyers/${lawyerId}`);
-        
-        if (response.data) {
-          const lawyer = response.data;
-          // Set the lawyer's hourly rate (consultation fee)
-          const rate = lawyer.hourlyRate || lawyer.consultationRate || 5000;
-          setLawyerRate(rate);
-          setLawyerName(`${lawyer.name || lawyer.user?.firstName + ' ' + lawyer.user?.lastName || 'Lawyer'}`);
-        }
-      } catch (err) {
-        console.error('Error fetching lawyer profile:', err);
-        // Keep default rate if fetch fails
-      } finally {
-        setLoadingLawyer(false);
-      }
-    };
-
-    fetchLawyerProfile();
-  }, [lawyerId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,21 +101,18 @@ export const BookingPage: React.FC = () => {
                 Book a Consultation
               </h1>
               <p className="text-slate-600 mb-2">
-                {loadingLawyer ? (
-                  <span className="animate-pulse">Loading lawyer details...</span>
-                ) : lawyerName ? (
+                {lawyerName ? (
                   <>Schedule your consultation with <span className="font-semibold text-blue-600">{lawyerName}</span></>
                 ) : (
                   'Schedule your video consultation with a qualified lawyer'
                 )}
               </p>
-              {!loadingLawyer && lawyerName && (
+              {lawyerName && (
                 <p className="text-sm text-slate-500 mb-6">
+                  {lawyerSpecialty && <span className="text-blue-600">{lawyerSpecialty}</span>}
+                  {lawyerSpecialty && ' • '}
                   60-minute session • KES {lawyerRate.toLocaleString()}
                 </p>
-              )}
-              {loadingLawyer && (
-                <div className="mb-6" />
               )}
 
               {error && (
