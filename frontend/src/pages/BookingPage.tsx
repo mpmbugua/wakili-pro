@@ -59,16 +59,22 @@ export const BookingPage: React.FC = () => {
         // Redirect to payment page instead of showing success
         const booking = response.data.data;
         console.log('Navigating to payment with booking:', booking);
+        
+        const paymentState = {
+          id: booking.id,
+          lawyerName: lawyerName || booking.lawyerName,
+          lawyerSpecialty: lawyerSpecialty,
+          date: formData.date,
+          time: formData.time,
+          consultationType: formData.consultationType,
+          fee: lawyerRate,
+        };
+        
+        console.log('Payment state:', paymentState);
+        console.log('Navigation path:', `/payment/${booking.id}`);
+        
         navigate(`/payment/${booking.id}`, {
-          state: {
-            id: booking.id,
-            lawyerName: lawyerName || booking.lawyerName,
-            lawyerSpecialty: lawyerSpecialty,
-            date: formData.date,
-            time: formData.time,
-            consultationType: formData.consultationType,
-            fee: lawyerRate,
-          }
+          state: paymentState
         });
       }
     } catch (err: any) {

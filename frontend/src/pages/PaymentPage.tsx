@@ -42,10 +42,20 @@ export const PaymentPage: React.FC = () => {
   });
 
   useEffect(() => {
+    console.log('PaymentPage mounted');
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('bookingId:', bookingId);
+    console.log('bookingDetails:', bookingDetails);
+    
     if (!isAuthenticated) {
+      console.log('Not authenticated, redirecting to login');
       navigate('/login');
+      return;
     }
+    
+    // Only redirect if we have neither bookingDetails nor bookingId
     if (!bookingDetails && !bookingId) {
+      console.log('No booking details or ID, redirecting to lawyers');
       navigate('/lawyers');
     }
   }, [isAuthenticated, bookingDetails, bookingId, navigate]);
