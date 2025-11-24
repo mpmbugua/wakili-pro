@@ -1,6 +1,6 @@
 import React from 'react';
 import AILegalAssistant from '../components/ai/AILegalAssistant';
-import { Brain, Scale, Shield, Users, BookOpen, MessageCircle } from 'lucide-react';
+import { Brain, Scale, Shield, Users, Book, MessageCircle } from 'lucide-react';
 
 const AILegalAssistantPage: React.FC = () => {
   return (
@@ -44,7 +44,7 @@ const AILegalAssistantPage: React.FC = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           <div className="text-center">
             <div className="p-3 bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="h-8 w-8 text-indigo-600" />
+              <Book className="h-8 w-8 text-indigo-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Legal Knowledge</h3>
             <p className="text-gray-600 text-sm">

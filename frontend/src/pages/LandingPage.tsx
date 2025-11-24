@@ -5,6 +5,7 @@ import {
   MessageSquare,
   Scale,
   ShoppingBag,
+  Book,
   ArrowRight, 
   Star, 
   MapPin,
@@ -170,7 +171,7 @@ export const LandingPage: React.FC = () => {
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { title: "Property Law Guide", category: "Real Estate", icon: BookOpen },
+              { title: "Property Law Guide", category: "Real Estate", icon: Book },
               { title: "Business Registration Steps", category: "Corporate", icon: TrendingUp },
               { title: "Employment Law Basics", category: "Labour", icon: Users },
               { title: "Legal Document Templates", category: "Documents", icon: FileText }

@@ -15,7 +15,7 @@ import {
   HelpCircle,
   X,
   Briefcase,
-  BookOpen,
+  Book,
   Award,
   TrendingUp
 } from 'lucide-react';
@@ -42,7 +42,7 @@ const navigation: NavItem[] = [
   { name: 'Appointments', href: '/appointments', icon: Calendar },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Documents', href: '/documents', icon: FileText },
-  { name: 'AI Assistant', href: '/ai', icon: BookOpen },
+  { name: 'AI Assistant', href: '/ai', icon: Book },
 ];
 
 const lawyerNavigation: NavItem[] = [

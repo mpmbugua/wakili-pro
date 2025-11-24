@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, MicOff, Volume2, VolumeX, User, Brain, BookOpen, FileText, Users } from 'lucide-react';
+import { Send, Mic, MicOff, Volume2, VolumeX, User, Brain, Book, FileText, Users } from 'lucide-react';
 import { aiService } from '../../services/aiService';
 import { analyticsService } from '../../services/analyticsService';
 import { cn } from '../../lib/utils';
@@ -436,7 +436,7 @@ How can I help you today? You can type your question or use the microphone 🎤 
                   {message.sources && message.sources.length > 0 && (
                     <div className="border-t pt-3">
                       <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <BookOpen className="h-4 w-4 mr-1" />
+                        <Book className="h-4 w-4 mr-1" />
                         Legal References
                       </h4>
                       <div className="space-y-1">
