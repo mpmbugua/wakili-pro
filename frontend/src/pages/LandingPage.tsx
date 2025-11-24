@@ -13,8 +13,16 @@ import {
   Users,
   CheckCircle,
   FileText,
-  TrendingUp
+  TrendingUp,
+  Home,
+  Briefcase,
+  Heart,
+  Gavel,
+  DollarSign,
+  Clock,
+  Copyright
 } from 'lucide-react';
+import { getFeaturedExamples } from '../data/servicePackageExamples';
 
 export const LandingPage: React.FC = () => {
   return (
@@ -93,8 +101,77 @@ export const LandingPage: React.FC = () => {
             </div>
           </section>
 
+          {/* Popular Legal Service Packages */}
+          <section id="service-packages" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-slate-900 mb-1">
+                  Popular Legal Service Packages
+                </h2>
+                <p className="text-xs text-slate-600">
+                  Fixed-price legal services by verified lawyers. Transparent pricing, clear deliverables.
+                </p>
+              </div>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { ...getFeaturedExamples()[0], icon: Home },
+                  { ...getFeaturedExamples()[1], icon: Briefcase },
+                  { ...getFeaturedExamples()[2], icon: Heart },
+                  { ...getFeaturedExamples()[3], icon: FileText },
+                  { ...getFeaturedExamples()[4], icon: Copyright },
+                  { ...getFeaturedExamples()[5], icon: Gavel },
+                  { ...getFeaturedExamples()[6], icon: Users },
+                  { ...getFeaturedExamples()[7], icon: Home }
+                ].map((service, i) => {
+                  const IconComponent = service.icon;
+                  return (
+                    <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                          {service.category.split(' & ')[0]}
+                        </span>
+                        <IconComponent className="h-4 w-4 text-slate-400" />
+                      </div>
+                      <h3 className="text-sm font-semibold text-slate-900 mb-2">
+                        {service.title.replace(' - Full Service', '').replace(' Package', '').replace(' - Uncontested', '').replace(' & Negotiation', '')}
+                      </h3>
+                      <p className="text-xs text-slate-600 mb-3">
+                        {service.description.split('.')[0]}
+                      </p>
+                      <div className="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100">
+                        <div className="flex items-center gap-1 text-slate-500">
+                          <Clock className="h-3 w-3" />
+                          <span>{service.deliveryTime}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-emerald-600 font-semibold">
+                          <span>KES {service.priceRange.min.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <Link 
+                        to="/marketplace" 
+                        className="block w-full text-center px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <div className="mt-6 text-center">
+                <Link 
+                  to="/marketplace" 
+                  className="inline-flex items-center text-xs text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  View all legal service packages <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+          </section>
+
           {/* Featured Lawyers Section */}
-          <section id="lawyers" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
+          <section id="lawyers" className="py-8 bg-white border-b border-slate-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
@@ -159,7 +236,7 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Legal Resources & Guides Section */}
-          <section id="resources" className="py-8 bg-white border-b border-slate-200">
+          <section id="resources" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
@@ -199,7 +276,7 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Insights & Analysis (Thought Leadership) */}
-          <section id="insights" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
+          <section id="insights" className="py-8 bg-white border-b border-slate-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
