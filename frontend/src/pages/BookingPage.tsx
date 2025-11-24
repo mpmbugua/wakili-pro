@@ -16,11 +16,11 @@ export const BookingPage: React.FC = () => {
   const [formData, setFormData] = useState({
     date: '',
     time: '',
-    duration: '30',
+    duration: '60',
     consultationType: 'video',
     description: '',
-    urgency: 'normal'
   });
+  const [lawyerRate, setLawyerRate] = useState<number>(5000);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -117,10 +117,14 @@ export const BookingPage: React.FC = () => {
                     type="date"
                     required
                     min={new Date().toISOString().split('T')[0]}
+                    max={new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0]}
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     className="input-field"
                   />
+                  <p className="text-xs text-slate-500 mt-1">
+                    Bookings available for today and tomorrow only
+                  </p>
                 </div>
 
                 {/* Time */}
@@ -138,21 +142,26 @@ export const BookingPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Duration */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
-                    Duration
-                  </label>
-                  <select
-                    required
-                    value={formData.duration}
-                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                    className="input-field"
-                  >
-                    <option value="30">30 minutes - KES 3,500</option>
-                    <option value="60">1 hour - KES 6,000</option>
-                    <option value="90">1.5 hours - KES 8,500</option>
-                  </select>
+                {/* Session Duration & Pricing */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-900 mb-1">
+                        <Clock className="inline h-4 w-4 mr-2" />
+                        Session Duration
+                      </label>
+                      <p className="text-2xl font-bold text-blue-900">60 Minutes</p>
+                      <p className="text-xs text-slate-600 mt-1">Standard consultation session</p>
+                    </div>
+                    <div className="text-right">
+                      <label className="block text-sm font-semibold text-slate-900 mb-1">
+                        <DollarSign className="inline h-4 w-4 mr-2" />
+                        Session Fee
+                      </label>
+                      <p className="text-2xl font-bold text-green-600">KES {lawyerRate.toLocaleString()}</p>
+                      <p className="text-xs text-slate-600 mt-1">Set by lawyer</p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Consultation Type */}
@@ -170,23 +179,6 @@ export const BookingPage: React.FC = () => {
                     <option value="video">Video Call</option>
                     <option value="phone">Phone Call</option>
                     <option value="in-person">In-Person (if available)</option>
-                  </select>
-                </div>
-
-                {/* Urgency */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
-                    Urgency
-                  </label>
-                  <select
-                    required
-                    value={formData.urgency}
-                    onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
-                    className="input-field"
-                  >
-                    <option value="normal">Normal (within 3-5 days)</option>
-                    <option value="urgent">Urgent (within 24 hours) - Additional 50%</option>
-                    <option value="emergency">Emergency (same day) - Additional 100%</option>
                   </select>
                 </div>
 
@@ -232,8 +224,8 @@ export const BookingPage: React.FC = () => {
 
               <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-900">
-                  <strong>Note:</strong> Your consultation will be confirmed once the lawyer approves your request 
-                  and you complete the payment. You'll receive email and SMS notifications.
+                  <strong>Note:</strong> All consultations are scheduled within 24 hours. Your booking will be confirmed 
+                  once the lawyer approves your request and you complete the payment. You'll receive email and SMS notifications.
                 </p>
               </div>
             </div>
