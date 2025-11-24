@@ -16,12 +16,17 @@ axiosInstance.interceptors.request.use(
   (config) => {
     // Get token from localStorage (zustand persist storage)
     const authStorage = localStorage.getItem('wakili-auth-storage');
+    console.log('Auth storage:', authStorage ? 'Found' : 'Not found');
+    
     if (authStorage) {
       try {
         const parsed = JSON.parse(authStorage);
         const token = parsed.state?.accessToken;
+        console.log('Access token:', token ? `${token.substring(0, 20)}...` : 'Not found');
+        
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
+          console.log('Authorization header set');
         }
       } catch (error) {
         console.error('Error parsing auth storage:', error);
