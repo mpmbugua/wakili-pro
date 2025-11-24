@@ -129,6 +129,10 @@ app.use('/api/subscriptions', subscriptionRouter);
 import certificationRouter from './routes/certifications';
 app.use('/api/certifications', certificationRouter);
 
+// Mount consultation routes
+import consultationsRouter from './routes/consultations';
+app.use('/api/consultations', consultationsRouter);
+
 // Auth routes (real implementation)
 app.use('/api/auth', authRoutes);
 
@@ -151,7 +155,8 @@ app.use('*', (_req: Request, res: Response) => {
       '/api/documents/*',
       '/api/notifications/*',
       '/api/subscriptions/*',
-      '/api/certifications/*'
+      '/api/certifications/*',
+      '/api/consultations/*'
     ]
   });
 });

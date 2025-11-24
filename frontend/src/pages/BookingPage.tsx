@@ -40,12 +40,16 @@ export const BookingPage: React.FC = () => {
     setError(null);
 
     try {
-      // TODO: Replace with actual booking API endpoint
-      const response = await axiosInstance.post('/api/consultations/book', {
+      const bookingData = {
         lawyerId,
-        ...formData,
-        clientId: user?.id
-      });
+        date: formData.date,
+        time: formData.time,
+        duration: formData.duration,
+        consultationType: formData.consultationType,
+        description: formData.description,
+      };
+
+      const response = await axiosInstance.post('/api/consultations/book', bookingData);
 
       if (response.data.success) {
         setSuccess(true);
@@ -54,7 +58,9 @@ export const BookingPage: React.FC = () => {
         }, 3000);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to book consultation. Please try again.');
+      const errorMessage = err.response?.data?.message || 'Failed to book consultation. Please try again.';
+      setError(errorMessage);
+      console.error('Booking error:', err.response?.data);
     } finally {
       setLoading(false);
     }
