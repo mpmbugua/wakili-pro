@@ -107,7 +107,18 @@ const Login: React.FC = () => {
             </div>
 
             {/* Social Login Buttons */}
-            <SocialLoginButtons />
+            {/* Temporarily commented out to test if this is causing blank page */}
+            {/* <SocialLoginButtons /> */}
+            
+            {/* Manual Divider to replace what SocialLoginButtons provided */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500 font-medium">Sign in with email</span>
+              </div>
+            </div>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-4">
