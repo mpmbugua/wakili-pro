@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { GuestDashboard } from './dashboards/GuestDashboard';
 import { PublicDashboard } from './dashboards/PublicDashboard';
+import { LawyerDashboard } from './dashboards/LawyerDashboard';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Calendar, MessageSquare, FileText, BarChart3, Video, Clock,
@@ -41,7 +42,11 @@ export default function Dashboard() {
     return <PublicDashboard user={user} />;
   }
 
-  // For LAWYER, ADMIN, SUPER_ADMIN - continue with existing dashboard
+  if (user.role === 'LAWYER') {
+    return <LawyerDashboard user={user} />;
+  }
+
+  // For ADMIN, SUPER_ADMIN - continue with existing dashboard
   const [loading, setLoading] = useState(true);
   const hasFetchedData = React.useRef(false);
   const [stats, setStats] = useState({
