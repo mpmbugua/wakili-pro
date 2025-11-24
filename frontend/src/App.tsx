@@ -17,15 +17,20 @@ import Dashboard from './components/Dashboard';
 const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com';
 
 function App() {
-  const { isAuthenticated, refreshAuth, accessToken } = useAuthStore();
+  const { isAuthenticated, refreshAuth, accessToken, user } = useAuthStore();
   const [hydrated, setHydrated] = React.useState(false);
+
+  console.log('[App] Render - isAuthenticated:', isAuthenticated, 'user:', user, 'accessToken:', accessToken ? 'present' : 'null');
 
   // Protected Route component - defined inside App to access hydrated state
   const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, user } = useAuthStore();
     
+    console.log('[ProtectedRoute] Hydrated:', hydrated, 'Authenticated:', isAuthenticated, 'User:', user);
+    
     // Wait for hydration before checking auth to prevent race conditions
     if (!hydrated) {
+      console.log('[ProtectedRoute] Still hydrating, showing nothing');
       return null; // Return null during hydration to prevent premature redirects
     }
     
@@ -34,12 +39,15 @@ function App() {
       return <Navigate to="/login" replace />;
     }
     
+    console.log('[ProtectedRoute] Authenticated, rendering children');
     return <>{children}</>;
   };
 
   useEffect(() => {
     // Wait for zustand to rehydrate from localStorage
+    console.log('[App] Starting hydration timer');
     const timer = setTimeout(() => {
+      console.log('[App] Hydration complete');
       setHydrated(true);
     }, 200); // Increased timeout for reliable hydration
     
@@ -48,7 +56,9 @@ function App() {
 
   useEffect(() => {
     // Try to refresh auth on app load if we have tokens
+    console.log('[App] Hydrated effect triggered, hydrated:', hydrated, 'isAuthenticated:', isAuthenticated, 'accessToken:', accessToken ? 'present' : 'null');
     if (hydrated && !isAuthenticated && accessToken) {
+      console.log('[App] Attempting to refresh auth');
       refreshAuth();
     }
   }, [hydrated, isAuthenticated, accessToken, refreshAuth]);
