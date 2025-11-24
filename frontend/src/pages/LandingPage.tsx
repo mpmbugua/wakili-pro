@@ -86,27 +86,27 @@ export const LandingPage: React.FC = () => {
                 <Home className="h-5 w-5" />
                 <span>Home</span>
               </a>
-              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
+              <Link to="/ai" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <MessageSquare className="h-5 w-5" />
                 <span>AI Legal Assistant</span>
-              </a>
-              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
+              </Link>
+              <Link to="/lawyers" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <Scale className="h-5 w-5" />
                 <span>Expert Lawyers</span>
-              </a>
-              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
+              </Link>
+              <Link to="/marketplace" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <ShoppingBag className="h-5 w-5" />
                 <span>Legal Documents</span>
-              </a>
+              </Link>
               <div className="border-t border-blue-200 my-3"></div>
               <a href="#lawyers" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <Users className="h-5 w-5" />
                 <span>Featured Lawyers</span>
               </a>
-              <a href="#resources" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
+              <Link to="/resources" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <BookOpen className="h-5 w-5" />
                 <span>Legal Resources</span>
-              </a>
+              </Link>
               <a href="#insights" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <Newspaper className="h-5 w-5" />
                 <span>Insights & Analysis</span>
