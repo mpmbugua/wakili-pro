@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
-import { CreditCard, CheckCircle, AlertCircle, ArrowLeft, Lock } from 'lucide-react';
+import { CreditCard, CheckCircle, AlertCircle, ArrowLeft, Lock, Smartphone } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import axiosInstance from '../lib/axios';
 
@@ -15,14 +15,17 @@ interface BookingDetails {
   fee: number;
 }
 
+type PaymentMethod = 'card' | 'mpesa';
+
 export const PaymentPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { bookingId } = useParams<{ bookingId: string }>();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   
   const bookingDetails = location.state as BookingDetails | null;
 
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [loading, setLoading] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +35,10 @@ export const PaymentPage: React.FC = () => {
     cardName: '',
     expiryDate: '',
     cvv: '',
+  });
+
+  const [mpesaDetails, setMpesaDetails] = useState({
+    phoneNumber: '',
   });
 
   useEffect(() => {
@@ -95,35 +102,67 @@ export const PaymentPage: React.FC = () => {
     setError(null);
 
     try {
-      // Create payment intent
-      const paymentIntent = await axiosInstance.post('/api/payments/create-intent', {
-        bookingId: bookingId || bookingDetails?.id,
-        amount: bookingDetails?.fee || 5000,
-        paymentMethod: 'STRIPE_CARD',
-        provider: 'STRIPE',
-      });
+      if (paymentMethod === 'mpesa') {
+        // M-Pesa payment flow
+        const mpesaPayment = await axiosInstance.post('/api/payments/mpesa/initiate', {
+          bookingId: bookingId || bookingDetails?.id,
+          amount: bookingDetails?.fee || 5000,
+          phoneNumber: mpesaDetails.phoneNumber,
+        });
 
-      if (!paymentIntent.data.success) {
-        throw new Error(paymentIntent.data.message || 'Failed to create payment intent');
-      }
+        if (!mpesaPayment.data.success) {
+          throw new Error(mpesaPayment.data.message || 'Failed to initiate M-Pesa payment');
+        }
 
-      // Simulate card payment processing
-      // In production, this would integrate with Stripe Elements
-      await new Promise(resolve => setTimeout(resolve, 2000));
+        // Show M-Pesa prompt message
+        setError(null);
+        alert(`M-Pesa payment initiated! Please check your phone (${mpesaDetails.phoneNumber}) and enter your PIN to complete the payment.`);
 
-      // Verify payment
-      const verification = await axiosInstance.post('/api/payments/verify', {
-        transactionId: paymentIntent.data.data.paymentId,
-        paymentMethod: 'STRIPE_CARD',
-      });
-
-      if (verification.data.success) {
+        // Poll for payment status (in production, use webhooks)
+        // For now, simulate success after delay
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
         setPaymentSuccess(true);
         setTimeout(() => {
           navigate('/dashboard');
         }, 3000);
+
       } else {
-        throw new Error('Payment verification failed');
+        // Card payment flow (Flutterwave)
+        const paymentIntent = await axiosInstance.post('/api/payments/create-intent', {
+          bookingId: bookingId || bookingDetails?.id,
+          amount: bookingDetails?.fee || 5000,
+          paymentMethod: 'FLUTTERWAVE_CARD',
+          provider: 'FLUTTERWAVE',
+          cardDetails: {
+            number: cardDetails.cardNumber.replace(/\s/g, ''),
+            name: cardDetails.cardName,
+            expiry: cardDetails.expiryDate,
+            cvv: cardDetails.cvv,
+          }
+        });
+
+        if (!paymentIntent.data.success) {
+          throw new Error(paymentIntent.data.message || 'Failed to create payment intent');
+        }
+
+        // Simulate card payment processing
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Verify payment
+        const verification = await axiosInstance.post('/api/payments/verify', {
+          transactionId: paymentIntent.data.data.paymentId,
+          paymentMethod: 'FLUTTERWAVE_CARD',
+        });
+
+        if (verification.data.success) {
+          setPaymentSuccess(true);
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 3000);
+        } else {
+          throw new Error('Payment verification failed');
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'Payment failed. Please try again.');
@@ -231,101 +270,207 @@ export const PaymentPage: React.FC = () => {
             )}
 
             <form onSubmit={handleSubmit} className="card p-6 space-y-6">
-              <div className="flex items-center justify-between mb-4">
+              {/* Payment Method Selector */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-3">
+                  Select Payment Method
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('card')}
+                    className={`p-4 border-2 rounded-lg transition-all ${
+                      paymentMethod === 'card'
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <CreditCard className={`h-8 w-8 mx-auto mb-2 ${
+                      paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-400'
+                    }`} />
+                    <p className={`text-sm font-medium ${
+                      paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-600'
+                    }`}>
+                      Card Payment
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Visa, Mastercard</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('mpesa')}
+                    className={`p-4 border-2 rounded-lg transition-all ${
+                      paymentMethod === 'mpesa'
+                        ? 'border-green-600 bg-green-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <Smartphone className={`h-8 w-8 mx-auto mb-2 ${
+                      paymentMethod === 'mpesa' ? 'text-green-600' : 'text-gray-400'
+                    }`} />
+                    <p className={`text-sm font-medium ${
+                      paymentMethod === 'mpesa' ? 'text-green-600' : 'text-gray-600'
+                    }`}>
+                      M-Pesa
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">STK Push</p>
+                  </button>
+                </div>
+              </div>
+
+              {/* Security Badge */}
+              <div className="flex items-center justify-between py-2 border-y">
                 <div className="flex items-center text-slate-600">
                   <Lock className="h-4 w-4 mr-2" />
                   <span className="text-sm">Secure Payment</span>
                 </div>
-                <div className="flex space-x-2">
-                  <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" className="h-6" />
-                  <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Mastercard" className="h-6" />
-                </div>
+                {paymentMethod === 'card' && (
+                  <div className="flex space-x-2">
+                    <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" className="h-6" />
+                    <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Mastercard" className="h-6" />
+                  </div>
+                )}
+                {paymentMethod === 'mpesa' && (
+                  <div className="flex items-center">
+                    <span className="text-xs font-semibold text-green-600">SAFARICOM M-PESA</span>
+                  </div>
+                )}
               </div>
 
-              {/* Card Number */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Card Number
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    placeholder="1234 5678 9012 3456"
-                    value={cardDetails.cardNumber}
-                    onChange={handleCardNumberChange}
-                    className="input-field pl-10"
-                  />
-                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-                </div>
-              </div>
+              {/* Card Payment Form */}
+              {paymentMethod === 'card' && (
+                <>
+                  {/* Card Number */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      Card Number
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        placeholder="1234 5678 9012 3456"
+                        value={cardDetails.cardNumber}
+                        onChange={handleCardNumberChange}
+                        className="input-field pl-10"
+                      />
+                      <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                    </div>
+                  </div>
 
-              {/* Cardholder Name */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Cardholder Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="John Doe"
-                  value={cardDetails.cardName}
-                  onChange={(e) => setCardDetails({ ...cardDetails, cardName: e.target.value })}
-                  className="input-field"
-                />
-              </div>
+                  {/* Cardholder Name */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      Cardholder Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="John Doe"
+                      value={cardDetails.cardName}
+                      onChange={(e) => setCardDetails({ ...cardDetails, cardName: e.target.value })}
+                      className="input-field"
+                    />
+                  </div>
 
-              {/* Expiry and CVV */}
-              <div className="grid grid-cols-2 gap-4">
+                  {/* Expiry and CVV */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-900 mb-2">
+                        Expiry Date
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="MM/YY"
+                        value={cardDetails.expiryDate}
+                        onChange={handleExpiryChange}
+                        className="input-field"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-900 mb-2">
+                        CVV
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="123"
+                        value={cardDetails.cvv}
+                        onChange={handleCvvChange}
+                        className="input-field"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* M-Pesa Payment Form */}
+              {paymentMethod === 'mpesa' && (
                 <div>
                   <label className="block text-sm font-semibold text-slate-900 mb-2">
-                    Expiry Date
+                    M-Pesa Phone Number
                   </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="MM/YY"
-                    value={cardDetails.expiryDate}
-                    onChange={handleExpiryChange}
-                    className="input-field"
-                  />
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      required
+                      placeholder="0712345678"
+                      value={mpesaDetails.phoneNumber}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, '');
+                        if (value.length <= 10) {
+                          setMpesaDetails({ phoneNumber: value });
+                        }
+                      }}
+                      className="input-field pl-10"
+                    />
+                    <Smartphone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-600" />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    You'll receive an STK push on your phone to complete the payment
+                  </p>
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
-                    CVV
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="123"
-                    value={cardDetails.cvv}
-                    onChange={handleCvvChange}
-                    className="input-field"
-                  />
-                </div>
-              </div>
+              )}
 
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`w-full py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-semibold transition ${
+                  paymentMethod === 'mpesa'
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
               >
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white inline-block mr-2"></div>
-                    Processing Payment...
+                    {paymentMethod === 'mpesa' ? 'Initiating M-Pesa...' : 'Processing Payment...'}
                   </>
                 ) : (
                   <>
-                    <Lock className="inline h-5 w-5 mr-2" />
-                    Pay KES {bookingDetails?.fee.toLocaleString()}
+                    {paymentMethod === 'mpesa' ? (
+                      <>
+                        <Smartphone className="inline h-5 w-5 mr-2" />
+                        Pay KES {bookingDetails?.fee.toLocaleString()} via M-Pesa
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="inline h-5 w-5 mr-2" />
+                        Pay KES {bookingDetails?.fee.toLocaleString()}
+                      </>
+                    )}
                   </>
                 )}
               </button>
 
               <p className="text-xs text-slate-500 text-center mt-4">
-                Your payment information is secure and encrypted. We use industry-standard security measures to protect your data.
+                {paymentMethod === 'mpesa' ? (
+                  <>Your M-Pesa payment is secure. You'll receive an STK push notification on your phone.</>
+                ) : (
+                  <>Your payment information is secure and encrypted. Powered by Flutterwave.</>
+                )}
               </p>
             </form>
           </div>
