@@ -11,6 +11,7 @@ import { ResourcesPage } from './pages/ResourcesPage';
 import { ServicesPage } from './pages/ServicesPage';
 import { LegalServicesPage } from './pages/LegalServicesPage';
 import { BookingPage } from './pages/BookingPage';
+import { PaymentPage } from './pages/PaymentPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -83,6 +84,7 @@ function App() {
             <Route path="/marketplace" element={<MarketplaceBrowse />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/booking/:lawyerId" element={<BookingPage />} />
+            <Route path="/payment/:bookingId" element={<PaymentPage />} />
             
             {/* Auth Routes */}
             <Route 

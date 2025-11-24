@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
-import { Calendar, Clock, Video, DollarSign, ArrowLeft, Check } from 'lucide-react';
+import { Calendar, Clock, Video, DollarSign, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import axiosInstance from '../lib/axios';
 
@@ -12,7 +12,6 @@ export const BookingPage: React.FC = () => {
   const locationState = location.state as { lawyerName?: string; hourlyRate?: number; specialty?: string } | null;
   const { isAuthenticated, user } = useAuthStore();
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -52,10 +51,19 @@ export const BookingPage: React.FC = () => {
       const response = await axiosInstance.post('/api/consultations/book', bookingData);
 
       if (response.data.success) {
-        setSuccess(true);
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 3000);
+        // Redirect to payment page instead of showing success
+        const booking = response.data.data;
+        navigate(`/payment/${booking.id}`, {
+          state: {
+            id: booking.id,
+            lawyerName: lawyerName || booking.lawyerName,
+            lawyerSpecialty: lawyerSpecialty,
+            date: formData.date,
+            time: formData.time,
+            consultationType: formData.consultationType,
+            fee: lawyerRate,
+          }
+        });
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to book consultation. Please try again.';
@@ -68,25 +76,6 @@ export const BookingPage: React.FC = () => {
 
   if (!isAuthenticated) {
     return null;
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-secondary flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center p-8">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="h-10 w-10 text-green-600" />
-          </div>
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Booking Confirmed!</h2>
-          <p className="text-slate-600 mb-6">
-            Your consultation has been scheduled. You'll receive a confirmation email with details.
-          </p>
-          <Link to="/dashboard" className="btn-primary inline-block">
-            Go to Dashboard
-          </Link>
-        </div>
-      </div>
-    );
   }
 
   return (
