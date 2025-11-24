@@ -109,8 +109,8 @@ export const BookingPage: React.FC = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Date */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
-                    <Calendar className="inline h-4 w-4 mr-2" />
+                  <label className="flex items-center text-sm font-semibold text-slate-900 mb-2">
+                    <Calendar className="h-4 w-4 mr-2" />
                     Preferred Date
                   </label>
                   <input
@@ -129,8 +129,8 @@ export const BookingPage: React.FC = () => {
 
                 {/* Time */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
-                    <Clock className="inline h-4 w-4 mr-2" />
+                  <label className="flex items-center text-sm font-semibold text-slate-900 mb-2">
+                    <Clock className="h-4 w-4 mr-2" />
                     Preferred Time
                   </label>
                   <input
