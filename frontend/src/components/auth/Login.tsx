@@ -124,12 +124,13 @@ const Login: React.FC = () => {
             {/* Development Test Credentials Notice */}
             {import.meta.env.DEV && (
               <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-xs font-medium text-blue-900 mb-2">Test Credentials (Development):</p>
+                <p className="text-xs font-medium text-blue-900 mb-2">Test Credentials (if database is seeded):</p>
                 <div className="text-xs text-blue-700 space-y-1">
                   <p><strong>Admin:</strong> admin@wakili.com</p>
                   <p><strong>Lawyer:</strong> lawyer@wakili.com</p>
                   <p><strong>User:</strong> user@wakili.com</p>
                   <p className="mt-2"><strong>Password:</strong> Password123!</p>
+                  <p className="mt-3 text-blue-600 font-medium">If you get "Invalid email or password", please create a new account below.</p>
                 </div>
               </div>
             )}

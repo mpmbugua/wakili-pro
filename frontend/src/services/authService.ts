@@ -96,10 +96,15 @@ class AuthService {
 
   async login(credentials: LoginRequest): Promise<ApiResponse<AuthData>> {
     try {
+      console.log('[AuthService] Attempting login to:', `${API_BASE_URL}/auth/login`);
+      console.log('[AuthService] Credentials:', { email: credentials.email, password: '***' });
+      
       const response: AxiosResponse<ApiResponse<AuthData>> = await apiClient.post(
         '/auth/login',
         credentials
       );
+
+      console.log('[AuthService] Login response:', response.data);
 
       if (response.data.success && response.data.data) {
         this.setAccessToken(response.data.data.accessToken);
@@ -107,7 +112,9 @@ class AuthService {
 
       return response.data;
     } catch (error) {
+      console.error('[AuthService] Login error:', error);
       if (axios.isAxiosError(error) && error.response) {
+        console.error('[AuthService] Error response:', error.response.data);
         return error.response.data;
       }
       
