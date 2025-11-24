@@ -4,6 +4,7 @@ import { GuestDashboard } from './dashboards/GuestDashboard';
 import { PublicDashboard } from './dashboards/PublicDashboard';
 import { LawyerDashboard } from './dashboards/LawyerDashboard';
 import { AdminDashboard } from './dashboards/AdminDashboard';
+import { SuperAdminDashboard } from './dashboards/SuperAdminDashboard';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Calendar, MessageSquare, FileText, BarChart3, Video, Clock,
@@ -51,7 +52,11 @@ export default function Dashboard() {
     return <AdminDashboard user={user} />;
   }
 
-  // For SUPER_ADMIN - continue with existing dashboard
+  if (user.role === 'SUPER_ADMIN') {
+    return <SuperAdminDashboard user={user} />;
+  }
+
+  // Fallback for any unknown roles
   const [loading, setLoading] = useState(true);
   const hasFetchedData = React.useRef(false);
   const [stats, setStats] = useState({
