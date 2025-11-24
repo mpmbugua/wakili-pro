@@ -89,6 +89,9 @@ export const BookingPage: React.FC = () => {
         
         if (refreshed) {
           console.log('Token refreshed successfully, retrying booking...');
+          // Wait a moment for the token to be persisted to localStorage
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
           // Retry the booking with the new token
           setLoading(true);
           setError(null);
@@ -103,6 +106,7 @@ export const BookingPage: React.FC = () => {
               description: formData.description,
             };
             
+            console.log('Retrying booking request to /consultations/book');
             const response = await axiosInstance.post('/consultations/book', bookingData);
             
             if (response.data.success) {
@@ -122,6 +126,9 @@ export const BookingPage: React.FC = () => {
               });
             }
           } catch (retryErr: any) {
+            console.error('Retry booking error:', retryErr);
+            console.error('Retry error response:', retryErr.response?.data);
+            console.error('Retry error status:', retryErr.response?.status);
             const errorMessage = retryErr.response?.data?.message || 'Failed to book consultation after token refresh.';
             setError(errorMessage);
           } finally {
