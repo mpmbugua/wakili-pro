@@ -1,11 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
+import { GlobalLayout } from '../components/layout';
 import { 
-  Scale, 
-  MessageSquare, 
-  ShoppingBag, 
-  BookOpen, 
+  MessageSquare,
+  Scale,
+  ShoppingBag,
   ArrowRight, 
   Star, 
   MapPin,
@@ -13,110 +12,12 @@ import {
   Users,
   CheckCircle,
   FileText,
-  TrendingUp,
-  Home,
-  Newspaper
+  TrendingUp
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
-  const { isAuthenticated, user } = useAuthStore();
-  
   return (
-    <div className="min-h-screen bg-[#e7f3ff]">
-      {/* Top Bar - FB Style */}
-      <header className="sticky top-0 z-50 bg-[#e7f3ff] border-b border-blue-200 shadow-sm">
-        <div className="px-4">
-          <div className="flex justify-between items-center h-14">
-            <div className="flex items-center space-x-2">
-              <div className="bg-blue-600 p-1.5 rounded">
-                <Scale className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-lg font-semibold text-slate-900">
-                Wakili Pro
-              </span>
-            </div>
-            <div className="flex items-center space-x-3">
-              {isAuthenticated ? (
-                <>
-                  <span className="text-xs text-slate-700">Hi, {user?.firstName}</span>
-                  <Link 
-                    to="/dashboard" 
-                    className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={async () => {
-                      await useAuthStore.getState().logout();
-                      window.location.reload();
-                    }}
-                    className="px-3 py-1.5 text-xs border border-slate-300 text-slate-700 rounded hover:bg-slate-200 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link 
-                    to="/login" 
-                    className="text-sm text-slate-700 hover:text-blue-600 transition-colors"
-                  >
-                    Log In
-                  </Link>
-                  <Link 
-                    to="/register" 
-                    className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Layout with Sidebar */}
-      <div className="flex">
-        {/* Left Sidebar - FB Style */}
-        <aside className="hidden lg:block w-64 fixed left-0 top-14 h-[calc(100vh-3.5rem)] bg-[#e7f3ff] border-r border-blue-200 overflow-y-auto">
-          <div className="p-3">
-            <nav className="space-y-1">
-              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
-                <Home className="h-5 w-5" />
-                <span>Home</span>
-              </a>
-              <Link to="/ai" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
-                <MessageSquare className="h-5 w-5" />
-                <span>AI Legal Assistant</span>
-              </Link>
-              <Link to="/lawyers" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
-                <Scale className="h-5 w-5" />
-                <span>Expert Lawyers</span>
-              </Link>
-              <Link to="/marketplace" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
-                <ShoppingBag className="h-5 w-5" />
-                <span>Legal Documents</span>
-              </Link>
-              <div className="border-t border-blue-200 my-3"></div>
-              <a href="#lawyers" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
-                <Users className="h-5 w-5" />
-                <span>Featured Lawyers</span>
-              </a>
-              <Link to="/resources" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
-                <BookOpen className="h-5 w-5" />
-                <span>Legal Resources</span>
-              </Link>
-              <a href="#insights" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
-                <Newspaper className="h-5 w-5" />
-                <span>Insights & Analysis</span>
-              </a>
-            </nav>
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="flex-1 lg:ml-64">
+    <GlobalLayout>
           {/* Hero Section with Services */}
           <section id="services" className="py-8 bg-white border-b border-slate-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -348,13 +249,11 @@ export const LandingPage: React.FC = () => {
               </div>
             ))}
           </div>
-            </div>
-          </section>
-        </main>
-      </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 lg:ml-64">
+      <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-6">
             <div>
@@ -448,6 +347,6 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
-    </div>
+    </GlobalLayout>
   );
 };

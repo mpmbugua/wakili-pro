@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { GlobalLayout } from '../components/layout';
 import { Video, MessageSquare, FileCheck, Clock, Star, ArrowRight, Filter } from 'lucide-react';
 import axiosInstance from '../lib/axios';
 
@@ -121,42 +122,21 @@ export const ServicesPage: React.FC = () => {
     : services.filter(s => s.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-[#e7f3ff]">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-blue-200">
-        <div className="container">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="text-2xl font-display font-bold text-primary">
-              Wakili Pro
-            </Link>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/ai" className="text-slate-700 hover:text-primary transition-colors">AI Assistant</Link>
-              <Link to="/lawyers" className="text-slate-700 hover:text-primary transition-colors">Find Lawyers</Link>
-              <Link to="/marketplace" className="text-slate-700 hover:text-primary transition-colors">Legal Documents</Link>
-              <Link to="/services" className="text-slate-700 hover:text-primary font-semibold transition-colors">Legal Services</Link>
-              <Link to="/resources" className="text-slate-700 hover:text-primary transition-colors">Resources</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Link to="/dashboard" className="btn-primary">Dashboard</Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <GlobalLayout>
       {/* Hero Section */}
-      <section className="container py-16">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-5xl font-display font-bold text-slate-900 mb-6">
+      <section className="bg-white border-b border-blue-200 py-12">
+        <div className="max-w-3xl mx-auto text-center px-4">
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">
             Professional Legal Services
           </h1>
-          <p className="text-xl text-slate-600">
+          <p className="text-lg text-slate-600">
             Book video consultations, document reviews, and legal representation from qualified Kenyan advocates
           </p>
         </div>
       </section>
 
       {/* Category Filter */}
-      <section className="container pb-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-center space-x-4 flex-wrap gap-4">
           <Filter className="h-5 w-5 text-slate-600" />
           {categories.map((category) => (
@@ -258,6 +238,6 @@ export const ServicesPage: React.FC = () => {
           </div>
         </div>
       </section>
-    </div>
+    </GlobalLayout>
   );
 };

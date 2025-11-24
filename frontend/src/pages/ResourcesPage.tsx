@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { GlobalLayout } from '../components/layout';
 import { Book, FileText, Video, HelpCircle, ArrowRight } from 'lucide-react';
 
 export const ResourcesPage: React.FC = () => {
@@ -68,29 +69,9 @@ export const ResourcesPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#e7f3ff]">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-blue-200">
-        <div className="container">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="text-2xl font-display font-bold text-primary">
-              Wakili Pro
-            </Link>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/ai" className="text-slate-700 hover:text-primary transition-colors">AI Assistant</Link>
-              <Link to="/lawyers" className="text-slate-700 hover:text-primary transition-colors">Find Lawyers</Link>
-              <Link to="/marketplace" className="text-slate-700 hover:text-primary transition-colors">Marketplace</Link>
-              <Link to="/resources" className="text-slate-700 hover:text-primary font-semibold transition-colors">Resources</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Link to="/dashboard" className="btn-primary">Dashboard</Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <GlobalLayout>
       {/* Hero Section */}
-      <section className="container py-16">
+      <section className="bg-white border-b border-blue-200 py-16">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-5xl font-display font-bold text-slate-900 mb-6">
             Legal Resources & Guides
@@ -179,6 +160,6 @@ export const ResourcesPage: React.FC = () => {
           </div>
         </div>
       </section>
-    </div>
+    </GlobalLayout>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
 
 interface Document {
@@ -357,36 +358,7 @@ export const MarketplaceBrowse: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#e7f3ff]">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-blue-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate('/')}
-                className="text-gray-600 hover:text-gray-900 font-medium"
-              >
-                ← Back to Home
-              </button>
-              <div className="border-l border-gray-300 h-6"></div>
-              <h1 className="text-2xl font-bold text-gray-900">Legal Documents Marketplace</h1>
-            </div>
-            {!isAuthenticated && (
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-gray-600">Ready to purchase?</span>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Log In
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
+    <GlobalLayout>
       {/* Search and Filters */}
       <div className="bg-white border-b border-blue-200 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -593,6 +565,6 @@ export const MarketplaceBrowse: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </GlobalLayout>
   );
 };

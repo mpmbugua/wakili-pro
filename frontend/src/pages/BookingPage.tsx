@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { GlobalLayout } from '../components/layout';
 import { Calendar, Clock, Video, DollarSign, ArrowLeft, Check } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import axiosInstance from '../lib/axios';
@@ -79,22 +80,8 @@ export const BookingPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#e7f3ff]">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-blue-200">
-        <div className="container">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="text-2xl font-display font-bold text-primary">
-              Wakili Pro
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Link to="/dashboard" className="btn-primary">Dashboard</Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="container py-12">
+    <GlobalLayout>
+      <div className="max-w-4xl mx-auto py-12 px-4">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center text-slate-600 hover:text-primary mb-8 transition-colors"
@@ -253,6 +240,6 @@ export const BookingPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </GlobalLayout>
   );
 };

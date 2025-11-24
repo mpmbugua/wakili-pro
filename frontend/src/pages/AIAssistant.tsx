@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
 import { aiService } from '../services/aiService';
 
@@ -358,61 +359,30 @@ export const AIAssistant: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#e7f3ff]">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-blue-200">
-        <div className="container">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate('/')}
-                className="text-slate-600 hover:text-primary font-medium transition-colors"
-              >
-                ← Back to Home
-              </button>
-              <div className="border-l border-slate-300 h-6"></div>
-              <h1 className="text-2xl font-display font-bold text-slate-900">AI Legal Assistant</h1>
-            </div>
-            {!isAuthenticated && (
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-slate-600">Have an account?</span>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="btn-outline text-sm"
-                >
-                  Log In
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+    <GlobalLayout>
+      <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+        {/* Chat Container */}
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+          {/* Hidden file inputs */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,.pdf,.doc,.docx"
+            multiple
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleCameraCapture}
+            style={{ display: 'none' }}
+          />
 
-      {/* Hidden file inputs */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*,.pdf,.doc,.docx"
-        multiple
-        onChange={handleFileSelect}
-        style={{ display: 'none' }}
-      />
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleCameraCapture}
-        style={{ display: 'none' }}
-      />
-
-      {/* Chat Container */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-2xl shadow-large overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 180px)' }}>
-          
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {messages.map((message) => (
+          {/* Messages Display */}
+          {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -731,8 +701,7 @@ export const AIAssistant: React.FC = () => {
                   : 'Type your question, upload documents/images, use camera, or click the microphone to speak.'}
             </p>
           </div>
-        </div>
       </div>
-    </div>
+    </GlobalLayout>
   );
 };
