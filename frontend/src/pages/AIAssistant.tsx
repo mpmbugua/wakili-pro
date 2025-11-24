@@ -270,7 +270,7 @@ export const AIAssistant: React.FC = () => {
       const errorMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: `⚠️ Failed to process voice query. Please try typing instead.\n\nError: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        content: `⚠️ Failed to process voice query. Please try typing instead.\n\n**Issue:** ${error instanceof Error ? error.message : 'Unknown error'}\n\n**Tip:** The voice recognition service requires an active internet connection and microphone access.`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);

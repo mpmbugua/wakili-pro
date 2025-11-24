@@ -43,12 +43,29 @@ class AIService {
         body: JSON.stringify(request),
       });
 
+      const contentType = response.headers.get('content-type');
+      const hasJsonContent = contentType && contentType.includes('application/json');
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || `HTTP ${response.status}: ${response.statusText}`);
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        
+        if (hasJsonContent) {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData?.message || errorMessage;
+          } catch (e) {
+            // JSON parsing failed, use default message
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      return await response.json();
+      if (hasJsonContent) {
+        return await response.json();
+      } else {
+        throw new Error('Server returned non-JSON response');
+      }
     } catch (error) {
       console.error('Error asking AI question:', error);
       return {
@@ -74,17 +91,44 @@ class AIService {
         }),
       });
 
+      // Check if response has content
+      const contentType = response.headers.get('content-type');
+      const hasJsonContent = contentType && contentType.includes('application/json');
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || `HTTP ${response.status}: ${response.statusText}`);
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        
+        if (hasJsonContent) {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData?.message || errorMessage;
+          } catch (e) {
+            // JSON parsing failed, use default message
+          }
+        } else {
+          // Try to get text response
+          try {
+            const errorText = await response.text();
+            if (errorText) errorMessage = errorText;
+          } catch (e) {
+            // Text reading failed, use default message
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      return await response.json();
+      // Parse successful response
+      if (hasJsonContent) {
+        return await response.json();
+      } else {
+        throw new Error('Server returned non-JSON response');
+      }
     } catch (error) {
       console.error('Error processing voice query:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to process voice query'
+        message: error instanceof Error ? error.message : 'Failed to process voice query. The voice recognition service may be unavailable.'
       };
     }
   }
