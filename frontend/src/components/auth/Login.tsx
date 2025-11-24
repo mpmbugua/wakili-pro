@@ -84,7 +84,7 @@ const Login: React.FC = () => {
     
     if (success) {
       // Redirect to the page they were trying to visit, or dashboard
-      navigate(from, { replace: true });
+      navigate(from); // Normal navigation preserves history for back button
     }
   };
 

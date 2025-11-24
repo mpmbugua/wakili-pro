@@ -16,27 +16,32 @@ import Dashboard from './components/Dashboard';
 
 const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com';
 
-// Protected Route component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, user } = useAuthStore();
-  
-  if (!isAuthenticated || !user) {
-    console.log('[ProtectedRoute] Not authenticated, redirecting to login');
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
 function App() {
   const { isAuthenticated, refreshAuth, accessToken } = useAuthStore();
   const [hydrated, setHydrated] = React.useState(false);
+
+  // Protected Route component - defined inside App to access hydrated state
+  const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { isAuthenticated, user } = useAuthStore();
+    
+    // Wait for hydration before checking auth to prevent race conditions
+    if (!hydrated) {
+      return null; // Return null during hydration to prevent premature redirects
+    }
+    
+    if (!isAuthenticated || !user) {
+      console.log('[ProtectedRoute] Not authenticated, redirecting to login');
+      return <Navigate to="/login" replace />;
+    }
+    
+    return <>{children}</>;
+  };
 
   useEffect(() => {
     // Wait for zustand to rehydrate from localStorage
     const timer = setTimeout(() => {
       setHydrated(true);
-    }, 100);
+    }, 200); // Increased timeout for reliable hydration
     
     return () => clearTimeout(timer);
   }, []);
