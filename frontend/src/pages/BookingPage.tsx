@@ -38,6 +38,9 @@ export const BookingPage: React.FC = () => {
     setLoading(true);
     setError(null);
 
+    console.log('Form submitted with data:', formData);
+    console.log('Lawyer ID:', lawyerId);
+
     try {
       const bookingData = {
         lawyerId,
@@ -48,11 +51,14 @@ export const BookingPage: React.FC = () => {
         description: formData.description,
       };
 
+      console.log('Sending booking request:', bookingData);
       const response = await axiosInstance.post('/api/consultations/book', bookingData);
+      console.log('Booking response:', response.data);
 
       if (response.data.success) {
         // Redirect to payment page instead of showing success
         const booking = response.data.data;
+        console.log('Navigating to payment with booking:', booking);
         navigate(`/payment/${booking.id}`, {
           state: {
             id: booking.id,
@@ -68,7 +74,8 @@ export const BookingPage: React.FC = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to book consultation. Please try again.';
       setError(errorMessage);
-      console.error('Booking error:', err.response?.data);
+      console.error('Booking error:', err);
+      console.error('Error response:', err.response?.data);
     } finally {
       setLoading(false);
     }
@@ -127,13 +134,12 @@ export const BookingPage: React.FC = () => {
                     type="date"
                     required
                     min={new Date().toISOString().split('T')[0]}
-                    max={new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0]}
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     className="input-field"
                   />
                   <p className="text-xs text-slate-500 mt-1">
-                    Bookings available for today and tomorrow only
+                    Select your preferred consultation date
                   </p>
                 </div>
 
@@ -234,8 +240,8 @@ export const BookingPage: React.FC = () => {
 
               <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-900">
-                  <strong>Note:</strong> All consultations are scheduled within 24 hours. Your booking will be confirmed 
-                  once the lawyer approves your request and you complete the payment. You'll receive email and SMS notifications.
+                  <strong>Important:</strong> After payment, the lawyer must confirm, reschedule, or reject your booking within 24 hours. 
+                  If the lawyer doesn't respond within 24 hours, you'll receive a full refund. You'll get email and SMS notifications for all updates.
                 </p>
               </div>
             </div>
