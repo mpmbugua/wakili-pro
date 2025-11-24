@@ -104,7 +104,7 @@ export const PaymentPage: React.FC = () => {
     try {
       if (paymentMethod === 'mpesa') {
         // M-Pesa payment flow
-        const mpesaPayment = await axiosInstance.post('/api/payments/mpesa/initiate', {
+        const mpesaPayment = await axiosInstance.post('/payments/mpesa/initiate', {
           bookingId: bookingId || bookingDetails?.id,
           amount: bookingDetails?.fee || 5000,
           phoneNumber: mpesaDetails.phoneNumber,
@@ -129,7 +129,7 @@ export const PaymentPage: React.FC = () => {
 
       } else {
         // Card payment flow (Flutterwave)
-        const paymentIntent = await axiosInstance.post('/api/payments/create-intent', {
+        const paymentIntent = await axiosInstance.post('/payments/create-intent', {
           bookingId: bookingId || bookingDetails?.id,
           amount: bookingDetails?.fee || 5000,
           paymentMethod: 'FLUTTERWAVE_CARD',
@@ -150,7 +150,7 @@ export const PaymentPage: React.FC = () => {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Verify payment
-        const verification = await axiosInstance.post('/api/payments/verify', {
+        const verification = await axiosInstance.post('/payments/verify', {
           transactionId: paymentIntent.data.data.paymentId,
           paymentMethod: 'FLUTTERWAVE_CARD',
         });

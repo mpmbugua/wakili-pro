@@ -52,7 +52,7 @@ export const BookingPage: React.FC = () => {
       };
 
       console.log('Sending booking request:', bookingData);
-      const response = await axiosInstance.post('/api/consultations/book', bookingData);
+      const response = await axiosInstance.post('/consultations/book', bookingData);
       console.log('Booking response:', response.data);
 
       if (response.data.success) {
