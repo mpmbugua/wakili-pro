@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { 
-  Gavel, 
+  Scale, 
   MessageSquare, 
   ShoppingBag, 
   BookOpen, 
@@ -15,8 +15,6 @@ import {
   FileText,
   TrendingUp,
   Home,
-  Briefcase,
-  GraduationCap,
   Newspaper
 } from 'lucide-react';
 
@@ -24,34 +22,18 @@ export const LandingPage: React.FC = () => {
   const { isAuthenticated, user } = useAuthStore();
   
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#e7f3ff]">
       {/* Top Bar - FB Style */}
-      <header className="sticky top-0 z-50 bg-[#f0f2f5] border-b border-slate-300 shadow-sm">
+      <header className="sticky top-0 z-50 bg-[#e7f3ff] border-b border-blue-200 shadow-sm">
         <div className="px-4">
           <div className="flex justify-between items-center h-14">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-2">
-                <div className="bg-blue-600 p-1.5 rounded">
-                  <Gavel className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-lg font-semibold text-slate-900">
-                  Wakili Pro
-                </span>
+            <div className="flex items-center space-x-2">
+              <div className="bg-blue-600 p-1.5 rounded">
+                <Scale className="h-5 w-5 text-white" />
               </div>
-              <nav className="hidden lg:flex space-x-1">
-                <a href="#services" className="px-4 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
-                  Services
-                </a>
-                <a href="#lawyers" className="px-4 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
-                  Lawyers
-                </a>
-                <a href="#resources" className="px-4 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
-                  Resources
-                </a>
-                <a href="#insights" className="px-4 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
-                  Insights
-                </a>
-              </nav>
+              <span className="text-lg font-semibold text-slate-900">
+                Wakili Pro
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               {isAuthenticated ? (
@@ -97,51 +79,38 @@ export const LandingPage: React.FC = () => {
       {/* Main Layout with Sidebar */}
       <div className="flex">
         {/* Left Sidebar - FB Style */}
-        <aside className="hidden lg:block w-64 fixed left-0 top-14 h-[calc(100vh-3.5rem)] bg-[#f0f2f5] border-r border-slate-300 overflow-y-auto">
+        <aside className="hidden lg:block w-64 fixed left-0 top-14 h-[calc(100vh-3.5rem)] bg-[#e7f3ff] border-r border-blue-200 overflow-y-auto">
           <div className="p-3">
             <nav className="space-y-1">
-              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <Home className="h-5 w-5" />
                 <span>Home</span>
               </a>
-              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <MessageSquare className="h-5 w-5" />
                 <span>AI Legal Assistant</span>
               </a>
-              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
-                <Gavel className="h-5 w-5" />
+              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
+                <Scale className="h-5 w-5" />
                 <span>Expert Lawyers</span>
               </a>
-              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+              <a href="#services" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <ShoppingBag className="h-5 w-5" />
                 <span>Legal Documents</span>
               </a>
-              <div className="border-t border-slate-300 my-3"></div>
-              <a href="#lawyers" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+              <div className="border-t border-blue-200 my-3"></div>
+              <a href="#lawyers" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <Users className="h-5 w-5" />
                 <span>Featured Lawyers</span>
               </a>
-              <a href="#resources" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+              <a href="#resources" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <BookOpen className="h-5 w-5" />
                 <span>Legal Resources</span>
               </a>
-              <a href="#insights" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+              <a href="#insights" className="flex items-center space-x-3 px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 rounded-lg transition-colors">
                 <Newspaper className="h-5 w-5" />
                 <span>Insights & Analysis</span>
               </a>
-              <div className="border-t border-slate-300 my-3"></div>
-              <Link to="/ai" className="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
-                <MessageSquare className="h-5 w-5" />
-                <span>Try AI Assistant</span>
-              </Link>
-              <Link to="/lawyers" className="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
-                <Briefcase className="h-5 w-5" />
-                <span>Browse Lawyers</span>
-              </Link>
-              <Link to="/marketplace" className="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
-                <FileText className="h-5 w-5" />
-                <span>Browse Documents</span>
-              </Link>
             </nav>
           </div>
         </aside>
@@ -223,7 +192,7 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Featured Lawyers Section */}
-          <section id="lawyers" className="py-8 bg-[#f0f2f5] border-b border-slate-200">
+          <section id="lawyers" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
@@ -328,7 +297,7 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Insights & Analysis (Thought Leadership) */}
-          <section id="insights" className="py-8 bg-[#f0f2f5] border-b border-slate-200">
+          <section id="insights" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
@@ -391,7 +360,7 @@ export const LandingPage: React.FC = () => {
             <div>
               <div className="flex items-center space-x-2 mb-3">
                 <div className="bg-blue-600 p-1.5 rounded">
-                  <Gavel className="h-4 w-4 text-white" />
+                  <Scale className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-sm font-semibold text-white">Wakili Pro</span>
               </div>
