@@ -11,6 +11,29 @@ const axiosInstance = axios.create({
   },
 });
 
+// Add request interceptor to attach auth token
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // Get token from localStorage (zustand persist storage)
+    const authStorage = localStorage.getItem('wakili-auth-storage');
+    if (authStorage) {
+      try {
+        const parsed = JSON.parse(authStorage);
+        const token = parsed.state?.accessToken;
+        if (token && config.headers) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error('Error parsing auth storage:', error);
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Add response interceptor for error handling
 axiosInstance.interceptors.response.use(
   (response) => response,
