@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { GuestDashboard } from './dashboards/GuestDashboard';
+import { PublicDashboard } from './dashboards/PublicDashboard';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Calendar, MessageSquare, FileText, BarChart3, Video, Clock,
@@ -29,6 +31,17 @@ interface Activity {
 export default function Dashboard() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
+
+  // Route to appropriate dashboard based on user role
+  if (!user) {
+    return <GuestDashboard />;
+  }
+
+  if (user.role === 'PUBLIC') {
+    return <PublicDashboard user={user} />;
+  }
+
+  // For LAWYER, ADMIN, SUPER_ADMIN - continue with existing dashboard
   const [loading, setLoading] = useState(true);
   const hasFetchedData = React.useRef(false);
   const [stats, setStats] = useState({
