@@ -15,6 +15,7 @@ interface LoginRequest {
 
 const Login: React.FC = () => {
   console.log('[Login] Component rendering');
+  console.log('[Login] TEST CREDENTIALS: admin@wakili.com / lawyer@wakili.com / user@wakili.com - Password: Password123!');
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isLoading, error, clearError } = useAuthStore();
@@ -119,6 +120,19 @@ const Login: React.FC = () => {
                 <span className="px-4 bg-white text-gray-500 font-medium">Sign in with email</span>
               </div>
             </div>
+
+            {/* Development Test Credentials Notice */}
+            {import.meta.env.DEV && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs font-medium text-blue-900 mb-2">Test Credentials (Development):</p>
+                <div className="text-xs text-blue-700 space-y-1">
+                  <p><strong>Admin:</strong> admin@wakili.com</p>
+                  <p><strong>Lawyer:</strong> lawyer@wakili.com</p>
+                  <p><strong>User:</strong> user@wakili.com</p>
+                  <p className="mt-2"><strong>Password:</strong> Password123!</p>
+                </div>
+              </div>
+            )}
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-4">
