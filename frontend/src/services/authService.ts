@@ -127,18 +127,26 @@ class AuthService {
 
   async register(userData: RegisterRequest): Promise<ApiResponse<AuthData>> {
     try {
+      console.log('[AuthService] Attempting registration to:', `${API_BASE_URL}/auth/register`);
+      console.log('[AuthService] User data:', { ...userData, password: '***' });
+      
       const response: AxiosResponse<ApiResponse<AuthData>> = await apiClient.post(
         '/auth/register',
         userData
       );
 
+      console.log('[AuthService] Registration response:', response.data);
+
       if (response.data.success && response.data.data) {
         this.setAccessToken(response.data.data.accessToken);
+        console.log('[AuthService] Access token set');
       }
 
       return response.data;
     } catch (error) {
+      console.error('[AuthService] Registration error:', error);
       if (axios.isAxiosError(error) && error.response) {
+        console.error('[AuthService] Error response:', error.response.data);
         return error.response.data;
       }
       

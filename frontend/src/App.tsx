@@ -24,9 +24,15 @@ function App() {
 
   // Protected Route component - defined inside App to access hydrated state
   const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isAuthenticated, user } = useAuthStore();
+    const authState = useAuthStore();
+    const { isAuthenticated, user } = authState;
     
-    console.log('[ProtectedRoute] Hydrated:', hydrated, 'Authenticated:', isAuthenticated, 'User:', user);
+    console.log('[ProtectedRoute] Full auth state:', { 
+      hydrated, 
+      isAuthenticated, 
+      user: user ? { id: user.id, email: user.email, role: user.role } : null,
+      accessToken: authState.accessToken ? 'present' : 'null'
+    });
     
     // Wait for hydration before checking auth to prevent race conditions
     if (!hydrated) {

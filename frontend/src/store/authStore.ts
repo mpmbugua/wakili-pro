@@ -82,11 +82,14 @@ export const useAuthStore = create<AuthStore>()(
         try {
           set({ isLoading: true, error: null });
 
+          console.log('[AuthStore] Attempting registration with:', userData.email);
           const response = await authService.register(userData);
+          console.log('[AuthStore] Registration response:', response);
           
           if (response.success && response.data) {
             const { user, accessToken, refreshToken } = response.data;
             
+            console.log('[AuthStore] Registration successful, setting auth state');
             set({
               user,
               accessToken,
@@ -96,8 +99,10 @@ export const useAuthStore = create<AuthStore>()(
               error: null
             });
 
+            console.log('[AuthStore] Auth state set, isAuthenticated should now be true');
             return true;
           } else {
+            console.log('[AuthStore] Registration failed:', response.message);
             set({
               isLoading: false,
               error: response.message || 'Registration failed'
@@ -105,6 +110,7 @@ export const useAuthStore = create<AuthStore>()(
             return false;
           }
         } catch (error) {
+          console.error('[AuthStore] Registration error:', error);
           const errorMessage = error instanceof Error ? error.message : 'Registration failed';
           set({
             isLoading: false,

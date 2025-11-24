@@ -94,10 +94,17 @@ const Register: React.FC = () => {
       return;
     }
 
+    console.log('[Register] Submitting registration...');
     const success = await register(formData);
+    console.log('[Register] Registration result:', success);
     
     if (success) {
-      navigate('/dashboard');
+      console.log('[Register] Registration successful, waiting before navigation...');
+      // Wait a moment for zustand persist to save state
+      setTimeout(() => {
+        console.log('[Register] Navigating to dashboard');
+        navigate('/dashboard');
+      }, 100);
     }
   };
 
