@@ -10,7 +10,7 @@ export const BookingPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = location.state as { lawyerName?: string; hourlyRate?: number; specialty?: string } | null;
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, refreshAuth } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,10 +78,67 @@ export const BookingPage: React.FC = () => {
         });
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to book consultation. Please try again.';
-      setError(errorMessage);
       console.error('Booking error:', err);
       console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+      
+      // If it's a 403 (forbidden/expired token), try refreshing auth
+      if (err.response?.status === 403) {
+        console.log('Token expired, attempting to refresh...');
+        const refreshed = await refreshAuth();
+        
+        if (refreshed) {
+          console.log('Token refreshed successfully, retrying booking...');
+          // Retry the booking with the new token
+          setLoading(true);
+          setError(null);
+          
+          try {
+            const bookingData = {
+              lawyerId,
+              date: formData.date,
+              time: formData.time,
+              duration: formData.duration,
+              consultationType: formData.consultationType,
+              description: formData.description,
+            };
+            
+            const response = await axiosInstance.post('/consultations/book', bookingData);
+            
+            if (response.data.success) {
+              const booking = response.data.data;
+              const paymentState = {
+                id: booking.id,
+                lawyerName: lawyerName || booking.lawyerName,
+                lawyerSpecialty: lawyerSpecialty,
+                date: formData.date,
+                time: formData.time,
+                consultationType: formData.consultationType,
+                fee: lawyerRate,
+              };
+              
+              navigate(`/payment/${booking.id}`, {
+                state: paymentState
+              });
+            }
+          } catch (retryErr: any) {
+            const errorMessage = retryErr.response?.data?.message || 'Failed to book consultation after token refresh.';
+            setError(errorMessage);
+          } finally {
+            setLoading(false);
+          }
+        } else {
+          // Refresh failed, redirect to login
+          setError('Your session has expired. Please log in again.');
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+        }
+      } else {
+        // Other errors
+        const errorMessage = err.response?.data?.message || 'Failed to book consultation. Please try again.';
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
