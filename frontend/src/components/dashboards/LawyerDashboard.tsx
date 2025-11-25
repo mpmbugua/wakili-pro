@@ -1,15 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, MessageSquare, FileText, Video, Clock, Plus, ArrowRight,
-  Users, DollarSign, TrendingUp, CheckCircle, AlertCircle, BarChart3, User
+  Users, DollarSign, TrendingUp, CheckCircle, AlertCircle, BarChart3, User,
+  Crown, Shield, Zap, Award, X, Lock
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
+import { TierLimitModal, CertificationBlockedModal, CommissionSavingsModal } from '../modals';
 import type { AuthUser } from '@wakili-pro/shared/src/types/auth';
 
 interface LawyerDashboardProps {
   user: AuthUser;
+}
+
+interface TierUsage {
+  currentTier: 'FREE' | 'LITE' | 'PRO';
+  usage: {
+    bookings: { current: number; limit: number; percentage: number };
+    certifications: { current: number; limit: number; percentage: number };
+    services: { current: number; limit: number; percentage: number };
+    specializations: { current: number; limit: number };
+  };
+  commissionRate: number;
+  pricingTier: 'ENTRY' | 'STANDARD' | 'PREMIUM' | 'ELITE';
 }
 
 interface Consultation {
@@ -42,6 +56,93 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     pendingConsultations: 5,
     totalDocuments: 156,
   });
+
+  // Tier usage state (would be fetched from /api/subscriptions/current)
+  const [tierUsage, setTierUsage] = useState<TierUsage>({
+    currentTier: 'FREE', // Default to FREE, will be updated from API
+    usage: {
+      bookings: { current: 1, limit: 2, percentage: 50 },
+      certifications: { current: 0, limit: 0, percentage: 0 },
+      services: { current: 0, limit: 1, percentage: 0 },
+      specializations: { current: 1, limit: 1 },
+    },
+    commissionRate: 0.50, // 50% for FREE tier
+    pricingTier: 'ENTRY',
+  });
+
+  // Modal states
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitModalType, setLimitModalType] = useState<'bookings' | 'certifications' | 'services'>('bookings');
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [showSavingsModal, setShowSavingsModal] = useState(false);
+
+  // Fetch tier usage on mount
+  useEffect(() => {
+    const fetchTierUsage = async () => {
+      try {
+        // TODO: Replace with actual API call to /api/subscriptions/current
+        // const response = await fetch('/api/subscriptions/current', {
+        //   headers: { Authorization: `Bearer ${token}` }
+        // });
+        // const data = await response.json();
+        // setTierUsage(data);
+        
+        // Mock data for now - simulating LITE tier with high usage
+        setTierUsage({
+          currentTier: 'LITE',
+          usage: {
+            bookings: { current: 8, limit: 10, percentage: 80 },
+            certifications: { current: 3, limit: 5, percentage: 60 },
+            services: { current: 2, limit: 5, percentage: 40 },
+            specializations: { current: 2, limit: 2 },
+          },
+          commissionRate: 0.30,
+          pricingTier: 'STANDARD',
+        });
+      } catch (error) {
+        console.error('Failed to fetch tier usage:', error);
+      }
+    };
+
+    fetchTierUsage();
+  }, []);
+
+  const handleUpgrade = () => {
+    navigate('/subscriptions');
+  };
+
+  const getTierColor = (tier: string) => {
+    switch (tier) {
+      case 'FREE': return 'text-gray-600 bg-gray-100';
+      case 'LITE': return 'text-blue-600 bg-blue-100';
+      case 'PRO': return 'text-purple-600 bg-purple-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const getTierIcon = (tier: string) => {
+    switch (tier) {
+      case 'PRO': return Crown;
+      case 'LITE': return Shield;
+      default: return null;
+    }
+  };
+
+  const shouldShowUpgradeBanner = () => {
+    const { bookings, certifications, services } = tierUsage.usage;
+    return (
+      bookings.percentage >= 75 ||
+      certifications.percentage >= 75 ||
+      services.percentage >= 75 ||
+      (tierUsage.currentTier === 'FREE' && stats.revenue > 20000)
+    );
+  };
+
+  const calculateCommissionPaid = () => {
+    return stats.revenue * tierUsage.commissionRate;
+  };
+
+  const TierIcon = getTierIcon(tierUsage.currentTier);
 
   const upcomingConsultations: Consultation[] = [
     { 
@@ -149,9 +250,44 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Tier Limit Modal */}
+      <TierLimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        limitType={limitModalType}
+        currentTier={tierUsage.currentTier}
+        currentUsage={tierUsage.usage[limitModalType].current}
+        limit={tierUsage.usage[limitModalType].limit}
+        onUpgrade={handleUpgrade}
+      />
+
+      {/* Certification Blocked Modal */}
+      <CertificationBlockedModal
+        isOpen={showCertModal}
+        onClose={() => setShowCertModal(false)}
+        onUpgrade={handleUpgrade}
+      />
+
+      {/* Commission Savings Modal */}
+      <CommissionSavingsModal
+        isOpen={showSavingsModal}
+        onClose={() => setShowSavingsModal(false)}
+        currentTier={tierUsage.currentTier}
+        monthlyRevenue={stats.revenue}
+        onUpgrade={handleUpgrade}
+      />
+
+      {/* Page Header with Tier Badge */}
       <PageHeader
-        title={`Welcome back, Advocate ${user.firstName}!`}
+        title={
+          <div className="flex items-center space-x-3">
+            <span>Welcome back, Advocate {user.firstName}!</span>
+            <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-semibold ${getTierColor(tierUsage.currentTier)}`}>
+              {TierIcon && <TierIcon className="h-4 w-4" />}
+              <span>{tierUsage.currentTier} TIER</span>
+            </div>
+          </div>
+        }
         subtitle="Lawyer Dashboard"
         description="Manage your legal practice, consultations, and client relationships"
         actions={
@@ -164,13 +300,154 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
               <Calendar className="h-4 w-4 mr-2" />
               View Calendar
             </Button>
-            <Button variant="primary" onClick={() => navigate('/consultations/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Consultation
-            </Button>
+            {tierUsage.currentTier !== 'PRO' && (
+              <Button 
+                variant="primary" 
+                onClick={() => navigate('/subscriptions')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                <Crown className="h-4 w-4 mr-2" />
+                Upgrade
+              </Button>
+            )}
           </>
         }
       />
+
+      {/* Upgrade Banner - Show if usage is high or commission savings available */}
+      {shouldShowUpgradeBanner() && tierUsage.currentTier !== 'PRO' && (
+        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center space-x-2 mb-2">
+                <Zap className="h-6 w-6" />
+                <h3 className="text-xl font-bold">
+                  {tierUsage.usage.bookings.percentage >= 75
+                    ? 'Booking Limit Alert!'
+                    : `You've paid KES ${calculateCommissionPaid().toLocaleString()} in commissions this month`}
+                </h3>
+              </div>
+              <p className="text-emerald-100 mb-4">
+                {tierUsage.currentTier === 'FREE'
+                  ? `Upgrade to LITE and save 20% on commissions. That's KES ${(calculateCommissionPaid() * 0.20).toLocaleString()} back in your pocket!`
+                  : `Upgrade to PRO for lower commissions and unlimited access. Save up to KES ${(calculateCommissionPaid() * 0.15).toLocaleString()}/month!`}
+              </p>
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="outline" 
+                  className="bg-white text-emerald-600 hover:bg-emerald-50 border-0"
+                  onClick={() => setShowSavingsModal(true)}
+                >
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Calculate Savings
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="bg-emerald-700 text-white hover:bg-emerald-800 border-0"
+                  onClick={() => navigate('/subscriptions')}
+                >
+                  <Crown className="h-4 w-4 mr-2" />
+                  Upgrade Now
+                </Button>
+              </div>
+            </div>
+            <button
+              onClick={() => {/* Dismiss banner */}}
+              className="text-emerald-100 hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Usage Meters - Show current tier limits */}
+      {tierUsage.currentTier !== 'PRO' && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Monthly Usage</h3>
+            <button
+              onClick={() => navigate('/subscriptions')}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              View Limits →
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Bookings Usage */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Bookings</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {tierUsage.usage.bookings.current}/{tierUsage.usage.bookings.limit}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full transition-all ${
+                    tierUsage.usage.bookings.percentage >= 100
+                      ? 'bg-red-600'
+                      : tierUsage.usage.bookings.percentage >= 75
+                      ? 'bg-amber-600'
+                      : 'bg-emerald-600'
+                  }`}
+                  style={{ width: `${Math.min(tierUsage.usage.bookings.percentage, 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Certifications Usage */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Certifications</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {tierUsage.usage.certifications.current}/{tierUsage.usage.certifications.limit === 0 ? '∞' : tierUsage.usage.certifications.limit}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                {tierUsage.usage.certifications.limit === 0 ? (
+                  <div className="h-2 rounded-full bg-gray-300 flex items-center justify-center">
+                    <Lock className="h-3 w-3 text-gray-500" />
+                  </div>
+                ) : (
+                  <div
+                    className={`h-2 rounded-full transition-all ${
+                      tierUsage.usage.certifications.percentage >= 100
+                        ? 'bg-red-600'
+                        : tierUsage.usage.certifications.percentage >= 75
+                        ? 'bg-amber-600'
+                        : 'bg-blue-600'
+                    }`}
+                    style={{ width: `${Math.min(tierUsage.usage.certifications.percentage, 100)}%` }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Services Usage */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Services</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {tierUsage.usage.services.current}/{tierUsage.usage.services.limit}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full transition-all ${
+                    tierUsage.usage.services.percentage >= 100
+                      ? 'bg-red-600'
+                      : tierUsage.usage.services.percentage >= 75
+                      ? 'bg-amber-600'
+                      : 'bg-purple-600'
+                  }`}
+                  style={{ width: `${Math.min(tierUsage.usage.services.percentage, 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
