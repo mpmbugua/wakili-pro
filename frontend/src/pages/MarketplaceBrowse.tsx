@@ -451,6 +451,7 @@ export const MarketplaceBrowse: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'popular' | 'price-low' | 'price-high' | 'rating'>('popular');
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
 
   // Filter and sort documents
   const filteredDocuments = sampleDocuments
@@ -599,7 +600,10 @@ export const MarketplaceBrowse: React.FC = () => {
                       <p className="text-2xl font-bold text-gray-900">KES {doc.price.toLocaleString()}</p>
                     </div>
                     {doc.previewAvailable && (
-                      <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                      <button 
+                        onClick={() => setPreviewDocument(doc)}
+                        className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                      >
                         Preview →
                       </button>
                     )}
@@ -697,6 +701,127 @@ export const MarketplaceBrowse: React.FC = () => {
               >
                 Log In
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewDocument && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPreviewDocument(null)}>
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 text-white">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
+                      {previewDocument.category}
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-yellow-300">★</span>
+                      <span className="text-sm font-semibold">{previewDocument.rating}</span>
+                      <span className="text-xs text-blue-100">({previewDocument.reviewCount} reviews)</span>
+                    </div>
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2">{previewDocument.title}</h2>
+                  <p className="text-blue-100 text-sm">{previewDocument.description}</p>
+                </div>
+                <button
+                  onClick={() => setPreviewDocument(null)}
+                  className="ml-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="overflow-y-auto max-h-[calc(90vh-280px)] px-8 py-6">
+              <div className="grid md:grid-cols-3 gap-6 mb-6">
+                <div className="text-center p-4 bg-slate-50 rounded-lg">
+                  <p className="text-slate-500 text-sm mb-1">Pages</p>
+                  <p className="text-2xl font-bold text-slate-900">{previewDocument.pages}</p>
+                </div>
+                <div className="text-center p-4 bg-slate-50 rounded-lg">
+                  <p className="text-slate-500 text-sm mb-1">Format</p>
+                  <p className="text-lg font-bold text-slate-900">{previewDocument.format}</p>
+                </div>
+                <div className="text-center p-4 bg-slate-50 rounded-lg">
+                  <p className="text-slate-500 text-sm mb-1">Downloads</p>
+                  <p className="text-2xl font-bold text-slate-900">{previewDocument.downloads.toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-slate-900 mb-3">What's Included</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {previewDocument.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
+                      <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-slate-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-slate-900 mb-3">Document Preview Sample</h3>
+                <div className="bg-white border-2 border-dashed border-blue-300 rounded-lg p-6 font-mono text-sm text-slate-700 space-y-3">
+                  <div className="text-center mb-4">
+                    <p className="font-bold text-lg">{previewDocument.title.toUpperCase()}</p>
+                    <p className="text-slate-500 text-xs mt-1">Sample Preview - Actual document contains complete legal text</p>
+                  </div>
+                  <div className="border-t border-slate-200 pt-4 space-y-2">
+                    <p><strong>THIS AGREEMENT</strong> is made on the _____ day of _________, 20___</p>
+                    <p><strong>BETWEEN:</strong></p>
+                    <p className="pl-4">Party 1: _________________________ (hereinafter referred to as "Party A")</p>
+                    <p className="pl-4">Party 2: _________________________ (hereinafter referred to as "Party B")</p>
+                    <p className="mt-4"><strong>WHEREAS:</strong></p>
+                    <p className="pl-4">1. The parties wish to enter into this agreement...</p>
+                    <p className="pl-4">2. This document is legally binding under Kenyan law...</p>
+                    <p className="mt-4 text-slate-500 italic text-xs">
+                      [Preview continues with full legal clauses, terms, conditions, and schedules in the purchased version]
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 mt-4 text-center">
+                  ⚠️ This is a simplified preview. The full document includes comprehensive legal clauses, 
+                  detailed terms, and customizable sections ready for your use.
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-slate-200 px-8 py-6 bg-slate-50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">One-time payment</p>
+                  <p className="text-3xl font-bold text-slate-900">KES {previewDocument.price.toLocaleString()}</p>
+                  <p className="text-xs text-slate-500 mt-1">Instant download • Lifetime access • Free updates</p>
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setPreviewDocument(null)}
+                    className="px-6 py-3 border-2 border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-100 transition"
+                  >
+                    Close Preview
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPreviewDocument(null);
+                      handlePurchaseDocument(previewDocument.id, previewDocument.title);
+                    }}
+                    className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-lg hover:shadow-xl"
+                  >
+                    Purchase Now
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
