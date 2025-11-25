@@ -203,14 +203,17 @@ export const BookingPage: React.FC = () => {
                     <Calendar className="h-4 w-4 mr-2" />
                     Preferred Date
                   </label>
-                  <input
-                    type="date"
-                    required
-                    min={new Date().toISOString().split('T')[0]}
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="input-field"
-                  />
+                  <div className="relative">
+                    <input
+                      type="date"
+                      required
+                      min={new Date().toISOString().split('T')[0]}
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      className="input-field w-full max-w-md"
+                      style={{ colorScheme: 'light' }}
+                    />
+                  </div>
                   <p className="text-xs text-slate-500 mt-1">
                     Select your preferred consultation date
                   </p>
