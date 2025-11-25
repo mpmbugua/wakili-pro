@@ -766,6 +766,14 @@ model DocumentReview {
   certificationLetterUrl String?
   lawyerNotes           String?
   
+  // Digital Certification Fields
+  certificateId         String?   @unique     // Unique verification ID (e.g., "WP-2024-ABC123")
+  verificationQRCodeUrl String?               // QR code image for verification
+  signedAt              DateTime?             // When lawyer signed the document
+  signatureApplied      Boolean   @default(false)
+  stampApplied          Boolean   @default(false)
+  letterheadApplied     Boolean   @default(false)
+  
   questionnaire         Json?
   urgency               UrgencyLevel            @default(STANDARD)
   deadline              DateTime
@@ -808,6 +816,8 @@ model LawyerLetterhead {
   lawyerId          String   @unique
   letterheadUrl     String
   stampUrl          String?
+  signatureUrl      String?              // Digital signature image
+  certificatePrefix String   @default("WP") // Prefix for certificate IDs (e.g., "WP", "LSK")
   firmName          String
   firmAddress       String?
   firmPhone         String?

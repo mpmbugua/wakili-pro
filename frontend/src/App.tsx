@@ -14,6 +14,9 @@ import { BookingPage } from './pages/BookingPage';
 import { PaymentPage } from './pages/PaymentPage';
 import { LawyerProfileSettings } from './pages/LawyerProfileSettings';
 import DocumentServicesPage from './pages/DocumentServicesPage';
+import LawyerSignatureSetup from './pages/LawyerSignatureSetup';
+import DocumentCertificationPage from './pages/DocumentCertificationPage';
+import VerifyCertificate from './pages/VerifyCertificate';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -89,6 +92,10 @@ function App() {
             <Route path="/booking/:lawyerId" element={<BookingPage />} />
             <Route path="/payment/:bookingId" element={<PaymentPage />} />
             
+            {/* Public Certificate Verification */}
+            <Route path="/verify/:certificateId" element={<VerifyCertificate />} />
+            <Route path="/verify" element={<VerifyCertificate />} />
+            
             {/* Auth Routes */}
             <Route 
               path="/login" 
@@ -113,6 +120,22 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <LawyerProfileSettings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/lawyer/signature-setup" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <LawyerSignatureSetup />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/lawyer/certifications" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <DocumentCertificationPage />
                 </ProtectedRoute>
               } 
             />
