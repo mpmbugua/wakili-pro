@@ -225,13 +225,16 @@ export const BookingPage: React.FC = () => {
                     <Clock className="h-4 w-4 mr-2" />
                     Preferred Time
                   </label>
-                  <input
-                    type="time"
-                    required
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="input-field"
-                  />
+                  <div className="relative">
+                    <input
+                      type="time"
+                      required
+                      value={formData.time}
+                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                      className="input-field w-full max-w-md"
+                      style={{ colorScheme: 'light' }}
+                    />
+                  </div>
                 </div>
 
                 {/* Session Duration & Pricing */}
