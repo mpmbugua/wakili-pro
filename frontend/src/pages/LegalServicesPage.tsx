@@ -230,16 +230,10 @@ export const LegalServicesPage: React.FC = () => {
                     )}
 
                     {/* CTA */}
-                    <div className="flex gap-2 pt-4 border-t border-gray-100">
-                      <button
-                        onClick={() => navigate('/lawyers')}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        Find Lawyers
-                      </button>
+                    <div className="pt-4 border-t border-gray-100">
                       <button
                         onClick={() => navigate('/service-request', { state: { fromService: service.title, category: service.category } })}
-                        className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md"
+                        className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md"
                       >
                         Get Started
                       </button>
