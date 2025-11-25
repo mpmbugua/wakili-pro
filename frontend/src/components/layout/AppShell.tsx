@@ -14,9 +14,10 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const location = useLocation();
 
   // Public routes that don't use the shell
-  const publicRoutes = ['/', '/login', '/register', '/ai', '/lawyers', '/marketplace', '/services', '/resources'];
+  const publicRoutes = ['/', '/login', '/register', '/ai', '/lawyers', '/marketplace', '/services', '/resources', '/document-services', '/service-request'];
   const isPublicRoute = publicRoutes.includes(location.pathname) || 
-                        location.pathname.startsWith('/booking');
+                        location.pathname.startsWith('/booking') ||
+                        location.pathname.startsWith('/payment');
 
   if (isPublicRoute) {
     return <>{children || <Outlet />}</>;
