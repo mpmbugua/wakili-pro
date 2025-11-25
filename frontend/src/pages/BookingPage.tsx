@@ -81,6 +81,7 @@ export const BookingPage: React.FC = () => {
       console.error('Booking error:', err);
       console.error('Error response:', err.response?.data);
       console.error('Error status:', err.response?.status);
+      console.error('Full error data:', JSON.stringify(err.response?.data, null, 2));
       
       // If it's a 403 (forbidden/expired token), try refreshing auth
       if (err.response?.status === 403) {
@@ -129,6 +130,7 @@ export const BookingPage: React.FC = () => {
             console.error('Retry booking error:', retryErr);
             console.error('Retry error response:', retryErr.response?.data);
             console.error('Retry error status:', retryErr.response?.status);
+            console.error('Full retry error data:', JSON.stringify(retryErr.response?.data, null, 2));
             const errorMessage = retryErr.response?.data?.message || 'Failed to book consultation after token refresh.';
             setError(errorMessage);
           } finally {
