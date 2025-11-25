@@ -64,7 +64,7 @@ const sampleDocuments: Document[] = [
     format: 'PDF',
     lastUpdated: '2023-12',
     features: ['Marriage Act 2014 aligned', 'Court filing checklist', 'Custody considerations', 'Asset division guide'],
-    previewAvailable: false
+    previewAvailable: true
   },
   {
     id: '4',
@@ -109,7 +109,7 @@ const sampleDocuments: Document[] = [
     format: 'PDF + DOCX',
     lastUpdated: '2023-11',
     features: ['Law of Succession Act compliant', 'Witness requirements', 'Executor guide', 'Asset inventory'],
-    previewAvailable: false
+    previewAvailable: true
   },
   {
     id: '7',
@@ -184,7 +184,7 @@ const sampleDocuments: Document[] = [
     format: 'PDF + DOCX',
     lastUpdated: '2024-01',
     features: ['Asset protection', 'Debt allocation', 'Inheritance rights', 'Financial disclosure'],
-    previewAvailable: false
+    previewAvailable: true
   },
   {
     id: '12',
@@ -304,7 +304,7 @@ const sampleDocuments: Document[] = [
     format: 'PDF + DOCX',
     lastUpdated: '2024-01',
     features: ['Best interests framework', 'Visitation schedule', 'Child support', 'Education decisions'],
-    previewAvailable: false
+    previewAvailable: true
   },
   {
     id: '20',
@@ -349,7 +349,97 @@ const sampleDocuments: Document[] = [
     format: 'PDF + DOCX',
     lastUpdated: '2024-03',
     features: ['Warranties & indemnities', 'Due diligence checklist', 'Completion mechanics', 'Escrow arrangement'],
-    previewAvailable: false
+    previewAvailable: true
+  },
+  {
+    id: '23',
+    title: 'Residential Property Rental Agreement',
+    category: 'Property',
+    description: 'Comprehensive residential tenancy agreement for house or apartment rentals. Covers rent payments, security deposits, utilities, repairs, and tenant obligations.',
+    price: 650,
+    downloads: 1567,
+    rating: 4.9,
+    reviewCount: 298,
+    pages: 7,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['Monthly/annual lease options', 'Utility clauses', 'Repair responsibilities', 'Notice periods'],
+    previewAvailable: true
+  },
+  {
+    id: '24',
+    title: 'Freelance Contract Agreement',
+    category: 'Employment',
+    description: 'Independent contractor agreement for freelancers and gig workers. Defines project scope, payment terms, and intellectual property rights.',
+    price: 850,
+    downloads: 892,
+    rating: 4.7,
+    reviewCount: 167,
+    pages: 6,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['Project milestones', 'Payment schedule', 'IP ownership', 'Confidentiality'],
+    previewAvailable: true
+  },
+  {
+    id: '25',
+    title: 'Memorandum of Understanding (MOU)',
+    category: 'Corporate',
+    description: 'Formal agreement outlining terms between two or more parties. Suitable for business partnerships, collaborations, and joint ventures.',
+    price: 700,
+    downloads: 534,
+    rating: 4.6,
+    reviewCount: 112,
+    pages: 5,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['Binding vs non-binding', 'Collaboration terms', 'Resource sharing', 'Exit strategy'],
+    previewAvailable: true
+  },
+  {
+    id: '26',
+    title: 'Board Resolution Template',
+    category: 'Corporate',
+    description: 'Official board resolution document for company decisions, director appointments, share transfers, and major transactions.',
+    price: 450,
+    downloads: 421,
+    rating: 4.8,
+    reviewCount: 89,
+    pages: 3,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['Multiple scenarios', 'Proper formatting', 'Voting records', 'Filing ready'],
+    previewAvailable: true
+  },
+  {
+    id: '27',
+    title: 'Construction Contract',
+    category: 'Property',
+    description: 'Building and construction agreement for residential or commercial projects. Includes timelines, payment stages, materials, and completion certificates.',
+    price: 1800,
+    downloads: 256,
+    rating: 4.9,
+    reviewCount: 54,
+    pages: 16,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-03',
+    features: ['Payment milestones', 'Material specs', 'Delay penalties', 'Defects liability'],
+    previewAvailable: true
+  },
+  {
+    id: '28',
+    title: 'Deed of Gift',
+    category: 'Succession',
+    description: 'Legal document for transferring property ownership as a gift. Covers land, vehicles, or other assets without monetary exchange.',
+    price: 900,
+    downloads: 312,
+    rating: 4.7,
+    reviewCount: 67,
+    pages: 4,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-02',
+    features: ['Stamp duty guide', 'Transfer procedure', 'Tax implications', 'Witness requirements'],
+    previewAvailable: true
   }
 ];
 
@@ -548,23 +638,39 @@ export const MarketplaceBrowse: React.FC = () => {
       </div>
 
       {/* Trust Badges */}
-      <div className="bg-white border-t border-gray-200 py-12">
+      <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 border-t border-blue-100 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-4xl mb-2">🔒</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Secure Downloads</h3>
-              <p className="text-sm text-gray-600">Encrypted transactions and instant access</p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">Why Choose Our Legal Documents?</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">Professional, legally compliant templates trusted by thousands of Kenyan businesses and individuals</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-8 text-center border border-blue-100">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Secure Downloads</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">Encrypted transactions with instant access to your documents. Your data is protected with bank-level security.</p>
             </div>
-            <div>
-              <div className="text-4xl mb-2">⚖️</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Legally Vetted</h3>
-              <p className="text-sm text-gray-600">All documents reviewed by qualified lawyers</p>
+            <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-8 text-center border border-blue-100">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Legally Vetted</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">Every document is reviewed and approved by qualified Kenyan lawyers to ensure full legal compliance.</p>
             </div>
-            <div>
-              <div className="text-4xl mb-2">📝</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Editable Templates</h3>
-              <p className="text-sm text-gray-600">Customize documents to fit your needs</p>
+            <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-8 text-center border border-blue-100">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 mb-4">
+                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Editable Templates</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">Fully customizable Word and PDF formats. Modify terms to perfectly match your specific needs.</p>
             </div>
           </div>
         </div>
