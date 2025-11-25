@@ -71,8 +71,8 @@ export const ResourcesPage: React.FC = () => {
   return (
     <GlobalLayout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-16">
-        <div className="max-w-3xl mx-auto text-center px-4">
+      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
+        <div className="max-w-6xl mx-auto text-center px-4 sm:px-6">
           <h1 className="text-2xl font-semibold text-slate-900 mb-2">
             Legal Resources & Guides
           </h1>
@@ -83,29 +83,29 @@ export const ResourcesPage: React.FC = () => {
       </section>
 
       {/* Legal Guides */}
-      <section className="container py-12">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-display font-bold text-slate-900">Legal Guides</h2>
-          <Book className="h-8 w-8 text-primary" />
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-slate-900">Legal Guides</h2>
+          <Book className="h-6 w-6 text-blue-600" />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {legalGuides.map((guide, index) => (
-            <div key={index} className="card hover:shadow-large transition-shadow">
+            <div key={index} className="bg-white rounded-lg border border-slate-200 hover:shadow-lg transition-shadow">
               <div className="p-6">
-                <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-sm font-semibold rounded-full mb-4">
+                <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full mb-3">
                   {guide.category}
                 </span>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{guide.title}</h3>
-                <p className="text-slate-600 mb-4 line-clamp-3">{guide.description}</p>
+                <h3 className="text-base font-semibold text-slate-900 mb-2">{guide.title}</h3>
+                <p className="text-sm text-slate-600 mb-4 line-clamp-3">{guide.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500">{guide.readTime}</span>
+                  <span className="text-xs text-slate-500">{guide.readTime}</span>
                   <Link 
                     to={guide.link} 
-                    className="text-primary font-semibold hover:text-navy-700 inline-flex items-center transition-colors"
+                    className="text-blue-600 text-sm font-semibold hover:text-blue-700 inline-flex items-center transition-colors"
                   >
                     Read More
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-1 h-4 w-4" />
                   </Link>
                 </div>
               </div>
@@ -115,46 +115,46 @@ export const ResourcesPage: React.FC = () => {
       </section>
 
       {/* FAQs */}
-      <section className="container py-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-display font-bold text-slate-900">Frequently Asked Questions</h2>
-          <HelpCircle className="h-8 w-8 text-primary" />
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-slate-900">Frequently Asked Questions</h2>
+          <HelpCircle className="h-6 w-6 text-blue-600" />
         </div>
         
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-4">
           {faqs.map((faq, index) => (
-            <div key={index} className="card">
+            <div key={index} className="bg-white rounded-lg border border-slate-200">
               <div className="p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-3">{faq.question}</h3>
-                <p className="text-slate-600">{faq.answer}</p>
+                <h3 className="text-base font-semibold text-slate-900 mb-2">{faq.question}</h3>
+                <p className="text-sm text-slate-600">{faq.answer}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-slate-600 mb-6">Have more questions?</p>
-          <Link to="/ai" className="btn-primary inline-flex items-center">
+        <div className="text-center mt-8">
+          <p className="text-sm text-slate-600 mb-4">Have more questions?</p>
+          <Link to="/ai" className="inline-flex items-center px-6 py-3 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
             Ask Our AI Assistant
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="container py-16">
-        <div className="bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 p-12 rounded-2xl text-center shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-slate-900">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8 rounded-lg border border-blue-200 text-center">
+          <h2 className="text-lg font-semibold mb-3 text-slate-900">
             Need Personalized Legal Advice?
           </h2>
-          <p className="text-sm text-slate-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-sm text-slate-600 mb-6 max-w-2xl mx-auto">
             These guides provide general information. For advice specific to your situation, consult with a qualified lawyer.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link to="/lawyers" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all text-lg font-semibold shadow-md hover:shadow-lg">
+            <Link to="/lawyers" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold">
               Find a Lawyer
             </Link>
-            <Link to="/marketplace" className="bg-white text-gray-900 px-8 py-4 rounded-xl hover:bg-gray-50 transition-colors text-lg font-semibold border-2 border-gray-300 shadow-md hover:shadow-lg">
+            <Link to="/marketplace" className="bg-white text-slate-900 px-6 py-3 rounded-lg hover:bg-slate-50 transition-colors text-sm font-semibold border border-slate-300">
               Browse Documents
             </Link>
           </div>

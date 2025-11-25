@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FileText, CheckCircle, Upload, Sparkles, Shield, Clock, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { PublicLayout } from '../components/layout';
+import { CheckCircle, Upload, Sparkles, Shield, Clock, AlertCircle } from 'lucide-react';
 
 type ServiceType = 'ai-review' | 'certification' | null;
 type DocumentSource = 'marketplace' | 'external' | null;
@@ -155,30 +156,10 @@ const DocumentServicesPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-2">
-              <FileText className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-semibold text-slate-900">Wakili Pro</span>
-            </Link>
-            <nav className="flex items-center space-x-6">
-              <Link to="/marketplace" className="text-sm text-slate-600 hover:text-blue-600">
-                Marketplace
-              </Link>
-              <Link to="/lawyers" className="text-sm text-slate-600 hover:text-blue-600">
-                Find Lawyers
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
+    <PublicLayout>
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-slate-900 mb-2">
               Document Review & Certification Services
@@ -189,52 +170,52 @@ const DocumentServicesPage: React.FC = () => {
             </p>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Service Selection */}
         {!selectedService && (
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6">
             {/* AI Review Card */}
             <div
               onClick={() => {
                 setSelectedService('ai-review');
                 setDocumentSource('external');
               }}
-              className="bg-white rounded-lg border-2 border-slate-200 hover:border-blue-500 transition-all cursor-pointer p-8"
+              className="bg-white rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer p-6"
             >
-              <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-lg mb-6">
-                <Sparkles className="h-8 w-8 text-blue-600" />
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-50 rounded-lg mb-4">
+                <Sparkles className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
                 AI Document Review
               </h3>
-              <p className="text-sm text-slate-600 mb-6">
+              <p className="text-sm text-slate-600 mb-4">
                 Get comprehensive AI-powered analysis of your document's completeness, 
                 consistency, legal compliance, and formatting.
               </p>
-              <div className="space-y-3 mb-6">
+              <div className="space-y-2 mb-4">
                 <div className="flex items-center text-sm text-slate-700">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
                   Completeness check
                 </div>
                 <div className="flex items-center text-sm text-slate-700">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
                   Legal compliance analysis
                 </div>
                 <div className="flex items-center text-sm text-slate-700">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
                   Risk identification
                 </div>
                 <div className="flex items-center text-sm text-slate-700">
-                  <Clock className="h-4 w-4 text-blue-600 mr-2" />
+                  <Clock className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
                   Results in 5-10 minutes
                 </div>
               </div>
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <span className="text-2xl font-bold text-slate-900">KES 500</span>
+              <div className="border-t border-slate-200 pt-4">
+                <div className="flex items-baseline">
+                  <span className="text-xl font-bold text-slate-900">KES 500</span>
                   <span className="text-sm text-slate-600 ml-2">per document</span>
                 </div>
               </div>
@@ -246,39 +227,39 @@ const DocumentServicesPage: React.FC = () => {
                 setSelectedService('certification');
                 setDocumentSource('external');
               }}
-              className="bg-white rounded-lg border-2 border-slate-200 hover:border-blue-500 transition-all cursor-pointer p-8"
+              className="bg-white rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer p-6"
             >
-              <div className="flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-lg mb-6">
-                <Shield className="h-8 w-8 text-indigo-600" />
+              <div className="flex items-center justify-center w-12 h-12 bg-indigo-50 rounded-lg mb-4">
+                <Shield className="h-6 w-6 text-indigo-600" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
                 Lawyer Certification
               </h3>
-              <p className="text-sm text-slate-600 mb-6">
+              <p className="text-sm text-slate-600 mb-4">
                 Get your document officially certified by a licensed lawyer. 
                 Includes lawyer stamp and certification letter for legal validity.
               </p>
-              <div className="space-y-3 mb-6">
+              <div className="space-y-2 mb-4">
                 <div className="flex items-center text-sm text-slate-700">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
                   Licensed lawyer review
                 </div>
                 <div className="flex items-center text-sm text-slate-700">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
                   Official certification stamp
                 </div>
                 <div className="flex items-center text-sm text-slate-700">
-                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
                   Quality control review
                 </div>
                 <div className="flex items-center text-sm text-slate-700">
-                  <Clock className="h-4 w-4 text-blue-600 mr-2" />
+                  <Clock className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
                   Completed within 24 hours
                 </div>
               </div>
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <span className="text-2xl font-bold text-slate-900">KES 3,000+</span>
+              <div className="border-t border-slate-200 pt-4">
+                <div className="flex items-baseline">
+                  <span className="text-xl font-bold text-slate-900">KES 3,000+</span>
                   <span className="text-sm text-slate-600 ml-2">varies by complexity</span>
                 </div>
               </div>
@@ -465,7 +446,7 @@ const DocumentServicesPage: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </PublicLayout>
   );
 };
 

@@ -483,30 +483,16 @@ export const MarketplaceBrowse: React.FC = () => {
       {/* Search and Filters */}
       <div className="bg-white border-b border-blue-200 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Documents
-              </label>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by title or keywords..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
+          <div className="flex items-center justify-between gap-4">
             {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="flex-1 max-w-xs">
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
                 Category
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-slate-900"
               >
                 {categories.map(category => (
                   <option key={category} value={category}>{category}</option>
@@ -514,27 +500,11 @@ export const MarketplaceBrowse: React.FC = () => {
               </select>
             </div>
 
-            {/* Sort By */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sort By
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="popular">Most Popular</option>
-                <option value="rating">Highest Rated</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
+            {/* Results Count */}
+            <div className="text-sm text-slate-600">
+              <span className="font-semibold text-slate-900">{filteredDocuments.length}</span> documents available
             </div>
           </div>
-
-          <p className="mt-4 text-sm text-gray-600">
-            <span className="font-semibold text-gray-900">{filteredDocuments.length}</span> documents available
-          </p>
         </div>
       </div>
 
