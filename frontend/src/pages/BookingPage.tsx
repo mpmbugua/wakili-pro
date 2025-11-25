@@ -203,17 +203,15 @@ export const BookingPage: React.FC = () => {
                     <Calendar className="h-4 w-4 mr-2" />
                     Preferred Date
                   </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      required
-                      min={new Date().toISOString().split('T')[0]}
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="input-field w-auto max-w-xs"
-                      style={{ colorScheme: 'light' }}
-                    />
-                  </div>
+                  <input
+                    type="date"
+                    required
+                    min={new Date().toISOString().split('T')[0]}
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="input-field"
+                    style={{ width: '200px', colorScheme: 'light' }}
+                  />
                   <p className="text-xs text-slate-500 mt-1">
                     Select your preferred consultation date
                   </p>
@@ -225,16 +223,14 @@ export const BookingPage: React.FC = () => {
                     <Clock className="h-4 w-4 mr-2" />
                     Preferred Time
                   </label>
-                  <div className="relative">
-                    <input
-                      type="time"
-                      required
-                      value={formData.time}
-                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                      className="input-field w-auto max-w-xs"
-                      style={{ colorScheme: 'light' }}
-                    />
-                  </div>
+                  <input
+                    type="time"
+                    required
+                    value={formData.time}
+                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                    className="input-field"
+                    style={{ width: '150px', colorScheme: 'light' }}
+                  />
                 </div>
 
                 {/* Session Duration & Pricing */}
