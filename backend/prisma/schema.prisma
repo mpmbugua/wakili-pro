@@ -40,6 +40,7 @@ model DocumentTemplate {
   Payment            Payment[]
   PurchaseLimit      PurchaseLimit[]
   VideoConsultation  VideoConsultation[]
+  DocumentReview     DocumentReview[]
 }
 
 model DocumentPurchase {
@@ -192,6 +193,11 @@ model User {
   videoParticipants                                          VideoParticipant[]
   walletTransactions                                         WalletTransaction[]
   LawyerProfile_LawyerProfileUser                            LawyerProfile[]         @relation("LawyerProfileUser")
+  documentReviewsAsUser                                      DocumentReview[]        @relation("DocumentReviewUser")
+  documentReviewsAsLawyer                                    DocumentReview[]        @relation("DocumentReviewLawyer")
+  documentReviewsAsQC                                        DocumentReview[]        @relation("DocumentReviewQC")
+  lawyerLetterhead                                           LawyerLetterhead?       @relation("LawyerLetterhead")
+  letterheadApprovals                                        LawyerLetterhead[]      @relation("LetterheadApprover")
 }
 
 model UserProfile {
@@ -736,4 +742,142 @@ enum VideoConsultationType {
   CONSULTATION
   DOCUMENT_REVIEW
   CASE_ANALYSIS
+}
+
+model DocumentReview {
+  id                    String                  @id @default(cuid())
+  userId                String
+  lawyerId              String?
+  documentSource        DocumentSource
+  marketplaceDocumentId String?
+  uploadedDocumentUrl   String?
+  originalFileName      String?
+  documentType          String
+  documentCategory      DocumentCategory?
+  
+  reviewType            ReviewType
+  aiReviewStatus        AIReviewStatus          @default(PENDING)
+  aiReviewResults       Json?
+  aiReviewCompletedAt   DateTime?
+  
+  certificationStatus   CertificationStatus?
+  certificationPrice    Float?
+  certifiedDocumentUrl  String?
+  certificationLetterUrl String?
+  lawyerNotes           String?
+  
+  questionnaire         Json?
+  urgency               UrgencyLevel            @default(STANDARD)
+  deadline              DateTime
+  
+  price                 Float
+  paymentId             String?
+  paidAt                DateTime?
+  
+  qualityControlStatus  QualityControlStatus?
+  qualityControlNotes   String?
+  qualityCheckedBy      String?
+  qualityCheckedAt      DateTime?
+  
+  completedAt           DateTime?
+  deliveredAt           DateTime?
+  clientRating          Int?
+  clientFeedback        String?
+  
+  revisionCount         Int                     @default(0)
+  revisionRequested     Boolean                 @default(false)
+  revisionNotes         String?
+  
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  
+  user                  User                    @relation("DocumentReviewUser", fields: [userId], references: [id])
+  lawyer                User?                   @relation("DocumentReviewLawyer", fields: [lawyerId], references: [id])
+  marketplaceDocument   DocumentTemplate?       @relation(fields: [marketplaceDocumentId], references: [id])
+  qualityController     User?                   @relation("DocumentReviewQC", fields: [qualityCheckedBy], references: [id])
+  
+  @@index([userId])
+  @@index([lawyerId])
+  @@index([aiReviewStatus])
+  @@index([certificationStatus])
+  @@index([qualityControlStatus])
+}
+
+model LawyerLetterhead {
+  id                String   @id @default(cuid())
+  lawyerId          String   @unique
+  letterheadUrl     String
+  stampUrl          String?
+  firmName          String
+  firmAddress       String?
+  firmPhone         String?
+  firmEmail         String?
+  licenseNumber     String
+  
+  isApproved        Boolean  @default(false)
+  approvedBy        String?
+  approvedAt        DateTime?
+  
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  lawyer            User     @relation("LawyerLetterhead", fields: [lawyerId], references: [id])
+  approver          User?    @relation("LetterheadApprover", fields: [approvedBy], references: [id])
+}
+
+enum DocumentSource {
+  MARKETPLACE
+  EXTERNAL
+}
+
+enum DocumentCategory {
+  EMPLOYMENT_CONTRACT
+  RENTAL_AGREEMENT
+  BUSINESS_CONTRACT
+  PARTNERSHIP_AGREEMENT
+  COURT_DOCUMENT
+  COMPANY_REGISTRATION
+  MEMORANDUM
+  POWER_OF_ATTORNEY
+  LEASE_AGREEMENT
+  SALES_AGREEMENT
+  OTHER
+}
+
+enum ReviewType {
+  AI_ONLY
+  CERTIFICATION
+  AI_PLUS_CERTIFICATION
+}
+
+enum AIReviewStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum CertificationStatus {
+  PENDING_ASSIGNMENT
+  ASSIGNED
+  IN_REVIEW
+  PENDING_QC
+  QC_APPROVED
+  QC_REJECTED
+  COMPLETED
+  REVISION_REQUESTED
+}
+
+enum QualityControlStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVISION_REQUIRED
+}
+
+enum UrgencyLevel {
+  EXPRESS
+  STANDARD
+  ECONOMY
 }

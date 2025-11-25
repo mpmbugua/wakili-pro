@@ -89,13 +89,32 @@ export const LandingPage: React.FC = () => {
                     <h3 className="text-base font-semibold text-slate-900">Legal Documents</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
-                    Access 500+ professional legal templates and documents. Download instantly.
+                    Access 500+ professional legal templates. Free AI review with every purchase.
                   </p>
                   <Link 
                     to="/marketplace" 
                     className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
                   >
                     Browse docs <ArrowRight className="ml-1 h-3 w-3" />
+                  </Link>
+                </div>
+
+                {/* Document Review */}
+                <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="bg-blue-50 p-2 rounded">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <h3 className="text-base font-semibold text-slate-900">Document Review</h3>
+                  </div>
+                  <p className="text-xs text-slate-600 mb-4">
+                    AI review (KES 500) or lawyer certification (from KES 3,000). 24-hour turnaround.
+                  </p>
+                  <Link 
+                    to="/document-services" 
+                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
+                  >
+                    Get started <ArrowRight className="ml-1 h-3 w-3" />
                   </Link>
                 </div>
               </div>

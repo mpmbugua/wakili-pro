@@ -20,6 +20,7 @@ app.use(express.json({ limit: '10mb' }));
 
 // Serve uploaded files
 app.use('/uploads/profile-photos', express.static(path.join(__dirname, '../storage/profile-photos')));
+app.use('/uploads/document-reviews', express.static(path.join(__dirname, '../storage/document-reviews')));
 
 // Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {
@@ -136,6 +137,10 @@ app.use('/api/certifications', certificationRouter);
 // Mount consultation routes
 import consultationsRouter from './routes/consultations';
 app.use('/api/consultations', consultationsRouter);
+
+// Mount document review routes
+import documentReviewRouter from './routes/documentReview';
+app.use('/api/document-review', documentReviewRouter);
 
 // Auth routes (real implementation)
 app.use('/api/auth', authRoutes);

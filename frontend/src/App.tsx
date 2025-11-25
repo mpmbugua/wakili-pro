@@ -13,6 +13,7 @@ import { LegalServicesPage } from './pages/LegalServicesPage';
 import { BookingPage } from './pages/BookingPage';
 import { PaymentPage } from './pages/PaymentPage';
 import { LawyerProfileSettings } from './pages/LawyerProfileSettings';
+import DocumentServicesPage from './pages/DocumentServicesPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -84,6 +85,7 @@ function App() {
             <Route path="/services" element={<LegalServicesPage />} />
             <Route path="/marketplace" element={<MarketplaceBrowse />} />
             <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/document-services" element={<DocumentServicesPage />} />
             <Route path="/booking/:lawyerId" element={<BookingPage />} />
             <Route path="/payment/:bookingId" element={<PaymentPage />} />
             
