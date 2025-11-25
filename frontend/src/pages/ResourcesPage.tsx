@@ -71,12 +71,12 @@ export const ResourcesPage: React.FC = () => {
   return (
     <GlobalLayout>
       {/* Hero Section */}
-      <section className="bg-white border-b border-blue-200 py-16">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-5xl font-display font-bold text-slate-900 mb-6">
+      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-16">
+        <div className="max-w-3xl mx-auto text-center px-4">
+          <h1 className="text-5xl font-display font-bold text-gray-900 mb-6">
             Legal Resources & Guides
           </h1>
-          <p className="text-xl text-slate-600">
+          <p className="text-xl text-gray-700">
             Free legal information, guides, and FAQs to help you understand Kenyan law
           </p>
         </div>
@@ -143,18 +143,18 @@ export const ResourcesPage: React.FC = () => {
 
       {/* CTA Section */}
       <section className="container py-16">
-        <div className="card-gradient bg-gradient-to-r from-primary to-navy-700 text-white p-12 rounded-2xl text-center">
-          <h2 className="text-3xl font-display font-bold mb-4">
+        <div className="bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 p-12 rounded-2xl text-center shadow-lg">
+          <h2 className="text-3xl font-display font-bold mb-4 text-gray-900">
             Need Personalized Legal Advice?
           </h2>
-          <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-gray-700 mb-8 max-w-2xl mx-auto text-lg">
             These guides provide general information. For advice specific to your situation, consult with a qualified lawyer.
           </p>
-          <div className="flex items-center justify-center space-x-4">
-            <Link to="/lawyers" className="bg-white text-primary px-8 py-4 rounded-xl hover:bg-slate-50 transition-colors text-lg font-semibold shadow-large">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link to="/lawyers" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all text-lg font-semibold shadow-md hover:shadow-lg">
               Find a Lawyer
             </Link>
-            <Link to="/marketplace" className="bg-navy-900 text-white px-8 py-4 rounded-xl hover:bg-black transition-colors text-lg font-semibold border-2 border-white">
+            <Link to="/marketplace" className="bg-white text-gray-900 px-8 py-4 rounded-xl hover:bg-gray-50 transition-colors text-lg font-semibold border-2 border-gray-300 shadow-md hover:shadow-lg">
               Browse Documents
             </Link>
           </div>
