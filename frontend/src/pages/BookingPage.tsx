@@ -210,7 +210,7 @@ export const BookingPage: React.FC = () => {
                       min={new Date().toISOString().split('T')[0]}
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="input-field w-full max-w-md"
+                      className="input-field w-auto max-w-xs"
                       style={{ colorScheme: 'light' }}
                     />
                   </div>
@@ -231,7 +231,7 @@ export const BookingPage: React.FC = () => {
                       required
                       value={formData.time}
                       onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                      className="input-field w-full max-w-md"
+                      className="input-field w-auto max-w-xs"
                       style={{ colorScheme: 'light' }}
                     />
                   </div>
