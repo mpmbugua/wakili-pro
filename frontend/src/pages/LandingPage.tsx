@@ -40,7 +40,7 @@ export const LandingPage: React.FC = () => {
                 </p>
               </div>
               
-              {/* Three Service Cards - Shown Once */}
+              {/* Six Service Cards */}
               <div className="grid md:grid-cols-3 gap-4">
                 {/* AI Assistant */}
                 <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
@@ -115,6 +115,44 @@ export const LandingPage: React.FC = () => {
                     className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
                   >
                     Get started <ArrowRight className="ml-1 h-3 w-3" />
+                  </Link>
+                </div>
+
+                {/* Legal Service Packages */}
+                <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="bg-blue-50 p-2 rounded">
+                      <Briefcase className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <h3 className="text-base font-semibold text-slate-900">Legal Services</h3>
+                  </div>
+                  <p className="text-xs text-slate-600 mb-4">
+                    Fixed-price packages for common legal needs. Property, business, family law, and more.
+                  </p>
+                  <Link 
+                    to="/legal-services" 
+                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
+                  >
+                    View services <ArrowRight className="ml-1 h-3 w-3" />
+                  </Link>
+                </div>
+
+                {/* Legal Resources */}
+                <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="bg-blue-50 p-2 rounded">
+                      <Book className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <h3 className="text-base font-semibold text-slate-900">Legal Resources</h3>
+                  </div>
+                  <p className="text-xs text-slate-600 mb-4">
+                    Free guides, articles, and information to help you understand Kenyan law.
+                  </p>
+                  <Link 
+                    to="/resources" 
+                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
+                  >
+                    Browse resources <ArrowRight className="ml-1 h-3 w-3" />
                   </Link>
                 </div>
               </div>
