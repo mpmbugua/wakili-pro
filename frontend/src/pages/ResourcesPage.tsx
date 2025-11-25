@@ -73,10 +73,10 @@ export const ResourcesPage: React.FC = () => {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-16">
         <div className="max-w-3xl mx-auto text-center px-4">
-          <h1 className="text-5xl font-display font-bold text-gray-900 mb-6">
+          <h1 className="text-2xl font-semibold text-slate-900 mb-2">
             Legal Resources & Guides
           </h1>
-          <p className="text-xl text-gray-700">
+          <p className="text-sm text-slate-600">
             Free legal information, guides, and FAQs to help you understand Kenyan law
           </p>
         </div>
@@ -144,10 +144,10 @@ export const ResourcesPage: React.FC = () => {
       {/* CTA Section */}
       <section className="container py-16">
         <div className="bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 p-12 rounded-2xl text-center shadow-lg">
-          <h2 className="text-3xl font-display font-bold mb-4 text-gray-900">
+          <h2 className="text-xl font-semibold mb-4 text-slate-900">
             Need Personalized Legal Advice?
           </h2>
-          <p className="text-gray-700 mb-8 max-w-2xl mx-auto text-lg">
+          <p className="text-sm text-slate-600 mb-8 max-w-2xl mx-auto">
             These guides provide general information. For advice specific to your situation, consult with a qualified lawyer.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">

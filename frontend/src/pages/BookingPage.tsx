@@ -203,7 +203,7 @@ export const BookingPage: React.FC = () => {
         <div className="max-w-2xl mx-auto">
           <div className="card">
             <div className="p-8">
-              <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight">
+              <h1 className="text-2xl font-semibold text-slate-900 mb-2">
                 Book a Consultation
               </h1>
               
