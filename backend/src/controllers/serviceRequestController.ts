@@ -221,15 +221,55 @@ export const getServiceRequest = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Service request not found' });
     }
 
-    // Authorization check: only request creator or lawyers with quotes can view
+    // Check if lawyer has paid connection fee (for lawyer viewing)
+    let connectionFeePaid = false;
+    let clientContact = null;
+
+    if (req.user?.role === 'LAWYER') {
+      const existingQuote = await prisma.lawyerQuote.findFirst({
+        where: {
+          serviceRequestId: id,
+          lawyerId: userId,
+          connectionFeePaid: true
+        }
+      });
+
+      if (existingQuote) {
+        connectionFeePaid = true;
+        clientContact = {
+          name: `${serviceRequest.user.firstName} ${serviceRequest.user.lastName}`,
+          phone: serviceRequest.phoneNumber || serviceRequest.user.phoneNumber || 'Not provided',
+          email: serviceRequest.email || serviceRequest.user.email
+        };
+      }
+    }
+
+    // Authorization check: only request creator or matched lawyers can view
     const hasQuote = serviceRequest.quotes.some(q => q.lawyerId === userId);
-    if (serviceRequest.userId !== userId && !hasQuote && req.user?.role !== 'ADMIN') {
+    const isOwner = serviceRequest.userId === userId;
+    
+    if (!isOwner && !hasQuote && req.user?.role !== 'ADMIN') {
       return res.status(403).json({ error: 'Unauthorized to view this request' });
     }
 
     res.json({
       success: true,
-      data: serviceRequest
+      serviceRequest: {
+        id: serviceRequest.id,
+        serviceCategory: serviceRequest.serviceCategory,
+        serviceTitle: serviceRequest.serviceTitle,
+        description: serviceRequest.description,
+        estimatedFee: serviceRequest.estimatedFee,
+        tier: serviceRequest.tier,
+        urgency: serviceRequest.urgency,
+        createdAt: serviceRequest.createdAt,
+        user: {
+          firstName: isOwner || connectionFeePaid ? serviceRequest.user.firstName : 'Client',
+          lastName: isOwner || connectionFeePaid ? serviceRequest.user.lastName : ''
+        }
+      },
+      connectionFeePaid,
+      clientContact
     });
   } catch (error) {
     console.error('Error fetching service request:', error);
@@ -503,12 +543,28 @@ export const submitQuote = async (req: AuthRequest, res: Response) => {
       }
     });
 
+    // Get client contact to return to lawyer
+    const clientContact = await prisma.user.findUnique({
+      where: { id: serviceRequest.userId },
+      select: {
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true
+      }
+    });
+
     // TODO: Notify client about new quote
 
     res.status(201).json({
       success: true,
       data: quote,
-      message: 'Quote submitted successfully'
+      clientContact: {
+        name: `${clientContact?.firstName} ${clientContact?.lastName}`,
+        phone: serviceRequest.phoneNumber || clientContact?.phoneNumber || 'Not provided',
+        email: serviceRequest.email || clientContact?.email || 'Not provided'
+      },
+      message: 'Quote submitted successfully. Client contact details revealed.'
     });
   } catch (error) {
     console.error('Error submitting quote:', error);

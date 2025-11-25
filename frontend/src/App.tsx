@@ -18,6 +18,7 @@ import LawyerSignatureSetup from './pages/LawyerSignatureSetup';
 import DocumentCertificationPage from './pages/DocumentCertificationPage';
 import VerifyCertificate from './pages/VerifyCertificate';
 import ServiceRequestPage from './pages/ServiceRequestPage';
+import LawyerQuoteSubmissionPage from './pages/LawyerQuoteSubmissionPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -91,6 +92,17 @@ function App() {
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/document-services" element={<DocumentServicesPage />} />
             <Route path="/service-request" element={<ServiceRequestPage />} />
+            
+            {/* Lawyer Quote Submission (Protected) */}
+            <Route 
+              path="/service-requests/:id/quote" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <LawyerQuoteSubmissionPage />
+                </ProtectedRoute>
+              } 
+            />
+            
             <Route path="/booking/:lawyerId" element={<BookingPage />} />
             <Route path="/payment/:bookingId" element={<PaymentPage />} />
             
