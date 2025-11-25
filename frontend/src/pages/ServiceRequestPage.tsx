@@ -368,7 +368,6 @@ export const ServiceRequestPage: React.FC = () => {
               <ol className="list-decimal list-inside space-y-1 text-blue-700">
                 <li>Pay KES 500 commitment fee (non-refundable, ensures serious requests)</li>
                 <li>We match you with 3-5 qualified lawyers based on your needs</li>
-                <li>Lawyers pay a connection fee to view your contact details and submit quotes</li>
                 <li>Review all quotes side-by-side and select your preferred lawyer</li>
                 <li>Handle payment directly with your chosen lawyer (no platform fees)</li>
               </ol>
@@ -395,9 +394,6 @@ export const ServiceRequestPage: React.FC = () => {
                         : 'bg-blue-100 text-blue-700'
                     }`}>
                       {feeEstimate.tier === 'tier2' ? 'High-Value Service' : 'Standard Service'}
-                    </span>
-                    <span className="text-sm text-slate-600">
-                      Lawyer connection fee: KES {feeEstimate.connectionFee.toLocaleString()}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-2">
@@ -699,7 +695,7 @@ export const ServiceRequestPage: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-slate-900">Receive Multiple Quotes</p>
                   <p className="text-xs text-slate-600">
-                    Lawyers pay a connection fee (KES {feeEstimate?.connectionFee.toLocaleString() || '2,000-5,000'}) to view your contact and submit detailed quotes with their fee, timeline, and approach.
+                    Qualified lawyers submit detailed quotes with their fee, timeline, and approach to your case.
                   </p>
                 </div>
               </div>

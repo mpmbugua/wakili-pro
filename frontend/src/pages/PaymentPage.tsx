@@ -15,6 +15,14 @@ interface BookingDetails {
   fee: number;
 }
 
+interface DocumentPaymentDetails {
+  reviewId: string;
+  documentType: string;
+  serviceType: 'ai-review' | 'certification';
+  price: number;
+  fileName: string;
+}
+
 type PaymentMethod = 'card' | 'mpesa';
 
 export const PaymentPage: React.FC = () => {
@@ -23,7 +31,8 @@ export const PaymentPage: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
   const { isAuthenticated, user } = useAuthStore();
   
-  const bookingDetails = location.state as BookingDetails | null;
+  const bookingDetails = location.state as (BookingDetails | DocumentPaymentDetails) | null;
+  const isDocumentPayment = bookingDetails && 'reviewId' in bookingDetails;
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [loading, setLoading] = useState(false);
@@ -114,11 +123,21 @@ export const PaymentPage: React.FC = () => {
     try {
       if (paymentMethod === 'mpesa') {
         // M-Pesa payment flow
-        const mpesaPayment = await axiosInstance.post('/payments/mpesa/initiate', {
-          bookingId: bookingId || bookingDetails?.id,
-          amount: bookingDetails?.fee || 5000,
-          phoneNumber: mpesaDetails.phoneNumber,
-        });
+        const paymentData = isDocumentPayment
+          ? {
+              reviewId: (bookingDetails as DocumentPaymentDetails).reviewId,
+              amount: (bookingDetails as DocumentPaymentDetails).price,
+              phoneNumber: mpesaDetails.phoneNumber,
+              paymentType: 'DOCUMENT_REVIEW'
+            }
+          : {
+              bookingId: bookingId || (bookingDetails as BookingDetails).id,
+              amount: (bookingDetails as BookingDetails).fee || 5000,
+              phoneNumber: mpesaDetails.phoneNumber,
+              paymentType: 'CONSULTATION'
+            };
+
+        const mpesaPayment = await axiosInstance.post('/payments/mpesa/initiate', paymentData);
 
         if (!mpesaPayment.data.success) {
           throw new Error(mpesaPayment.data.message || 'Failed to initiate M-Pesa payment');
@@ -139,18 +158,34 @@ export const PaymentPage: React.FC = () => {
 
       } else {
         // Card payment flow (Flutterwave)
-        const paymentIntent = await axiosInstance.post('/payments/create-intent', {
-          bookingId: bookingId || bookingDetails?.id,
-          amount: bookingDetails?.fee || 5000,
-          paymentMethod: 'FLUTTERWAVE_CARD',
-          provider: 'FLUTTERWAVE',
-          cardDetails: {
-            number: cardDetails.cardNumber.replace(/\s/g, ''),
-            name: cardDetails.cardName,
-            expiry: cardDetails.expiryDate,
-            cvv: cardDetails.cvv,
-          }
-        });
+        const paymentIntentData = isDocumentPayment
+          ? {
+              reviewId: (bookingDetails as DocumentPaymentDetails).reviewId,
+              amount: (bookingDetails as DocumentPaymentDetails).price,
+              paymentMethod: 'FLUTTERWAVE_CARD',
+              provider: 'FLUTTERWAVE',
+              paymentType: 'DOCUMENT_REVIEW',
+              cardDetails: {
+                number: cardDetails.cardNumber.replace(/\s/g, ''),
+                name: cardDetails.cardName,
+                expiry: cardDetails.expiryDate,
+                cvv: cardDetails.cvv,
+              }
+            }
+          : {
+              bookingId: bookingId || (bookingDetails as BookingDetails).id,
+              amount: (bookingDetails as BookingDetails).fee || 5000,
+              paymentMethod: 'FLUTTERWAVE_CARD',
+              provider: 'FLUTTERWAVE',
+              cardDetails: {
+                number: cardDetails.cardNumber.replace(/\s/g, ''),
+                name: cardDetails.cardName,
+                expiry: cardDetails.expiryDate,
+                cvv: cardDetails.cvv,
+              }
+            };
+
+        const paymentIntent = await axiosInstance.post('/payments/create-intent', paymentIntentData);
 
         if (!paymentIntent.data.success) {
           throw new Error(paymentIntent.data.message || 'Failed to create payment intent');
@@ -194,27 +229,56 @@ export const PaymentPage: React.FC = () => {
           </div>
           <h2 className="text-3xl font-bold text-slate-900 mb-4">Payment Successful!</h2>
           <p className="text-slate-600 mb-6">
-            Your consultation has been confirmed. You'll receive a confirmation email with the meeting link.
+            {isDocumentPayment
+              ? 'Your document review payment is confirmed. Processing will begin shortly.'
+              : 'Your consultation has been confirmed. You\'ll receive a confirmation email with the meeting link.'}
           </p>
           <div className="bg-white rounded-lg p-6 mb-6 text-left">
-            <h3 className="font-semibold text-slate-900 mb-4">Booking Details</h3>
+            <h3 className="font-semibold text-slate-900 mb-4">
+              {isDocumentPayment ? 'Payment Details' : 'Booking Details'}
+            </h3>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-600">Lawyer:</span>
-                <span className="font-medium">{bookingDetails?.lawyerName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-600">Date:</span>
-                <span className="font-medium">{bookingDetails?.date}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-600">Time:</span>
-                <span className="font-medium">{bookingDetails?.time}</span>
-              </div>
-              <div className="flex justify-between border-t pt-2 mt-2">
-                <span className="text-slate-600">Amount Paid:</span>
-                <span className="font-bold text-green-600">KES {bookingDetails?.fee.toLocaleString()}</span>
-              </div>
+              {isDocumentPayment ? (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Service:</span>
+                    <span className="font-medium">
+                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' ? 'AI Document Review' : 'Lawyer Certification'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Document:</span>
+                    <span className="font-medium">{(bookingDetails as DocumentPaymentDetails).fileName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Type:</span>
+                    <span className="font-medium">{(bookingDetails as DocumentPaymentDetails).documentType}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2 mt-2">
+                    <span className="text-slate-600">Amount Paid:</span>
+                    <span className="font-bold text-green-600">KES {(bookingDetails as DocumentPaymentDetails).price.toLocaleString()}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Lawyer:</span>
+                    <span className="font-medium">{(bookingDetails as BookingDetails).lawyerName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Date:</span>
+                    <span className="font-medium">{(bookingDetails as BookingDetails).date}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Time:</span>
+                    <span className="font-medium">{(bookingDetails as BookingDetails).time}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2 mt-2">
+                    <span className="text-slate-600">Amount Paid:</span>
+                    <span className="font-bold text-green-600">KES {(bookingDetails as BookingDetails).fee.toLocaleString()}</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
           <button onClick={() => navigate('/dashboard')} className="btn-primary w-full">
@@ -237,34 +301,72 @@ export const PaymentPage: React.FC = () => {
         </button>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Booking Summary */}
+          {/* Booking/Document Summary */}
           <div>
-            <h2 className="text-2xl font-display font-bold text-slate-900 mb-6">Booking Summary</h2>
+            <h2 className="text-2xl font-display font-bold text-slate-900 mb-6">
+              {isDocumentPayment ? 'Service Summary' : 'Booking Summary'}
+            </h2>
             <div className="card p-6 space-y-4">
-              <div>
-                <p className="text-sm text-slate-600">Lawyer</p>
-                <p className="font-semibold text-slate-900">{bookingDetails?.lawyerName}</p>
-                <p className="text-sm text-blue-600">{bookingDetails?.lawyerSpecialty}</p>
-              </div>
-              <div className="border-t pt-4">
-                <p className="text-sm text-slate-600">Consultation Type</p>
-                <p className="font-semibold text-slate-900 capitalize">{bookingDetails?.consultationType}</p>
-              </div>
-              <div className="border-t pt-4">
-                <p className="text-sm text-slate-600">Date & Time</p>
-                <p className="font-semibold text-slate-900">{bookingDetails?.date}</p>
-                <p className="text-slate-700">{bookingDetails?.time}</p>
-              </div>
-              <div className="border-t pt-4">
-                <p className="text-sm text-slate-600">Duration</p>
-                <p className="font-semibold text-slate-900">60 minutes</p>
-              </div>
-              <div className="border-t pt-4 bg-blue-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-900 font-semibold">Total Amount</span>
-                  <span className="text-2xl font-bold text-blue-600">KES {bookingDetails?.fee.toLocaleString()}</span>
-                </div>
-              </div>
+              {isDocumentPayment ? (
+                <>
+                  <div>
+                    <p className="text-sm text-slate-600">Service Type</p>
+                    <p className="font-semibold text-slate-900">
+                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' ? 'AI Document Review' : 'Lawyer Certification'}
+                    </p>
+                    <p className="text-sm text-blue-600">
+                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' ? 'Automated Analysis' : 'Professional Certification'}
+                    </p>
+                  </div>
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-slate-600">Document</p>
+                    <p className="font-semibold text-slate-900">{(bookingDetails as DocumentPaymentDetails).fileName}</p>
+                  </div>
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-slate-600">Document Type</p>
+                    <p className="font-semibold text-slate-900">{(bookingDetails as DocumentPaymentDetails).documentType}</p>
+                  </div>
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-slate-600">Processing Time</p>
+                    <p className="font-semibold text-slate-900">
+                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' ? '5-10 minutes' : 'Within 24 hours'}
+                    </p>
+                  </div>
+                  <div className="border-t pt-4 bg-blue-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-900 font-semibold">Total Amount</span>
+                      <span className="text-2xl font-bold text-blue-600">KES {(bookingDetails as DocumentPaymentDetails).price.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-sm text-slate-600">Lawyer</p>
+                    <p className="font-semibold text-slate-900">{(bookingDetails as BookingDetails).lawyerName}</p>
+                    <p className="text-sm text-blue-600">{(bookingDetails as BookingDetails).lawyerSpecialty}</p>
+                  </div>
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-slate-600">Consultation Type</p>
+                    <p className="font-semibold text-slate-900 capitalize">{(bookingDetails as BookingDetails).consultationType}</p>
+                  </div>
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-slate-600">Date & Time</p>
+                    <p className="font-semibold text-slate-900">{(bookingDetails as BookingDetails).date}</p>
+                    <p className="text-slate-700">{(bookingDetails as BookingDetails).time}</p>
+                  </div>
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-slate-600">Duration</p>
+                    <p className="font-semibold text-slate-900">60 minutes</p>
+                  </div>
+                  <div className="border-t pt-4 bg-blue-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-900 font-semibold">Total Amount</span>
+                      <span className="text-2xl font-bold text-blue-600">KES {(bookingDetails as BookingDetails).fee.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -463,12 +565,12 @@ export const PaymentPage: React.FC = () => {
                     {paymentMethod === 'mpesa' ? (
                       <>
                         <Smartphone className="inline h-5 w-5 mr-2" />
-                        Pay KES {bookingDetails?.fee.toLocaleString()} via M-Pesa
+                        Pay KES {(isDocumentPayment ? (bookingDetails as DocumentPaymentDetails).price : (bookingDetails as BookingDetails).fee).toLocaleString()} via M-Pesa
                       </>
                     ) : (
                       <>
                         <Lock className="inline h-5 w-5 mr-2" />
-                        Pay KES {bookingDetails?.fee.toLocaleString()}
+                        Pay KES {(isDocumentPayment ? (bookingDetails as DocumentPaymentDetails).price : (bookingDetails as BookingDetails).fee).toLocaleString()}
                       </>
                     )}
                   </>

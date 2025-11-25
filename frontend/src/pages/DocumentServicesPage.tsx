@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FileText, CheckCircle, Upload, Sparkles, Shield, Clock, AlertCircle } from 'lucide-react';
 
 type ServiceType = 'ai-review' | 'certification' | null;
@@ -11,6 +11,7 @@ interface UploadedFile {
 }
 
 const DocumentServicesPage: React.FC = () => {
+  const navigate = useNavigate();
   const [selectedService, setSelectedService] = useState<ServiceType>(null);
   const [documentSource, setDocumentSource] = useState<DocumentSource>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -125,13 +126,21 @@ const DocumentServicesPage: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Redirect to payment or results
+        // Redirect to payment page with document review details
         if (data.data.paymentRequired) {
-          alert(`Document uploaded! Please proceed to payment: KES ${data.data.price}`);
-          // TODO: Redirect to payment page
+          navigate(`/payment/document/${data.data.reviewId}`, {
+            state: {
+              reviewId: data.data.reviewId,
+              documentType: documentType,
+              serviceType: selectedService,
+              price: data.data.price,
+              fileName: uploadedFile.file.name
+            }
+          });
         } else {
           alert('Document uploaded! AI review in progress...');
-          // TODO: Redirect to results page
+          // Redirect to results page
+          navigate('/dashboard');
         }
       } else {
         alert(`Error: ${data.message}`);
