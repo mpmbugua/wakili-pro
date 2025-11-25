@@ -146,7 +146,13 @@ export const BookingPage: React.FC = () => {
       } else {
         // Other errors
         const errorMessage = err.response?.data?.message || 'Failed to book consultation. Please try again.';
-        setError(errorMessage);
+        
+        // Special handling for "Lawyer not found" error
+        if (errorMessage === 'Lawyer not found') {
+          setError('This lawyer profile is not available for booking at the moment. Please try selecting a different lawyer from the lawyers directory.');
+        } else {
+          setError(errorMessage);
+        }
       }
     } finally {
       setLoading(false);

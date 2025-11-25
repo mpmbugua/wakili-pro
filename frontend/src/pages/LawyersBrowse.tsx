@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
+import axiosInstance from '../lib/axios';
 
 interface Lawyer {
   id: string;
+  userId: string; // The actual user ID to send to backend
   name: string;
   specialty: string;
   location: string;
@@ -22,6 +24,7 @@ interface Lawyer {
 const sampleLawyers: Lawyer[] = [
   {
     id: '1',
+    userId: 'sample-1', // Placeholder - real lawyers will have actual userIds
     name: 'Jane Wanjiru',
     specialty: 'Employment Law',
     location: 'Nairobi',
@@ -36,6 +39,7 @@ const sampleLawyers: Lawyer[] = [
   },
   {
     id: '2',
+    userId: 'sample-2',
     name: 'David Kamau',
     specialty: 'Property & Land Law',
     location: 'Nairobi',
@@ -50,6 +54,7 @@ const sampleLawyers: Lawyer[] = [
   },
   {
     id: '3',
+    userId: 'sample-3',
     name: 'Sarah Ochieng',
     specialty: 'Family Law',
     location: 'Mombasa',
@@ -64,6 +69,7 @@ const sampleLawyers: Lawyer[] = [
   },
   {
     id: '4',
+    userId: 'sample-4',
     name: 'Michael Kipchoge',
     specialty: 'Criminal Defense',
     location: 'Kisumu',
@@ -78,6 +84,7 @@ const sampleLawyers: Lawyer[] = [
   },
   {
     id: '5',
+    userId: 'sample-5',
     name: 'Grace Nyambura',
     specialty: 'Corporate Law',
     location: 'Nairobi',
@@ -92,6 +99,7 @@ const sampleLawyers: Lawyer[] = [
   },
   {
     id: '6',
+    userId: 'sample-6',
     name: 'James Mutua',
     specialty: 'Immigration Law',
     location: 'Nairobi',
@@ -208,9 +216,51 @@ export const LawyersBrowse: React.FC = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState('All Specialties');
   const [selectedLocation, setSelectedLocation] = useState('All Locations');
   const [sortBy, setSortBy] = useState<'rating' | 'price' | 'experience'>('rating');
+  const [lawyers, setLawyers] = useState<Lawyer[]>(sampleLawyers);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch real lawyers from backend
+  useEffect(() => {
+    const fetchLawyers = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get('/lawyers');
+        if (response.data.success && response.data.data?.lawyers) {
+          // Map backend response to our Lawyer interface
+          const backendLawyers = response.data.data.lawyers.map((lawyer: any) => ({
+            id: lawyer.id,
+            userId: lawyer.userId, // Important: use userId for booking
+            name: `${lawyer.user?.firstName || ''} ${lawyer.user?.lastName || ''}`.trim() || 'Lawyer',
+            specialty: lawyer.specializations?.[0] || 'General Practice',
+            location: lawyer.location || 'Nairobi',
+            rating: lawyer.averageRating || 4.5,
+            reviewCount: lawyer.totalReviews || 0,
+            yearsExperience: lawyer.yearsOfExperience || 5,
+            hourlyRate: lawyer.hourlyRate || 3500,
+            imageUrl: lawyer.profileImageUrl || `https://ui-avatars.com/api/?name=${lawyer.user?.firstName}+${lawyer.user?.lastName}&background=3b82f6&color=fff&size=200`,
+            bio: lawyer.bio || 'Experienced legal professional',
+            languages: ['English', 'Swahili'],
+            availability: lawyer.isAvailable ? 'Available' : 'Busy'
+          }));
+          
+          // Use real lawyers if available, otherwise fall back to sample data
+          if (backendLawyers.length > 0) {
+            setLawyers(backendLawyers);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching lawyers:', error);
+        // Keep using sample data on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLawyers();
+  }, []);
 
   // Filter and sort lawyers
-  const filteredLawyers = sampleLawyers
+  const filteredLawyers = lawyers
     .filter(lawyer => 
       (selectedSpecialty === 'All Specialties' || lawyer.specialty === selectedSpecialty) &&
       (selectedLocation === 'All Locations' || lawyer.location === selectedLocation)
@@ -223,13 +273,14 @@ export const LawyersBrowse: React.FC = () => {
     });
 
   const handleBookConsultation = (lawyerId: string, lawyerName: string) => {
-    const lawyer = sampleLawyers.find(l => l.id === lawyerId);
+    const lawyer = lawyers.find(l => l.id === lawyerId);
     
     if (!isAuthenticated) {
-      sessionStorage.setItem('pendingBooking', JSON.stringify({ lawyerId, lawyerName, hourlyRate: lawyer?.hourlyRate }));
+      sessionStorage.setItem('pendingBooking', JSON.stringify({ lawyerId: lawyer?.userId, lawyerName, hourlyRate: lawyer?.hourlyRate }));
       navigate('/login', { state: { from: '/lawyers', message: 'Please log in to book a consultation' } });
     } else {
-      navigate(`/booking/${lawyerId}`, { 
+      // Use userId for booking (this is what the backend expects)
+      navigate(`/booking/${lawyer?.userId}`, { 
         state: { 
           lawyerName: lawyer?.name,
           hourlyRate: lawyer?.hourlyRate,
