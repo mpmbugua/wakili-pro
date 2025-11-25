@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
+import { WakiliLogo } from '../components/ui/WakiliLogo';
 import { 
   MessageSquare,
   Scale,
@@ -335,11 +336,8 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-6">
             <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <div className="bg-blue-600 p-1.5 rounded">
-                  <Scale className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm font-semibold text-white">Wakili Pro</span>
+              <div className="mb-3 scale-75 origin-left">
+                <WakiliLogo size="md" variant="full" />
               </div>
               <p className="text-xs leading-relaxed mb-3">
                 Your trusted platform for legal services in Kenya.

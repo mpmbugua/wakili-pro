@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Scale, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { WakiliLogo } from '../ui/WakiliLogo';
 
 interface GlobalTopBarProps {
   onMenuClick?: () => void;
@@ -26,13 +27,8 @@ export const GlobalTopBar: React.FC<GlobalTopBarProps> = ({ onMenuClick }) => {
             >
               <Menu className="h-5 w-5 text-slate-700" />
             </button>
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="bg-blue-600 p-1.5 rounded">
-                <Scale className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-lg font-semibold text-slate-900">
-                Wakili Pro
-              </span>
+            <Link to="/" className="flex items-center">
+              <WakiliLogo size="sm" variant="full" />
             </Link>
           </div>
           <div className="flex items-center space-x-3">
