@@ -43,7 +43,7 @@ export const LandingPage: React.FC = () => {
               {/* Six Service Cards */}
               <div className="grid md:grid-cols-3 gap-4">
                 {/* AI Assistant */}
-                <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
+                <Link to="/ai" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
                       <MessageSquare className="h-5 w-5 text-blue-600" />
@@ -53,16 +53,13 @@ export const LandingPage: React.FC = () => {
                   <p className="text-xs text-slate-600 mb-4">
                     Get instant answers to legal questions, 24/7. AI-powered guidance based on Kenyan law.
                   </p>
-                  <Link 
-                    to="/ai" 
-                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
-                  >
+                  <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
                     Try for free <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </div>
+                  </span>
+                </Link>
 
                 {/* Expert Lawyers */}
-                <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
+                <Link to="/lawyers" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
                       <Scale className="h-5 w-5 text-blue-600" />
@@ -72,16 +69,13 @@ export const LandingPage: React.FC = () => {
                   <p className="text-xs text-slate-600 mb-4">
                     Book video consultations with 500+ verified advocates across all practice areas.
                   </p>
-                  <Link 
-                    to="/lawyers" 
-                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
-                  >
+                  <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
                     Browse lawyers <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </div>
+                  </span>
+                </Link>
 
                 {/* Legal Documents */}
-                <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
+                <Link to="/marketplace" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
                       <ShoppingBag className="h-5 w-5 text-blue-600" />
@@ -91,16 +85,13 @@ export const LandingPage: React.FC = () => {
                   <p className="text-xs text-slate-600 mb-4">
                     Access 500+ professional legal templates. Free AI review with every purchase.
                   </p>
-                  <Link 
-                    to="/marketplace" 
-                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
-                  >
+                  <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
                     Browse docs <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </div>
+                  </span>
+                </Link>
 
                 {/* Document Review */}
-                <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
+                <Link to="/document-services" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
                       <FileText className="h-5 w-5 text-blue-600" />
@@ -110,16 +101,13 @@ export const LandingPage: React.FC = () => {
                   <p className="text-xs text-slate-600 mb-4">
                     AI review (KES 500) or lawyer certification (from KES 3,000). 24-hour turnaround.
                   </p>
-                  <Link 
-                    to="/document-services" 
-                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
-                  >
+                  <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
                     Get started <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </div>
+                  </span>
+                </Link>
 
                 {/* Legal Service Packages */}
-                <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
+                <Link to="/legal-services" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
                       <Briefcase className="h-5 w-5 text-blue-600" />
@@ -129,16 +117,13 @@ export const LandingPage: React.FC = () => {
                   <p className="text-xs text-slate-600 mb-4">
                     Fixed-price packages for common legal needs. Property, business, family law, and more.
                   </p>
-                  <Link 
-                    to="/legal-services" 
-                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
-                  >
+                  <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
                     View services <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </div>
+                  </span>
+                </Link>
 
                 {/* Legal Resources */}
-                <div className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all">
+                <Link to="/resources" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
                       <Book className="h-5 w-5 text-blue-600" />
@@ -148,13 +133,10 @@ export const LandingPage: React.FC = () => {
                   <p className="text-xs text-slate-600 mb-4">
                     Free guides, articles, and information to help you understand Kenyan law.
                   </p>
-                  <Link 
-                    to="/resources" 
-                    className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
-                  >
+                  <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
                     Browse resources <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </div>
+                  </span>
+                </Link>
               </div>
             </div>
           </section>
