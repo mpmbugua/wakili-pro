@@ -42,6 +42,7 @@ const navigation: NavItem[] = [
   { name: 'Appointments', href: '/appointments', icon: Calendar },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Documents', href: '/documents', icon: FileText },
+  { name: 'Document Review', href: '/document-services', icon: Shield },
   { name: 'AI Assistant', href: '/ai', icon: Book },
 ];
 

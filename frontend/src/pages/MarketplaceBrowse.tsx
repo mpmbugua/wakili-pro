@@ -777,16 +777,108 @@ export const MarketplaceBrowse: React.FC = () => {
                     <p className="text-slate-500 text-xs mt-1">Sample Preview - Actual document contains complete legal text</p>
                   </div>
                   <div className="border-t border-slate-200 pt-4 space-y-2">
-                    <p><strong>THIS AGREEMENT</strong> is made on the _____ day of _________, 20___</p>
-                    <p><strong>BETWEEN:</strong></p>
-                    <p className="pl-4">Party 1: _________________________ (hereinafter referred to as "Party A")</p>
-                    <p className="pl-4">Party 2: _________________________ (hereinafter referred to as "Party B")</p>
-                    <p className="mt-4"><strong>WHEREAS:</strong></p>
-                    <p className="pl-4">1. The parties wish to enter into this agreement...</p>
-                    <p className="pl-4">2. This document is legally binding under Kenyan law...</p>
-                    <p className="mt-4 text-slate-500 italic text-xs">
-                      [Preview continues with full legal clauses, terms, conditions, and schedules in the purchased version]
-                    </p>
+                    {previewDocument.category === 'Employment' && (
+                      <>
+                        <p><strong>EMPLOYMENT CONTRACT</strong></p>
+                        <p>This Employment Agreement is entered into on _____ day of _________, 20___</p>
+                        <p><strong>BETWEEN:</strong></p>
+                        <p className="pl-4">Employer: _________________________ ("Company")</p>
+                        <p className="pl-4">Employee: _________________________ ("Employee")</p>
+                        <p className="mt-4"><strong>1. POSITION AND DUTIES</strong></p>
+                        <p className="pl-4">1.1 The Employee shall serve as _________________________</p>
+                        <p className="pl-4">1.2 Reporting to: _________________________</p>
+                        <p className="mt-4"><strong>2. REMUNERATION</strong></p>
+                        <p className="pl-4">2.1 Basic Salary: KES _________ per month</p>
+                        <p className="pl-4">2.2 Benefits: Housing, Medical, Transport allowances...</p>
+                        <p className="mt-4"><strong>3. TERMINATION</strong></p>
+                        <p className="pl-4">3.1 Notice Period: _____ days written notice...</p>
+                        <p className="mt-4 text-slate-500 italic text-xs">
+                          [Includes: Leave entitlements, Confidentiality clauses, Non-compete terms, Intellectual property rights]
+                        </p>
+                      </>
+                    )}
+                    {previewDocument.category === 'Property' && (
+                      <>
+                        <p><strong>LAND SALE AGREEMENT</strong></p>
+                        <p>This Agreement is made on _____ day of _________, 20___</p>
+                        <p><strong>BETWEEN:</strong></p>
+                        <p className="pl-4">Vendor: _________________________ ("Seller")</p>
+                        <p className="pl-4">Purchaser: _________________________ ("Buyer")</p>
+                        <p className="mt-4"><strong>1. PROPERTY DESCRIPTION</strong></p>
+                        <p className="pl-4">Land Reference No: _________________________</p>
+                        <p className="pl-4">Location: _________________________ County</p>
+                        <p className="pl-4">Size: _________ Acres/Hectares</p>
+                        <p className="mt-4"><strong>2. PURCHASE CONSIDERATION</strong></p>
+                        <p className="pl-4">Purchase Price: KES _________________________</p>
+                        <p className="pl-4">Deposit: KES _________ (payable upon signing)</p>
+                        <p className="pl-4">Balance: KES _________ (payable on completion)</p>
+                        <p className="mt-4"><strong>3. TITLE TRANSFER</strong></p>
+                        <p className="pl-4">3.1 Transfer of ownership within _____ days...</p>
+                        <p className="mt-4 text-slate-500 italic text-xs">
+                          [Includes: Encumbrances, Warranties, Vacant possession, Stamp duty provisions]
+                        </p>
+                      </>
+                    )}
+                    {previewDocument.category === 'Family Law' && (
+                      <>
+                        <p><strong>DIVORCE PETITION</strong></p>
+                        <p className="text-center font-bold mt-2">IN THE HIGH COURT OF KENYA AT _____________</p>
+                        <p className="text-center">MATRIMONIAL CAUSE NO. _____ OF 20___</p>
+                        <p className="mt-4"><strong>IN THE MATTER OF:</strong></p>
+                        <p className="pl-4">Petitioner: _________________________</p>
+                        <p className="pl-4">Respondent: _________________________</p>
+                        <p className="mt-4"><strong>PETITION FOR DISSOLUTION OF MARRIAGE</strong></p>
+                        <p className="mt-4"><strong>GROUNDS FOR DIVORCE:</strong></p>
+                        <p className="pl-4">☐ Irretrievable breakdown of marriage</p>
+                        <p className="pl-4">☐ Adultery</p>
+                        <p className="pl-4">☐ Cruelty</p>
+                        <p className="pl-4">☐ Desertion</p>
+                        <p className="mt-4"><strong>MATTERS FOR DETERMINATION:</strong></p>
+                        <p className="pl-4">1. Custody of children...</p>
+                        <p className="pl-4">2. Division of matrimonial property...</p>
+                        <p className="pl-4">3. Maintenance and support...</p>
+                        <p className="mt-4 text-slate-500 italic text-xs">
+                          [Includes: Affidavit format, Children's welfare provisions, Property schedules]
+                        </p>
+                      </>
+                    )}
+                    {previewDocument.category === 'Corporate' && (
+                      <>
+                        <p><strong>PARTNERSHIP DEED</strong></p>
+                        <p>This Partnership Agreement is made on _____ day of _________, 20___</p>
+                        <p><strong>BETWEEN:</strong></p>
+                        <p className="pl-4">Partner 1: _________________________ (____%)</p>
+                        <p className="pl-4">Partner 2: _________________________ (____%)</p>
+                        <p className="mt-4"><strong>1. BUSINESS NAME AND PURPOSE</strong></p>
+                        <p className="pl-4">Name: _________________________</p>
+                        <p className="pl-4">Nature: _________________________</p>
+                        <p className="mt-4"><strong>2. CAPITAL CONTRIBUTION</strong></p>
+                        <p className="pl-4">Partner 1: KES _________________________</p>
+                        <p className="pl-4">Partner 2: KES _________________________</p>
+                        <p className="mt-4"><strong>3. PROFIT AND LOSS SHARING</strong></p>
+                        <p className="pl-4">Profits/Losses shared in ratio: _____ : _____</p>
+                        <p className="mt-4"><strong>4. MANAGEMENT</strong></p>
+                        <p className="pl-4">4.1 Day-to-day decisions: Mutual consent</p>
+                        <p className="pl-4">4.2 Major decisions: Unanimous agreement...</p>
+                        <p className="mt-4 text-slate-500 italic text-xs">
+                          [Includes: Banking arrangements, Dissolution terms, Dispute resolution, Admission of new partners]
+                        </p>
+                      </>
+                    )}
+                    {!['Employment', 'Property', 'Family Law', 'Corporate'].includes(previewDocument.category) && (
+                      <>
+                        <p><strong>THIS AGREEMENT</strong> is made on the _____ day of _________, 20___</p>
+                        <p><strong>BETWEEN:</strong></p>
+                        <p className="pl-4">Party 1: _________________________ (hereinafter referred to as "Party A")</p>
+                        <p className="pl-4">Party 2: _________________________ (hereinafter referred to as "Party B")</p>
+                        <p className="mt-4"><strong>WHEREAS:</strong></p>
+                        <p className="pl-4">1. The parties wish to enter into this agreement...</p>
+                        <p className="pl-4">2. This document is legally binding under Kenyan law...</p>
+                        <p className="mt-4 text-slate-500 italic text-xs">
+                          [Preview continues with full legal clauses, terms, conditions, and schedules in the purchased version]
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
                 <p className="text-xs text-slate-600 mt-4 text-center">
