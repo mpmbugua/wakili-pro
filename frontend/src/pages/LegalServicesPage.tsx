@@ -46,11 +46,11 @@ export const LegalServicesPage: React.FC = () => {
   return (
     <GlobalLayout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-700 text-white py-12">
+      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-3">Legal Service Packages</h1>
-            <p className="text-lg text-blue-100 max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold mb-3 text-gray-900">Legal Service Packages</h1>
+            <p className="text-lg text-gray-700 max-w-2xl mx-auto">
               Fixed-price legal services by verified lawyers. Transparent pricing, clear deliverables, professional results.
             </p>
           </div>
@@ -236,8 +236,8 @@ export const LegalServicesPage: React.FC = () => {
                         Find Lawyers
                       </button>
                       <button
-                        onClick={() => navigate('/marketplace')}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        onClick={() => navigate('/lawyers', { state: { fromService: service.title } })}
+                        className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md"
                       >
                         Get Started
                       </button>
@@ -251,12 +251,12 @@ export const LegalServicesPage: React.FC = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-12 bg-white border-t border-gray-200">
+      <section className="py-12 bg-gradient-to-br from-gray-50 to-blue-50 border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-center mb-8">Why Choose Our Legal Service Packages?</h2>
+          <h2 className="text-2xl font-bold text-center mb-8 text-gray-900">Why Choose Our Legal Service Packages?</h2>
           <div className="grid md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
                 <DollarSign className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="font-semibold mb-2">Fixed Pricing</h3>

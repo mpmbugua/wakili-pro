@@ -276,7 +276,12 @@ export const LawyersBrowse: React.FC = () => {
     const lawyer = lawyers.find(l => l.id === lawyerId);
     
     if (!isAuthenticated) {
-      sessionStorage.setItem('pendingBooking', JSON.stringify({ lawyerId: lawyer?.userId, lawyerName, hourlyRate: lawyer?.hourlyRate }));
+      sessionStorage.setItem('pendingBooking', JSON.stringify({ 
+        lawyerId: lawyer?.userId, 
+        lawyerName, 
+        hourlyRate: lawyer?.hourlyRate,
+        profileImage: lawyer?.imageUrl 
+      }));
       navigate('/login', { state: { from: '/lawyers', message: 'Please log in to book a consultation' } });
     } else {
       // Use userId for booking (this is what the backend expects)
@@ -284,7 +289,8 @@ export const LawyersBrowse: React.FC = () => {
         state: { 
           lawyerName: lawyer?.name,
           hourlyRate: lawyer?.hourlyRate,
-          specialty: lawyer?.specialty
+          specialty: lawyer?.specialty,
+          profileImage: lawyer?.imageUrl
         } 
       });
     }

@@ -9,7 +9,7 @@ export const BookingPage: React.FC = () => {
   const { lawyerId } = useParams<{ lawyerId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const locationState = location.state as { lawyerName?: string; hourlyRate?: number; specialty?: string } | null;
+  const locationState = location.state as { lawyerName?: string; hourlyRate?: number; specialty?: string; profileImage?: string } | null;
   const { isAuthenticated, user, refreshAuth } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +25,29 @@ export const BookingPage: React.FC = () => {
   const [lawyerRate, setLawyerRate] = useState<number>(locationState?.hourlyRate || 5000);
   const [lawyerName, setLawyerName] = useState<string>(locationState?.lawyerName || '');
   const [lawyerSpecialty, setLawyerSpecialty] = useState<string>(locationState?.specialty || '');
+  const [lawyerPhoto, setLawyerPhoto] = useState<string>(locationState?.profileImage || '');
+
+  // Fetch lawyer details if not in location state
+  useEffect(() => {
+    const fetchLawyerDetails = async () => {
+      if (!lawyerName && lawyerId) {
+        try {
+          const response = await axiosInstance.get(`/lawyers/${lawyerId}`);
+          if (response.data.success && response.data.data) {
+            const lawyer = response.data.data;
+            setLawyerName(`${lawyer.user?.firstName || ''} ${lawyer.user?.lastName || ''}`.trim());
+            setLawyerSpecialty(lawyer.specializations?.[0] || '');
+            setLawyerRate(lawyer.hourlyRate || 5000);
+            setLawyerPhoto(lawyer.profileImageUrl || `https://ui-avatars.com/api/?name=${lawyer.user?.firstName}+${lawyer.user?.lastName}&background=3b82f6&color=fff&size=200`);
+          }
+        } catch (error) {
+          console.error('Error fetching lawyer details:', error);
+        }
+      }
+    };
+
+    fetchLawyerDetails();
+  }, [lawyerId, lawyerName]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -64,6 +87,7 @@ export const BookingPage: React.FC = () => {
         const paymentState = {
           id: booking.id,
           lawyerName: lawyerName || booking.lawyerName,
+          lawyerPhoto,
           lawyerSpecialty: lawyerSpecialty,
           date: formData.date,
           time: formData.time,
@@ -116,6 +140,7 @@ export const BookingPage: React.FC = () => {
               const paymentState = {
                 id: booking.id,
                 lawyerName: lawyerName || booking.lawyerName,
+                lawyerPhoto,
                 lawyerSpecialty: lawyerSpecialty,
                 date: formData.date,
                 time: formData.time,
@@ -181,20 +206,36 @@ export const BookingPage: React.FC = () => {
               <h1 className="text-3xl font-display font-bold text-slate-900 mb-2">
                 Book a Consultation
               </h1>
-              <p className="text-slate-600 mb-2">
+              
+              {/* Lawyer Profile Header */}
+              {lawyerName && (
+                <div className="flex items-center space-x-4 mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                  {lawyerPhoto && (
+                    <img
+                      src={lawyerPhoto}
+                      alt={lawyerName}
+                      className="w-20 h-20 rounded-full object-cover border-2 border-blue-500 shadow-md"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-gray-800">{lawyerName}</h2>
+                    {lawyerSpecialty && (
+                      <p className="text-sm text-blue-600 font-medium">{lawyerSpecialty}</p>
+                    )}
+                    <p className="text-sm text-slate-600 mt-1">
+                      60-minute session • KES {lawyerRate.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              <p className="text-slate-600 mb-6">
                 {lawyerName ? (
                   <>Schedule your consultation with <span className="font-semibold text-blue-600">{lawyerName}</span></>
                 ) : (
                   'Schedule your video consultation with a qualified lawyer'
                 )}
               </p>
-              {lawyerName && (
-                <p className="text-sm text-slate-500 mb-6">
-                  {lawyerSpecialty && <span className="text-blue-600">{lawyerSpecialty}</span>}
-                  {lawyerSpecialty && ' • '}
-                  60-minute session • KES {lawyerRate.toLocaleString()}
-                </p>
-              )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Date */}

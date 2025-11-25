@@ -12,6 +12,7 @@ import { ServicesPage } from './pages/ServicesPage';
 import { LegalServicesPage } from './pages/LegalServicesPage';
 import { BookingPage } from './pages/BookingPage';
 import { PaymentPage } from './pages/PaymentPage';
+import { LawyerProfileSettings } from './pages/LawyerProfileSettings';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -102,6 +103,14 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile/settings" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <LawyerProfileSettings />
                 </ProtectedRoute>
               } 
             />

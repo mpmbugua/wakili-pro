@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, MessageSquare, FileText, Video, Clock, Plus, ArrowRight,
-  Users, DollarSign, TrendingUp, CheckCircle, AlertCircle, BarChart3
+  Users, DollarSign, TrendingUp, CheckCircle, AlertCircle, BarChart3, User
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
@@ -156,6 +156,10 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         description="Manage your legal practice, consultations, and client relationships"
         actions={
           <>
+            <Button variant="outline" onClick={() => navigate('/profile/settings')}>
+              <User className="h-4 w-4 mr-2" />
+              Profile Settings
+            </Button>
             <Button variant="outline" onClick={() => navigate('/calendar')}>
               <Calendar className="h-4 w-4 mr-2" />
               View Calendar

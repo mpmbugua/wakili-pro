@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import type { Express } from 'express';
 
 // Import routes
@@ -16,6 +17,9 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
+
+// Serve uploaded files
+app.use('/uploads/profile-photos', express.static(path.join(__dirname, '../storage/profile-photos')));
 
 // Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {

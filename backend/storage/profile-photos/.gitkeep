@@ -1,0 +1,5 @@
+# Profile Photos Storage
+
+This directory stores uploaded lawyer profile photos.
+
+**Note:** This is for local development only. In production, use cloud storage (Cloudinary, AWS S3, etc.)
