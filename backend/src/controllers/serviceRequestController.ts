@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, LawyerTier } from '@prisma/client';
 import { calculateServiceFee } from '../utils/serviceFeeCalculator';
+import { notifyMatchedLawyers } from '../services/lawyerNotificationService';
 
 const prisma = new PrismaClient();
 
@@ -92,13 +93,68 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
       }
     });
 
-    // TODO: Trigger lawyer matching notification here
-    // await notifyMatchedLawyers(serviceRequest);
+    // Match lawyers based on service tier and specialization
+    const tierFilter: LawyerTier[] = feeCalculation.tier === 'tier2' 
+      ? [LawyerTier.PRO] 
+      : [LawyerTier.LITE, LawyerTier.PRO];
+    
+    const matchedLawyers = await prisma.lawyerProfile.findMany({
+      where: {
+        tier: { in: tierFilter },
+        specializations: { has: serviceCategory },
+        isVerified: true,
+        status: 'APPROVED'
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true
+          }
+        }
+      },
+      orderBy: [
+        { rating: 'desc' }
+      ],
+      take: 5 // Match up to 5 lawyers
+    });
+
+    // Send notifications to matched lawyers
+    if (matchedLawyers.length > 0) {
+      const formattedLawyers = matchedLawyers.map(lp => ({
+        id: lp.user.id,
+        name: `${lp.user.firstName} ${lp.user.lastName}`,
+        email: lp.user.email,
+        phone: lp.user.phoneNumber || '',
+        tier: lp.tier || 'LITE',
+        specializations: lp.specializations
+      }));
+
+      // Send notifications asynchronously (don't wait)
+      notifyMatchedLawyers({
+        id: serviceRequest.id,
+        serviceCategory: serviceRequest.serviceCategory,
+        serviceTitle: serviceRequest.serviceTitle,
+        description: serviceRequest.description,
+        estimatedFee: serviceRequest.estimatedFee,
+        tier: serviceRequest.tier,
+        urgency: serviceRequest.urgency,
+        createdAt: serviceRequest.createdAt,
+        phoneNumber: serviceRequest.phoneNumber,
+        email: serviceRequest.email
+      }, formattedLawyers).catch(err => {
+        console.error('Failed to send lawyer notifications:', err);
+      });
+    }
 
     res.status(201).json({
       success: true,
       data: serviceRequest,
-      message: 'Service request created successfully. Notifying available lawyers...'
+      matchedLawyers: matchedLawyers.length,
+      message: `Service request created successfully. ${matchedLawyers.length} qualified lawyers notified.`
     });
   } catch (error) {
     console.error('Error creating service request:', error);
@@ -137,10 +193,9 @@ export const getServiceRequest = async (req: AuthRequest, res: Response) => {
                 email: true,
                 lawyerProfile: {
                   select: {
-                    specialization: true,
+                    specializations: true,
                     yearsOfExperience: true,
-                    rating: true,
-                    subscriptionTier: true
+                    rating: true
                   }
                 }
               }
@@ -430,7 +485,7 @@ export const submitQuote = async (req: AuthRequest, res: Response) => {
             lastName: true,
             lawyerProfile: {
               select: {
-                specialization: true,
+                specializations: true,
                 yearsOfExperience: true,
                 rating: true
               }
