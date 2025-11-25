@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PublicLayout } from '../components/layout';
+import { GlobalLayout } from '../components/layout';
 import { CheckCircle, Upload, Sparkles, Shield, Clock, AlertCircle } from 'lucide-react';
 
 type ServiceType = 'ai-review' | 'certification' | null;
@@ -156,7 +156,7 @@ const DocumentServicesPage: React.FC = () => {
   };
 
   return (
-    <PublicLayout>
+    <GlobalLayout>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -446,7 +446,7 @@ const DocumentServicesPage: React.FC = () => {
           </div>
         )}
       </div>
-    </PublicLayout>
+    </GlobalLayout>
   );
 };
 
