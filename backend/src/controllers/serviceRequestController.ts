@@ -573,8 +573,82 @@ export const submitQuote = async (req: AuthRequest, res: Response) => {
 };
 
 /**
+ * Get all quotes for a service request (client view)
+ * GET /api/service-requests/:id/quotes
+ */
+export const getQuotesForRequest = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    // Get service request
+    const serviceRequest = await prisma.serviceRequest.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        serviceCategory: true,
+        serviceTitle: true,
+        description: true,
+        estimatedFee: true,
+        tier: true,
+        status: true,
+        createdAt: true
+      }
+    });
+
+    if (!serviceRequest) {
+      return res.status(404).json({ error: 'Service request not found' });
+    }
+
+    // Only request owner can view quotes
+    if (serviceRequest.userId !== userId && req.user?.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Unauthorized to view quotes' });
+    }
+
+    // Get all quotes with lawyer details
+    const quotes = await prisma.lawyerQuote.findMany({
+      where: { serviceRequestId: id },
+      include: {
+        lawyer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            profileImageUrl: true,
+            lawyerProfile: {
+              select: {
+                specializations: true,
+                yearsOfExperience: true,
+                rating: true,
+                reviewCount: true,
+                licenseNumber: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        submittedAt: 'desc'
+      }
+    });
+
+    res.json({
+      success: true,
+      serviceRequest,
+      quotes
+    });
+  } catch (error) {
+    console.error('Error fetching quotes:', error);
+    res.status(500).json({ error: 'Failed to fetch quotes' });
+  }
+};
+
+/**
  * Select a lawyer for a service request
- * POST /api/service-requests/:id/select-lawyer
+ * POST /api/service-requests/:id/select
  */
 export const selectLawyer = async (req: AuthRequest, res: Response) => {
   try {
@@ -621,11 +695,29 @@ export const selectLawyer = async (req: AuthRequest, res: Response) => {
       })
     ]);
 
+    // Get selected lawyer details
+    const selectedLawyer = await prisma.user.findUnique({
+      where: { id: selectedQuote.lawyerId },
+      select: {
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true
+      }
+    });
+
     // TODO: Notify selected lawyer and client
 
     res.json({
       success: true,
-      message: 'Lawyer selected successfully'
+      message: 'Lawyer selected successfully',
+      selectedLawyer: {
+        name: `${selectedLawyer?.firstName} ${selectedLawyer?.lastName}`,
+        phone: selectedLawyer?.phoneNumber || 'Not provided',
+        email: selectedLawyer?.email || 'Not provided',
+        proposedFee: selectedQuote.proposedFee,
+        proposedTimeline: selectedQuote.proposedTimeline
+      }
     });
   } catch (error) {
     console.error('Error selecting lawyer:', error);

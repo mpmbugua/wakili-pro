@@ -19,6 +19,7 @@ import DocumentCertificationPage from './pages/DocumentCertificationPage';
 import VerifyCertificate from './pages/VerifyCertificate';
 import ServiceRequestPage from './pages/ServiceRequestPage';
 import LawyerQuoteSubmissionPage from './pages/LawyerQuoteSubmissionPage';
+import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -99,6 +100,16 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <LawyerQuoteSubmissionPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Quote Comparison (Protected) */}
+            <Route 
+              path="/service-requests/:id/quotes" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <QuoteComparisonPage />
                 </ProtectedRoute>
               } 
             />

@@ -6,6 +6,7 @@ import {
   getMyRequests,
   getAvailableRequests,
   submitQuote,
+  getQuotesForRequest,
   selectLawyer,
   markComplete,
   confirmComplete
@@ -19,7 +20,8 @@ router.use(authenticateToken);
 // Client routes
 router.post('/', createServiceRequest); // Create new service request
 router.get('/my-requests', getMyRequests); // Get client's own requests
-router.post('/:id/select-lawyer', selectLawyer); // Select lawyer from quotes
+router.get('/:id/quotes', getQuotesForRequest); // Get all quotes for a request
+router.post('/:id/select', selectLawyer); // Select lawyer from quotes
 router.patch('/:id/confirm-complete', confirmComplete); // Confirm completion and rate
 
 // Lawyer routes
