@@ -49,8 +49,10 @@ export const LegalServicesPage: React.FC = () => {
       <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-3 text-gray-900">Legal Service Packages</h1>
-            <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 tracking-tight leading-tight">
+              Legal Service Packages
+            </h1>
+            <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed font-medium">
               Fixed-price legal services by verified lawyers. Transparent pricing, clear deliverables, professional results.
             </p>
           </div>
@@ -253,35 +255,35 @@ export const LegalServicesPage: React.FC = () => {
       {/* Benefits Section */}
       <section className="py-12 bg-gradient-to-br from-gray-50 to-blue-50 border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-center mb-8 text-gray-900">Why Choose Our Legal Service Packages?</h2>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10 text-gray-900 tracking-tight leading-tight">Why Choose Our Legal Service Packages?</h2>
           <div className="grid md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
                 <DollarSign className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="font-semibold mb-2">Fixed Pricing</h3>
-              <p className="text-sm text-gray-600">Know exactly what you'll pay upfront. No hidden fees or surprises.</p>
+              <h3 className="font-bold text-lg mb-2 text-gray-900">Fixed Pricing</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">Know exactly what you'll pay upfront. No hidden fees or surprises.</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="font-semibold mb-2">Verified Lawyers</h3>
-              <p className="text-sm text-gray-600">All lawyers are verified members of the Law Society of Kenya.</p>
+              <h3 className="font-bold text-lg mb-2 text-gray-900">Verified Lawyers</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">All lawyers are verified members of the Law Society of Kenya.</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <FileText className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="font-semibold mb-2">Clear Deliverables</h3>
-              <p className="text-sm text-gray-600">Every package lists exactly what you'll receive.</p>
+              <h3 className="font-bold text-lg mb-2 text-gray-900">Clear Deliverables</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">Every package lists exactly what you'll receive.</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Clock className="h-6 w-6 text-amber-600" />
               </div>
-              <h3 className="font-semibold mb-2">Time Estimates</h3>
-              <p className="text-sm text-gray-600">Clear delivery timeframes so you can plan accordingly.</p>
+              <h3 className="font-bold text-lg mb-2 text-gray-900">Time Estimates</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">Clear delivery timeframes so you can plan accordingly.</p>
             </div>
           </div>
         </div>
