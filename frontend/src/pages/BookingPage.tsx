@@ -269,7 +269,6 @@ export const BookingPage: React.FC = () => {
                   >
                     <option value="video">Video Call</option>
                     <option value="phone">Phone Call</option>
-                    <option value="in-person">In-Person (if available)</option>
                   </select>
                 </div>
 
