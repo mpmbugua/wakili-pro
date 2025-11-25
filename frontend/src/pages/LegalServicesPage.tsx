@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
 import { 
-  Search, X, Clock, DollarSign, ChevronDown, CheckCircle,
+  Clock, DollarSign, ChevronDown, CheckCircle,
   Home, Briefcase, Heart, Users, Copyright, Gavel, FileText, TrendingUp
 } from 'lucide-react';
 import { servicePackageExamples, serviceCategories, getExamplesByCategory } from '../data/servicePackageExamples';
@@ -48,7 +48,7 @@ export const LegalServicesPage: React.FC = () => {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-8">
+          <div className="text-center">
             <h1 className="text-2xl font-semibold text-slate-900 mb-2">
               Legal Service Packages
             </h1>
@@ -56,33 +56,11 @@ export const LegalServicesPage: React.FC = () => {
               Fixed-price legal services by verified lawyers. Transparent pricing, clear deliverables, professional results.
             </p>
           </div>
-
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search for legal services... (e.g., 'land conveyancing', 'company registration')"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-lg border-0 text-gray-900 focus:ring-2 focus:ring-blue-400"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2"
-                >
-                  <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                </button>
-              )}
-            </div>
-          </div>
         </div>
       </section>
 
       {/* Filters */}
-      <section className="bg-white border-b border-gray-200 sticky top-14 z-10">
+      <section className="bg-white border-b border-blue-200 sticky top-14 z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4 flex-wrap">
@@ -90,7 +68,7 @@ export const LegalServicesPage: React.FC = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="All Categories">All Categories</option>
                 {serviceCategories.map(cat => (
@@ -102,7 +80,7 @@ export const LegalServicesPage: React.FC = () => {
               <select
                 value={priceRange}
                 onChange={(e) => setPriceRange(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="All Prices">All Prices</option>
                 <option value="Under KES 10,000">Under KES 10,000</option>
@@ -112,8 +90,8 @@ export const LegalServicesPage: React.FC = () => {
               </select>
             </div>
 
-            <div className="text-sm text-gray-600">
-              {filteredServices.length} service{filteredServices.length !== 1 ? 's' : ''} found
+            <div className="text-sm text-slate-600">
+              <span className="font-semibold text-slate-900">{filteredServices.length}</span> service{filteredServices.length !== 1 ? 's' : ''} found
             </div>
           </div>
         </div>
