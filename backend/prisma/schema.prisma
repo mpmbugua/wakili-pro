@@ -198,6 +198,9 @@ model User {
   documentReviewsAsQC                                        DocumentReview[]        @relation("DocumentReviewQC")
   lawyerLetterhead                                           LawyerLetterhead?       @relation("LawyerLetterhead")
   letterheadApprovals                                        LawyerLetterhead[]      @relation("LetterheadApprover")
+  clientServiceRequests                                      ServiceRequest[]        @relation("ClientServiceRequests")
+  selectedLawyerRequests                                     ServiceRequest[]        @relation("SelectedLawyerRequests")
+  lawyerQuotes                                               LawyerQuote[]           @relation("LawyerQuotes")
 }
 
 model UserProfile {
@@ -890,4 +893,72 @@ enum UrgencyLevel {
   EXPRESS
   STANDARD
   ECONOMY
+}
+
+model ServiceRequest {
+  id                    String         @id @default(cuid())
+  userId                String
+  serviceCategory       String
+  serviceTitle          String
+  description           String
+  estimatedBudget       Int
+  estimatedFee          Int
+  tier                  String
+  urgency               String
+  phoneNumber           String
+  email                 String
+  transactionValue      Int?
+  dealValue             Int?
+  claimAmount           Int?
+  businessType          String?
+  complexity            String?
+  commitmentFeePaid     Boolean        @default(false)
+  commitmentFeeAmount   Int            @default(500)
+  commitmentFeeTxId     String?
+  status                RequestStatus  @default(PENDING)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  selectedLawyerId      String?
+  user                  User           @relation("ClientServiceRequests", fields: [userId], references: [id])
+  selectedLawyer        User?          @relation("SelectedLawyerRequests", fields: [selectedLawyerId], references: [id])
+  quotes                LawyerQuote[]
+  completedAt           DateTime?
+  confirmedAt           DateTime?
+  rating                Int?
+  feedback              String?
+
+  @@index([userId])
+  @@index([status])
+  @@index([tier])
+}
+
+model LawyerQuote {
+  id                  String         @id @default(cuid())
+  serviceRequestId    String
+  lawyerId            String
+  connectionFeePaid   Boolean        @default(false)
+  connectionFeeAmount Int
+  connectionFeeTxId   String?
+  proposedFee         Int
+  proposedTimeline    String
+  approach            String
+  offersMilestones    Boolean        @default(false)
+  milestones          Json?
+  submittedAt         DateTime       @default(now())
+  isSelected          Boolean        @default(false)
+  serviceRequest      ServiceRequest @relation(fields: [serviceRequestId], references: [id])
+  lawyer              User           @relation("LawyerQuotes", fields: [lawyerId], references: [id])
+
+  @@index([serviceRequestId])
+  @@index([lawyerId])
+}
+
+enum RequestStatus {
+  PENDING
+  QUOTES_RECEIVED
+  LAWYER_SELECTED
+  IN_PROGRESS
+  COMPLETED
+  CONFIRMED
+  CANCELLED
 }

@@ -140,6 +140,10 @@ app.use('/api/subscriptions', subscriptionRouter);
 import certificationRouter from './routes/certifications';
 app.use('/api/certifications', certificationRouter);
 
+// Mount service request routes (Connection Fee Business Model)
+import serviceRequestRouter from './routes/serviceRequests';
+app.use('/api/service-requests', serviceRequestRouter);
+
 // Mount consultation routes
 import consultationsRouter from './routes/consultations';
 app.use('/api/consultations', consultationsRouter);
