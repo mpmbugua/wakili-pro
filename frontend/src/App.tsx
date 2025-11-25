@@ -20,6 +20,7 @@ import VerifyCertificate from './pages/VerifyCertificate';
 import ServiceRequestPage from './pages/ServiceRequestPage';
 import LawyerQuoteSubmissionPage from './pages/LawyerQuoteSubmissionPage';
 import QuoteComparisonPage from './pages/QuoteComparisonPage';
+import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -110,6 +111,16 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <QuoteComparisonPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Service Tracking (Protected) */}
+            <Route 
+              path="/service-requests/:id/track" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <ServiceTrackingPage />
                 </ProtectedRoute>
               } 
             />

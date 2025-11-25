@@ -252,6 +252,36 @@ export const getServiceRequest = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ error: 'Unauthorized to view this request' });
     }
 
+    // Get selected quote details if lawyer is selected
+    let selectedQuote = null;
+    if (serviceRequest.selectedLawyerId) {
+      selectedQuote = await prisma.lawyerQuote.findFirst({
+        where: {
+          serviceRequestId: id,
+          lawyerId: serviceRequest.selectedLawyerId,
+          isSelected: true
+        }
+      });
+    }
+
+    // Get selected lawyer profile
+    let selectedLawyerProfile = null;
+    if (serviceRequest.selectedLawyer) {
+      const lawyerProfile = await prisma.lawyerProfile.findUnique({
+        where: { userId: serviceRequest.selectedLawyer.id },
+        select: {
+          rating: true,
+          yearsOfExperience: true,
+          specializations: true
+        }
+      });
+      
+      selectedLawyerProfile = {
+        ...serviceRequest.selectedLawyer,
+        lawyerProfile
+      };
+    }
+
     res.json({
       success: true,
       serviceRequest: {
@@ -262,7 +292,20 @@ export const getServiceRequest = async (req: AuthRequest, res: Response) => {
         estimatedFee: serviceRequest.estimatedFee,
         tier: serviceRequest.tier,
         urgency: serviceRequest.urgency,
+        status: serviceRequest.status,
         createdAt: serviceRequest.createdAt,
+        completedAt: serviceRequest.completedAt,
+        confirmedAt: serviceRequest.confirmedAt,
+        rating: serviceRequest.rating,
+        feedback: serviceRequest.feedback,
+        selectedLawyer: selectedLawyerProfile,
+        selectedQuote: selectedQuote ? {
+          proposedFee: selectedQuote.proposedFee,
+          proposedTimeline: selectedQuote.proposedTimeline,
+          approach: selectedQuote.approach,
+          offersMilestones: selectedQuote.offersMilestones,
+          milestones: selectedQuote.milestones
+        } : null,
         user: {
           firstName: isOwner || connectionFeePaid ? serviceRequest.user.firstName : 'Client',
           lastName: isOwner || connectionFeePaid ? serviceRequest.user.lastName : ''
@@ -806,11 +849,32 @@ export const confirmComplete = async (req: AuthRequest, res: Response) => {
       }
     });
 
-    // TODO: Update lawyer's rating and stats
+    // Update lawyer's rating and review count
+    if (serviceRequest.selectedLawyerId) {
+      const lawyerProfile = await prisma.lawyerProfile.findUnique({
+        where: { userId: serviceRequest.selectedLawyerId },
+        select: { rating: true, reviewCount: true }
+      });
+
+      if (lawyerProfile) {
+        const currentRating = lawyerProfile.rating || 0;
+        const currentReviewCount = lawyerProfile.reviewCount || 0;
+        const newReviewCount = currentReviewCount + 1;
+        const newRating = ((currentRating * currentReviewCount) + rating) / newReviewCount;
+
+        await prisma.lawyerProfile.update({
+          where: { userId: serviceRequest.selectedLawyerId },
+          data: {
+            rating: newRating,
+            reviewCount: newReviewCount
+          }
+        });
+      }
+    }
 
     res.json({
       success: true,
-      message: 'Service confirmed and rated successfully'
+      message: 'Service confirmed and rated successfully. Thank you for your feedback!'
     });
   } catch (error) {
     console.error('Error confirming completion:', error);
