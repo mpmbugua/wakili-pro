@@ -116,13 +116,12 @@ model LawyerProfile {
   providerId                          String           @unique
   userId                              String           @unique
   licenseNumber                       String?          @unique
-  tier                                LawyerTier?      @default(LITE)
+  tier                                LawyerTier?      @default(FREE)
   specializations                     String[]
   phoneNumber                         String?
   yearOfAdmission                     Int?
   location                            String?
   linkedInProfile                     String?
-  tier                                String           @default("FREE")
   isVerified                          Boolean          @default(false)
   rating                              Float?           @default(0)
   reviewCount                         Int?             @default(0)
