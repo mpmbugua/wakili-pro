@@ -88,6 +88,19 @@ const SuperAdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }
   return <>{children}</>;
 };
 
+// Wrapper components to inject user prop safely
+const AdminDashboardWrapper: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  if (!user) return null;
+  return <AdminDashboard user={user} />;
+};
+
+const SuperAdminDashboardWrapper: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  if (!user) return null;
+  return <SuperAdminDashboard user={user} />;
+};
+
 function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const accessToken = useAuthStore((state) => state.accessToken);
@@ -227,7 +240,7 @@ function App() {
               path="/admin" 
               element={
                 <AdminRoute hydrated={hydrated}>
-                  <AdminDashboard user={user!} />
+                  <AdminDashboardWrapper />
                 </AdminRoute>
               } 
             />
@@ -245,7 +258,7 @@ function App() {
               path="/super-admin" 
               element={
                 <SuperAdminRoute hydrated={hydrated}>
-                  <SuperAdminDashboard user={user!} />
+                  <SuperAdminDashboardWrapper />
                 </SuperAdminRoute>
               } 
             />
