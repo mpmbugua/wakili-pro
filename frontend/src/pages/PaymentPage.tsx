@@ -34,7 +34,7 @@ export const PaymentPage: React.FC = () => {
   const bookingDetails = location.state as (BookingDetails | DocumentPaymentDetails) | null;
   const isDocumentPayment = bookingDetails && 'reviewId' in bookingDetails;
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mpesa'); // Default to M-Pesa
   const [loading, setLoading] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -411,6 +411,15 @@ export const PaymentPage: React.FC = () => {
           <div>
             <h2 className="text-2xl font-display font-bold text-slate-900 mb-6">Payment Details</h2>
             
+            {/* M-Pesa Info Banner */}
+            <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-6 flex items-start">
+              <Smartphone className="h-5 w-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-green-800">
+                <p className="font-medium mb-1">Quick & Easy Payment with M-Pesa</p>
+                <p className="text-green-700">Pay instantly using your M-Pesa mobile money. You'll receive an STK push notification to complete payment.</p>
+              </div>
+            </div>
+
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-start">
                 <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
