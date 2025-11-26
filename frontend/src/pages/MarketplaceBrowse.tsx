@@ -472,9 +472,10 @@ export const MarketplaceBrowse: React.FC = () => {
   const handlePurchaseDocument = (docId: string, docTitle: string) => {
     if (!isAuthenticated) {
       sessionStorage.setItem('pendingPurchase', JSON.stringify({ docId, docTitle }));
-      navigate('/login', { state: { from: `/checkout/${docId}`, message: 'Please log in to purchase documents' } });
+      navigate('/login', { state: { from: '/marketplace', message: 'Please log in to purchase documents' } });
     } else {
-      navigate(`/checkout/${docId}`);
+      // Redirect to marketplace page which will handle the purchase
+      navigate('/marketplace');
     }
   };
 

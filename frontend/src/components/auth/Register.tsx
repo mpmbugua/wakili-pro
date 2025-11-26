@@ -101,20 +101,32 @@ const Register: React.FC = () => {
       const pendingPurchase = sessionStorage.getItem('pendingPurchase');
       
       let redirectPath = '/dashboard';
+      let redirectState: any = undefined;
       
       if (pendingBooking) {
         const booking = JSON.parse(pendingBooking);
         redirectPath = `/booking/${booking.lawyerId}`;
+        redirectState = {
+          lawyerName: booking.lawyerName,
+          hourlyRate: booking.hourlyRate,
+          profileImage: booking.profileImage
+        };
         sessionStorage.removeItem('pendingBooking');
       } else if (pendingPurchase) {
         const purchase = JSON.parse(pendingPurchase);
-        redirectPath = `/checkout/${purchase.docId}`;
-        sessionStorage.removeItem('pendingPurchase');
+        // Redirect to marketplace page with purchase info in sessionStorage
+        redirectPath = '/marketplace';
+        redirectState = {
+          docId: purchase.docId,
+          docTitle: purchase.docTitle
+        };
+        // Keep in sessionStorage so marketplace page can handle it
+        // Don't remove it yet - let marketplace page handle it
       }
       
       // Wait a moment for zustand persist to save state
       setTimeout(() => {
-        navigate(redirectPath);
+        navigate(redirectPath, { state: redirectState });
       }, 100);
     }
   };

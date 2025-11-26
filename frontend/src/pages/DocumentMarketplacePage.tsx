@@ -23,6 +23,26 @@ const DocumentMarketplacePage: React.FC = () => {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Check for pending purchase on mount (after login/registration)
+  useEffect(() => {
+    const pendingPurchase = sessionStorage.getItem('pendingPurchase');
+    if (pendingPurchase && data?.templates) {
+      try {
+        const purchase = JSON.parse(pendingPurchase);
+        const template = data.templates.find((t: DocumentTemplate) => t.id === purchase.docId);
+        if (template) {
+          // Auto-open the purchase modal for this template
+          setSelectedTemplate(template);
+          // Clear the pending purchase
+          sessionStorage.removeItem('pendingPurchase');
+        }
+      } catch (error) {
+        console.error('Error parsing pending purchase:', error);
+        sessionStorage.removeItem('pendingPurchase');
+      }
+    }
+  }, [data?.templates]);
+
   const handlePurchase = async (template: DocumentTemplate | null, aiInput: import('../services/documentMarketplace').PurchaseAIInput) => {
     if (!template || !aiInput) {
       setSelectedTemplate(null);
