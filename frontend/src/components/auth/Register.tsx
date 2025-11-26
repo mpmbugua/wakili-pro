@@ -96,6 +96,15 @@ const Register: React.FC = () => {
     const success = await register(formData);
     
     if (success) {
+      // Check if new user is a lawyer - redirect to onboarding
+      if (formData.role === 'LAWYER') {
+        // Wait a moment for zustand persist to save state
+        setTimeout(() => {
+          navigate('/lawyer/onboarding');
+        }, 100);
+        return;
+      }
+      
       // Check for pending actions in sessionStorage
       const pendingBooking = sessionStorage.getItem('pendingBooking');
       const pendingPurchase = sessionStorage.getItem('pendingPurchase');

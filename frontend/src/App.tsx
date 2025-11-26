@@ -14,6 +14,7 @@ import { LegalServicesPage } from './pages/LegalServicesPage';
 import { BookingPage } from './pages/BookingPage';
 import { PaymentPage } from './pages/PaymentPage';
 import { LawyerProfileSettings } from './pages/LawyerProfileSettings';
+import LawyerOnboarding from './pages/LawyerOnboarding';
 import DocumentServicesPage from './pages/DocumentServicesPage';
 import LawyerSignatureSetup from './pages/LawyerSignatureSetup';
 import DocumentCertificationPage from './pages/DocumentCertificationPage';
@@ -224,6 +225,14 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <LawyerProfileSettings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/lawyer/onboarding" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <LawyerOnboarding />
                 </ProtectedRoute>
               } 
             />

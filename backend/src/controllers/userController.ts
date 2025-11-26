@@ -196,6 +196,10 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
         userId,
         licenseNumber: onboardingData.licenseNumber,
         yearOfAdmission: onboardingData.yearOfAdmission,
+        bio: onboardingData.bio,
+        yearsOfExperience: onboardingData.yearsOfExperience,
+        profileImageUrl: onboardingData.profileImageUrl,
+        linkedInProfile: onboardingData.linkedInProfile,
         specializations: Array.isArray(onboardingData.specializations)
           ? onboardingData.specializations.map((s: any) =>
               typeof s === 'string'
@@ -210,7 +214,8 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
             : '',
         isVerified: false,
         rating: 0,
-        reviewCount: 0
+        reviewCount: 0,
+        tier: 'LITE' // Set free tier by default
       },
       include: {
         user: {

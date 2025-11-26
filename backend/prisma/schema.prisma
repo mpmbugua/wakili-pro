@@ -111,6 +111,7 @@ model LawyerProfile {
   bio                                 String?
   yearsOfExperience                   Int?
   availability                        Json?
+  linkedInProfile                     String?
   id                                  String           @id @default(cuid())
   providerId                          String           @unique
   userId                              String           @unique

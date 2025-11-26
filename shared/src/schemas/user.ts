@@ -29,6 +29,7 @@ export const LawyerOnboardingSchema = z.object({
   bio: z.string().min(100, 'Bio must be at least 100 characters').max(1000),
   yearsOfExperience: z.number().min(0, 'Years of experience cannot be negative').max(60),
   profileImageUrl: z.string().url('Invalid profile image URL').optional(),
+  linkedInProfile: z.string().url('Invalid LinkedIn URL').optional().or(z.literal('')),
 });
 
 export const WorkingHoursSchema = z.object({
