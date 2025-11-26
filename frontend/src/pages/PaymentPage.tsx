@@ -416,7 +416,12 @@ export const PaymentPage: React.FC = () => {
               <Smartphone className="h-5 w-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-green-800">
                 <p className="font-medium mb-1">Quick & Easy Payment with M-Pesa</p>
-                <p className="text-green-700">Pay instantly using your M-Pesa mobile money. You'll receive an STK push notification to complete payment.</p>
+                <p className="text-green-700">
+                  {isDocumentPayment 
+                    ? 'Pay for your document review instantly with M-Pesa. Processing begins immediately after payment confirmation.'
+                    : 'Pay instantly using your M-Pesa mobile money. You\'ll receive an STK push notification to complete payment.'
+                  }
+                </p>
               </div>
             </div>
 
