@@ -22,9 +22,12 @@ const prisma = new PrismaClient();
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('[Register] Received request body:', JSON.stringify(req.body, null, 2));
+    
     // Validate request body
     const validationResult = RegisterSchema.safeParse(req.body);
     if (!validationResult.success) {
+      console.log('[Register] Validation failed:', JSON.stringify(validationResult.error.issues, null, 2));
       res.status(400).json({
         success: false,
         message: 'Validation failed',
