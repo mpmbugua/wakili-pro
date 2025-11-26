@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
 import { 
   User, 
   MapPin, 
   Briefcase, 
-  FileText, 
   Award, 
   Linkedin,
   ArrowRight,
@@ -39,13 +37,13 @@ interface OnboardingFormData {
 }
 
 const SPECIALIZATION_CATEGORIES = [
-  { id: 'CORPORATE', name: 'Corporate Law', description: 'Business, mergers, contracts' },
-  { id: 'CRIMINAL', name: 'Criminal Law', description: 'Defense, prosecution' },
-  { id: 'FAMILY', name: 'Family Law', description: 'Divorce, custody, adoption' },
-  { id: 'PROPERTY', name: 'Property Law', description: 'Real estate, land disputes' },
-  { id: 'IMMIGRATION', name: 'Immigration Law', description: 'Visas, permits, citizenship' },
-  { id: 'IP', name: 'Intellectual Property', description: 'Patents, trademarks, copyright' },
-  { id: 'EMPLOYMENT', name: 'Employment Law', description: 'Labor disputes, contracts' },
+  { id: 'CORPORATE', name: 'Corporate Law', description: 'Business, mergers, contracts', category: 'CORPORATE' },
+  { id: 'CRIMINAL', name: 'Criminal Law', description: 'Defense, prosecution', category: 'CRIMINAL' },
+  { id: 'FAMILY', name: 'Family Law', description: 'Divorce, custody, adoption', category: 'FAMILY' },
+  { id: 'PROPERTY', name: 'Property Law', description: 'Real estate, land disputes', category: 'PROPERTY' },
+  { id: 'IMMIGRATION', name: 'Immigration Law', description: 'Visas, permits, citizenship', category: 'IMMIGRATION' },
+  { id: 'IP', name: 'Intellectual Property', description: 'Patents, trademarks, copyright', category: 'IP' },
+  { id: 'EMPLOYMENT', name: 'Employment Law', description: 'Labor disputes, contracts', category: 'EMPLOYMENT' },
 ];
 
 const KENYAN_COUNTIES = [
@@ -70,7 +68,6 @@ const FREE_TIER_LIMITS = {
 
 export const LawyerOnboarding: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
