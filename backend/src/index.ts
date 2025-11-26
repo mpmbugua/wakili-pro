@@ -64,6 +64,31 @@ app.get('/debug/schemas', (_req: Request, res: Response) => {
   }
 });
 
+// Debug endpoint to test database connection
+app.get('/debug/db-test', async (_req: Request, res: Response) => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    // Try to count users
+    const userCount = await prisma.user.count();
+    
+    await prisma.$disconnect();
+    
+    res.json({
+      success: true,
+      message: 'Database connection works',
+      userCount
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+  }
+});
+
 // Debug endpoint to test registration validation
 app.post('/debug/register-test', async (req: Request, res: Response) => {
   const step = { current: 'start' };
