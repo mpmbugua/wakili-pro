@@ -131,6 +131,7 @@ export const useAuthStore = create<AuthStore>()(
         } catch (error) {
           console.error('Logout error:', error);
         } finally {
+          // Clear state
           set({
             user: null,
             accessToken: null,
@@ -138,6 +139,9 @@ export const useAuthStore = create<AuthStore>()(
             isAuthenticated: false,
             error: null
           });
+          
+          // Force clear localStorage to prevent rehydration
+          localStorage.removeItem('wakili-auth-storage');
         }
       },
 

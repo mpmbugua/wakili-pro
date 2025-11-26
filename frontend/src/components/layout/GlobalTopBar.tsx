@@ -13,8 +13,15 @@ export const GlobalTopBar: React.FC<GlobalTopBarProps> = ({ onMenuClick }) => {
   const { isAuthenticated, user, logout } = useAuthStore();
   
   const handleLogout = async () => {
-    await logout();
-    navigate('/', { replace: true });
+    try {
+      await logout();
+      // Force full page refresh to clear all state
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Still redirect even if logout call fails
+      window.location.href = '/';
+    }
   };
   
   return (
