@@ -106,12 +106,6 @@ model RefreshToken {
 }
 
 model LawyerProfile {
-  profileImageUrl                     String?
-  updatedAt                           DateTime         @updatedAt
-  bio                                 String?
-  yearsOfExperience                   Int?
-  availability                        Json?
-  linkedInProfile                     String?
   id                                  String           @id @default(cuid())
   providerId                          String           @unique
   userId                              String           @unique
@@ -122,6 +116,10 @@ model LawyerProfile {
   yearOfAdmission                     Int?
   location                            String?
   linkedInProfile                     String?
+  profileImageUrl                     String?
+  bio                                 String?
+  yearsOfExperience                   Int?
+  availability                        Json?
   isVerified                          Boolean          @default(false)
   rating                              Float?           @default(0)
   reviewCount                         Int?             @default(0)
@@ -129,6 +127,7 @@ model LawyerProfile {
   featuredUntil                       DateTime?
   status                              String?          @default("ACTIVE")
   createdAt                           DateTime         @default(now())
+  updatedAt                           DateTime         @updatedAt
   User_LawyerProfile_providerIdToUser User             @relation("LawyerProfile_providerIdToUser", fields: [providerId], references: [id])
   user                                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   ServiceBooking                      ServiceBooking[]
