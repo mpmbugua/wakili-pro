@@ -69,6 +69,9 @@ app.post('/debug/register-test', async (req: Request, res: Response) => {
   try {
     const { RegisterSchema } = require('@wakili-pro/shared');
     const { validatePassword } = require('./services/security/passwordPolicyService');
+    const bcrypt = require('bcryptjs');
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
     
     // Step 1: Test validation
     const validationResult = RegisterSchema.safeParse(req.body);
@@ -81,7 +84,7 @@ app.post('/debug/register-test', async (req: Request, res: Response) => {
     }
     
     // Step 2: Test password policy
-    const { password } = validationResult.data;
+    const { password, phoneNumber, email, firstName, lastName, role } = validationResult.data;
     const passwordCheck = validatePassword(password);
     if (!passwordCheck.valid) {
       return res.json({
@@ -91,12 +94,42 @@ app.post('/debug/register-test', async (req: Request, res: Response) => {
       });
     }
     
-    // Step 3: Success
+    // Step 3: Check existing user
+    const existingUser = await prisma.user.findFirst({
+      where: { phoneNumber }
+    });
+    if (existingUser) {
+      return res.json({
+        step: 'existingUser',
+        success: false,
+        message: 'Phone number already exists'
+      });
+    }
+    
+    // Step 4: Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Step 5: Try to create user
+    const user = await prisma.user.create({
+      data: {
+        email: email || `${phoneNumber}@wakili.temp`,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        phoneNumber,
+        role,
+        emailVerified: false
+      }
+    });
+    
+    await prisma.$disconnect();
+    
+    // Success
     res.json({
       step: 'complete',
       success: true,
-      message: 'Validation passed',
-      data: validationResult.data
+      message: 'User created successfully',
+      userId: user.id
     });
   } catch (error) {
     res.status(500).json({
