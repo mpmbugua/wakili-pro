@@ -23,6 +23,7 @@ import LawyerQuoteSubmissionPage from './pages/LawyerQuoteSubmissionPage';
 import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
+import { AdminDashboard } from './components/dashboards/AdminDashboard';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -41,6 +42,26 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }>
   
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Admin Route component for admin-only pages
+const AdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = ({ children, hydrated }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  
+  if (!hydrated) {
+    return null;
+  }
+  
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    return <Navigate to="/dashboard" replace />;
   }
   
   return <>{children}</>;
@@ -182,11 +203,19 @@ function App() {
             
             {/* Admin Routes */}
             <Route 
+              path="/admin" 
+              element={
+                <AdminRoute hydrated={hydrated}>
+                  <AdminDashboard user={user!} />
+                </AdminRoute>
+              } 
+            />
+            <Route 
               path="/admin/articles" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
+                <AdminRoute hydrated={hydrated}>
                   <ArticleManagementPage />
-                </ProtectedRoute>
+                </AdminRoute>
               } 
             />
 
