@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "LawyerProfile" 
+ADD COLUMN IF NOT EXISTS "linkedInProfile" TEXT,
+ADD COLUMN IF NOT EXISTS "tier" TEXT DEFAULT 'FREE';
