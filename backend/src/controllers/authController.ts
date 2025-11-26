@@ -38,17 +38,32 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const { email, password, firstName, lastName, phoneNumber, role } = validationResult.data;
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
+    // Check if user already exists by phone number (primary identifier)
+    const existingUserByPhone = await prisma.user.findFirst({
+      where: { phoneNumber }
     });
 
-    if (existingUser) {
+    if (existingUserByPhone) {
       res.status(409).json({
         success: false,
-        message: 'User with this email already exists'
+        message: 'User with this phone number already exists'
       });
       return;
+    }
+
+    // Check if user already exists by email (if provided)
+    if (email && email.trim() !== '') {
+      const existingUserByEmail = await prisma.user.findUnique({
+        where: { email }
+      });
+
+      if (existingUserByEmail) {
+        res.status(409).json({
+          success: false,
+          message: 'User with this email already exists'
+        });
+        return;
+      }
     }
 
     // Password policy validation
@@ -65,10 +80,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
+    // Create user with optional email
     const user = await prisma.user.create({
       data: {
-        email,
+        email: email && email.trim() !== '' ? email : `${phoneNumber}@wakili.temp`, // Use temp email if not provided
         password: hashedPassword,
         firstName,
         lastName,
@@ -88,10 +103,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       }
     });
 
-    // Generate tokens
+    // Generate tokens using phone number as identifier
     const tokenPayload = {
       userId: user.id,
       email: user.email,
+      phoneNumber: user.phoneNumber || '',
       role: user.role as UserRole
     };
 
@@ -147,11 +163,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { email, password } = validationResult.data;
+    const { identifier, password } = validationResult.data;
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // Determine if identifier is email or phone number
+    const isEmail = identifier.includes('@');
+    
+    // Find user by email or phone number
+    const user = await prisma.user.findFirst({
+      where: isEmail 
+        ? { email: identifier }
+        : { phoneNumber: identifier },
       select: {
         id: true,
         email: true,

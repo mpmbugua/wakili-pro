@@ -5,11 +5,10 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { WakiliLogo } from '../ui/WakiliLogo';
 import { Button } from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';
-import { SocialLoginButtons } from './SocialLoginButtons';
 
 // Inline type to replace shared dependency
 interface LoginRequest {
-  email: string;
+  identifier: string;
   password: string;
 }
 
@@ -19,7 +18,7 @@ const Login: React.FC = () => {
   const { login, isLoading, error, clearError } = useAuthStore();
 
   const [formData, setFormData] = useState<LoginRequest>({
-    email: '',
+    identifier: '',
     password: ''
   });
   
@@ -32,11 +31,9 @@ const Login: React.FC = () => {
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
-    // Email validation
-    if (!formData.email) {
-      errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
+    // Identifier validation (phone or email)
+    if (!formData.identifier) {
+      errors.identifier = 'Phone number or email is required';
     }
 
     // Password validation
@@ -101,20 +98,6 @@ const Login: React.FC = () => {
               </p>
             </div>
 
-            {/* Social Login Buttons */}
-            {/* Temporarily commented out to test if this is causing blank page */}
-            {/* <SocialLoginButtons /> */}
-            
-            {/* Manual Divider to replace what SocialLoginButtons provided */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">Sign in with email</span>
-              </div>
-            </div>
-
             {/* Development Test Credentials Notice */}
             {import.meta.env.DEV && (
               <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -131,35 +114,35 @@ const Login: React.FC = () => {
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-4">
-                {/* Email Field */}
+                {/* Identifier Field (Phone or Email) */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                  <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number or Email
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
+                      id="identifier"
+                      name="identifier"
+                      type="text"
+                      autoComplete="username"
                       required
-                      value={formData.email}
+                      value={formData.identifier}
                       onChange={handleInputChange}
                       className={`w-full pl-12 pr-4 py-3 border-0 rounded-xl bg-gray-50 ${
-                        validationErrors.email 
+                        validationErrors.identifier 
                           ? 'ring-2 ring-red-500 bg-red-50' 
                           : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
                       } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
-                      placeholder="Enter your email address"
+                      placeholder="0712345678 or email@example.com"
                     />
                   </div>
-                  {validationErrors.email && (
+                  {validationErrors.identifier && (
                     <p className="mt-2 text-sm text-red-600 flex items-center">
                       <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
-                      {validationErrors.email}
+                      {validationErrors.identifier}
                     </p>
                   )}
                 </div>

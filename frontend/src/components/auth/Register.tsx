@@ -6,7 +6,6 @@ import { Mail, Lock, User, Phone, Eye, EyeOff, Scale } from 'lucide-react';
 import { WakiliLogo } from '../ui/WakiliLogo';
 import { Button } from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';
-import { SocialLoginButtons } from './SocialLoginButtons';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -41,11 +40,16 @@ const Register: React.FC = () => {
       errors.lastName = 'Last name must be at least 2 characters';
     }
 
-    // Email validation
-    if (!formData.email) {
-      errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    // Email validation (optional but must be valid if provided)
+    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = 'Please enter a valid email address';
+    }
+
+    // Phone number validation (required)
+    if (!formData.phoneNumber) {
+      errors.phoneNumber = 'Phone number is required';
+    } else if (!/^(\+254|0)[17]\d{8}$/.test(formData.phoneNumber)) {
+      errors.phoneNumber = 'Please enter a valid Kenyan phone number (e.g., 0712345678)';
     }
 
     // Password validation
@@ -55,11 +59,6 @@ const Register: React.FC = () => {
       errors.password = 'Password must be at least 8 characters';
     } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
       errors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-    }
-
-    // Phone number validation (optional but if provided must be valid)
-    if (formData.phoneNumber && !/^(\+254|0)[17]\d{8}$/.test(formData.phoneNumber)) {
-      errors.phoneNumber = 'Please enter a valid Kenyan phone number';
     }
 
     setValidationErrors(errors);
@@ -119,9 +118,6 @@ const Register: React.FC = () => {
               </p>
             </div>
 
-            {/* Social Login Buttons */}
-            <SocialLoginButtons />
-
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-4">
                 {/* Name Fields - Side by Side */}
@@ -180,43 +176,10 @@ const Register: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Email Field */}
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className={`w-full pl-12 pr-4 py-3 border-0 rounded-xl bg-gray-50 ${
-                        validationErrors.email 
-                          ? 'ring-2 ring-red-500 bg-red-50' 
-                          : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
-                      } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
-                      placeholder="john.doe@example.com"
-                    />
-                  </div>
-                  {validationErrors.email && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center">
-                      <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
-                      {validationErrors.email}
-                    </p>
-                  )}
-                </div>
-
-                {/* Phone Number Field */}
+                {/* Phone Number Field - Now Required */}
                 <div>
                   <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number <span className="text-gray-400 text-xs">(Optional)</span>
+                    Phone Number
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -227,6 +190,7 @@ const Register: React.FC = () => {
                       name="phoneNumber"
                       type="tel"
                       autoComplete="tel"
+                      required
                       value={formData.phoneNumber}
                       onChange={handleInputChange}
                       className={`w-full pl-12 pr-4 py-3 border-0 rounded-xl bg-gray-50 ${
@@ -234,13 +198,45 @@ const Register: React.FC = () => {
                           ? 'ring-2 ring-red-500 bg-red-50' 
                           : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
                       } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
-                      placeholder="+254712345678"
+                      placeholder="0712345678 or +254712345678"
                     />
                   </div>
                   {validationErrors.phoneNumber && (
                     <p className="mt-2 text-sm text-red-600 flex items-center">
                       <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
                       {validationErrors.phoneNumber}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email Field - Now Optional */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address <span className="text-gray-400 text-xs">(Optional)</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className={`w-full pl-12 pr-4 py-3 border-0 rounded-xl bg-gray-50 ${
+                        validationErrors.email 
+                          ? 'ring-2 ring-red-500 bg-red-50' 
+                          : 'focus:ring-2 focus:ring-sky-500 focus:bg-white'
+                      } placeholder-gray-400 text-gray-900 transition-all duration-200 focus:outline-none text-sm`}
+                      placeholder="john.doe@example.com (optional)"
+                    />
+                  </div>
+                  {validationErrors.email && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center">
+                      <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
+                      {validationErrors.email}
                     </p>
                   )}
                 </div>

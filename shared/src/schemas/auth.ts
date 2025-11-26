@@ -1,20 +1,19 @@
 import { z } from 'zod';
 
 export const LoginSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  identifier: z.string().min(1, 'Phone number or email is required'), // Can be phone or email
   password: z.string().min(1, 'Password is required'),
 });
 
 export const RegisterSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  email: z.string().email('Invalid email format').optional().or(z.literal('')),
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number'),
   firstName: z.string().min(2, 'First name must be at least 2 characters').max(50),
   lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50),
   phoneNumber: z.string()
-    .regex(/^(\+254|0)[17]\d{8}$/, 'Invalid Kenyan phone number format')
-    .optional(),
+    .regex(/^(\+254|0)[17]\d{8}$/, 'Invalid Kenyan phone number format (e.g., 0712345678 or +254712345678)'),
   role: z.enum(['PUBLIC', 'LAWYER']),
 });
 
