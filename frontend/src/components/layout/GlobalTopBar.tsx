@@ -15,10 +15,11 @@ export const GlobalTopBar: React.FC<GlobalTopBarProps> = ({ onMenuClick }) => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout failed:', error);
-      navigate('/', { replace: true });
+    } finally {
+      // Always redirect to home and reload to ensure clean state
+      window.location.href = '/';
     }
   };
   

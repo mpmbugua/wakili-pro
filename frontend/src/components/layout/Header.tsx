@@ -15,8 +15,13 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      window.location.href = '/';
+    }
   };
 
   return (
