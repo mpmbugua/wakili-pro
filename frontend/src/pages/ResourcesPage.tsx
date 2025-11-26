@@ -29,17 +29,18 @@ export const ResourcesPage: React.FC = () => {
   const fetchArticles = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await axiosInstance.get('/api/articles/published?limit=6');
       
       if (response.data.success) {
         setArticles(response.data.data.articles || []);
       } else {
-        setError('Failed to load articles');
+        // No error if no articles yet - just show empty state
+        setArticles([]);
       }
     } catch (err) {
       console.error('Error fetching articles:', err);
-      setError('Failed to load articles');
-      // Fall back to showing no articles rather than breaking the page
+      // Don't set error - just show empty state gracefully
       setArticles([]);
     } finally {
       setLoading(false);
