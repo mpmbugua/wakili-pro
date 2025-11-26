@@ -944,9 +944,18 @@ export const MarketplaceBrowse: React.FC = () => {
               </button>
               <button
                 onClick={() => {
-                  // For now, show an alert. In production, this would initiate the actual purchase flow
-                  alert(`Purchase flow for "${purchasingDocument.title}" would be initiated here.\n\nThis is a demo marketplace. In production, you would be redirected to the M-Pesa payment page.`);
-                  setPurchasingDocument(null);
+                  if (purchasingDocument) {
+                    // Redirect to payment page with document purchase details
+                    navigate('/payment/document/marketplace', {
+                      state: {
+                        documentType: purchasingDocument.title,
+                        serviceType: 'marketplace-purchase',
+                        price: purchasingDocument.price,
+                        fileName: purchasingDocument.title,
+                        documentId: purchasingDocument.id
+                      }
+                    });
+                  }
                 }}
                 className="flex-1 px-4 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
               >
