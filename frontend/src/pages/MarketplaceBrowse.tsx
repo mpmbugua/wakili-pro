@@ -948,11 +948,11 @@ export const MarketplaceBrowse: React.FC = () => {
                     // Redirect to payment page with document purchase details
                     navigate('/payment/document/marketplace', {
                       state: {
+                        reviewId: purchasingDocument.id,
                         documentType: purchasingDocument.title,
                         serviceType: 'marketplace-purchase',
                         price: purchasingDocument.price,
                         fileName: purchasingDocument.title,
-                        documentId: purchasingDocument.id
                       }
                     });
                   }

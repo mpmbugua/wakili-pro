@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
 import { CheckCircle, Upload, Sparkles, Shield, Clock, AlertCircle } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
 
 type ServiceType = 'ai-review' | 'certification' | null;
 type DocumentSource = 'marketplace' | 'external' | null;
@@ -13,6 +14,7 @@ interface UploadedFile {
 
 const DocumentServicesPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
   const [selectedService, setSelectedService] = useState<ServiceType>(null);
   const [documentSource, setDocumentSource] = useState<DocumentSource>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -21,6 +23,27 @@ const DocumentServicesPage: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Restore pending document review after user logs in/registers
+  useEffect(() => {
+    if (isAuthenticated) {
+      const pendingReview = sessionStorage.getItem('pendingDocumentReview');
+      if (pendingReview) {
+        try {
+          const reviewData = JSON.parse(pendingReview);
+          setSelectedService(reviewData.selectedService);
+          setDocumentType(reviewData.documentType);
+          setDocumentCategory(reviewData.documentCategory);
+          setDocumentSource('external');
+          
+          // Show a message to the user
+          alert(`Welcome back! Your document "${reviewData.fileName}" is ready to submit. Please re-upload the file to continue.`);
+        } catch (error) {
+          console.error('Error restoring pending review:', error);
+        }
+      }
+    }
+  }, [isAuthenticated]);
 
   const handleFileSelect = (file: File) => {
     if (file.size > 20 * 1024 * 1024) {
@@ -88,6 +111,27 @@ const DocumentServicesPage: React.FC = () => {
       return;
     }
 
+    // Check authentication before proceeding
+    if (!isAuthenticated) {
+      // Store pending document review details in sessionStorage
+      sessionStorage.setItem('pendingDocumentReview', JSON.stringify({
+        fileName: uploadedFile.file.name,
+        documentType,
+        documentCategory,
+        selectedService,
+        price: calculatePrice()
+      }));
+      
+      // Redirect to registration/login
+      navigate('/register', { 
+        state: { 
+          returnTo: '/document-services',
+          message: 'Please register or login to submit your document for review'
+        } 
+      });
+      return;
+    }
+
     setIsUploading(true);
     setUploadProgress(0);
 
@@ -127,6 +171,9 @@ const DocumentServicesPage: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
+        // Clear pending review from sessionStorage
+        sessionStorage.removeItem('pendingDocumentReview');
+        
         // Redirect to payment page with document review details
         if (data.data.paymentRequired) {
           navigate(`/payment/document/${data.data.reviewId}`, {

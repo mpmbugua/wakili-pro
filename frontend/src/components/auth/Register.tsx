@@ -99,6 +99,7 @@ const Register: React.FC = () => {
       // Check for pending actions in sessionStorage
       const pendingBooking = sessionStorage.getItem('pendingBooking');
       const pendingPurchase = sessionStorage.getItem('pendingPurchase');
+      const pendingDocumentReview = sessionStorage.getItem('pendingDocumentReview');
       
       let redirectPath = '/dashboard';
       let redirectState: any = undefined;
@@ -122,6 +123,11 @@ const Register: React.FC = () => {
         };
         // Keep in sessionStorage so marketplace page can handle it
         // Don't remove it yet - let marketplace page handle it
+      } else if (pendingDocumentReview) {
+        // Redirect to document services page to restore pending review
+        redirectPath = '/document-services';
+        // Keep in sessionStorage so the page can restore the state
+        // Don't remove it - DocumentServicesPage will handle it
       }
       
       // Wait a moment for zustand persist to save state

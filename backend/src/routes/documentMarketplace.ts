@@ -4,10 +4,10 @@ import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// List all available document templates
-router.get('/templates', authenticateToken, listDocumentTemplates);
+// List all available document templates (public)
+router.get('/templates', listDocumentTemplates);
 
-// Generate a document from a template (AI-powered)
+// Generate a document from a template (AI-powered) - requires auth
 router.post('/generate', authenticateToken, generateDocument);
 
 // Purchase a generated document

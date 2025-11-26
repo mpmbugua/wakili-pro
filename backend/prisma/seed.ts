@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { nanoid } from 'nanoid';
 
 const prisma = new PrismaClient();
 
@@ -103,6 +104,95 @@ async function main() {
     console.log('');
   }
 
+  // Seed sample document templates
+  console.log('📄 Seeding document templates...');
+  
+  const documentTemplates = [
+    {
+      name: 'Employment Contract',
+      type: 'CONTRACT',
+      description: 'Standard employment contract template for Kenyan businesses',
+      template: 'Employment contract template content',
+      priceKES: 2500,
+      isActive: true,
+      isPublic: true,
+      url: '/templates/employment-contract',
+      consultationId: nanoid()
+    },
+    {
+      name: 'Non-Disclosure Agreement (NDA)',
+      type: 'AGREEMENT',
+      description: 'Confidentiality agreement to protect sensitive business information',
+      template: 'NDA template content',
+      priceKES: 1500,
+      isActive: true,
+      isPublic: true,
+      url: '/templates/nda',
+      consultationId: nanoid()
+    },
+    {
+      name: 'Lease Agreement',
+      type: 'AGREEMENT',
+      description: 'Residential or commercial property lease agreement',
+      template: 'Lease agreement template content',
+      priceKES: 3000,
+      isActive: true,
+      isPublic: true,
+      url: '/templates/lease-agreement',
+      consultationId: nanoid()
+    },
+    {
+      name: 'Power of Attorney',
+      type: 'LEGAL_DOCUMENT',
+      description: 'General or special power of attorney document',
+      template: 'Power of attorney template content',
+      priceKES: 2000,
+      isActive: true,
+      isPublic: true,
+      url: '/templates/power-of-attorney',
+      consultationId: nanoid()
+    },
+    {
+      name: 'Business Partnership Agreement',
+      type: 'AGREEMENT',
+      description: 'Partnership agreement for business ventures',
+      template: 'Partnership agreement template content',
+      priceKES: 4000,
+      isActive: true,
+      isPublic: true,
+      url: '/templates/partnership-agreement',
+      consultationId: nanoid()
+    },
+    {
+      name: 'Will and Testament',
+      type: 'LEGAL_DOCUMENT',
+      description: 'Last will and testament document',
+      template: 'Will template content',
+      priceKES: 3500,
+      isActive: true,
+      isPublic: true,
+      url: '/templates/will',
+      consultationId: nanoid()
+    }
+  ];
+
+  for (const template of documentTemplates) {
+    const existing = await prisma.documentTemplate.findFirst({
+      where: { name: template.name }
+    });
+
+    if (!existing) {
+      await prisma.documentTemplate.create({
+        data: {
+          id: nanoid(),
+          ...template
+        }
+      });
+      console.log(`   ✅ Created template: ${template.name}`);
+    }
+  }
+
+  console.log('');
   console.log('🎉 Database seeding completed!');
 }
 
