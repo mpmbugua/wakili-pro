@@ -13,7 +13,7 @@ export const RegisterSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters').max(50),
   lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50),
   phoneNumber: z.string()
-    .regex(/^(\+254|0)[17]\d{8}$/, 'Invalid Kenyan phone number format (e.g., 0712345678 or +254712345678)'),
+    .regex(/^(\+254|0)[17]\d{8}$/, 'Invalid Kenyan phone number. Must be 10 digits starting with 07 or 01 (e.g., 0712345678, 0112345678)'),
   role: z.enum(['PUBLIC', 'LAWYER']),
 });
 
