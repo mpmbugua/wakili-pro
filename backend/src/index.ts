@@ -46,6 +46,24 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// Debug endpoint to test schema imports
+app.get('/debug/schemas', (_req: Request, res: Response) => {
+  try {
+    const { RegisterSchema } = require('@wakili-pro/shared');
+    res.json({
+      success: true,
+      registerSchemaExists: !!RegisterSchema,
+      registerSchemaType: typeof RegisterSchema
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+  }
+});
+
 // (Optional) Heap snapshot endpoint for diagnostics (disable in production if not needed)
 if (process.env.NODE_ENV !== 'production') {
   app.get('/heapdump', async (_req: Request, res: Response) => {
