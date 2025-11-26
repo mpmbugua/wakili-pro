@@ -76,26 +76,26 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       </main>
 
       {/* Simple Footer */}
-      <footer className="bg-slate-50 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <WakiliLogo size="sm" variant="full" />
-              <p className="text-xs text-slate-600 mt-2">
+              <p className="text-xs text-slate-400 mt-2">
                 &copy; 2025 Wakili Pro. All rights reserved.
               </p>
             </div>
             <div className="flex space-x-6">
-              <Link to="/" className="text-sm text-slate-600 hover:text-slate-900">
+              <Link to="/" className="text-sm text-slate-400 hover:text-slate-200">
                 Home
               </Link>
-              <Link to="/ai" className="text-sm text-slate-600 hover:text-slate-900">
+              <Link to="/ai" className="text-sm text-slate-400 hover:text-slate-200">
                 AI Assistant
               </Link>
-              <Link to="/lawyers" className="text-sm text-slate-600 hover:text-slate-900">
+              <Link to="/lawyers" className="text-sm text-slate-400 hover:text-slate-200">
                 Find Lawyers
               </Link>
-              <Link to="/marketplace" className="text-sm text-slate-600 hover:text-slate-900">
+              <Link to="/marketplace" className="text-sm text-slate-400 hover:text-slate-200">
                 Documents
               </Link>
             </div>

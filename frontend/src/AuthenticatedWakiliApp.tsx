@@ -303,7 +303,7 @@ export default function AuthenticatedWakiliApp() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-16 mt-32">
+      <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="text-4xl font-bold mb-6">Wakili Pro</div>
           <p className="text-xl text-gray-300 mb-6">Professional Legal Services Platform for Kenya</p>

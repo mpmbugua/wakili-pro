@@ -196,7 +196,7 @@ export default function WakiliProApp() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16 mt-32">
+      <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="text-3xl font-bold mb-6">Wakili Pro</div>
           <p className="text-gray-400 mb-6 text-lg">Professional Legal Services Platform for Kenya</p>
