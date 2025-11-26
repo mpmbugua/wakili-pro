@@ -11,6 +11,16 @@ import {
   paymentProcessorDown,
   paymentRollback
 } from '../controllers/paymentErrorStubs';
+
+// M-Pesa Daraja API controllers
+import {
+  initiateMpesaPayment,
+  mpesaCallback,
+  mpesaTimeout,
+  checkPaymentStatus,
+  getPaymentHistory as getMpesaHistory,
+} from '../controllers/mpesaController';
+
 // Stub handlers for missing endpoints
 import { Request, Response } from 'express';
 
@@ -45,11 +55,17 @@ import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = express.Router();
 
 
-// Payment processing routes (match test expectations)
+// M-Pesa Daraja API routes (PRODUCTION READY)
+router.post('/mpesa/initiate', authenticateToken, initiateMpesaPayment);
+router.post('/mpesa/callback', mpesaCallback); // Called by Safaricom (no auth)
+router.post('/mpesa/timeout', mpesaTimeout); // Called by Safaricom (no auth)
+router.get('/mpesa/status/:paymentId', authenticateToken, checkPaymentStatus);
+
+// Payment processing routes (legacy/testing - match test expectations)
 router.post('/intent', authenticateToken, createPaymentIntent);
 router.post('/verify', authenticateToken, verifyPayment);
 router.post('/process', authenticateToken, processPayment);
-router.get('/history', authenticateToken, getPaymentHistory);
+router.get('/history', authenticateToken, getMpesaHistory); // Use M-Pesa payment history
 router.post('/:id/refund', authenticateToken, refundPayment);
 
 // Error scenario endpoints for tests
@@ -57,7 +73,7 @@ router.post('/rate-limit', rateLimitPayment);
 router.post('/processor-down', paymentProcessorDown);
 router.post('/rollback', paymentRollback);
 
-// Webhook endpoints
+// Webhook endpoints (legacy)
 router.post('/webhook/mpesa', handleMpesaWebhook);
 router.post('/webhook/stripe', handleStripeWebhook);
 

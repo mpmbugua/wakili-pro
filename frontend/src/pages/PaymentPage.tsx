@@ -122,7 +122,7 @@ export const PaymentPage: React.FC = () => {
 
     try {
       if (paymentMethod === 'mpesa') {
-        // M-Pesa payment flow
+        // M-Pesa Daraja API payment flow
         const paymentData = isDocumentPayment
           ? {
               reviewId: (bookingDetails as DocumentPaymentDetails).reviewId,
@@ -137,24 +137,61 @@ export const PaymentPage: React.FC = () => {
               paymentType: 'CONSULTATION'
             };
 
-        const mpesaPayment = await axiosInstance.post('/payments/mpesa/initiate', paymentData);
+        const mpesaResponse = await axiosInstance.post('/payments/mpesa/initiate', paymentData);
 
-        if (!mpesaPayment.data.success) {
-          throw new Error(mpesaPayment.data.message || 'Failed to initiate M-Pesa payment');
+        if (!mpesaResponse.data.success) {
+          throw new Error(mpesaResponse.data.message || 'Failed to initiate M-Pesa payment');
         }
+
+        const { paymentId, customerMessage } = mpesaResponse.data.data;
 
         // Show M-Pesa prompt message
         setError(null);
-        alert(`M-Pesa payment initiated! Please check your phone (${mpesaDetails.phoneNumber}) and enter your PIN to complete the payment.`);
+        alert(customerMessage || `Please check your phone (${mpesaDetails.phoneNumber}) and enter your M-Pesa PIN to complete the payment.`);
 
-        // Poll for payment status (in production, use webhooks)
-        // For now, simulate success after delay
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        
-        setPaymentSuccess(true);
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 3000);
+        // Poll for payment status every 3 seconds (max 60 seconds)
+        let attempts = 0;
+        const maxAttempts = 20;
+        const pollInterval = 3000;
+
+        const checkStatus = async (): Promise<boolean> => {
+          try {
+            const statusResponse = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
+            
+            if (statusResponse.data.success) {
+              const { status } = statusResponse.data.data;
+              
+              if (status === 'COMPLETED') {
+                setPaymentSuccess(true);
+                setTimeout(() => {
+                  navigate('/dashboard');
+                }, 3000);
+                return true;
+              } else if (status === 'FAILED') {
+                throw new Error('Payment failed or was cancelled');
+              }
+            }
+            return false;
+          } catch (err) {
+            console.error('Status check error:', err);
+            return false;
+          }
+        };
+
+        // Start polling
+        const pollPaymentStatus = setInterval(async () => {
+          attempts++;
+          const completed = await checkStatus();
+          
+          if (completed || attempts >= maxAttempts) {
+            clearInterval(pollPaymentStatus);
+            setLoading(false);
+            
+            if (!completed && attempts >= maxAttempts) {
+              setError('Payment verification timed out. Please check your payment history or contact support.');
+            }
+          }
+        }, pollInterval);
 
       } else {
         // Card payment flow (Flutterwave)
