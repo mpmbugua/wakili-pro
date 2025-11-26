@@ -24,6 +24,7 @@ import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
 import { AdminDashboard } from './components/dashboards/AdminDashboard';
+import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -61,6 +62,26 @@ const AdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = (
   }
   
   if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Super Admin Route component for super admin only pages
+const SuperAdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = ({ children, hydrated }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  
+  if (!hydrated) {
+    return null;
+  }
+  
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (user.role !== 'SUPER_ADMIN') {
     return <Navigate to="/dashboard" replace />;
   }
   
@@ -216,6 +237,16 @@ function App() {
                 <AdminRoute hydrated={hydrated}>
                   <ArticleManagementPage />
                 </AdminRoute>
+              } 
+            />
+
+            {/* Super Admin Routes */}
+            <Route 
+              path="/super-admin" 
+              element={
+                <SuperAdminRoute hydrated={hydrated}>
+                  <SuperAdminDashboard user={user!} />
+                </SuperAdminRoute>
               } 
             />
 
