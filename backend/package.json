@@ -14,11 +14,15 @@
     "lint": "echo 'Backend linting skipped - no ESLint config present. Will add proper linting later.'",
     "test": "node --max-old-space-size=4096 ./node_modules/.bin/jest",
     "postinstall": "prisma generate",
+    "seed": "ts-node ./prisma/seed.ts",
     "seed:users": "ts-node ./prisma/seedUsers.ts",
     "seed:lawyers": "ts-node ./prisma/seedLawyerSubscriptions.ts",
     "seed:docs": "ts-node ./prisma/seedDocumentTemplates.ts",
     "seed:all": "npm run seed:users && npm run seed:lawyers && npm run seed:docs",
     "seed:auto": "ts-node ./prisma/seedAll.ts"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.930.0",
