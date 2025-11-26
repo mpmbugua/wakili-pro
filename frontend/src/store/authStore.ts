@@ -104,9 +104,20 @@ export const useAuthStore = create<AuthStore>()(
             return true;
           } else {
             console.log('[AuthStore] Registration failed:', response.message);
+            console.log('[AuthStore] Validation errors:', response.errors);
+            
+            // Format validation errors for display
+            let errorMessage = response.message || 'Registration failed';
+            if (response.errors && Array.isArray(response.errors)) {
+              const errorDetails = response.errors.map((err: any) => 
+                `${err.field}: ${err.message}`
+              ).join(', ');
+              errorMessage = `${errorMessage} - ${errorDetails}`;
+            }
+            
             set({
               isLoading: false,
-              error: response.message || 'Registration failed'
+              error: errorMessage
             });
             return false;
           }
