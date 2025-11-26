@@ -44,7 +44,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }>
   }
   
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
+    // Don't use replace - allow back button to work
+    return <Navigate to="/login" />;
   }
   
   return <>{children}</>;
@@ -198,11 +199,11 @@ function App() {
             {/* Auth Routes */}
             <Route 
               path="/login" 
-              element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} 
             />
             <Route 
               path="/register" 
-              element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} 
+              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Register />} 
             />
             
             {/* Admin Login Route - Public but redirects if already authenticated as admin */}
