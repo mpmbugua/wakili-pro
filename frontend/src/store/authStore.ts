@@ -131,6 +131,15 @@ export const useAuthStore = create<AuthStore>()(
         } catch (error) {
           console.error('Logout error:', error);
         } finally {
+          // Clear all auth-related items from localStorage
+          localStorage.removeItem('wakili-auth-storage');
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          
+          // Clear sessionStorage as well
+          sessionStorage.clear();
+          
           // Clear state
           set({
             user: null,
@@ -139,9 +148,6 @@ export const useAuthStore = create<AuthStore>()(
             isAuthenticated: false,
             error: null
           });
-          
-          // Force clear localStorage to prevent rehydration
-          localStorage.removeItem('wakili-auth-storage');
         }
       },
 

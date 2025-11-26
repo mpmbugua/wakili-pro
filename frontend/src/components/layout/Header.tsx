@@ -17,10 +17,14 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
   const handleLogout = async () => {
     try {
       await logout();
+      setTimeout(() => {
+        navigate('/', { replace: true });
+        window.location.reload();
+      }, 100);
     } catch (error) {
       console.error('Logout failed:', error);
-    } finally {
-      window.location.href = '/';
+      navigate('/', { replace: true });
+      window.location.reload();
     }
   };
 
