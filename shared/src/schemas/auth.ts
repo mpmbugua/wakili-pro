@@ -9,7 +9,7 @@ export const RegisterSchema = z.object({
   email: z.string().email('Invalid email format').optional().or(z.literal('').transform(() => undefined)),
   password: z.string()
     .min(10, 'Password must be at least 10 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])/, 'Password must contain uppercase, lowercase, number, and symbol (!@#$%^&* etc.)'),
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-+=])/, 'Password must contain uppercase, lowercase, number, and symbol (!@#$%^&* etc.)'),
   firstName: z.string().min(2, 'First name must be at least 2 characters').max(50),
   lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50),
   phoneNumber: z.string()
@@ -26,7 +26,7 @@ export const ChangePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
   newPassword: z.string()
     .min(10, 'New password must be at least 10 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])/, 'Password must contain uppercase, lowercase, number, and symbol (!@#$%^&* etc.)'),
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-+=])/, 'Password must contain uppercase, lowercase, number, and symbol (!@#$%^&* etc.)'),
 });
 
 export const VerifyEmailSchema = z.object({
