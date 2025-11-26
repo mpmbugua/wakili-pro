@@ -282,7 +282,7 @@ export const LawyersBrowse: React.FC = () => {
         hourlyRate: lawyer?.hourlyRate,
         profileImage: lawyer?.imageUrl 
       }));
-      navigate('/login', { state: { from: '/lawyers', message: 'Please log in to book a consultation' } });
+      navigate('/login', { state: { from: `/booking/${lawyer?.userId}`, message: 'Please log in to book a consultation' } });
     } else {
       // Use userId for booking (this is what the backend expects)
       navigate(`/booking/${lawyer?.userId}`, { 
@@ -469,13 +469,13 @@ export const LawyersBrowse: React.FC = () => {
             </p>
             <div className="flex justify-center space-x-4">
               <button
-                onClick={() => navigate('/register')}
+                onClick={() => navigate('/register', { state: { from: '/lawyers' } })}
                 className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition"
               >
                 Create Free Account
               </button>
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/login', { state: { from: '/lawyers' } })}
                 className="px-8 py-3 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition border-2 border-white"
               >
                 Log In

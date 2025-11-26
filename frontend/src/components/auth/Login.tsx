@@ -78,8 +78,24 @@ const Login: React.FC = () => {
     const result = await login(formData);
     
     if (result.success) {
-      // Redirect to the page they were trying to visit, or dashboard
-      navigate(from); // Normal navigation preserves history for back button
+      // Check for pending actions in sessionStorage
+      const pendingBooking = sessionStorage.getItem('pendingBooking');
+      const pendingPurchase = sessionStorage.getItem('pendingPurchase');
+      
+      let redirectPath = from;
+      
+      if (pendingBooking) {
+        const booking = JSON.parse(pendingBooking);
+        redirectPath = `/booking/${booking.lawyerId}`;
+        sessionStorage.removeItem('pendingBooking');
+      } else if (pendingPurchase) {
+        const purchase = JSON.parse(pendingPurchase);
+        redirectPath = `/checkout/${purchase.docId}`;
+        sessionStorage.removeItem('pendingPurchase');
+      }
+      
+      // Redirect to the intended destination
+      navigate(redirectPath);
     }
   };
 

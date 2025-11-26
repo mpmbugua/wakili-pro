@@ -472,7 +472,7 @@ export const MarketplaceBrowse: React.FC = () => {
   const handlePurchaseDocument = (docId: string, docTitle: string) => {
     if (!isAuthenticated) {
       sessionStorage.setItem('pendingPurchase', JSON.stringify({ docId, docTitle }));
-      navigate('/login', { state: { from: '/marketplace', message: 'Please log in to purchase documents' } });
+      navigate('/login', { state: { from: `/checkout/${docId}`, message: 'Please log in to purchase documents' } });
     } else {
       navigate(`/checkout/${docId}`);
     }
@@ -660,13 +660,13 @@ export const MarketplaceBrowse: React.FC = () => {
             </p>
             <div className="flex justify-center space-x-4">
               <button
-                onClick={() => navigate('/register')}
+                onClick={() => navigate('/register', { state: { from: '/marketplace' } })}
                 className="px-8 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-gray-100 transition"
               >
                 Create Free Account
               </button>
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/login', { state: { from: '/marketplace' } })}
                 className="px-8 py-3 bg-purple-700 text-white font-semibold rounded-lg hover:bg-purple-800 transition border-2 border-white"
               >
                 Log In

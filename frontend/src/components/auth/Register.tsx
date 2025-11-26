@@ -96,9 +96,25 @@ const Register: React.FC = () => {
     const success = await register(formData);
     
     if (success) {
+      // Check for pending actions in sessionStorage
+      const pendingBooking = sessionStorage.getItem('pendingBooking');
+      const pendingPurchase = sessionStorage.getItem('pendingPurchase');
+      
+      let redirectPath = '/dashboard';
+      
+      if (pendingBooking) {
+        const booking = JSON.parse(pendingBooking);
+        redirectPath = `/booking/${booking.lawyerId}`;
+        sessionStorage.removeItem('pendingBooking');
+      } else if (pendingPurchase) {
+        const purchase = JSON.parse(pendingPurchase);
+        redirectPath = `/checkout/${purchase.docId}`;
+        sessionStorage.removeItem('pendingPurchase');
+      }
+      
       // Wait a moment for zustand persist to save state
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate(redirectPath);
       }, 100);
     }
   };
