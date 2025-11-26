@@ -13,7 +13,7 @@ interface AuthState {
 }
 
 interface AuthActions {
-  login: (credentials: LoginRequest) => Promise<boolean>;
+  login: (credentials: LoginRequest) => Promise<{ success: boolean; user?: AuthUser; error?: string }>;
   register: (userData: RegisterRequest) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<boolean>;
@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthStore>()(
       error: null,
 
       // Actions
-      login: async (credentials: LoginRequest): Promise<boolean> => {
+      login: async (credentials: LoginRequest): Promise<{ success: boolean; user?: AuthUser; error?: string }> => {
         try {
           set({ isLoading: true, error: null });
 
@@ -58,14 +58,15 @@ export const useAuthStore = create<AuthStore>()(
               error: null
             });
 
-            return true;
+            return { success: true, user };
           } else {
             console.log('[AuthStore] Login failed:', response.message);
+            const errorMsg = response.message || 'Login failed';
             set({
               isLoading: false,
-              error: response.message || 'Login failed'
+              error: errorMsg
             });
-            return false;
+            return { success: false, error: errorMsg };
           }
         } catch (error) {
           console.error('[AuthStore] Login error:', error);
@@ -74,7 +75,7 @@ export const useAuthStore = create<AuthStore>()(
             isLoading: false,
             error: errorMessage
           });
-          return false;
+          return { success: false, error: errorMessage };
         }
       },
 

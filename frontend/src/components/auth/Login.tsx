@@ -78,9 +78,9 @@ const Login: React.FC = () => {
       return;
     }
 
-    const success = await login(formData);
+    const result = await login(formData);
     
-    if (success) {
+    if (result.success) {
       // Redirect to the page they were trying to visit, or dashboard
       navigate(from); // Normal navigation preserves history for back button
     }

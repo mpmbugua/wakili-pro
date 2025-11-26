@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { WakiliLogo } from '../ui/WakiliLogo';
@@ -9,11 +9,12 @@ interface GlobalTopBarProps {
 }
 
 export const GlobalTopBar: React.FC<GlobalTopBarProps> = ({ onMenuClick }) => {
+  const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
   
   const handleLogout = async () => {
     await logout();
-    window.location.href = '/';
+    navigate('/', { replace: true });
   };
   
   return (
