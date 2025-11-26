@@ -82,14 +82,12 @@ export const simpleRegister = async (req: Request, res: Response): Promise<void>
     const accessToken = generateAccessToken({
       userId: user.id,
       email: user.email,
-      phoneNumber: user.phoneNumber || '',
       role: user.role as any
     });
 
     const refreshToken = generateRefreshToken({
       userId: user.id,
       email: user.email,
-      phoneNumber: user.phoneNumber || '',
       role: user.role as any
     });
 
