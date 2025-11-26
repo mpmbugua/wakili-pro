@@ -23,6 +23,7 @@ const prisma = new PrismaClient();
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('[Register] Received request body:', JSON.stringify(req.body, null, 2));
+    console.log('[Register] Starting registration process...');
     
     // Validate request body
     const validationResult = RegisterSchema.safeParse(req.body);
