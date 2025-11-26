@@ -147,6 +147,20 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       console.error('Error stack:', error.stack);
     }
     
+    // Check for Prisma unique constraint errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as { code: string; meta?: { target?: string[] } };
+      
+      if (prismaError.code === 'P2002') {
+        const target = prismaError.meta?.target?.[0] || 'field';
+        res.status(409).json({
+          success: false,
+          message: `A user with this ${target} already exists`
+        });
+        return;
+      }
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Internal server error during registration',
