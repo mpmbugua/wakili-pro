@@ -171,7 +171,13 @@ export const BookingPage: React.FC = () => {
         }
       } else {
         // Other errors
-        const errorMessage = err.response?.data?.message || 'Failed to book consultation. Please try again.';
+        let errorMessage = err.response?.data?.message || 'Failed to book consultation. Please try again.';
+        
+        // If there are validation errors, show them
+        if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+          const validationErrors = err.response.data.errors.map((e: any) => e.message).join(', ');
+          errorMessage = `Validation error: ${validationErrors}`;
+        }
         
         // Special handling for "Lawyer not found" error
         if (errorMessage === 'Lawyer not found') {
@@ -350,9 +356,10 @@ export const BookingPage: React.FC = () => {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="input-field resize-none"
+                    minLength={10}
                   />
                   <p className="text-xs text-slate-500 mt-1">
-                    This helps the lawyer prepare for your consultation
+                    This helps the lawyer prepare for your consultation (minimum 10 characters)
                   </p>
                 </div>
 
