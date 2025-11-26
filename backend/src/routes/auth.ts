@@ -8,6 +8,7 @@ import {
   googleOAuth,
   facebookOAuth
 } from '../controllers/authController';
+import { simpleRegister } from '../controllers/simpleAuthController';
 import { authenticateToken } from '../middleware/auth';
 
 import type { Router as ExpressRouter } from 'express';
@@ -19,7 +20,7 @@ const router: ExpressRouter = Router();
  * @access  Public
  * @body    { email, password, firstName, lastName, phoneNumber?, role }
  */
-router.post('/register', register);
+router.post('/register', simpleRegister);
 
 /**
  * @route   POST /api/auth/login
