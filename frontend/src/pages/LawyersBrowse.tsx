@@ -229,12 +229,12 @@ export const LawyersBrowse: React.FC = () => {
           // Map backend response to our Lawyer interface
           const backendLawyers = response.data.data.lawyers.map((lawyer: any) => ({
             id: lawyer.id,
-            userId: lawyer.userId, // Important: use userId for booking
+            userId: lawyer.user?.id || lawyer.userId, // Important: use user.id from backend for booking
             name: `${lawyer.user?.firstName || ''} ${lawyer.user?.lastName || ''}`.trim() || 'Lawyer',
             specialty: lawyer.specializations?.[0] || 'General Practice',
             location: lawyer.location || 'Nairobi',
-            rating: lawyer.averageRating || 4.5,
-            reviewCount: lawyer.totalReviews || 0,
+            rating: lawyer.rating || lawyer.averageRating || 4.5,
+            reviewCount: lawyer.reviewCount || lawyer.totalReviews || 0,
             yearsExperience: lawyer.yearsOfExperience || 5,
             hourlyRate: lawyer.hourlyRate || 3500,
             imageUrl: lawyer.profileImageUrl || `https://ui-avatars.com/api/?name=${lawyer.user?.firstName}+${lawyer.user?.lastName}&background=3b82f6&color=fff&size=200`,
