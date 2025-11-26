@@ -8,6 +8,7 @@ import { AIAssistant } from './pages/AIAssistant';
 import { LawyersBrowse } from './pages/LawyersBrowse';
 import { MarketplaceBrowse } from './pages/MarketplaceBrowse';
 import { ResourcesPage } from './pages/ResourcesPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
 import { ServicesPage } from './pages/ServicesPage';
 import { LegalServicesPage } from './pages/LegalServicesPage';
 import { BookingPage } from './pages/BookingPage';
@@ -92,6 +93,7 @@ function App() {
             <Route path="/services" element={<LegalServicesPage />} />
             <Route path="/marketplace" element={<MarketplaceBrowse />} />
             <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/resources/article/:id" element={<ArticleDetailPage />} />
             <Route path="/document-services" element={<DocumentServicesPage />} />
             <Route path="/service-request" element={<ServiceRequestPage />} />
             

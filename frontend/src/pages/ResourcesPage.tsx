@@ -1,53 +1,59 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
 import { Book, FileText, Video, HelpCircle, ArrowRight } from 'lucide-react';
+import axiosInstance from '../lib/axios';
+
+interface Article {
+  id: string;
+  title: string;
+  content: string;
+  metadata?: {
+    aiSummary?: string;
+    category?: string;
+    tags?: string[];
+    qualityScore?: number;
+    source?: string;
+  };
+}
 
 export const ResourcesPage: React.FC = () => {
-  const legalGuides = [
-    {
-      title: "Understanding Kenyan Employment Law",
-      description: "A comprehensive guide to employee rights, contracts, and dismissal procedures under the Employment Act 2007.",
-      category: "Employment",
-      readTime: "15 min read",
-      link: "#"
-    },
-    {
-      title: "Starting a Business in Kenya",
-      description: "Step-by-step guide to registering your business, understanding tax obligations, and legal compliance requirements.",
-      category: "Business",
-      readTime: "20 min read",
-      link: "#"
-    },
-    {
-      title: "Land & Property Rights in Kenya",
-      description: "Everything you need to know about land ownership, title transfers, and property disputes in Kenya.",
-      category: "Property",
-      readTime: "18 min read",
-      link: "#"
-    },
-    {
-      title: "Family Law Essentials",
-      description: "Guide to marriage, divorce, child custody, and succession law in Kenya.",
-      category: "Family",
-      readTime: "12 min read",
-      link: "#"
-    },
-    {
-      title: "Criminal Law & Your Rights",
-      description: "Understanding your rights when arrested, bail procedures, and criminal defense in Kenya.",
-      category: "Criminal",
-      readTime: "10 min read",
-      link: "#"
-    },
-    {
-      title: "Traffic Offenses & Motor Vehicle Law",
-      description: "Complete guide to traffic laws, NTSA procedures, and handling road accidents in Kenya.",
-      category: "Traffic",
-      readTime: "8 min read",
-      link: "#"
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  const fetchArticles = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get('/api/articles/published?limit=6');
+      
+      if (response.data.success) {
+        setArticles(response.data.data.articles || []);
+      } else {
+        setError('Failed to load articles');
+      }
+    } catch (err) {
+      console.error('Error fetching articles:', err);
+      setError('Failed to load articles');
+      // Fall back to showing no articles rather than breaking the page
+      setArticles([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const legalGuides = articles.map(article => ({
+    id: article.id,
+    title: article.title,
+    description: article.metadata?.aiSummary || article.content.substring(0, 150) + '...',
+    category: article.metadata?.category || 'Legal',
+    readTime: `${Math.ceil(article.content.length / 1000)} min read`,
+    link: `/resources/article/${article.id}`
+  }));
 
   const faqs = [
     {
@@ -89,29 +95,52 @@ export const ResourcesPage: React.FC = () => {
           <Book className="h-6 w-6 text-blue-600" />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {legalGuides.map((guide, index) => (
-            <div key={index} className="bg-white rounded-lg border border-slate-200 hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full mb-3">
-                  {guide.category}
-                </span>
-                <h3 className="text-base font-semibold text-slate-900 mb-2">{guide.title}</h3>
-                <p className="text-sm text-slate-600 mb-4 line-clamp-3">{guide.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">{guide.readTime}</span>
-                  <Link 
-                    to={guide.link} 
-                    className="text-blue-600 text-sm font-semibold hover:text-blue-700 inline-flex items-center transition-colors"
-                  >
-                    Read More
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-sm text-slate-600">Loading articles...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-sm text-red-600 mb-4">{error}</p>
+            <button 
+              onClick={fetchArticles}
+              className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : legalGuides.length === 0 ? (
+          <div className="text-center py-12 bg-slate-50 rounded-lg">
+            <Book className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <p className="text-sm text-slate-600">No articles available yet.</p>
+            <p className="text-xs text-slate-500 mt-2">Check back soon for legal guides and resources!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {legalGuides.map((guide) => (
+              <div key={guide.id} className="bg-white rounded-lg border border-slate-200 hover:shadow-lg transition-shadow">
+                <div className="p-6">
+                  <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full mb-3">
+                    {guide.category}
+                  </span>
+                  <h3 className="text-base font-semibold text-slate-900 mb-2">{guide.title}</h3>
+                  <p className="text-sm text-slate-600 mb-4 line-clamp-3">{guide.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500">{guide.readTime}</span>
+                    <Link 
+                      to={guide.link} 
+                      className="text-blue-600 text-sm font-semibold hover:text-blue-700 inline-flex items-center transition-colors"
+                    >
+                      Read More
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* FAQs */}

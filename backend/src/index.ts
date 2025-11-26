@@ -160,6 +160,10 @@ app.use('/api/lawyer/letterhead', lawyerLetterheadRouter);
 import documentCertificationRouter from './routes/documentCertification';
 app.use('/api/certification', documentCertificationRouter);
 
+// Mount article routes
+import articlesRouter from './routes/articles';
+app.use('/api/articles', articlesRouter);
+
 // Auth routes (real implementation)
 app.use('/api/auth', authRoutes);
 
