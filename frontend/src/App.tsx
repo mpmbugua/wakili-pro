@@ -22,6 +22,7 @@ import ServiceRequestPage from './pages/ServiceRequestPage';
 import LawyerQuoteSubmissionPage from './pages/LawyerQuoteSubmissionPage';
 import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import ServiceTrackingPage from './pages/ServiceTrackingPage';
+import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -175,6 +176,16 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <DocumentCertificationPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin Routes */}
+            <Route 
+              path="/admin/articles" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <ArticleManagementPage />
                 </ProtectedRoute>
               } 
             />
