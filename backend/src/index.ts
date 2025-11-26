@@ -66,16 +66,27 @@ app.get('/debug/schemas', (_req: Request, res: Response) => {
 
 // Debug endpoint to test registration validation
 app.post('/debug/register-test', async (req: Request, res: Response) => {
+  const step = { current: 'start' };
   try {
+    step.current = 'import-schema';
     const { RegisterSchema } = require('@wakili-pro/shared');
+    
+    step.current = 'import-password-validator';
     const { validatePassword } = require('./services/security/passwordPolicyService');
+    
+    step.current = 'import-bcrypt';
     const bcrypt = require('bcryptjs');
+    
+    step.current = 'import-prisma';
     const { PrismaClient } = require('@prisma/client');
+    
+    step.current = 'create-prisma-client';
     const prisma = new PrismaClient();
     
-    // Step 1: Test validation
+    step.current = 'validate-request';
     const validationResult = RegisterSchema.safeParse(req.body);
     if (!validationResult.success) {
+      await prisma.$disconnect();
       return res.json({
         step: 'validation',
         success: false,
@@ -83,10 +94,11 @@ app.post('/debug/register-test', async (req: Request, res: Response) => {
       });
     }
     
-    // Step 2: Test password policy
+    step.current = 'validate-password-policy';
     const { password, phoneNumber, email, firstName, lastName, role } = validationResult.data;
     const passwordCheck = validatePassword(password);
     if (!passwordCheck.valid) {
+      await prisma.$disconnect();
       return res.json({
         step: 'passwordPolicy',
         success: false,
@@ -94,11 +106,12 @@ app.post('/debug/register-test', async (req: Request, res: Response) => {
       });
     }
     
-    // Step 3: Check existing user
+    step.current = 'check-existing-user';
     const existingUser = await prisma.user.findFirst({
       where: { phoneNumber }
     });
     if (existingUser) {
+      await prisma.$disconnect();
       return res.json({
         step: 'existingUser',
         success: false,
@@ -106,10 +119,10 @@ app.post('/debug/register-test', async (req: Request, res: Response) => {
       });
     }
     
-    // Step 4: Hash password
+    step.current = 'hash-password';
     const hashedPassword = await bcrypt.hash(password, 12);
     
-    // Step 5: Try to create user
+    step.current = 'create-user';
     const user = await prisma.user.create({
       data: {
         email: email || `${phoneNumber}@wakili.temp`,
@@ -122,9 +135,10 @@ app.post('/debug/register-test', async (req: Request, res: Response) => {
       }
     });
     
+    step.current = 'disconnect-prisma';
     await prisma.$disconnect();
     
-    // Success
+    step.current = 'complete';
     res.json({
       step: 'complete',
       success: true,
@@ -134,6 +148,7 @@ app.post('/debug/register-test', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
+      failedAtStep: step.current,
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
     });
