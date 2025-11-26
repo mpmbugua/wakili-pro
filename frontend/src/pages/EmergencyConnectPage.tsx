@@ -11,7 +11,7 @@ const EmergencyConnectPage: React.FC = () => {
 
   const handleSuccess = () => {
     // Redirect to chat/consultation or show success message
-    window.location.href = '/chat';
+    navigate('/chat');
   };
 
   const handleCancel = () => {

@@ -122,14 +122,14 @@ const AILegalAssistantPage: React.FC = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <button 
-              onClick={() => window.location.href = '/marketplace'}
+              onClick={() => navigate('/marketplace')}
               className="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2"
             >
               <Users className="h-5 w-5" />
               <span>Browse Lawyers</span>
             </button>
             <button 
-              onClick={() => window.location.href = '/auth/register'}
+              onClick={() => navigate('/auth/register')}
               className="bg-white text-indigo-600 border border-indigo-600 px-8 py-3 rounded-lg hover:bg-indigo-50 transition-colors"
             >
               Sign Up for More Queries

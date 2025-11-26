@@ -14,10 +14,10 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const handleLogout = async () => {
     try {
       await logout();
-      window.location.href = '/';
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout failed:', error);
-      window.location.href = '/';
+      navigate('/', { replace: true });
     }
   };
 

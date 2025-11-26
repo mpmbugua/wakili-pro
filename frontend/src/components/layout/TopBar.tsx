@@ -20,11 +20,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick, onToggleCollapse, s
   const handleLogout = async () => {
     try {
       await logout();
-      // Force full page refresh to clear all state
-      window.location.href = '/login';
+      navigate('/login', { replace: true });
     } catch (error) {
       console.error('Logout failed:', error);
-      window.location.href = '/login';
+      navigate('/login', { replace: true });
     }
   };
 

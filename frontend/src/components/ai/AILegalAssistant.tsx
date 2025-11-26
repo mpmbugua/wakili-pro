@@ -325,7 +325,7 @@ How can I help you today? You can type your question or use the microphone 🎤 
 
   const handleConsultationClick = (link: string) => {
     // Navigate to marketplace or booking page
-    window.location.href = link;
+    navigate(link);
   };
 
   return (
@@ -375,7 +375,7 @@ How can I help you today? You can type your question or use the microphone 🎤 
               </div>
               {!queryLimits.isAuthenticated && (
                 <button 
-                  onClick={() => window.location.href = '/auth/register'}
+                  onClick={() => navigate('/auth/register')}
                   className="text-xs bg-white/20 px-2 py-1 rounded mt-1 hover:bg-white/30 transition-colors"
                 >
                   Sign up for more
@@ -582,7 +582,7 @@ How can I help you today? You can type your question or use the microphone 🎤 
                 ⚠️ You have {queryLimits.daily.remaining} question{queryLimits.daily.remaining !== 1 ? 's' : ''} remaining today.
               </div>
               <button
-                onClick={() => window.location.href = '/auth/register'}
+                onClick={() => navigate('/auth/register')}
                 className="text-xs bg-amber-600 text-white px-3 py-1 rounded hover:bg-amber-700 transition-colors"
               >
                 Sign up for 50/month
