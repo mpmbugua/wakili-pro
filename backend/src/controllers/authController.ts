@@ -140,9 +140,19 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(201).json(response);
   } catch (error) {
     console.error('Registration error:', error);
+    
+    // Better error logging
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Internal server error during registration'
+      message: 'Internal server error during registration',
+      ...(process.env.NODE_ENV === 'development' && { 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      })
     });
   }
 };
