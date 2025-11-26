@@ -64,6 +64,49 @@ app.get('/debug/schemas', (_req: Request, res: Response) => {
   }
 });
 
+// Debug endpoint to test registration validation
+app.post('/debug/register-test', async (req: Request, res: Response) => {
+  try {
+    const { RegisterSchema } = require('@wakili-pro/shared');
+    const { validatePassword } = require('./services/security/passwordPolicyService');
+    
+    // Step 1: Test validation
+    const validationResult = RegisterSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.json({
+        step: 'validation',
+        success: false,
+        errors: validationResult.error.issues
+      });
+    }
+    
+    // Step 2: Test password policy
+    const { password } = validationResult.data;
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      return res.json({
+        step: 'passwordPolicy',
+        success: false,
+        errors: passwordCheck.errors
+      });
+    }
+    
+    // Step 3: Success
+    res.json({
+      step: 'complete',
+      success: true,
+      message: 'Validation passed',
+      data: validationResult.data
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+  }
+});
+
 // (Optional) Heap snapshot endpoint for diagnostics (disable in production if not needed)
 if (process.env.NODE_ENV !== 'production') {
   app.get('/heapdump', async (_req: Request, res: Response) => {
