@@ -71,20 +71,36 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Password policy validation
-    const passwordCheck = validatePassword(password);
-    if (!passwordCheck.valid) {
-      res.status(400).json({
+    console.log('[Register] Validating password policy...');
+    try {
+      const passwordCheck = validatePassword(password);
+      console.log('[Register] Password validation result:', passwordCheck);
+      if (!passwordCheck.valid) {
+        res.status(400).json({
+          success: false,
+          message: 'Password does not meet security requirements',
+          errors: passwordCheck.errors.map(message => ({ field: 'password', message }))
+        });
+        return;
+      }
+    } catch (pwdError) {
+      console.error('[Register] Password validation error:', pwdError);
+      res.status(500).json({
         success: false,
-        message: 'Password does not meet security requirements',
-        errors: passwordCheck.errors.map(message => ({ field: 'password', message }))
+        message: 'Error validating password',
+        error: pwdError instanceof Error ? pwdError.message : 'Unknown error'
       });
       return;
     }
+    
     // Hash password
+    console.log('[Register] Hashing password...');
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
+    console.log('[Register] Password hashed successfully');
 
     // Create user with optional email
+    console.log('[Register] Creating user in database...');
     const user = await prisma.user.create({
       data: {
         email: email && email.trim() !== '' ? email : `${phoneNumber}@wakili.temp`, // Use temp email if not provided
