@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuthStore } from './store/authStore';
 import { AppShell } from './components/layout/AppShell';
@@ -25,6 +25,7 @@ import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
 import { AdminDashboard } from './components/dashboards/AdminDashboard';
 import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard';
+import { AdminLoginPage } from './pages/auth/AdminLoginPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
@@ -50,6 +51,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }>
 
 // Admin Route component for admin-only pages
 const AdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = ({ children, hydrated }) => {
+  const location = useLocation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   
@@ -58,7 +60,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = (
   }
   
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
   
   if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
@@ -70,6 +72,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = (
 
 // Super Admin Route component for super admin only pages
 const SuperAdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = ({ children, hydrated }) => {
+  const location = useLocation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   
@@ -78,7 +81,7 @@ const SuperAdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }
   }
   
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
   
   if (user.role !== 'SUPER_ADMIN') {
@@ -199,6 +202,12 @@ function App() {
             <Route 
               path="/register" 
               element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} 
+            />
+            
+            {/* Admin Login Route - Public but redirects if already authenticated as admin */}
+            <Route 
+              path="/admin/login" 
+              element={<AdminLoginPage />} 
             />
 
             {/* Protected Routes - Authentication Required */}
