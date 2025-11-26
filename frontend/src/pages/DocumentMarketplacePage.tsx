@@ -2,6 +2,7 @@
 
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DocumentTemplate } from '@shared/types/ai';
 import { useQuery } from '@tanstack/react-query';
 import { fetchDocumentTemplates, purchaseDocumentTemplate, getPurchaseStatus, downloadDocument, PurchaseResult } from '../services/documentMarketplace';
@@ -10,6 +11,7 @@ import { toast } from 'react-hot-toast';
 
 
 const DocumentMarketplacePage: React.FC = () => {
+  const navigate = useNavigate();
   const { data, isLoading, error } = useQuery(['document-templates'], fetchDocumentTemplates);
   const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<PurchaseResult['paymentInfo'] | null>(null);
@@ -28,13 +30,21 @@ const DocumentMarketplacePage: React.FC = () => {
     }
     setIsPurchasing(true);
     try {
-      toast.loading('Initiating purchase...');
+      toast.loading('Preparing document purchase...');
       const result = await purchaseDocumentTemplate(template.id, aiInput);
-      setPaymentInfo(result.paymentInfo);
-      setPurchaseId(result.purchase.id);
-      setSelectedTemplate(null);
       toast.dismiss();
-      toast.success('Purchase initiated. Please complete payment.');
+      
+      // Redirect to payment page with document purchase details
+      navigate(`/payment/document/${result.purchase.id}`, {
+        state: {
+          reviewId: result.purchase.id,
+          documentType: template.name,
+          serviceType: 'marketplace-purchase',
+          price: result.purchase.price || template.price || 1000,
+          fileName: template.name,
+          templateId: template.id
+        }
+      });
     } catch (e) {
       toast.dismiss();
       let msg = 'Failed to initiate purchase.';

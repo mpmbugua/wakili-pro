@@ -99,13 +99,14 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
         bookingId: bookingId || 'N/A', // Payment model requires bookingId
         targetId,
         amount,
-        type: paymentType || 'CONSULTATION',
+        type: 'DOCUMENT', // Use DOCUMENT type from PaymentType enum for all document-related payments
         status: 'PENDING',
         provider: 'MPESA',
         method: 'MPESA',
         metadata: {
           phoneNumber,
           accountReference,
+          paymentType, // Store the specific payment type in metadata
         },
       },
     });

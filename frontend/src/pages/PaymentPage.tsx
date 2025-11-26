@@ -18,9 +18,10 @@ interface BookingDetails {
 interface DocumentPaymentDetails {
   reviewId: string;
   documentType: string;
-  serviceType: 'ai-review' | 'certification';
+  serviceType: 'ai-review' | 'certification' | 'marketplace-purchase';
   price: number;
   fileName: string;
+  templateId?: string;
 }
 
 type PaymentMethod = 'card' | 'mpesa';
@@ -128,7 +129,9 @@ export const PaymentPage: React.FC = () => {
               reviewId: (bookingDetails as DocumentPaymentDetails).reviewId,
               amount: (bookingDetails as DocumentPaymentDetails).price,
               phoneNumber: mpesaDetails.phoneNumber,
-              paymentType: 'DOCUMENT_REVIEW'
+              paymentType: (bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase' 
+                ? 'MARKETPLACE_PURCHASE' 
+                : 'DOCUMENT_REVIEW'
             }
           : {
               bookingId: bookingId || (bookingDetails as BookingDetails).id,
@@ -267,7 +270,9 @@ export const PaymentPage: React.FC = () => {
           <h2 className="text-3xl font-bold text-slate-900 mb-4">Payment Successful!</h2>
           <p className="text-slate-600 mb-6">
             {isDocumentPayment
-              ? 'Your document review payment is confirmed. Processing will begin shortly.'
+              ? (bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase'
+                ? 'Your legal document template is ready for download!'
+                : 'Your document review payment is confirmed. Processing will begin shortly.'
               : 'Your consultation has been confirmed. You\'ll receive a confirmation email with the meeting link.'}
           </p>
           <div className="bg-white rounded-lg p-6 mb-6 text-left">
@@ -280,7 +285,11 @@ export const PaymentPage: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-slate-600">Service:</span>
                     <span className="font-medium">
-                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' ? 'AI Document Review' : 'Lawyer Certification'}
+                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase' 
+                        ? 'Legal Document Purchase'
+                        : (bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' 
+                        ? 'AI Document Review' 
+                        : 'Lawyer Certification'}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -418,7 +427,9 @@ export const PaymentPage: React.FC = () => {
                 <p className="font-medium mb-1">Quick & Easy Payment with M-Pesa</p>
                 <p className="text-green-700">
                   {isDocumentPayment 
-                    ? 'Pay for your document review instantly with M-Pesa. Processing begins immediately after payment confirmation.'
+                    ? (bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase'
+                      ? 'Pay for your legal document template instantly with M-Pesa. Download available immediately after payment confirmation.'
+                      : 'Pay for your document review instantly with M-Pesa. Processing begins immediately after payment confirmation.'
                     : 'Pay instantly using your M-Pesa mobile money. You\'ll receive an STK push notification to complete payment.'
                   }
                 </p>
