@@ -12,7 +12,10 @@ import { toast } from 'react-hot-toast';
 
 const DocumentMarketplacePage: React.FC = () => {
   const navigate = useNavigate();
-  const { data, isLoading, error } = useQuery(['document-templates'], fetchDocumentTemplates);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['document-templates'],
+    queryFn: fetchDocumentTemplates
+  });
   const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<PurchaseResult['paymentInfo'] | null>(null);
   const [purchaseId, setPurchaseId] = useState<string | null>(null);
