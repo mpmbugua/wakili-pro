@@ -6,7 +6,7 @@ import { AppShell } from './components/layout/AppShell';
 import { LandingPage } from './pages/LandingPage';
 import { AIAssistant } from './pages/AIAssistant';
 import { LawyersBrowse } from './pages/LawyersBrowse';
-import { MarketplaceBrowse } from './pages/MarketplaceBrowse';
+import DocumentMarketplacePage from './pages/DocumentMarketplacePage';
 import { ResourcesPage } from './pages/ResourcesPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import { ServicesPage } from './pages/ServicesPage';
@@ -150,7 +150,7 @@ function App() {
             <Route path="/ai" element={<AIAssistant />} />
             <Route path="/lawyers" element={<LawyersBrowse />} />
             <Route path="/services" element={<LegalServicesPage />} />
-            <Route path="/marketplace" element={<MarketplaceBrowse />} />
+            <Route path="/marketplace" element={<DocumentMarketplacePage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/resources/article/:id" element={<ArticleDetailPage />} />
             <Route path="/document-services" element={<DocumentServicesPage />} />

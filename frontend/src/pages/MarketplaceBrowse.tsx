@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
@@ -452,6 +452,26 @@ export const MarketplaceBrowse: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'popular' | 'price-low' | 'price-high' | 'rating'>('popular');
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
+  const [purchasingDocument, setPurchasingDocument] = useState<Document | null>(null);
+
+  // Check for pending purchase after login/registration
+  useEffect(() => {
+    const pendingPurchase = sessionStorage.getItem('pendingPurchase');
+    if (pendingPurchase && isAuthenticated) {
+      try {
+        const { docId } = JSON.parse(pendingPurchase);
+        const doc = sampleDocuments.find(d => d.id === docId);
+        if (doc) {
+          // Auto-trigger purchase for this document
+          setPurchasingDocument(doc);
+          sessionStorage.removeItem('pendingPurchase');
+        }
+      } catch (error) {
+        console.error('Error parsing pending purchase:', error);
+        sessionStorage.removeItem('pendingPurchase');
+      }
+    }
+  }, [isAuthenticated]);
 
   // Filter and sort documents
   const filteredDocuments = sampleDocuments
@@ -474,8 +494,11 @@ export const MarketplaceBrowse: React.FC = () => {
       sessionStorage.setItem('pendingPurchase', JSON.stringify({ docId, docTitle }));
       navigate('/login', { state: { from: '/marketplace', message: 'Please log in to purchase documents' } });
     } else {
-      // Redirect to marketplace page which will handle the purchase
-      navigate('/marketplace');
+      // Find the document and show purchase confirmation
+      const doc = sampleDocuments.find(d => d.id === docId);
+      if (doc) {
+        setPurchasingDocument(doc);
+      }
     }
   };
 
@@ -885,6 +908,50 @@ export const MarketplaceBrowse: React.FC = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Purchase Confirmation Modal */}
+      {purchasingDocument && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-slate-900 mb-4">Confirm Purchase</h3>
+            <div className="mb-6">
+              <p className="text-slate-700 font-medium mb-2">{purchasingDocument.title}</p>
+              <p className="text-sm text-slate-600 mb-4">{purchasingDocument.description}</p>
+              <div className="bg-slate-50 rounded-lg p-4 mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-slate-600">Document Price</span>
+                  <span className="font-semibold text-slate-900">KES {purchasingDocument.price.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">Format</span>
+                  <span className="font-semibold text-slate-900">{purchasingDocument.format}</span>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 text-center">
+                You will be redirected to M-Pesa payment to complete your purchase
+              </p>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setPurchasingDocument(null)}
+                className="flex-1 px-4 py-3 border-2 border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-100 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // For now, show an alert. In production, this would initiate the actual purchase flow
+                  alert(`Purchase flow for "${purchasingDocument.title}" would be initiated here.\n\nThis is a demo marketplace. In production, you would be redirected to the M-Pesa payment page.`);
+                  setPurchasingDocument(null);
+                }}
+                className="flex-1 px-4 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
+              >
+                Pay with M-Pesa
+              </button>
             </div>
           </div>
         </div>
