@@ -113,12 +113,6 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
               </li>
             </ul>
           </div>
-          <button
-            onClick={() => navigate('/lawyer/profile')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            View My Profile
-          </button>
         </div>
       </div>
     );
