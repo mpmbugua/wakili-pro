@@ -123,7 +123,7 @@ export const LawyerProfile: React.FC = () => {
     );
   }
 
-  if (error || !profile) {
+  if (error || !profile || !editedProfile) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
@@ -140,9 +140,11 @@ export const LawyerProfile: React.FC = () => {
   }
 
   const { user, lawyerProfile } = profile;
-  const location = typeof lawyerProfile.location === 'string' 
-    ? JSON.parse(lawyerProfile.location) 
-    : lawyerProfile.location;
+  const location = lawyerProfile?.location 
+    ? (typeof lawyerProfile.location === 'string' 
+        ? JSON.parse(lawyerProfile.location) 
+        : lawyerProfile.location)
+    : {};
 
   const tierBadges = {
     FREE: { color: 'bg-gray-100 text-gray-700', icon: User, label: 'Free Tier' },
@@ -304,9 +306,9 @@ export const LawyerProfile: React.FC = () => {
           {/* Bio */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">About</h2>
-            {isEditing ? (
+            {isEditing && editedProfile ? (
               <textarea
-                value={editedProfile.lawyerProfile.bio}
+                value={editedProfile.lawyerProfile?.bio || ''}
                 onChange={(e) => setEditedProfile({
                   ...editedProfile,
                   lawyerProfile: { ...editedProfile.lawyerProfile, bio: e.target.value }
@@ -316,7 +318,7 @@ export const LawyerProfile: React.FC = () => {
                 placeholder="Describe your legal expertise..."
               />
             ) : (
-              <p className="text-gray-700 whitespace-pre-wrap">{lawyerProfile.bio}</p>
+              <p className="text-gray-700 whitespace-pre-wrap">{lawyerProfile?.bio || 'No bio provided'}</p>
             )}
           </div>
 
@@ -354,10 +356,10 @@ export const LawyerProfile: React.FC = () => {
                 <Phone className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">Phone</p>
-                  {isEditing ? (
+                  {isEditing && editedProfile ? (
                     <input
                       type="tel"
-                      value={editedProfile.user.phoneNumber || ''}
+                      value={editedProfile.user?.phoneNumber || ''}
                       onChange={(e) => setEditedProfile({
                         ...editedProfile,
                         user: { ...editedProfile.user, phoneNumber: e.target.value }
@@ -366,7 +368,7 @@ export const LawyerProfile: React.FC = () => {
                       placeholder="07XXXXXXXX"
                     />
                   ) : (
-                    <p className="text-gray-900 font-medium">{user.phoneNumber || 'Not provided'}</p>
+                    <p className="text-gray-900 font-medium">{user?.phoneNumber || 'Not provided'}</p>
                   )}
                 </div>
               </div>
@@ -375,22 +377,33 @@ export const LawyerProfile: React.FC = () => {
                 <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">Office Address</p>
-                  {isEditing ? (
+                  {isEditing && editedProfile ? (
                     <textarea
-                      value={typeof editedProfile.lawyerProfile.location === 'string'
-                        ? JSON.parse(editedProfile.lawyerProfile.location).address || ''
-                        : editedProfile.lawyerProfile.location.address || ''}
+                      value={(() => {
+                        try {
+                          const loc = typeof editedProfile.lawyerProfile?.location === 'string'
+                            ? JSON.parse(editedProfile.lawyerProfile.location)
+                            : editedProfile.lawyerProfile?.location;
+                          return loc?.address || '';
+                        } catch {
+                          return '';
+                        }
+                      })()}
                       onChange={(e) => {
-                        const currentLocation = typeof editedProfile.lawyerProfile.location === 'string'
-                          ? JSON.parse(editedProfile.lawyerProfile.location)
-                          : editedProfile.lawyerProfile.location;
-                        setEditedProfile({
-                          ...editedProfile,
-                          lawyerProfile: {
-                            ...editedProfile.lawyerProfile,
-                            location: JSON.stringify({ ...currentLocation, address: e.target.value })
-                          }
-                        });
+                        try {
+                          const currentLocation = typeof editedProfile.lawyerProfile?.location === 'string'
+                            ? JSON.parse(editedProfile.lawyerProfile.location)
+                            : editedProfile.lawyerProfile?.location || {};
+                          setEditedProfile({
+                            ...editedProfile,
+                            lawyerProfile: {
+                              ...editedProfile.lawyerProfile,
+                              location: JSON.stringify({ ...currentLocation, address: e.target.value })
+                            }
+                          });
+                        } catch (err) {
+                          console.error('Error updating location:', err);
+                        }
                       }}
                       rows={2}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -413,10 +426,10 @@ export const LawyerProfile: React.FC = () => {
                 <Linkedin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">LinkedIn</p>
-                  {isEditing ? (
+                  {isEditing && editedProfile ? (
                     <input
                       type="url"
-                      value={editedProfile.lawyerProfile.linkedInProfile || ''}
+                      value={editedProfile.lawyerProfile?.linkedInProfile || ''}
                       onChange={(e) => setEditedProfile({
                         ...editedProfile,
                         lawyerProfile: { ...editedProfile.lawyerProfile, linkedInProfile: e.target.value }
@@ -424,7 +437,7 @@ export const LawyerProfile: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="https://linkedin.com/in/yourprofile"
                     />
-                  ) : lawyerProfile.linkedInProfile ? (
+                  ) : lawyerProfile?.linkedInProfile ? (
                     <a
                       href={lawyerProfile.linkedInProfile}
                       target="_blank"
