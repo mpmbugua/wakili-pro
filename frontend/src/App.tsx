@@ -147,18 +147,27 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Router>
-        <AppShell>
-          <Routes>
-            {/* Public Routes - No Authentication Required */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/ai" element={<AIAssistant />} />
-            <Route path="/lawyers" element={<LawyersBrowse />} />
-            <Route path="/services" element={<LegalServicesPage />} />
-            <Route path="/marketplace" element={<MarketplaceBrowse />} />
-            <Route path="/resources" element={<ResourcesPage />} />
-            <Route path="/resources/article/:id" element={<ArticleDetailPage />} />
-            <Route path="/document-services" element={<DocumentServicesPage />} />
-            <Route path="/service-request" element={<ServiceRequestPage />} />
+        <Routes>
+          {/* Admin Login Route - Standalone without AppShell */}
+          <Route 
+            path="/admin/login" 
+            element={<AdminLoginPage />} 
+          />
+
+          {/* All other routes wrapped in AppShell */}
+          <Route path="*" element={
+            <AppShell>
+              <Routes>
+                {/* Public Routes - No Authentication Required */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/ai" element={<AIAssistant />} />
+                <Route path="/lawyers" element={<LawyersBrowse />} />
+                <Route path="/services" element={<LegalServicesPage />} />
+                <Route path="/marketplace" element={<MarketplaceBrowse />} />
+                <Route path="/resources" element={<ResourcesPage />} />
+                <Route path="/resources/article/:id" element={<ArticleDetailPage />} />
+                <Route path="/document-services" element={<DocumentServicesPage />} />
+                <Route path="/service-request" element={<ServiceRequestPage />} />
             
             {/* Lawyer Quote Submission (Protected) */}
             <Route 
@@ -206,12 +215,6 @@ function App() {
             <Route 
               path="/register" 
               element={isAuthenticated ? <Navigate to="/dashboard" /> : <Register />} 
-            />
-            
-            {/* Admin Login Route - Public but redirects if already authenticated as admin */}
-            <Route 
-              path="/admin/login" 
-              element={<AdminLoginPage />} 
             />
 
             {/* Protected Routes - Authentication Required */}
@@ -302,8 +305,10 @@ function App() {
 
             {/* Catch-all - redirect to landing */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AppShell>
+              </Routes>
+            </AppShell>
+          } />
+        </Routes>
       </Router>
     </GoogleOAuthProvider>
   );

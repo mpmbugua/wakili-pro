@@ -7,6 +7,9 @@ export const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const login = useAuthStore((state) => state.login);
+  const logout = useAuthStore((state) => state.logout);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -18,6 +21,17 @@ export const AdminLoginPage: React.FC = () => {
 
   // Determine redirect path based on where user came from
   const from = (location.state as any)?.from?.pathname || '/admin';
+
+  // If user is already authenticated as admin, redirect
+  React.useEffect(() => {
+    if (isAuthenticated && user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')) {
+      navigate(from, { replace: true });
+    }
+    // If user is authenticated but not admin, logout
+    if (isAuthenticated && user && user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+      logout();
+    }
+  }, [isAuthenticated, user, navigate, from, logout]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
