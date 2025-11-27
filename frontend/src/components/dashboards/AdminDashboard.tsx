@@ -500,9 +500,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Admin Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Button variant="outline" className="justify-start" onClick={() => navigate('/admin/users/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add User
+          <Button variant="outline" className="justify-start" onClick={() => navigate('/admin/lawyers')}>
+            <UserCheck className="h-4 w-4 mr-2" />
+            Approve Lawyers
           </Button>
           <Button variant="outline" className="justify-start" onClick={() => navigate('/admin/users')}>
             <Users className="h-4 w-4 mr-2" />
