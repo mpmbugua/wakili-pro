@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { 
+  getAdminStats,
   getPendingLawyers,
   getVerifiedLawyers,
   approveLawyer,
@@ -12,6 +13,13 @@ const router = Router();
 // All routes require ADMIN role
 router.use(authenticateToken);
 router.use(authorizeRoles('ADMIN', 'SUPER_ADMIN'));
+
+/**
+ * @route   GET /api/admin/lawyers/stats
+ * @desc    Get admin dashboard statistics
+ * @access  Admin only
+ */
+router.get('/stats', getAdminStats);
 
 /**
  * @route   GET /api/admin/lawyers/pending

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Users, UserCheck, UserX, Shield, FileText, AlertCircle, 
@@ -8,6 +8,7 @@ import {
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
 import type { AuthUser } from '@wakili-pro/shared/src/types/auth';
+import axiosInstance from '../../lib/axios';
 
 interface AdminDashboardProps {
   user: AuthUser;
@@ -45,7 +46,7 @@ interface FlaggedContent {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const navigate = useNavigate();
   
-  const [stats] = useState({
+  const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
     totalLawyers: 0,
@@ -56,15 +57,50 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
     activeIssues: 0,
   });
 
+  const [loading, setLoading] = useState(true);
+  const [recentUsers, setRecentUsers] = useState<User[]>([]);
+  const [pendingLawyers, setPendingLawyers] = useState<LawyerApplication[]>([]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch admin stats
+      const statsRes = await axiosInstance.get('/admin/lawyers/stats');
+      if (statsRes.data.success) {
+        setStats(statsRes.data.data);
+      }
+      
+      // Fetch pending lawyers
+      const lawyersRes = await axiosInstance.get('/admin/lawyers/pending');
+      if (lawyersRes.data.success) {
+        const lawyers = lawyersRes.data.data.map((l: any) => ({
+          id: l.id,
+          name: `${l.user.firstName} ${l.user.lastName}`,
+          email: l.user.email,
+          specialization: l.specializations.join(', '),
+          experience: `${l.yearsOfExperience} years`,
+          submittedDate: new Date(l.createdAt).toLocaleDateString(),
+          status: 'pending' as const
+        }));
+        setPendingLawyers(lawyers);
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [growthData] = useState({
     users: { current: 0, previous: 0, change: 0 },
     revenue: { current: 0, previous: 0, change: 0 },
     consultations: { current: 0, previous: 0, change: 0 },
   });
-
-  const recentUsers: User[] = [];
-
-  const pendingLawyers: LawyerApplication[] = [];
 
   const flaggedItems: FlaggedContent[] = [];
 

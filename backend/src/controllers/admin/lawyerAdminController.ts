@@ -6,6 +6,55 @@ import type { ApiResponse } from '@wakili-pro/shared';
 const prisma = new PrismaClient();
 
 /**
+ * Get admin dashboard statistics
+ */
+export const getAdminStats = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    // Get total users count
+    const totalUsers = await prisma.user.count();
+    
+    // Get total lawyers count
+    const totalLawyers = await prisma.lawyerProfile.count();
+    
+    // Get pending lawyer applications
+    const pendingApplications = await prisma.lawyerProfile.count({
+      where: { isVerified: false }
+    });
+    
+    // Get verified lawyers count
+    const verifiedLawyers = await prisma.lawyerProfile.count({
+      where: { isVerified: true }
+    });
+
+    const stats = {
+      totalUsers,
+      totalLawyers,
+      verifiedLawyers,
+      pendingApplications,
+      activeUsers: totalUsers, // Can be refined with last login tracking
+      consultationsToday: 0, // TODO: Implement when consultations are tracked
+      platformRevenue: 0, // TODO: Implement when payments are tracked
+      flaggedContent: 0, // TODO: Implement content moderation
+      activeIssues: 0 // TODO: Implement issue tracking
+    };
+
+    const response: ApiResponse<typeof stats> = {
+      success: true,
+      message: 'Admin statistics retrieved successfully',
+      data: stats
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Get admin stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve admin statistics'
+    });
+  }
+};
+
+/**
  * Get all pending lawyer applications
  */
 export const getPendingLawyers = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
