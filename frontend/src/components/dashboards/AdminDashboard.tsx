@@ -46,117 +46,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const navigate = useNavigate();
   
   const [stats] = useState({
-    totalUsers: 1247,
-    activeUsers: 892,
-    totalLawyers: 156,
-    pendingApplications: 12,
-    consultationsToday: 47,
-    platformRevenue: 1850000,
-    flaggedContent: 8,
-    activeIssues: 3,
+    totalUsers: 0,
+    activeUsers: 0,
+    totalLawyers: 0,
+    pendingApplications: 0,
+    consultationsToday: 0,
+    platformRevenue: 0,
+    flaggedContent: 0,
+    activeIssues: 0,
   });
 
   const [growthData] = useState({
-    users: { current: 1247, previous: 1089, change: 14.5 },
-    revenue: { current: 1850000, previous: 1620000, change: 14.2 },
-    consultations: { current: 47, previous: 38, change: 23.7 },
+    users: { current: 0, previous: 0, change: 0 },
+    revenue: { current: 0, previous: 0, change: 0 },
+    consultations: { current: 0, previous: 0, change: 0 },
   });
 
-  const recentUsers: User[] = [
-    { 
-      id: '1', 
-      name: 'John Kamau', 
-      email: 'john.kamau@email.com', 
-      role: 'PUBLIC',
-      status: 'active',
-      joinedDate: '2025-11-20',
-      lastActive: '2 hours ago'
-    },
-    { 
-      id: '2', 
-      name: 'Mary Wanjiku', 
-      email: 'mary.wanjiku@email.com', 
-      role: 'LAWYER',
-      status: 'active',
-      joinedDate: '2025-11-18',
-      lastActive: '1 day ago'
-    },
-    { 
-      id: '3', 
-      name: 'Peter Ochieng', 
-      email: 'peter.ochieng@email.com', 
-      role: 'PUBLIC',
-      status: 'pending',
-      joinedDate: '2025-11-22',
-      lastActive: '5 hours ago'
-    },
-    { 
-      id: '4', 
-      name: 'Sarah Njeri', 
-      email: 'sarah.njeri@email.com', 
-      role: 'PUBLIC',
-      status: 'active',
-      joinedDate: '2025-11-19',
-      lastActive: '3 hours ago'
-    },
-  ];
+  const recentUsers: User[] = [];
 
-  const pendingLawyers: LawyerApplication[] = [
-    { 
-      id: '1', 
-      name: 'Advocate David Otieno', 
-      email: 'david.otieno@lawfirm.com',
-      specialization: 'Corporate Law',
-      experience: '8 years',
-      submittedDate: '2025-11-22',
-      status: 'pending'
-    },
-    { 
-      id: '2', 
-      name: 'Advocate Grace Mwangi', 
-      email: 'grace.mwangi@legal.com',
-      specialization: 'Family Law',
-      experience: '5 years',
-      submittedDate: '2025-11-21',
-      status: 'pending'
-    },
-    { 
-      id: '3', 
-      name: 'Advocate James Kipchoge', 
-      email: 'james.k@advocates.co.ke',
-      specialization: 'Criminal Law',
-      experience: '12 years',
-      submittedDate: '2025-11-20',
-      status: 'pending'
-    },
-  ];
+  const pendingLawyers: LawyerApplication[] = [];
 
-  const flaggedItems: FlaggedContent[] = [
-    { 
-      id: '1', 
-      type: 'message', 
-      reportedBy: 'John Kamau',
-      reason: 'Inappropriate content',
-      date: '2025-11-24',
-      status: 'pending'
-    },
-    { 
-      id: '2', 
-      type: 'consultation', 
-      reportedBy: 'Mary Wanjiku',
-      reason: 'Unprofessional behavior',
-      date: '2025-11-23',
-      status: 'pending'
-    },
-    { 
-      id: '3', 
-      type: 'document', 
-      reportedBy: 'Peter Ochieng',
-      reason: 'Copyright violation',
-      date: '2025-11-22',
-      status: 'resolved'
-    },
-  ];
+  const flaggedItems: FlaggedContent[] = [];
 
   const userColumns: Column<User>[] = [
     { key: 'name', label: 'Name', sortable: true },
