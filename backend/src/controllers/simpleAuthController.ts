@@ -6,6 +6,22 @@ import { RegisterSchema } from '@wakili-pro/shared';
 
 const prisma = new PrismaClient();
 
+// Store last error for debugging
+let lastError: any = null;
+
+export const getLastError = (req: Request, res: Response) => {
+  res.json({
+    lastError: lastError ? {
+      message: lastError.message,
+      stack: lastError.stack,
+      name: lastError.name,
+      code: lastError.code,
+      meta: lastError.meta
+    } : null,
+    timestamp: new Date().toISOString()
+  });
+};
+
 export const simpleRegister = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('[STEP 1] Starting registration');
@@ -134,7 +150,13 @@ export const simpleRegister = async (req: Request, res: Response): Promise<void>
       }
     });
   } catch (error) {
+    lastError = error; // Store for debugging endpoint
     console.error('Simple registration error:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    });
     res.status(500).json({
       success: false,
       message: 'Internal server error during registration',

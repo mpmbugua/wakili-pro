@@ -89,6 +89,13 @@ app.get('/debug/db-test', async (_req: Request, res: Response) => {
   }
 });
 
+// Debug endpoint to get last registration error
+app.get('/debug/last-error', async (req, res) => {
+  const { getLastError } = await import('./controllers/simpleAuthController');
+  getLastError(req, res);
+});
+
+
 // Debug endpoint to test registration validation
 app.post('/debug/register-test', async (req: Request, res: Response) => {
   const step = { current: 'start' };
