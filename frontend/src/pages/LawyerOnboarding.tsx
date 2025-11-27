@@ -496,14 +496,25 @@ export const LawyerOnboarding: React.FC = () => {
             <Linkedin className="h-5 w-5 text-gray-400" />
           </div>
           <input
-            type="url"
+            type="text"
             value={formData.linkedInProfile}
-            onChange={(e) => setFormData({ ...formData, linkedInProfile: e.target.value })}
-            placeholder="https://www.linkedin.com/in/yourprofile"
+            onChange={(e) => {
+              let value = e.target.value.trim();
+              // Auto-format: if user enters just username, convert to full URL
+              if (value && !value.startsWith('http')) {
+                // Remove any existing linkedin.com/in/ prefix if user pasted it
+                value = value.replace(/^(www\.)?linkedin\.com\/in\//, '');
+                value = `https://www.linkedin.com/in/${value}`;
+              }
+              setFormData({ ...formData, linkedInProfile: value });
+            }}
+            placeholder="Enter username (e.g., john-doe) or full URL"
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        <p className="text-xs text-gray-500 mt-1">Add your LinkedIn profile to boost credibility</p>
+        <p className="text-xs text-gray-500 mt-1">
+          Just type your LinkedIn username - we'll create the full URL automatically
+        </p>
       </div>
 
       <div>
