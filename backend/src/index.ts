@@ -324,9 +324,11 @@ app.use('*', (_req: Request, res: Response) => {
     availableEndpoints: [
       '/health',
       '/api',
+      '/api/setup/*',
       '/api/auth/*',
       '/api/ai/*',
       '/api/lawyers/*',
+      '/api/admin/lawyers/*',
       '/api/marketplace/*',
       '/api/video/*',
       '/api/users/*',
