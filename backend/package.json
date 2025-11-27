@@ -13,7 +13,7 @@
     "dev": "node --max-old-space-size=4096 dist/index.js",
     "lint": "echo 'Backend linting skipped - no ESLint config present. Will add proper linting later.'",
     "test": "node --max-old-space-size=4096 ./node_modules/.bin/jest",
-    "postinstall": "prisma generate && prisma migrate deploy",
+    "postinstall": "prisma generate && prisma migrate resolve --applied 20251123074255_update_oauth_fields && prisma migrate deploy",
     "seed": "ts-node ./prisma/seed.ts",
     "seed:users": "ts-node ./prisma/seedUsers.ts",
     "seed:lawyers": "ts-node ./prisma/seedLawyerSubscriptions.ts",
