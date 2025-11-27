@@ -149,11 +149,6 @@ model User {
   role                                                       String
   updatedAt                                                  DateTime                @updatedAt
   verificationStatus                                         String?                 @default("PENDING")
-  googleId                                                   String?                 @unique
-  facebookId                                                 String?                 @unique
-  appleId                                                    String?                 @unique
-  provider                                                   String?
-  avatar                                                     String?
   aiQueries                                                  AIQuery[]               @relation("UserAIQueries")
   Article                                                    Article[]
   AuditLog                                                   AuditLog[]
