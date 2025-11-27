@@ -13,7 +13,10 @@ import {
   Clock,
   Edit,
   Crown,
-  Shield
+  Shield,
+  Save,
+  X,
+  Upload
 } from 'lucide-react';
 import axiosInstance from '../lib/axios';
 
@@ -48,6 +51,9 @@ export const LawyerProfile: React.FC = () => {
   const [profile, setProfile] = useState<LawyerProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<any>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -56,6 +62,7 @@ export const LawyerProfile: React.FC = () => {
         
         if (response.data.success && response.data.data) {
           setProfile(response.data.data);
+          setEditedProfile(response.data.data);
         } else {
           setError('Failed to load profile');
         }
@@ -69,6 +76,44 @@ export const LawyerProfile: React.FC = () => {
 
     fetchProfile();
   }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+
+    try {
+      // Update user info
+      await axiosInstance.put('/users/profile', {
+        firstName: editedProfile.user.firstName,
+        lastName: editedProfile.user.lastName,
+        phoneNumber: editedProfile.user.phoneNumber
+      });
+
+      // Update lawyer profile
+      await axiosInstance.put('/lawyers/profile', {
+        bio: editedProfile.lawyerProfile.bio,
+        yearsOfExperience: editedProfile.lawyerProfile.yearsOfExperience,
+        linkedInProfile: editedProfile.lawyerProfile.linkedInProfile,
+        location: typeof editedProfile.lawyerProfile.location === 'string'
+          ? editedProfile.lawyerProfile.location
+          : JSON.stringify(editedProfile.lawyerProfile.location)
+      });
+
+      setProfile(editedProfile);
+      setIsEditing(false);
+    } catch (err: any) {
+      console.error('Save error:', err);
+      setError(err.response?.data?.message || 'Failed to save changes');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditedProfile(profile);
+    setIsEditing(false);
+    setError(null);
+  };
 
   if (loading) {
     return (
@@ -159,13 +204,45 @@ export const LawyerProfile: React.FC = () => {
                   </div>
                 </div>
                 
-                <button
-                  onClick={() => navigate('/profile/settings')}
-                  className="mt-4 md:mt-0 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Edit className="h-4 w-4" />
-                  Edit Profile
-                </button>
+                <div className="mt-4 md:mt-0 flex gap-2">
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={handleCancel}
+                        disabled={saving}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                      >
+                        <X className="h-4 w-4" />
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                      >
+                        {saving ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4" />
+                            Save Changes
+                          </>
+                        )}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit Profile
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -213,6 +290,13 @@ export const LawyerProfile: React.FC = () => {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
+
       {/* Details Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
@@ -220,7 +304,20 @@ export const LawyerProfile: React.FC = () => {
           {/* Bio */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">About</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">{lawyerProfile.bio}</p>
+            {isEditing ? (
+              <textarea
+                value={editedProfile.lawyerProfile.bio}
+                onChange={(e) => setEditedProfile({
+                  ...editedProfile,
+                  lawyerProfile: { ...editedProfile.lawyerProfile, bio: e.target.value }
+                })}
+                rows={6}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Describe your legal expertise..."
+              />
+            ) : (
+              <p className="text-gray-700 whitespace-pre-wrap">{lawyerProfile.bio}</p>
+            )}
           </div>
 
           {/* Specializations */}
@@ -244,41 +341,90 @@ export const LawyerProfile: React.FC = () => {
           {/* Contact Information */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h2>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
+                <Mail className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
                   <p className="text-sm text-gray-600">Email</p>
                   <p className="text-gray-900 font-medium">{user.email}</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-600">Phone</p>
-                  <p className="text-gray-900 font-medium">{user.phoneNumber || 'Not provided'}</p>
+                <Phone className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 mb-1">Phone</p>
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      value={editedProfile.user.phoneNumber || ''}
+                      onChange={(e) => setEditedProfile({
+                        ...editedProfile,
+                        user: { ...editedProfile.user, phoneNumber: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="07XXXXXXXX"
+                    />
+                  ) : (
+                    <p className="text-gray-900 font-medium">{user.phoneNumber || 'Not provided'}</p>
+                  )}
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-600">Location</p>
-                  <p className="text-gray-900 font-medium">
-                    {location?.city || 'Not provided'}, {location?.county || ''}
-                  </p>
-                  {location?.address && (
-                    <p className="text-sm text-gray-600 mt-1">{location.address}</p>
+                <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 mb-1">Office Address</p>
+                  {isEditing ? (
+                    <textarea
+                      value={typeof editedProfile.lawyerProfile.location === 'string'
+                        ? JSON.parse(editedProfile.lawyerProfile.location).address || ''
+                        : editedProfile.lawyerProfile.location.address || ''}
+                      onChange={(e) => {
+                        const currentLocation = typeof editedProfile.lawyerProfile.location === 'string'
+                          ? JSON.parse(editedProfile.lawyerProfile.location)
+                          : editedProfile.lawyerProfile.location;
+                        setEditedProfile({
+                          ...editedProfile,
+                          lawyerProfile: {
+                            ...editedProfile.lawyerProfile,
+                            location: JSON.stringify({ ...currentLocation, address: e.target.value })
+                          }
+                        });
+                      }}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., 3rd Floor, ABC Towers, Kimathi Street"
+                    />
+                  ) : (
+                    <>
+                      <p className="text-gray-900 font-medium">
+                        {location?.city || 'Not provided'}, {location?.county || ''}
+                      </p>
+                      {location?.address && (
+                        <p className="text-sm text-gray-600 mt-1">{location.address}</p>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
 
-              {lawyerProfile.linkedInProfile && (
-                <div className="flex items-start gap-3">
-                  <Linkedin className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-gray-600">LinkedIn</p>
+              <div className="flex items-start gap-3">
+                <Linkedin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 mb-1">LinkedIn</p>
+                  {isEditing ? (
+                    <input
+                      type="url"
+                      value={editedProfile.lawyerProfile.linkedInProfile || ''}
+                      onChange={(e) => setEditedProfile({
+                        ...editedProfile,
+                        lawyerProfile: { ...editedProfile.lawyerProfile, linkedInProfile: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://linkedin.com/in/yourprofile"
+                    />
+                  ) : lawyerProfile.linkedInProfile ? (
                     <a
                       href={lawyerProfile.linkedInProfile}
                       target="_blank"
@@ -287,9 +433,11 @@ export const LawyerProfile: React.FC = () => {
                     >
                       View Profile
                     </a>
-                  </div>
+                  ) : (
+                    <p className="text-gray-500">Not provided</p>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
