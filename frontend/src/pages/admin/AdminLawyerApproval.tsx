@@ -12,7 +12,7 @@ import {
   Shield,
   AlertCircle
 } from 'lucide-react';
-import axiosInstance from '../lib/axios';
+import axiosInstance from '../../lib/axios';
 
 interface LawyerApplication {
   id: string;
