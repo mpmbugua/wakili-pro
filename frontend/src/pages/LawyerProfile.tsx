@@ -58,6 +58,15 @@ export const LawyerProfile: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        // Check if token exists
+        const authStorage = localStorage.getItem('wakili-auth-storage');
+        if (!authStorage) {
+          setError('Not authenticated. Please log in.');
+          setLoading(false);
+          navigate('/login');
+          return;
+        }
+
         const response = await axiosInstance.get('/users/profile');
         
         if (response.data.success && response.data.data) {
@@ -68,14 +77,22 @@ export const LawyerProfile: React.FC = () => {
         }
       } catch (err: any) {
         console.error('Profile fetch error:', err);
-        setError(err.response?.data?.message || 'Failed to load profile');
+        
+        // Handle token expiration
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          setError('Session expired. Please log in again.');
+          localStorage.removeItem('wakili-auth-storage');
+          setTimeout(() => navigate('/login'), 2000);
+        } else {
+          setError(err.response?.data?.message || 'Failed to load profile');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [navigate]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -125,15 +142,27 @@ export const LawyerProfile: React.FC = () => {
 
   if (error || !profile || !editedProfile) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <p className="text-red-700">{error || 'Profile not found'}</p>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </button>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <X className="h-6 w-6 text-red-600" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {error?.includes('token') || error?.includes('Session') 
+                ? 'Session Expired'
+                : 'Unable to Load Profile'}
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              {error || 'There was an error loading your profile data.'}
+            </p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
