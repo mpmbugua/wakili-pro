@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthStore>()(
         try {
           set({ isLoading: true, error: null });
 
-          console.log('[AuthStore] Attempting login with:', credentials.email);
+          console.log('[AuthStore] Attempting login with:', credentials.identifier);
           const response = await authService.login(credentials);
           console.log('[AuthStore] Login response:', response);
           

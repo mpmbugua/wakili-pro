@@ -97,7 +97,7 @@ class AuthService {
   async login(credentials: LoginRequest): Promise<ApiResponse<AuthData>> {
     try {
       console.log('[AuthService] Attempting login to:', `${API_BASE_URL}/auth/login`);
-      console.log('[AuthService] Credentials:', { email: credentials.email, password: '***' });
+      console.log('[AuthService] Credentials:', { identifier: credentials.identifier, password: '***' });
       
       const response: AxiosResponse<ApiResponse<AuthData>> = await apiClient.post(
         '/auth/login',

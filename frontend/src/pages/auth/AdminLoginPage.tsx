@@ -12,7 +12,7 @@ export const AdminLoginPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
 
   const [formData, setFormData] = useState({
-    email: '',
+    identifier: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +39,10 @@ export const AdminLoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await login({ 
+        identifier: formData.identifier, 
+        password: formData.password 
+      });
       
       if (result.success && result.user) {
         // Check if user has admin privileges
@@ -109,11 +112,11 @@ export const AdminLoginPage: React.FC = () => {
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
+                  id="identifier"
+                  name="identifier"
+                  type="text"
                   required
-                  value={formData.email}
+                  value={formData.identifier}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="admin@wakilipro.com"
