@@ -25,6 +25,7 @@ import LawyerQuoteSubmissionPage from './pages/LawyerQuoteSubmissionPage';
 import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
+import { AdminLawyerApproval } from './pages/admin/AdminLawyerApproval';
 import { AdminDashboard } from './components/dashboards/AdminDashboard';
 import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard';
 import { AdminLoginPage } from './pages/auth/AdminLoginPage';
@@ -277,6 +278,14 @@ function App() {
               element={
                 <AdminRoute hydrated={hydrated}>
                   <ArticleManagementPage />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/lawyers" 
+              element={
+                <AdminRoute hydrated={hydrated}>
+                  <AdminLawyerApproval />
                 </AdminRoute>
               } 
             />

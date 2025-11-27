@@ -249,6 +249,10 @@ app.use('/api/admin/legal-materials', adminLegalMaterialsRouter);
 import adminLegalScraperRouter from './routes/admin/legalScraperRoutes';
 app.use('/api/admin/legal-scraper', adminLegalScraperRouter);
 
+// Mount admin lawyer management router
+import adminLawyerRouter from './routes/admin/lawyerAdminRoutes';
+app.use('/api/admin/lawyers', adminLawyerRouter);
+
 // Mount AI assistant routes
 import aiRouter from './routes/ai';
 app.use('/api/ai', aiRouter);
