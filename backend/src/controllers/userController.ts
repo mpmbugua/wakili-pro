@@ -194,6 +194,7 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
     const lawyerProfile = await prisma.lawyerProfile.create({
       data: {
         userId,
+        providerId: userId, // Set providerId same as userId
         licenseNumber: onboardingData.licenseNumber,
         yearOfAdmission: onboardingData.yearOfAdmission,
         bio: onboardingData.bio,
@@ -212,10 +213,10 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
           : onboardingData.location && typeof onboardingData.location === 'object'
             ? JSON.stringify(onboardingData.location)
             : '',
-        isVerified: false,
+        isVerified: false, // Pending admin approval
         rating: 0,
         reviewCount: 0,
-        tier: 'LITE' // Set free tier by default
+        tier: 'FREE' // Start with free tier
       },
       include: {
         user: {

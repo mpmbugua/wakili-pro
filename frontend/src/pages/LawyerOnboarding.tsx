@@ -560,11 +560,17 @@ export const LawyerOnboarding: React.FC = () => {
   const renderStep5 = () => (
     <div className="text-center py-8">
       <div className="mb-6">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="h-10 w-10 text-green-600" />
+        <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <AlertCircle className="h-10 w-10 text-amber-600" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Wakili Pro! 🎉</h2>
-        <p className="text-lg text-gray-600">Your lawyer profile has been created successfully</p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Profile Submitted Successfully! 📋</h2>
+        <p className="text-lg text-gray-600 mb-2">Thank you for joining Wakili Pro</p>
+        <div className="max-w-md mx-auto mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-900">
+            <strong>⏳ Pending Verification</strong><br/>
+            Your credentials are under review by our admin team. You'll receive an email notification once your profile is approved (usually within 24-48 hours).
+          </p>
+        </div>
       </div>
 
       {/* Free Tier Summary */}
@@ -599,7 +605,7 @@ export const LawyerOnboarding: React.FC = () => {
           onClick={() => navigate('/subscription')}
           className="w-full bg-white text-orange-600 font-bold py-3 px-6 rounded-lg hover:bg-gray-100 transition-all shadow-lg"
         >
-          Upgrade to Premium - KES 2,999/month
+          Upgrade to Premium - KES 4,999/month
         </button>
       </div>
 
