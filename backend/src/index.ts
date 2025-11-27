@@ -309,6 +309,10 @@ app.use('/api/certification', documentCertificationRouter);
 import articlesRouter from './routes/articles';
 app.use('/api/articles', articlesRouter);
 
+// Setup routes (admin initialization)
+import setupRouter from './routes/setup';
+app.use('/api/setup', setupRouter);
+
 // Auth routes (real implementation)
 app.use('/api/auth', authRoutes);
 

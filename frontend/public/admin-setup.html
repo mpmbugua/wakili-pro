@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wakili Pro - Admin Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        p {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 15px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #166534;
+        }
+        .error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+            color: #1e40af;
+        }
+        .credentials {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .credentials strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #1e293b;
+        }
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Admin Setup</h1>
+        <p>Initialize the admin user for Wakili Pro</p>
+        
+        <button onclick="checkAdmin()" id="checkBtn">1️⃣ Check Admin Status</button>
+        <button onclick="initAdmin()" id="initBtn">2️⃣ Create Admin User</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://wakili-pro.onrender.com/api';
+        
+        async function checkAdmin() {
+            const btn = document.getElementById('checkBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+            result.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_URL}/setup/check-admin`);
+                const data = await response.json();
+                
+                result.style.display = 'block';
+                if (data.success) {
+                    result.className = 'success';
+                    result.innerHTML = `
+                        <strong>✅ Admin User Exists</strong>
+                        <div class="credentials">
+                            <p><strong>Email:</strong> ${data.data.email}</p>
+                            <p><strong>Role:</strong> ${data.data.role}</p>
+                            <p><strong>Name:</strong> ${data.data.firstName} ${data.data.lastName}</p>
+                        </div>
+                        <p style="margin-top: 15px;">You can now login at <a href="https://wakili-pro-1.onrender.com/admin/login" target="_blank">Admin Login</a></p>
+                    `;
+                } else {
+                    result.className = 'info';
+                    result.innerHTML = `
+                        <strong>ℹ️ Admin User Not Found</strong>
+                        <p style="margin-top: 10px;">Click "Create Admin User" to initialize the admin account.</p>
+                    `;
+                }
+            } catch (error) {
+                result.style.display = 'block';
+                result.className = 'error';
+                result.innerHTML = `<strong>❌ Error</strong><p style="margin-top: 5px;">${error.message}</p>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '1️⃣ Check Admin Status';
+            }
+        }
+        
+        async function initAdmin() {
+            const btn = document.getElementById('initBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+            result.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_URL}/setup/init-admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                result.style.display = 'block';
+                if (data.success) {
+                    result.className = 'success';
+                    result.innerHTML = `
+                        <strong>✅ ${data.message}</strong>
+                        ${data.data.credentials ? `
+                            <div class="credentials">
+                                <strong>Admin Credentials:</strong>
+                                <p><strong>Email:</strong> <code>${data.data.credentials.email}</code></p>
+                                <p><strong>Password:</strong> <code>${data.data.credentials.password}</code></p>
+                            </div>
+                            <p style="margin-top: 15px; color: #dc2626; font-weight: 600;">⚠️ Save these credentials! Change the password after first login.</p>
+                            <p style="margin-top: 10px;">Login at: <a href="https://wakili-pro-1.onrender.com/admin/login" target="_blank">Admin Login</a></p>
+                        ` : `
+                            <p style="margin-top: 10px;">Use the existing credentials to login.</p>
+                        `}
+                    `;
+                } else {
+                    result.className = 'error';
+                    result.innerHTML = `<strong>❌ Failed</strong><p style="margin-top: 5px;">${data.message}</p>`;
+                }
+            } catch (error) {
+                result.style.display = 'block';
+                result.className = 'error';
+                result.innerHTML = `<strong>❌ Error</strong><p style="margin-top: 5px;">${error.message}</p>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '2️⃣ Create Admin User';
+            }
+        }
+        
+        // Auto-check on load
+        window.addEventListener('load', checkAdmin);
+    </script>
+</body>
+</html>
