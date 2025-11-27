@@ -1,14 +1,29 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { 
   getProfile, 
   updateProfile, 
   lawyerOnboarding, 
-  deleteAccount 
+  deleteAccount
 } from '../controllers/userController';
+import { uploadPhoto } from '../controllers/photoUploadController';
 import { authenticateToken, authorizeRoles } from '../middleware/auth';
 
 import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = Router();
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 /**
  * @route   GET /api/users/profile
@@ -24,6 +39,13 @@ router.get('/profile', authenticateToken, getProfile);
  * @body    { firstName?, lastName?, phoneNumber?, dateOfBirth?, profilePicture? }
  */
 router.put('/profile', authenticateToken, updateProfile);
+
+/**
+ * @route   POST /api/users/upload-photo
+ * @desc    Upload profile photo
+ * @access  Private
+ */
+router.post('/upload-photo', authenticateToken, upload.single('photo'), uploadPhoto);
 
 /**
  * @route   POST /api/users/lawyer-onboarding

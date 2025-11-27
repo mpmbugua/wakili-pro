@@ -11,7 +11,9 @@ import {
   CheckCircle,
   AlertCircle,
   Crown,
-  Sparkles
+  Sparkles,
+  Upload,
+  X
 } from 'lucide-react';
 import axiosInstance from '../lib/axios';
 
@@ -72,6 +74,9 @@ export const LawyerOnboarding: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const [formData, setFormData] = useState<OnboardingFormData>({
     licenseNumber: '',
@@ -89,6 +94,40 @@ export const LawyerOnboarding: React.FC = () => {
     profileImageUrl: '',
     linkedInProfile: ''
   });
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB');
+        return;
+      }
+
+      setPhotoFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      setError(null);
+    }
+  };
+
+  const removePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview('');
+    setFormData({ ...formData, profileImageUrl: '' });
+  };
 
   const handleSpecializationToggle = (spec: { id: string; name: string; category: string }) => {
     const isSelected = formData.specializations.some(s => s.category === spec.id);
@@ -167,6 +206,28 @@ export const LawyerOnboarding: React.FC = () => {
     setError(null);
 
     try {
+      // Upload photo first if one is selected
+      if (photoFile) {
+        setUploadingPhoto(true);
+        const photoFormData = new FormData();
+        photoFormData.append('photo', photoFile);
+        
+        try {
+          const uploadResponse = await axiosInstance.post('/users/upload-photo', photoFormData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          
+          if (uploadResponse.data.success && uploadResponse.data.data?.url) {
+            formData.profileImageUrl = uploadResponse.data.data.url;
+          }
+        } catch (uploadErr) {
+          console.error('Photo upload failed:', uploadErr);
+          // Continue with onboarding even if photo upload fails
+        } finally {
+          setUploadingPhoto(false);
+        }
+      }
+
       const response = await axiosInstance.post('/users/lawyer-onboarding', formData);
 
       if (response.data.success) {
@@ -447,16 +508,40 @@ export const LawyerOnboarding: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Profile Photo URL <span className="text-gray-500 text-xs">(Optional)</span>
+          Profile Photo <span className="text-gray-500 text-xs">(Optional)</span>
         </label>
-        <input
-          type="url"
-          value={formData.profileImageUrl}
-          onChange={(e) => setFormData({ ...formData, profileImageUrl: e.target.value })}
-          placeholder="https://example.com/your-photo.jpg"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <p className="text-xs text-gray-500 mt-1">Upload your photo to our server or provide a URL</p>
+        
+        {photoPreview ? (
+          <div className="relative inline-block">
+            <img 
+              src={photoPreview} 
+              alt="Profile preview" 
+              className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
+            />
+            <button
+              type="button"
+              onClick={removePhoto}
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 px-4 py-3 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors">
+              <Upload className="h-5 w-5" />
+              <span>Choose Photo</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="hidden"
+              />
+            </label>
+            <p className="text-sm text-gray-500">Max 5MB • JPG, PNG, GIF</p>
+          </div>
+        )}
+        <p className="text-xs text-gray-500 mt-2">Add your professional photo to boost credibility</p>
       </div>
     </div>
   );
