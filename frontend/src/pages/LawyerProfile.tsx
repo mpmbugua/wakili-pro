@@ -152,7 +152,7 @@ export const LawyerProfile: React.FC = () => {
     PRO: { color: 'bg-purple-100 text-purple-700', icon: Crown, label: 'Pro' }
   };
 
-  const tierInfo = tierBadges[lawyerProfile.tier];
+  const tierInfo = tierBadges[lawyerProfile?.tier || 'FREE'] || tierBadges.FREE;
   const TierIcon = tierInfo.icon;
 
   return (
