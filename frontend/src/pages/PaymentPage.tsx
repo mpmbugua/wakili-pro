@@ -359,10 +359,18 @@ export const PaymentPage: React.FC = () => {
                   <div>
                     <p className="text-sm text-slate-600">Service Type</p>
                     <p className="font-semibold text-slate-900">
-                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' ? 'AI Document Review' : 'Lawyer Certification'}
+                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase' 
+                        ? 'Legal Document Template' 
+                        : (bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' 
+                        ? 'AI Document Review' 
+                        : 'Lawyer Certification'}
                     </p>
                     <p className="text-sm text-blue-600">
-                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' ? 'Automated Analysis' : 'Professional Certification'}
+                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase'
+                        ? 'Instant Download'
+                        : (bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' 
+                        ? 'Automated Analysis' 
+                        : 'Professional Certification'}
                     </p>
                   </div>
                   <div className="border-t pt-4">
@@ -374,9 +382,17 @@ export const PaymentPage: React.FC = () => {
                     <p className="font-semibold text-slate-900">{(bookingDetails as DocumentPaymentDetails).documentType}</p>
                   </div>
                   <div className="border-t pt-4">
-                    <p className="text-sm text-slate-600">Processing Time</p>
+                    <p className="text-sm text-slate-600">
+                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase' 
+                        ? 'Availability' 
+                        : 'Processing Time'}
+                    </p>
                     <p className="font-semibold text-slate-900">
-                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' ? '5-10 minutes' : 'Within 24 hours'}
+                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase'
+                        ? 'Instant download after payment'
+                        : (bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' 
+                        ? '5-10 minutes' 
+                        : 'Within 24 hours'}
                     </p>
                   </div>
                   <div className="border-t pt-4 bg-blue-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
