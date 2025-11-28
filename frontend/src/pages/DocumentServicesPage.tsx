@@ -156,10 +156,32 @@ const DocumentServicesPage: React.FC = () => {
         ? '/document-review/external/ai-review'
         : '/document-review/certification';
 
+      // Get token from localStorage the same way axios interceptor does
+      let token = accessToken;
+      if (!token) {
+        const authStorage = localStorage.getItem('wakili-auth-storage');
+        if (authStorage) {
+          try {
+            const parsed = JSON.parse(authStorage);
+            token = parsed.state?.accessToken;
+          } catch (error) {
+            console.error('Error parsing auth storage:', error);
+          }
+        }
+      }
+
+      console.log('🔐 Document Upload Authentication:');
+      console.log('   Token available:', token ? 'Yes' : 'No');
+      console.log('   Token preview:', token ? `${token.substring(0, 20)}...` : 'NULL');
+
+      if (!token) {
+        throw new Error('No authentication token available. Please log in again.');
+      }
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`
+          'Authorization': `Bearer ${token}`
         },
         body: formData
       });
