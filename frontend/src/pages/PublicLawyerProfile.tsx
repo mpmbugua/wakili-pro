@@ -183,7 +183,7 @@ export const PublicLawyerProfile: React.FC = () => {
     `https://ui-avatars.com/api/?name=${lawyer.firstName}+${lawyer.lastName}&background=3b82f6&color=fff&size=400`;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Simple Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -193,19 +193,21 @@ export const PublicLawyerProfile: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{/* Back Button */}
-        <button
-          onClick={() => navigate('/lawyers')}
-          className="flex items-center text-blue-600 hover:text-blue-700 mb-6 font-medium"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Lawyers
-        </button>
+      <div className="flex-1 overflow-auto">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Back Button */}
+          <button
+            onClick={() => navigate('/lawyers')}
+            className="flex items-center text-blue-600 hover:text-blue-700 mb-6 font-medium"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Back to Lawyers
+          </button>
 
-        <div className="grid lg:grid-cols-12 gap-6">
-          {/* Left Column - Profile Card (Fixed, Sticky) */}
-          <div className="lg:col-span-4">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden sticky top-24 self-start">
+          <div className="grid lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column - Profile Card (Fixed, Sticky) */}
+            <div className="lg:col-span-4">
+              <div className="bg-white rounded-lg shadow-md overflow-hidden sticky top-6">
               {/* Profile Image */}
               <div className="relative h-72">
                 <img
