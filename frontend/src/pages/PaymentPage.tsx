@@ -33,7 +33,7 @@ export const PaymentPage: React.FC = () => {
   const { isAuthenticated, user } = useAuthStore();
   
   const bookingDetails = location.state as (BookingDetails | DocumentPaymentDetails) | null;
-  const isDocumentPayment = bookingDetails && 'reviewId' in bookingDetails;
+  const isDocumentPayment = (bookingDetails && 'reviewId' in bookingDetails) || !!reviewId;
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mpesa'); // Default to M-Pesa
   const [loading, setLoading] = useState(false);
@@ -127,7 +127,7 @@ export const PaymentPage: React.FC = () => {
         // M-Pesa Daraja API payment flow
         const paymentData = isDocumentPayment
           ? {
-              reviewId: (bookingDetails as DocumentPaymentDetails).reviewId,
+              reviewId: reviewId || (bookingDetails as DocumentPaymentDetails).reviewId,
               amount: (bookingDetails as DocumentPaymentDetails).price,
               phoneNumber: mpesaDetails.phoneNumber,
               paymentType: (bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase' 
@@ -201,7 +201,7 @@ export const PaymentPage: React.FC = () => {
         // Card payment flow (Flutterwave)
         const paymentIntentData = isDocumentPayment
           ? {
-              reviewId: (bookingDetails as DocumentPaymentDetails).reviewId,
+              reviewId: reviewId || (bookingDetails as DocumentPaymentDetails).reviewId,
               amount: (bookingDetails as DocumentPaymentDetails).price,
               paymentMethod: 'FLUTTERWAVE_CARD',
               provider: 'FLUTTERWAVE',
