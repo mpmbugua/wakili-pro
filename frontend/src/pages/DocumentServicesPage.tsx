@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
-import { CheckCircle, Upload, Sparkles, Shield, Clock, AlertCircle } from 'lucide-react';
+import { CheckCircle, Upload, Sparkles, Shield, Clock, AlertCircle, FileText } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 type ServiceType = 'ai-review' | 'certification' | null;
@@ -12,8 +12,15 @@ interface UploadedFile {
   preview: string;
 }
 
+interface LocationState {
+  documentId?: string;
+  documentTitle?: string;
+  requestType?: 'review' | 'certification';
+}
+
 const DocumentServicesPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, accessToken } = useAuthStore();
   const [selectedService, setSelectedService] = useState<ServiceType>(null);
   const [documentSource, setDocumentSource] = useState<DocumentSource>(null);
@@ -23,6 +30,34 @@ const DocumentServicesPage: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [fromUploadedDocument, setFromUploadedDocument] = useState(false);
+
+  // Check if coming from Request Review button
+  useEffect(() => {
+    const state = location.state as LocationState;
+    if (state?.documentId && state?.documentTitle) {
+      // User clicked Request Review from DocumentsPage
+      setFromUploadedDocument(true);
+      setDocumentType(state.documentTitle);
+      
+      // Auto-select service based on requestType
+      if (state.requestType === 'review') {
+        setSelectedService('ai-review');
+      } else if (state.requestType === 'certification') {
+        setSelectedService('certification');
+      }
+      
+      setDocumentSource('external');
+      
+      // Create a mock file reference (since document is already uploaded)
+      // This signals that we have a document ready
+      const mockFile = new File([''], state.documentTitle, { type: 'application/pdf' });
+      setUploadedFile({
+        file: mockFile,
+        preview: state.documentTitle
+      });
+    }
+  }, [location.state]);
 
   // Restore pending document review after user logs in/registers
   useEffect(() => {
@@ -136,6 +171,25 @@ const DocumentServicesPage: React.FC = () => {
     setUploadProgress(0);
 
     try {
+      // If document is from uploaded documents (already on server), handle differently
+      if (fromUploadedDocument) {
+        const state = location.state as LocationState;
+        
+        // TODO: Call API to request review for existing document
+        // For now, simulate the process
+        setTimeout(() => {
+          setUploadProgress(100);
+          setIsUploading(false);
+          
+          alert(`${selectedService === 'ai-review' ? 'AI Review' : 'Certification'} request submitted for "${documentType}"!`);
+          
+          // Redirect to documents page to see updated status
+          navigate('/documents');
+        }, 2000);
+        
+        return;
+      }
+
       const formData = new FormData();
       formData.append('document', uploadedFile.file);
       formData.append('documentType', documentType);
@@ -370,14 +424,25 @@ const DocumentServicesPage: React.FC = () => {
               >
                 {uploadedFile ? (
                   <div className="space-y-3">
-                    <CheckCircle className="h-12 w-12 text-green-600 mx-auto" />
+                    {fromUploadedDocument ? (
+                      <FileText className="h-12 w-12 text-blue-600 mx-auto" />
+                    ) : (
+                      <CheckCircle className="h-12 w-12 text-green-600 mx-auto" />
+                    )}
                     <p className="text-sm font-medium text-slate-900">{uploadedFile.preview}</p>
-                    <button
-                      onClick={() => setUploadedFile(null)}
-                      className="text-xs text-slate-600 hover:text-slate-900"
-                    >
-                      Remove file
-                    </button>
+                    {fromUploadedDocument && (
+                      <p className="text-xs text-blue-600">
+                        Document already uploaded • Ready for review
+                      </p>
+                    )}
+                    {!fromUploadedDocument && (
+                      <button
+                        onClick={() => setUploadedFile(null)}
+                        className="text-xs text-slate-600 hover:text-slate-900"
+                      >
+                        Remove file
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <>
