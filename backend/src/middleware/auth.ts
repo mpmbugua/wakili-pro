@@ -39,12 +39,21 @@ export const generateRefreshToken = (payload: JWTPayload): string => {
 
 export const verifyAccessToken = (token: string): JWTPayload => {
   try {
+    console.log('   🔍 Verifying token with JWT_SECRET:', JWT_SECRET.substring(0, 10) + '...');
     const decoded = jwt.verify(token, JWT_SECRET, {
       issuer: 'wakili-pro',
       audience: 'wakili-pro-users'
     }) as JWTPayload;
+    console.log('   ✅ Token decoded successfully:', { userId: decoded.userId, email: decoded.email });
     return decoded;
   } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      console.log('   ❌ JWT Error:', error.name, '-', error.message);
+    } else if (error instanceof jwt.TokenExpiredError) {
+      console.log('   ❌ Token expired at:', error.expiredAt);
+    } else {
+      console.log('   ❌ Unknown error:', error);
+    }
     throw new Error('Invalid or expired access token');
   }
 };
