@@ -229,6 +229,32 @@ model UserProfile {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model UserDocument {
+  id          String         @id @default(cuid())
+  userId      String
+  title       String
+  type        DocumentType
+  category    String?
+  fileUrl     String
+  fileSize    Int
+  fileName    String
+  mimeType    String
+  status      DocumentStatus @default(DRAFT)
+  source      DocumentSource @default(UPLOADED)
+  templateId  String?
+  uploadedAt  DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+  
+  user        User              @relation("UserDocuments", fields: [userId], references: [id], onDelete: Cascade)
+  template    DocumentTemplate? @relation("DocumentFromTemplate", fields: [templateId], references: [id])
+  reviews     DocumentReview[]  @relation("UserDocumentReviews")
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+}
+
 model VideoParticipant {
   id                String            @id @default(uuid())
   consultationId    String
@@ -590,6 +616,22 @@ enum DocumentStatus {
   REVISION_NEEDED
   CERTIFIED
   REJECTED
+  REVIEWED
+  FINALIZED
+}
+
+enum DocumentType {
+  CONTRACT
+  AGREEMENT
+  CERTIFICATE
+  COURT_FILING
+  OTHER
+}
+
+enum DocumentSource {
+  UPLOADED
+  PURCHASED
+  GENERATED
 }
 
 enum ApprovalStatus {
@@ -769,7 +811,7 @@ model DocumentReview {
   id                    String            @id @default(cuid())
   userId                String
   lawyerId              String?
-  documentSource        DocumentSource
+  documentSource        DocumentOrigin
   marketplaceDocumentId String?
   uploadedDocumentUrl   String?
   originalFileName      String?
@@ -858,7 +900,7 @@ model LawyerLetterhead {
   approver User? @relation("LetterheadApprover", fields: [approvedBy], references: [id])
 }
 
-enum DocumentSource {
+enum DocumentOrigin {
   MARKETPLACE
   EXTERNAL
 }
@@ -1161,59 +1203,4 @@ enum WithdrawalStatus {
   REJECTED
   FAILED
   CANCELLED
-}
-
-// User Document Storage
-model UserDocument {
-  id          String         @id @default(cuid())
-  userId      String
-  title       String
-  type        DocumentType
-  category    String?
-  fileUrl     String         // Cloud storage URL
-  fileSize    Int
-  fileName    String
-  mimeType    String
-  status      DocumentStatus @default(DRAFT)
-  source      DocumentSource @default(UPLOADED)
-  templateId  String?        // Reference to DocumentTemplate if purchased
-  uploadedAt  DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  deletedAt   DateTime?      // Soft delete
-
-  user     User             @relation("UserDocuments", fields: [userId], references: [id], onDelete: Cascade)
-  template DocumentTemplate? @relation("DocumentFromTemplate", fields: [templateId], references: [id])
-  reviews  DocumentReview[] @relation("UserDocumentReviews")
-
-  @@index([userId, status])
-  @@index([userId, uploadedAt])
-  @@index([status])
-}
-
-enum DocumentType {
-  CONTRACT
-  AGREEMENT
-  CERTIFICATE
-  COURT_FILING
-  LETTER
-  MEMORANDUM
-  AFFIDAVIT
-  WILL
-  POWER_OF_ATTORNEY
-  OTHER
-}
-
-enum DocumentStatus {
-  DRAFT
-  UNDER_REVIEW
-  REVIEWED
-  FINALIZED
-  ARCHIVED
-}
-
-enum DocumentSource {
-  UPLOADED       // User uploaded
-  PURCHASED      // Bought from marketplace
-  GENERATED      // AI-generated or customized template
-  CONSULTATION   // From video consultation
 }
