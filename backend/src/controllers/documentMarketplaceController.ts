@@ -26,15 +26,30 @@ export async function initiateMarketplacePurchase(req: AuthenticatedRequest, res
       });
     }
 
+    // Verify the template exists
+    const template = await prisma.documentTemplate.findUnique({
+      where: { id: templateId }
+    });
+
+    if (!template) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Document template not found' 
+      });
+    }
+
     // Create a pending purchase record
     const purchase = await prisma.documentPurchase.create({
       data: {
         userId,
-        templateId,
-        documentTitle,
-        price,
+        documentId: templateId,
+        amount: price,
+        type: template.type || 'marketplace-template',
+        content: '', // Empty content, will be generated after payment
+        description: documentTitle,
+        template: template.template,
         status: 'PENDING', // Will be updated to COMPLETED after payment
-        purchasedAt: new Date()
+        updatedAt: new Date()
       }
     });
 
@@ -42,7 +57,7 @@ export async function initiateMarketplacePurchase(req: AuthenticatedRequest, res
       success: true,
       data: {
         purchaseId: purchase.id,
-        price: purchase.price,
+        price: purchase.amount,
         paymentRequired: true
       },
       message: 'Purchase initiated. Please complete payment.'
@@ -51,7 +66,8 @@ export async function initiateMarketplacePurchase(req: AuthenticatedRequest, res
     console.error('Error initiating marketplace purchase:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to initiate purchase'
+      message: 'Failed to initiate purchase',
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }
