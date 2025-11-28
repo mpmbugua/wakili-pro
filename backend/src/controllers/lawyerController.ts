@@ -244,25 +244,43 @@ export const getPublicLawyerProfile = async (req: Request, res: Response): Promi
       return;
     }
 
-    const lawyerProfile = await prisma.lawyerProfile.findUnique({
-      where: { userId: lawyerId },
-      select: {
-        id: true,
-        licenseNumber: true,
-        yearOfAdmission: true,
-        specializations: true,
-        location: true,
-        rating: true,
-        reviewCount: true,
-        isVerified: true,
+    // Try to find by LawyerProfile.id first, then by userId
+    let lawyerProfile = await prisma.lawyerProfile.findUnique({
+      where: { id: lawyerId },
+      include: {
         user: {
           select: {
+            id: true,
+            email: true,
             firstName: true,
-            lastName: true
+            lastName: true,
+            phoneNumber: true,
+            profileImageUrl: true,
+            createdAt: true
           }
         }
       }
     });
+
+    // If not found by profile id, try by user id
+    if (!lawyerProfile) {
+      lawyerProfile = await prisma.lawyerProfile.findUnique({
+        where: { userId: lawyerId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              phoneNumber: true,
+              profileImageUrl: true,
+              createdAt: true
+            }
+          }
+        }
+      });
+    }
 
     if (!lawyerProfile) {
       res.status(404).json({
@@ -272,19 +290,46 @@ export const getPublicLawyerProfile = async (req: Request, res: Response): Promi
       return;
     }
 
-    // Only show verified profiles to public
-    if (!lawyerProfile.isVerified) {
-      res.status(404).json({
-        success: false,
-        message: 'Lawyer profile not available'
-      });
-      return;
+    // Parse location if it's stored as JSON string
+    let locationDetails = null;
+    if (lawyerProfile.location) {
+      try {
+        locationDetails = typeof lawyerProfile.location === 'string' 
+          ? JSON.parse(lawyerProfile.location) 
+          : lawyerProfile.location;
+      } catch (e) {
+        // If parsing fails, treat as plain string
+        locationDetails = { city: lawyerProfile.location };
+      }
     }
 
-    const response: ApiResponse<typeof lawyerProfile> = {
+    // Build response with all public information
+    const publicProfile = {
+      id: lawyerProfile.id,
+      userId: lawyerProfile.userId,
+      user: lawyerProfile.user,
+      licenseNumber: lawyerProfile.licenseNumber,
+      yearOfAdmission: lawyerProfile.yearOfAdmission,
+      specializations: lawyerProfile.specializations,
+      location: lawyerProfile.location,
+      locationDetails,
+      bio: lawyerProfile.bio,
+      yearsOfExperience: lawyerProfile.yearsOfExperience,
+      rating: lawyerProfile.rating,
+      reviewCount: lawyerProfile.reviewCount,
+      isVerified: lawyerProfile.isVerified,
+      tier: lawyerProfile.tier,
+      linkedInProfile: lawyerProfile.linkedInProfile,
+      profileImageUrl: lawyerProfile.profileImageUrl,
+      hourlyRate: lawyerProfile.hourlyRate,
+      consultationFee: lawyerProfile.consultationFee,
+      isAvailable: true // Could be determined by checking availability schedule
+    };
+
+    const response: ApiResponse<typeof publicProfile> = {
       success: true,
       message: 'Lawyer profile retrieved successfully',
-      data: lawyerProfile
+      data: publicProfile
     };
 
     res.json(response);
@@ -350,20 +395,15 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
     // Get lawyers with basic filtering
     const lawyers = await prisma.lawyerProfile.findMany({
       where,
-      select: {
-        id: true,
-        licenseNumber: true,
-        yearOfAdmission: true,
-        specializations: true,
-        location: true,
-        rating: true,
-        reviewCount: true,
+      include: {
         user: {
           select: {
             id: true,
             firstName: true,
-            lastName: true
-            // profilePicture: true // TODO: Add to User model
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            profileImageUrl: true
           }
         }
       },
