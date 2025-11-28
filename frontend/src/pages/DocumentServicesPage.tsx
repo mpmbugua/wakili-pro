@@ -32,25 +32,49 @@ const DocumentServicesPage: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fromUploadedDocument, setFromUploadedDocument] = useState(false);
 
-  // Check if coming from Request Review button
+  // Check if coming from Request Review button or restore from sessionStorage
   useEffect(() => {
+    // First, check sessionStorage for persisted document review
+    const savedReviewRequest = sessionStorage.getItem('activeDocumentReview');
+    if (savedReviewRequest) {
+      try {
+        const reviewData = JSON.parse(savedReviewRequest);
+        setFromUploadedDocument(true);
+        setDocumentType(reviewData.documentTitle);
+        setSelectedService(reviewData.selectedService || 'ai-review');
+        setDocumentSource('external');
+        
+        const mockFile = new File([''], reviewData.documentTitle, { type: 'application/pdf' });
+        setUploadedFile({
+          file: mockFile,
+          preview: reviewData.documentTitle
+        });
+        return;
+      } catch (error) {
+        console.error('Error restoring document review:', error);
+      }
+    }
+
+    // If no saved data, check navigation state
     const state = location.state as LocationState;
     if (state?.documentId && state?.documentTitle) {
       // User clicked Request Review from DocumentsPage
+      const reviewData = {
+        documentId: state.documentId,
+        documentTitle: state.documentTitle,
+        requestType: state.requestType,
+        selectedService: state.requestType === 'review' ? 'ai-review' : 'certification'
+      };
+      
+      // Save to sessionStorage for persistence
+      sessionStorage.setItem('activeDocumentReview', JSON.stringify(reviewData));
+      
       setFromUploadedDocument(true);
       setDocumentType(state.documentTitle);
-      
-      // Auto-select service based on requestType
-      if (state.requestType === 'review') {
-        setSelectedService('ai-review');
-      } else if (state.requestType === 'certification') {
-        setSelectedService('certification');
-      }
-      
+      setSelectedService(reviewData.selectedService);
       setDocumentSource('external');
       
       // Create a mock file reference (since document is already uploaded)
-      // This signals that we have a document ready
       const mockFile = new File([''], state.documentTitle, { type: 'application/pdf' });
       setUploadedFile({
         file: mockFile,
@@ -73,6 +97,9 @@ const DocumentServicesPage: React.FC = () => {
           
           // Show a message to the user
           alert(`Welcome back! Your document "${reviewData.fileName}" is ready to submit. Please re-upload the file to continue.`);
+          
+          // Clear the pending review
+          sessionStorage.removeItem('pendingDocumentReview');
         } catch (error) {
           console.error('Error restoring pending review:', error);
         }
@@ -80,7 +107,22 @@ const DocumentServicesPage: React.FC = () => {
     }
   }, [isAuthenticated]);
 
-  const handleFileSelect = (file: File) => {
+  const handleServiceChange = () => {
+    // When changing service for an uploaded document, preserve the document
+    if (fromUploadedDocument) {
+      const savedReview = sessionStorage.getItem('activeDocumentReview');
+      if (savedReview) {
+        sessionStorage.removeItem('activeDocumentReview');
+      }
+    }
+    
+    setSelectedService(null);
+    
+    // Only clear uploaded file if it's a newly uploaded file, not from documents page
+    if (!fromUploadedDocument) {
+      setUploadedFile(null);
+    }
+  };
     if (file.size > 20 * 1024 * 1024) {
       alert('File size must be less than 20MB');
       return;
@@ -173,13 +215,26 @@ const DocumentServicesPage: React.FC = () => {
     try {
       // If document is from uploaded documents (already on server), handle differently
       if (fromUploadedDocument) {
-        const state = location.state as LocationState;
+        const savedReview = sessionStorage.getItem('activeDocumentReview');
+        let documentId = '';
+        
+        if (savedReview) {
+          try {
+            const reviewData = JSON.parse(savedReview);
+            documentId = reviewData.documentId;
+          } catch (error) {
+            console.error('Error parsing review data:', error);
+          }
+        }
         
         // TODO: Call API to request review for existing document
         // For now, simulate the process
         setTimeout(() => {
           setUploadProgress(100);
           setIsUploading(false);
+          
+          // Clear the active review from sessionStorage
+          sessionStorage.removeItem('activeDocumentReview');
           
           alert(`${selectedService === 'ai-review' ? 'AI Review' : 'Certification'} request submitted for "${documentType}"!`);
           
@@ -248,6 +303,7 @@ const DocumentServicesPage: React.FC = () => {
       if (data.success) {
         // Clear pending review from sessionStorage
         sessionStorage.removeItem('pendingDocumentReview');
+        sessionStorage.removeItem('activeDocumentReview');
         
         // Redirect to payment page with document review details
         if (data.data.paymentRequired) {
@@ -304,6 +360,18 @@ const DocumentServicesPage: React.FC = () => {
               onClick={() => {
                 setSelectedService('ai-review');
                 setDocumentSource('external');
+                
+                // Update sessionStorage if document is from uploaded documents
+                const savedReview = sessionStorage.getItem('activeDocumentReview');
+                if (savedReview) {
+                  try {
+                    const reviewData = JSON.parse(savedReview);
+                    reviewData.selectedService = 'ai-review';
+                    sessionStorage.setItem('activeDocumentReview', JSON.stringify(reviewData));
+                  } catch (error) {
+                    console.error('Error updating service:', error);
+                  }
+                }
               }}
               className="bg-white rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer p-6"
             >
@@ -348,6 +416,18 @@ const DocumentServicesPage: React.FC = () => {
               onClick={() => {
                 setSelectedService('certification');
                 setDocumentSource('external');
+                
+                // Update sessionStorage if document is from uploaded documents
+                const savedReview = sessionStorage.getItem('activeDocumentReview');
+                if (savedReview) {
+                  try {
+                    const reviewData = JSON.parse(savedReview);
+                    reviewData.selectedService = 'certification';
+                    sessionStorage.setItem('activeDocumentReview', JSON.stringify(reviewData));
+                  } catch (error) {
+                    console.error('Error updating service:', error);
+                  }
+                }
               }}
               className="bg-white rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer p-6"
             >
@@ -399,10 +479,7 @@ const DocumentServicesPage: React.FC = () => {
                   {selectedService === 'ai-review' ? 'AI Document Review' : 'Lawyer Certification'}
                 </h2>
                 <button
-                  onClick={() => {
-                    setSelectedService(null);
-                    setUploadedFile(null);
-                  }}
+                  onClick={handleServiceChange}
                   className="text-sm text-slate-600 hover:text-slate-900"
                 >
                   Change Service
