@@ -69,7 +69,13 @@ export const authenticateToken = (
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
+  console.log('🔐 Authentication Middleware:');
+  console.log('   Path:', req.path);
+  console.log('   Auth header present:', !!authHeader);
+  console.log('   Token extracted:', token ? `${token.substring(0, 20)}...` : 'NULL');
+
   if (!token) {
+    console.log('   ❌ No token provided');
     res.status(401).json({ 
       success: false, 
       message: 'Access token required' 
@@ -79,6 +85,7 @@ export const authenticateToken = (
 
   try {
     const decoded = verifyAccessToken(token);
+    console.log('   ✅ Token valid, userId:', decoded.userId);
     req.user = {
       id: decoded.userId,
       email: decoded.email,
@@ -88,6 +95,7 @@ export const authenticateToken = (
     };
     next();
   } catch (error) {
+    console.log('   ❌ Token verification failed:', error instanceof Error ? error.message : 'Unknown error');
     res.status(403).json({ 
       success: false, 
       message: 'Invalid or expired token' 
