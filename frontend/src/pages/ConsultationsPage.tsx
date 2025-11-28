@@ -1,0 +1,216 @@
+import React, { useState, useEffect } from 'react';
+import { Video, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
+import axiosInstance from '../lib/axios';
+
+interface Consultation {
+  id: string;
+  lawyerName: string;
+  lawyerImage?: string;
+  specialty: string;
+  scheduledAt: string;
+  duration: number;
+  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'IN_PROGRESS';
+  meetingLink?: string;
+  consultationFee: number;
+}
+
+export const ConsultationsPage: React.FC = () => {
+  const { user } = useAuthStore();
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+
+  useEffect(() => {
+    fetchConsultations();
+  }, []);
+
+  const fetchConsultations = async () => {
+    try {
+      setLoading(true);
+      // TODO: Replace with actual API endpoint
+      // const response = await axiosInstance.get('/consultations');
+      // setConsultations(response.data.data);
+      
+      // Mock data for now
+      setConsultations([
+        {
+          id: '1',
+          lawyerName: 'Sarah Mwangi',
+          specialty: 'Corporate Law',
+          scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+          duration: 60,
+          status: 'SCHEDULED',
+          consultationFee: 3500,
+        },
+        {
+          id: '2',
+          lawyerName: 'John Kamau',
+          specialty: 'Family Law',
+          scheduledAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          duration: 45,
+          status: 'COMPLETED',
+          consultationFee: 3000,
+        },
+      ]);
+    } catch (error) {
+      console.error('Error fetching consultations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status: Consultation['status']) => {
+    const badges = {
+      SCHEDULED: { color: 'bg-blue-100 text-blue-700', icon: Clock, text: 'Scheduled' },
+      IN_PROGRESS: { color: 'bg-green-100 text-green-700', icon: Video, text: 'In Progress' },
+      COMPLETED: { color: 'bg-gray-100 text-gray-700', icon: CheckCircle, text: 'Completed' },
+      CANCELLED: { color: 'bg-red-100 text-red-700', icon: XCircle, text: 'Cancelled' },
+    };
+    const badge = badges[status];
+    const Icon = badge.icon;
+    return (
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${badge.color}`}>
+        <Icon className="h-3 w-3 mr-1" />
+        {badge.text}
+      </span>
+    );
+  };
+
+  const filteredConsultations = consultations.filter(consultation => {
+    const consultationDate = new Date(consultation.scheduledAt);
+    const now = new Date();
+    
+    if (filter === 'upcoming') {
+      return consultationDate > now && consultation.status === 'SCHEDULED';
+    } else if (filter === 'past') {
+      return consultationDate < now || consultation.status === 'COMPLETED' || consultation.status === 'CANCELLED';
+    }
+    return true;
+  });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-900">My Consultations</h1>
+        <p className="text-slate-600 mt-2">Manage your video consultations with lawyers</p>
+      </div>
+
+      {/* Filters */}
+      <div className="mb-6 flex space-x-2">
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            filter === 'all'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+          }`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setFilter('upcoming')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            filter === 'upcoming'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+          }`}
+        >
+          Upcoming
+        </button>
+        <button
+          onClick={() => setFilter('past')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            filter === 'past'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+          }`}
+        >
+          Past
+        </button>
+      </div>
+
+      {/* Consultations List */}
+      {filteredConsultations.length === 0 ? (
+        <div className="bg-white rounded-lg border border-slate-200 p-12 text-center">
+          <Video className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-slate-900 mb-2">No consultations found</h3>
+          <p className="text-slate-600 mb-6">You don't have any {filter !== 'all' ? filter : ''} consultations yet.</p>
+          <a
+            href="/lawyers"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+          >
+            Find a Lawyer
+          </a>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredConsultations.map((consultation) => (
+            <div key={consultation.id} className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start space-x-4">
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <User className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">{consultation.lawyerName}</h3>
+                    <p className="text-sm text-slate-600">{consultation.specialty}</p>
+                  </div>
+                </div>
+                {getStatusBadge(consultation.status)}
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4 mb-4">
+                <div className="flex items-center space-x-2 text-sm text-slate-600">
+                  <Calendar className="h-4 w-4" />
+                  <span>{new Date(consultation.scheduledAt).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-slate-600">
+                  <Clock className="h-4 w-4" />
+                  <span>{new Date(consultation.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-slate-600">
+                  <Video className="h-4 w-4" />
+                  <span>{consultation.duration} minutes</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                <span className="text-sm font-medium text-slate-700">
+                  Fee: KES {consultation.consultationFee.toLocaleString()}
+                </span>
+                {consultation.status === 'SCHEDULED' && (
+                  <div className="flex space-x-2">
+                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition text-sm font-medium">
+                      Reschedule
+                    </button>
+                    {consultation.meetingLink && (
+                      <a
+                        href={consultation.meetingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                      >
+                        Join Meeting
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ConsultationsPage;

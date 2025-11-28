@@ -29,7 +29,10 @@ import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
 import { PublicLawyerProfile } from './pages/PublicLawyerProfile';
-import { PublicLawyerProfile } from './pages/PublicLawyerProfile';
+import ConsultationsPage from './pages/ConsultationsPage';
+import AppointmentsPage from './pages/AppointmentsPage';
+import MessagesPage from './pages/MessagesPage';
+import DocumentsPage from './pages/DocumentsPage';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
 import { AdminLawyerApproval } from './pages/admin/AdminLawyerApproval';
 import AdminWithdrawalManagement from './pages/admin/AdminWithdrawalManagement';
@@ -278,6 +281,38 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <HelpPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/consultations" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <ConsultationsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/appointments" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <AppointmentsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/messages" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <MessagesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/documents" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <DocumentsPage />
                 </ProtectedRoute>
               } 
             />
