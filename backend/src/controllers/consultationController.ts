@@ -2,7 +2,6 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { createNotification } from '../services/notificationService';
 
 const prisma = new PrismaClient();
 
@@ -104,19 +103,21 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
       }
     });
 
-    // Notify lawyer of new consultation request
+    // Notify lawyer of new consultation request (create notification in database)
     const client = await prisma.user.findUnique({ where: { id: userId } });
-    await createNotification(
-      actualLawyerId,
-      'BOOKING_CREATED',
-      'New Consultation Request',
-      `${client?.firstName || 'A client'} has requested a ${validatedData.consultationType} consultation on ${validatedData.date} at ${validatedData.time}`,
-      { 
-        bookingId: booking.id,
-        consultationType: validatedData.consultationType,
-        description: validatedData.description
-      }
-    );
+    try {
+      await prisma.notification.create({
+        data: {
+          userId: actualLawyerId,
+          type: 'BOOKING_CREATED',
+          title: 'New Consultation Request',
+          message: `${client?.firstName || 'A client'} has requested a ${validatedData.consultationType} consultation on ${validatedData.date} at ${validatedData.time}`
+        }
+      });
+    } catch (notifError) {
+      console.error('Failed to create notification:', notifError);
+      // Don't fail the booking if notification fails
+    }
 
     res.status(201).json({
       success: true,
