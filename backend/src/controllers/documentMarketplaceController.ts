@@ -26,15 +26,26 @@ export async function initiateMarketplacePurchase(req: AuthenticatedRequest, res
       });
     }
 
-    // Verify the template exists
-    const template = await prisma.documentTemplate.findUnique({
+    // Try to find the template, if not found create a placeholder
+    let template = await prisma.documentTemplate.findUnique({
       where: { id: templateId }
     });
 
+    // If template doesn't exist, create it for marketplace purchase
     if (!template) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Document template not found' 
+      template = await prisma.documentTemplate.create({
+        data: {
+          id: templateId,
+          type: 'marketplace-template',
+          name: documentTitle,
+          description: documentTitle,
+          template: '',
+          consultationId: 'marketplace', // Placeholder
+          url: '',
+          priceKES: Math.round(price),
+          isActive: true,
+          isPublic: true
+        }
       });
     }
 
@@ -42,12 +53,12 @@ export async function initiateMarketplacePurchase(req: AuthenticatedRequest, res
     const purchase = await prisma.documentPurchase.create({
       data: {
         userId,
-        documentId: templateId,
+        documentId: template.id,
         amount: price,
         type: template.type || 'marketplace-template',
         content: '', // Empty content, will be generated after payment
         description: documentTitle,
-        template: template.template,
+        template: template.template || '',
         status: 'PENDING', // Will be updated to COMPLETED after payment
         updatedAt: new Date()
       }
