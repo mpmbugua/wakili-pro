@@ -270,12 +270,12 @@ export const PublicLawyerProfile: React.FC = () => {
                 </button>
               </div>
             </div>
-          </div>
+            </div>
 
-          {/* Right Column - Details (Scrollable) */}
-          <div className="lg:col-span-8 space-y-6">
-            {/* About */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            {/* Right Column - Details (Scrollable) */}
+            <div className="lg:col-span-8 space-y-6">
+              {/* About */}
+              <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold text-slate-900 mb-4">About</h2>
               <p className="text-slate-700 leading-relaxed">{lawyer.bio}</p>
             </div>
