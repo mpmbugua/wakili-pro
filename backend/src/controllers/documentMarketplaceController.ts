@@ -1,11 +1,59 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../types/express';
 import * as documentMarketplaceService from '../services/documentMarketplaceService';
+import { prisma } from '../utils/database';
 
 // List all available document templates
 export async function listDocumentTemplates(req: AuthenticatedRequest, res: Response) {
   const templates = await documentMarketplaceService.getAllTemplates();
   res.json({ templates });
+}
+
+// Initiate marketplace template purchase (before payment)
+export async function initiateMarketplacePurchase(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { templateId, documentTitle, price } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Authentication required' });
+    }
+
+    if (!templateId || !documentTitle || !price) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Missing required fields: templateId, documentTitle, price' 
+      });
+    }
+
+    // Create a pending purchase record
+    const purchase = await prisma.documentPurchase.create({
+      data: {
+        userId,
+        templateId,
+        documentTitle,
+        price,
+        status: 'PENDING', // Will be updated to COMPLETED after payment
+        purchasedAt: new Date()
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        purchaseId: purchase.id,
+        price: purchase.price,
+        paymentRequired: true
+      },
+      message: 'Purchase initiated. Please complete payment.'
+    });
+  } catch (error) {
+    console.error('Error initiating marketplace purchase:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to initiate purchase'
+    });
+  }
 }
 
 // Generate a document from a template (AI-powered)

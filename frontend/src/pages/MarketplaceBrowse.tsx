@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
+import axiosInstance from '../lib/axios';
 
 interface Document {
   id: string;
@@ -943,18 +944,34 @@ export const MarketplaceBrowse: React.FC = () => {
                 Cancel
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (purchasingDocument) {
-                    // Redirect to payment page with document purchase details
-                    navigate('/payment/document/marketplace', {
-                      state: {
-                        reviewId: purchasingDocument.id,
-                        documentType: purchasingDocument.title,
-                        serviceType: 'marketplace-purchase',
-                        price: purchasingDocument.price,
-                        fileName: purchasingDocument.title,
+                    try {
+                      // Create purchase record in backend first
+                      const response = await axiosInstance.post('/documents/marketplace/purchase', {
+                        templateId: purchasingDocument.id,
+                        documentTitle: purchasingDocument.title,
+                        price: purchasingDocument.price
+                      });
+
+                      if (response.data.success) {
+                        // Redirect to payment page with purchase details
+                        navigate(`/payment/document/${response.data.data.purchaseId}`, {
+                          state: {
+                            reviewId: response.data.data.purchaseId,
+                            documentType: purchasingDocument.title,
+                            serviceType: 'marketplace-purchase',
+                            price: purchasingDocument.price,
+                            fileName: purchasingDocument.title,
+                          }
+                        });
+                      } else {
+                        alert(response.data.message || 'Failed to initiate purchase');
                       }
-                    });
+                    } catch (error: any) {
+                      console.error('Purchase initiation error:', error);
+                      alert(error.response?.data?.message || 'Failed to initiate purchase. Please try again.');
+                    }
                   }
                 }}
                 className="flex-1 px-4 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
