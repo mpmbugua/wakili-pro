@@ -5,8 +5,8 @@ export const EmergencyCallButton: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const emergencyNumbers = [
-    { number: '0727114573', label: 'Primary Line' },
-    { number: '0787679378', label: 'Secondary Line' },
+    { number: '0727114573', label: 'Safaricom' },
+    { number: '0787679378', label: 'Airtel' },
   ];
 
   const handleCall = (number: string) => {
