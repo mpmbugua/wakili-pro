@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware/auth';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
@@ -18,7 +18,7 @@ const CreateConsultationSchema = z.object({
 /**
  * Create a new consultation booking
  */
-export const createConsultation = async (req: AuthRequest, res: Response) => {
+export const createConsultation = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -162,7 +162,7 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
 /**
  * Get user's consultations
  */
-export const getMyConsultations = async (req: AuthRequest, res: Response) => {
+export const getMyConsultations = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
