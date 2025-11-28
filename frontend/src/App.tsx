@@ -163,6 +163,12 @@ function App() {
             element={<AdminLoginPage />} 
           />
 
+          {/* Public Lawyer Profile - Standalone without AppShell */}
+          <Route 
+            path="/lawyers/:lawyerId" 
+            element={<PublicLawyerProfile />} 
+          />
+
           {/* All other routes wrapped in AppShell */}
           <Route path="*" element={
             <AppShell>
@@ -171,7 +177,6 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/ai" element={<AIAssistant />} />
                 <Route path="/lawyers" element={<LawyersBrowse />} />
-                <Route path="/lawyers/:lawyerId" element={<PublicLawyerProfile />} />
                 <Route path="/services" element={<LegalServicesPage />} />
                 <Route path="/marketplace" element={<MarketplaceBrowse />} />
                 <Route path="/resources" element={<ResourcesPage />} />
