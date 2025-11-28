@@ -580,8 +580,8 @@ export const AIAssistant: React.FC = () => {
           )}
 
           {/* Input Area */}
-          <div className="border-t border-slate-200 p-4 bg-slate-50">
-            <div className="flex items-end space-x-3">
+          <div className="border-t border-slate-200 p-2 sm:p-4 bg-slate-50">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -592,106 +592,109 @@ export const AIAssistant: React.FC = () => {
                   }
                 }}
                 placeholder="Ask me any legal question..."
-                className="input-field flex-1 resize-none"
+                className="input-field flex-1 resize-none min-h-[80px] sm:min-h-0"
                 rows={3}
                 disabled={isRecording}
               />
               
-              {/* File Upload Button */}
-              <button
-                onClick={openFileSelector}
-                disabled={isLoading || isRecording}
-                className="btn-ghost p-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Upload image or document"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+              {/* Action Buttons Row */}
+              <div className="flex items-center gap-2 justify-end sm:justify-start">
+                {/* File Upload Button */}
+                <button
+                  onClick={openFileSelector}
+                  disabled={isLoading || isRecording}
+                  className="btn-ghost p-2 sm:p-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Upload image or document"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                    />
+                  </svg>
+                </button>
 
-              {/* Camera Button */}
-              <button
-                onClick={openCamera}
-                disabled={isLoading || isRecording}
-                className="btn-ghost p-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Take photo"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+                {/* Camera Button */}
+                <button
+                  onClick={openCamera}
+                  disabled={isLoading || isRecording}
+                  className="btn-ghost p-2 sm:p-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Take photo"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              </button>
-              
-              {/* Microphone Button */}
-              <button
-                onClick={toggleRecording}
-                disabled={isLoading}
-                className={`p-3 rounded-xl font-medium transition-all duration-200 ${
-                  isRecording
-                    ? 'bg-error text-white hover:bg-red-700 animate-pulse shadow-medium'
-                    : 'btn-ghost'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                title={isRecording ? 'Stop recording' : 'Start voice recording'}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  {isRecording ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
                     />
-                  ) : (
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
                     />
-                  )}
-                </svg>
-              </button>
-              
-              <button
-                onClick={handleSendMessage}
-                disabled={!input.trim() || isLoading || isRecording}
-                className="btn-primary px-6 py-3 disabled:bg-slate-300 disabled:cursor-not-allowed"
-              >
-                Send
-              </button>
+                  </svg>
+                </button>
+                
+                {/* Microphone Button */}
+                <button
+                  onClick={toggleRecording}
+                  disabled={isLoading}
+                  className={`p-2 sm:p-3 rounded-xl font-medium transition-all duration-200 ${
+                    isRecording
+                      ? 'bg-error text-white hover:bg-red-700 animate-pulse shadow-medium'
+                      : 'btn-ghost'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  title={isRecording ? 'Stop recording' : 'Start voice recording'}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    {isRecording ? (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    ) : (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                      />
+                    )}
+                  </svg>
+                </button>
+                
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!input.trim() || isLoading || isRecording}
+                  className="btn-primary px-4 py-2 sm:px-6 sm:py-3 disabled:bg-slate-300 disabled:cursor-not-allowed text-sm sm:text-base"
+                >
+                  Send
+                </button>
+              </div>
             </div>
             <p className="text-xs text-slate-500 mt-2">
               💡 {isRecording 
