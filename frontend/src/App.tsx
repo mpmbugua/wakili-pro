@@ -28,6 +28,8 @@ import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
+import { PublicLawyerProfile } from './pages/PublicLawyerProfile';
+import { PublicLawyerProfile } from './pages/PublicLawyerProfile';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
 import { AdminLawyerApproval } from './pages/admin/AdminLawyerApproval';
 import AdminWithdrawalManagement from './pages/admin/AdminWithdrawalManagement';
@@ -169,6 +171,7 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/ai" element={<AIAssistant />} />
                 <Route path="/lawyers" element={<LawyersBrowse />} />
+                <Route path="/lawyers/:lawyerId" element={<PublicLawyerProfile />} />
                 <Route path="/services" element={<LegalServicesPage />} />
                 <Route path="/marketplace" element={<MarketplaceBrowse />} />
                 <Route path="/resources" element={<ResourcesPage />} />

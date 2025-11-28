@@ -416,22 +416,31 @@ export const LawyersBrowse: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <div>
-                    <p className="text-xs text-gray-500">Consultation Fee</p>
-                    <p className="text-lg font-bold text-gray-900">KES {lawyer.hourlyRate.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500">per session</p>
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="text-xs text-gray-500">Consultation Fee</p>
+                      <p className="text-lg font-bold text-gray-900">KES {lawyer.hourlyRate.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500">per session</p>
+                    </div>
+                    <button
+                      onClick={() => handleBookConsultation(lawyer.id, lawyer.name)}
+                      disabled={lawyer.availability === 'Offline'}
+                      className={`px-6 py-3 rounded-lg font-medium transition ${
+                        lawyer.availability === 'Offline'
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {lawyer.availability === 'Offline' ? 'Unavailable' : 'Book Now'}
+                    </button>
                   </div>
+                  
                   <button
-                    onClick={() => handleBookConsultation(lawyer.id, lawyer.name)}
-                    disabled={lawyer.availability === 'Offline'}
-                    className={`px-6 py-3 rounded-lg font-medium transition ${
-                      lawyer.availability === 'Offline'
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
+                    onClick={() => navigate(`/lawyers/${lawyer.id}`)}
+                    className="w-full px-4 py-2 border border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition text-sm"
                   >
-                    {lawyer.availability === 'Offline' ? 'Unavailable' : 'Book Now'}
+                    View Full Profile
                   </button>
                 </div>
 
