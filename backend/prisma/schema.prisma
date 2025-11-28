@@ -813,6 +813,7 @@ model DocumentReview {
   lawyerId              String?
   documentSource        DocumentOrigin
   marketplaceDocumentId String?
+  userDocumentId        String?
   uploadedDocumentUrl   String?
   originalFileName      String?
   documentType          String
@@ -866,7 +867,7 @@ model DocumentReview {
   lawyer              User?             @relation("DocumentReviewLawyer", fields: [lawyerId], references: [id])
   marketplaceDocument DocumentTemplate? @relation(fields: [marketplaceDocumentId], references: [id])
   qualityController   User?             @relation("DocumentReviewQC", fields: [qualityCheckedBy], references: [id])
-  userDocument        UserDocument?     @relation("UserDocumentReviews", fields: [uploadedDocumentUrl], references: [fileUrl])
+  userDocument        UserDocument?     @relation("UserDocumentReviews", fields: [userDocumentId], references: [id])
 
   @@index([userId])
   @@index([lawyerId])
