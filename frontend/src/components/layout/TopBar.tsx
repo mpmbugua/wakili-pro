@@ -110,7 +110,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick, onToggleCollapse, s
                   className="fixed inset-0 z-40" 
                   onClick={() => setShowNotifications(false)}
                 />
-                <div className="absolute right-0 top-12 w-80 bg-white rounded-lg shadow-lg border 
+                <div className="absolute -right-2 sm:right-0 top-12 w-80 bg-white rounded-lg shadow-lg border 
                               border-slate-200 z-50 max-h-96 overflow-y-auto">
                   <div className="p-3 border-b border-slate-200">
                     <h3 className="font-semibold text-slate-900">Notifications</h3>
@@ -166,7 +166,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick, onToggleCollapse, s
                   className="fixed inset-0 z-40" 
                   onClick={() => setShowUserMenu(false)}
                 />
-                <div className="absolute right-0 top-12 w-56 bg-white rounded-lg shadow-lg border 
+                <div className="absolute -right-2 sm:right-0 top-12 w-56 bg-white rounded-lg shadow-lg border 
                               border-slate-200 z-50 py-2">
                   <div className="px-4 py-3 border-b border-slate-100">
                     <p className="text-sm font-medium text-slate-900">
