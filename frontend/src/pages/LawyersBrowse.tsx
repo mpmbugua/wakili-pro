@@ -298,6 +298,14 @@ export const LawyersBrowse: React.FC = () => {
 
   return (
     <GlobalLayout>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold mb-2">Find a Lawyer</h1>
+          <p className="text-blue-100">Connect with verified legal experts across Kenya</p>
+        </div>
+      </div>
+
       {/* Filters Section */}
       <div className="bg-white border-b border-blue-200 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
