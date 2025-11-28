@@ -201,6 +201,12 @@ export const lawyerOnboarding = async (req: AuthenticatedRequest, res: Response)
         yearsOfExperience: onboardingData.yearsOfExperience,
         profileImageUrl: onboardingData.profileImageUrl,
         linkedInProfile: onboardingData.linkedInProfile,
+        hourlyRate: onboardingData.hourlyRate,
+        offPeakHourlyRate: onboardingData.offPeakHourlyRate,
+        available24_7: onboardingData.available24_7 || false,
+        workingHours: onboardingData.workingHours 
+          ? JSON.stringify(onboardingData.workingHours)
+          : null,
         specializations: Array.isArray(onboardingData.specializations)
           ? onboardingData.specializations.map((s: any) =>
               typeof s === 'string'

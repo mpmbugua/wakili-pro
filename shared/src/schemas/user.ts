@@ -30,6 +30,18 @@ export const LawyerOnboardingSchema = z.object({
   yearsOfExperience: z.number().min(0, 'Years of experience cannot be negative').max(60),
   profileImageUrl: z.string().url('Invalid profile image URL').optional(),
   linkedInProfile: z.string().url('Invalid LinkedIn URL').optional().or(z.literal('')),
+  hourlyRate: z.number().min(500, 'Hourly rate must be at least KES 500').max(50000, 'Hourly rate cannot exceed KES 50,000'),
+  offPeakHourlyRate: z.number().min(500, 'Off-peak rate must be at least KES 500').max(50000, 'Off-peak rate cannot exceed KES 50,000').optional(),
+  available24_7: z.boolean().optional(),
+  workingHours: z.object({
+    monday: z.object({ start: z.string(), end: z.string(), available: z.boolean() }),
+    tuesday: z.object({ start: z.string(), end: z.string(), available: z.boolean() }),
+    wednesday: z.object({ start: z.string(), end: z.string(), available: z.boolean() }),
+    thursday: z.object({ start: z.string(), end: z.string(), available: z.boolean() }),
+    friday: z.object({ start: z.string(), end: z.string(), available: z.boolean() }),
+    saturday: z.object({ start: z.string(), end: z.string(), available: z.boolean() }),
+    sunday: z.object({ start: z.string(), end: z.string(), available: z.boolean() }),
+  }).optional(),
 });
 
 export const WorkingHoursSchema = z.object({

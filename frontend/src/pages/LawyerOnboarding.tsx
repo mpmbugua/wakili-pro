@@ -13,7 +13,8 @@ import {
   Crown,
   Sparkles,
   Upload,
-  X
+  X,
+  DollarSign
 } from 'lucide-react';
 import axiosInstance from '../lib/axios';
 
@@ -36,6 +37,13 @@ interface OnboardingFormData {
   yearsOfExperience: number;
   profileImageUrl?: string;
   linkedInProfile?: string;
+  // Rates & Availability (Step 5)
+  hourlyRate?: number;
+  offPeakHourlyRate?: number;
+  available24_7?: boolean;
+  workingHours?: {
+    [key: string]: { start: string; end: string; available: boolean };
+  };
 }
 
 const SPECIALIZATION_CATEGORIES = [
@@ -92,7 +100,20 @@ export const LawyerOnboarding: React.FC = () => {
     bio: '',
     yearsOfExperience: 0,
     profileImageUrl: '',
-    linkedInProfile: ''
+    linkedInProfile: '',
+    // Rates & Availability defaults
+    hourlyRate: undefined,
+    offPeakHourlyRate: undefined,
+    available24_7: false,
+    workingHours: {
+      monday: { start: '09:00', end: '17:00', available: true },
+      tuesday: { start: '09:00', end: '17:00', available: true },
+      wednesday: { start: '09:00', end: '17:00', available: true },
+      thursday: { start: '09:00', end: '17:00', available: true },
+      friday: { start: '09:00', end: '17:00', available: true },
+      saturday: { start: '09:00', end: '13:00', available: false },
+      sunday: { start: '09:00', end: '13:00', available: false },
+    }
   });
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,6 +198,8 @@ export const LawyerOnboarding: React.FC = () => {
         return formData.location.city.length > 0 && formData.location.address.length > 0;
       case 4:
         return formData.bio.length >= 50 && formData.yearsOfExperience >= 0;
+      case 5:
+        return (formData.hourlyRate !== undefined && formData.hourlyRate > 0);
       default:
         return true;
     }
@@ -197,7 +220,7 @@ export const LawyerOnboarding: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(4)) {
+    if (!validateStep(5)) {
       setError('Please complete all required fields');
       return;
     }
@@ -232,7 +255,7 @@ export const LawyerOnboarding: React.FC = () => {
 
       if (response.data.success) {
         // Show success message with upgrade prompt
-        setCurrentStep(5); // Success step
+        setCurrentStep(6); // Success step (moved from 5 to 6)
       } else {
         setError(response.data.message || 'Failed to complete onboarding');
       }
@@ -247,7 +270,7 @@ export const LawyerOnboarding: React.FC = () => {
   const renderProgressBar = () => (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-2">
-        {[1, 2, 3, 4].map((step) => (
+        {[1, 2, 3, 4, 5].map((step) => (
           <div key={step} className="flex items-center flex-1">
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
@@ -558,6 +581,153 @@ export const LawyerOnboarding: React.FC = () => {
   );
 
   const renderStep5 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <DollarSign className="h-12 w-12 text-blue-600 mx-auto mb-3" />
+        <h2 className="text-2xl font-bold text-gray-900">Rates & Availability</h2>
+        <p className="text-gray-600 mt-2">Set your consultation rates and working hours</p>
+      </div>
+
+      {/* Hourly Rate */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Hourly Rate (KES) <span className="text-red-500">*</span>
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span className="text-gray-500">KES</span>
+          </div>
+          <input
+            type="number"
+            value={formData.hourlyRate || ''}
+            onChange={(e) => setFormData({ ...formData, hourlyRate: parseFloat(e.target.value) || undefined })}
+            placeholder="5000"
+            min="500"
+            step="100"
+            className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          💡 Average lawyer rate: KES 3,000 - 8,000/hour depending on experience
+        </p>
+      </div>
+
+      {/* Off-Peak Rate */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Off-Peak Hourly Rate (KES) <span className="text-gray-500 text-xs">(Optional)</span>
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span className="text-gray-500">KES</span>
+          </div>
+          <input
+            type="number"
+            value={formData.offPeakHourlyRate || ''}
+            onChange={(e) => setFormData({ ...formData, offPeakHourlyRate: parseFloat(e.target.value) || undefined })}
+            placeholder="4000"
+            min="500"
+            step="100"
+            className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          💡 Set a lower rate for weekends/evenings to attract more clients
+        </p>
+      </div>
+
+      {/* 24/7 Availability Toggle */}
+      <div className="flex items-start p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <input
+          type="checkbox"
+          id="available24_7"
+          checked={formData.available24_7}
+          onChange={(e) => setFormData({ ...formData, available24_7: e.target.checked })}
+          className="mt-1 h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+        />
+        <label htmlFor="available24_7" className="ml-3 flex-1">
+          <span className="block text-sm font-medium text-gray-900">Available 24/7 for Emergency Consultations</span>
+          <span className="block text-xs text-gray-600 mt-1">
+            Clients can book you anytime for urgent legal matters (premium service)
+          </span>
+        </label>
+      </div>
+
+      {/* Working Hours */}
+      {!formData.available24_7 && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Regular Working Hours
+          </label>
+          <div className="space-y-3">
+            {Object.entries(formData.workingHours || {}).map(([day, hours]) => (
+              <div key={day} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <input
+                  type="checkbox"
+                  id={`${day}-available`}
+                  checked={hours.available}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    workingHours: {
+                      ...formData.workingHours,
+                      [day]: { ...hours, available: e.target.checked }
+                    }
+                  })}
+                  className="h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <label htmlFor={`${day}-available`} className="w-24 text-sm font-medium text-gray-700 capitalize">
+                  {day}
+                </label>
+                <input
+                  type="time"
+                  value={hours.start}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    workingHours: {
+                      ...formData.workingHours,
+                      [day]: { ...hours, start: e.target.value }
+                    }
+                  })}
+                  disabled={!hours.available}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+                />
+                <span className="text-gray-500">-</span>
+                <input
+                  type="time"
+                  value={hours.end}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    workingHours: {
+                      ...formData.workingHours,
+                      [day]: { ...hours, end: e.target.value }
+                    }
+                  })}
+                  disabled={!hours.available}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+                />
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            💡 Clients will only see available time slots within your working hours
+          </p>
+        </div>
+      )}
+
+      {/* Pricing Strategy Tips */}
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <h4 className="text-sm font-semibold text-amber-900 mb-2">💰 Pricing Tips</h4>
+        <ul className="text-xs text-amber-800 space-y-1">
+          <li>• Junior lawyers (0-3 years): KES 2,000 - 4,000/hour</li>
+          <li>• Mid-level lawyers (3-7 years): KES 4,000 - 6,000/hour</li>
+          <li>• Senior lawyers (7+ years): KES 6,000 - 10,000/hour</li>
+          <li>• Specialized expertise can command 20-30% premium rates</li>
+        </ul>
+      </div>
+    </div>
+  );
+
+  const renderStep6 = () => (
     <div className="text-center py-8">
       <div className="mb-6">
         <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -630,7 +800,7 @@ export const LawyerOnboarding: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {currentStep < 5 && renderProgressBar()}
+          {currentStep < 6 && renderProgressBar()}
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
@@ -646,8 +816,9 @@ export const LawyerOnboarding: React.FC = () => {
           {currentStep === 3 && renderStep3()}
           {currentStep === 4 && renderStep4()}
           {currentStep === 5 && renderStep5()}
+          {currentStep === 6 && renderStep6()}
 
-          {currentStep < 5 && (
+          {currentStep < 6 && (
             <div className="flex justify-between mt-8 pt-6 border-t">
               {currentStep > 1 ? (
                 <button
@@ -661,7 +832,7 @@ export const LawyerOnboarding: React.FC = () => {
                 <div></div>
               )}
 
-              {currentStep < 4 ? (
+              {currentStep < 5 ? (
                 <button
                   onClick={handleNext}
                   className="flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all"
