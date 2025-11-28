@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FileText, Download, Eye, Trash2, Upload, Search, Filter, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../utils/axiosInstance';
 
 interface Document {
   id: string;
@@ -37,11 +38,14 @@ export const DocumentsPage: React.FC = () => {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API endpoint
-      // const response = await axiosInstance.get('/documents');
-      // setDocuments(response.data.data);
+      const response = await axiosInstance.get('/user-documents');
       
-      // Mock data
+      if (response.data.success) {
+        setDocuments(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      // Fallback to mock data if API fails
       setDocuments([
         {
           id: '1',
@@ -63,28 +67,7 @@ export const DocumentsPage: React.FC = () => {
           status: 'FINALIZED',
           lawyerName: 'David Ochieng',
         },
-        {
-          id: '3',
-          title: 'Business Registration Certificate',
-          type: 'CERTIFICATE',
-          category: 'Corporate',
-          uploadedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          size: 98000,
-          status: 'FINALIZED',
-        },
-        {
-          id: '4',
-          title: 'Partnership Agreement Draft',
-          type: 'AGREEMENT',
-          category: 'Corporate',
-          uploadedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          size: 312000,
-          status: 'UNDER_REVIEW',
-          lawyerName: 'Grace Wanjiru',
-        },
       ]);
-    } catch (error) {
-      console.error('Error fetching documents:', error);
     } finally {
       setLoading(false);
     }
@@ -135,64 +118,71 @@ export const DocumentsPage: React.FC = () => {
     try {
       setUploading(true);
 
-      // TODO: Replace with actual API upload
-      // const formData = new FormData();
-      // formData.append('file', uploadFile);
-      // formData.append('title', uploadTitle);
-      // formData.append('type', uploadType);
-      // formData.append('category', uploadCategory);
-      // const response = await axiosInstance.post('/documents/upload', formData);
+      const formData = new FormData();
+      formData.append('document', uploadFile);
+      formData.append('title', uploadTitle);
+      formData.append('type', uploadType);
+      if (uploadCategory) {
+        formData.append('category', uploadCategory);
+      }
 
-      // Simulate upload and add to local state
-      const newDocument: Document = {
-        id: `doc-${Date.now()}`,
-        title: uploadTitle,
-        type: uploadType,
-        category: uploadCategory || 'General',
-        uploadedAt: new Date().toISOString(),
-        size: uploadFile.size,
-        status: 'DRAFT',
-      };
+      const response = await axiosInstance.post('/user-documents/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      setDocuments(prev => [newDocument, ...prev]);
-      
-      // Reset form
-      setShowUploadModal(false);
-      setUploadFile(null);
-      setUploadTitle('');
-      setUploadType('CONTRACT');
-      setUploadCategory('');
-      
-      alert('Document uploaded successfully!');
-    } catch (error) {
+      if (response.data.success) {
+        // Refresh documents list
+        await fetchDocuments();
+        
+        // Reset form
+        setShowUploadModal(false);
+        setUploadFile(null);
+        setUploadTitle('');
+        setUploadType('CONTRACT');
+        setUploadCategory('');
+        
+        alert('Document uploaded successfully!');
+      }
+    } catch (error: any) {
       console.error('Error uploading document:', error);
-      alert('Failed to upload document. Please try again.');
+      alert(error.response?.data?.message || 'Failed to upload document. Please try again.');
     } finally {
       setUploading(false);
     }
   };
 
-  const handleRequestReview = (documentId: string, documentTitle: string) => {
-    // Update document status to UNDER_REVIEW
-    setDocuments(prev =>
-      prev.map(doc =>
-        doc.id === documentId
-          ? { ...doc, status: 'UNDER_REVIEW' as Document['status'] }
-          : doc
-      )
-    );
+  const handleRequestReview = async (documentId: string, documentTitle: string) => {
+    try {
+      // Update local state optimistically
+      setDocuments(prev =>
+        prev.map(doc =>
+          doc.id === documentId
+            ? { ...doc, status: 'UNDER_REVIEW' as Document['status'] }
+            : doc
+        )
+      );
 
-    // TODO: Replace with actual API call
-    // await axiosInstance.post(`/documents/${documentId}/request-review`);
+      // Call API to update document status
+      await axiosInstance.post(`/user-documents/${documentId}/request-review`, {
+        reviewType: 'AI_REVIEW',
+      });
 
-    // Navigate to document services page for lawyer selection
-    navigate('/document-services', { 
-      state: { 
-        documentId,
-        documentTitle,
-        requestType: 'review'
-      } 
-    });
+      // Navigate to document services page for payment
+      navigate('/document-services', { 
+        state: { 
+          documentId,
+          documentTitle,
+          requestType: 'review'
+        } 
+      });
+    } catch (error) {
+      console.error('Error requesting review:', error);
+      // Revert optimistic update on error
+      await fetchDocuments();
+      alert('Failed to request review. Please try again.');
+    }
   };
 
   const filteredDocuments = documents.filter(doc => {

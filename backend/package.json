@@ -40,6 +40,7 @@
     "bcryptjs": "^3.0.3",
     "bull": "^4.16.5",
     "cheerio": "^1.1.2",
+    "cloudinary": "^2.5.1",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
