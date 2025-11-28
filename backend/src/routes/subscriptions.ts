@@ -62,15 +62,28 @@ router.get('/current', loadLawyerProfile, async (req: any, res) => {
 
 /**
  * POST /api/subscriptions/upgrade
- * Initiate subscription upgrade
+ * Initiate subscription upgrade with M-Pesa payment
  */
 router.post('/upgrade', loadLawyerProfile, async (req: any, res) => {
   try {
-    const { targetTier } = req.body;
+    const { targetTier, phoneNumber } = req.body;
     const { lawyerProfile } = req;
 
     if (!Object.values(LawyerTier).includes(targetTier)) {
       return res.status(400).json({ error: 'Invalid tier' });
+    }
+
+    // For paid tiers, phone number is required
+    if (targetTier !== LawyerTier.FREE && !phoneNumber) {
+      return res.status(400).json({ error: 'Phone number required for M-Pesa payment' });
+    }
+
+    // Temporarily update lawyer phone number if provided
+    if (phoneNumber && phoneNumber !== lawyerProfile.phoneNumber) {
+      await require('../utils/database').prisma.lawyerProfile.update({
+        where: { id: lawyerProfile.id },
+        data: { phoneNumber },
+      });
     }
 
     const result = await subscriptionService.createSubscription(
@@ -82,9 +95,9 @@ router.post('/upgrade', loadLawyerProfile, async (req: any, res) => {
       success: true,
       subscriptionId: result.subscriptionId,
       paymentRequired: result.paymentRequired,
-      checkoutUrl: result.checkoutUrl,
+      checkoutRequestID: result.checkoutUrl,
       message: result.paymentRequired
-        ? 'Please complete M-Pesa payment on your phone'
+        ? 'Please check your phone and enter M-Pesa PIN to complete payment'
         : 'Tier updated successfully',
     });
   } catch (error: any) {
@@ -102,16 +115,36 @@ router.post('/confirm', async (req, res) => {
 
     // M-Pesa callback format handling
     if (Body?.stkCallback) {
-      const { MerchantRequestID, ResultCode } = Body.stkCallback;
+      const { CheckoutRequestID, ResultCode, CallbackMetadata } = Body.stkCallback;
       
       if (ResultCode === 0) {
-        // Payment successful
-        const actualTransactionId = MerchantRequestID;
-        await subscriptionService.confirmSubscriptionPayment(subscriptionId, actualTransactionId);
+        // Payment successful - find subscription by CheckoutRequestID
+        const prisma = require('../utils/database').prisma;
+        const subscription = await prisma.subscription.findFirst({
+          where: {
+            metadata: {
+              path: ['checkoutRequestID'],
+              equals: CheckoutRequestID,
+            },
+          },
+        });
+
+        if (subscription) {
+          // Extract M-Pesa receipt number
+          let mpesaReceiptNumber = CheckoutRequestID;
+          if (CallbackMetadata?.Item) {
+            const receiptItem = CallbackMetadata.Item.find((item: any) => item.Name === 'MpesaReceiptNumber');
+            if (receiptItem) {
+              mpesaReceiptNumber = receiptItem.Value;
+            }
+          }
+
+          await subscriptionService.confirmSubscriptionPayment(subscription.id, mpesaReceiptNumber);
+        }
         
         return res.json({ success: true, message: 'Subscription activated' });
       } else {
-        return res.status(400).json({ error: 'Payment failed' });
+        return res.status(200).json({ success: false, message: 'Payment failed' });
       }
     }
 
@@ -122,6 +155,37 @@ router.post('/confirm', async (req, res) => {
     }
 
     res.status(400).json({ error: 'Invalid request' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/subscriptions/payment-status/:subscriptionId
+ * Check subscription payment status
+ */
+router.get('/payment-status/:subscriptionId', async (req, res) => {
+  try {
+    const { subscriptionId } = req.params;
+    const prisma = require('../utils/database').prisma;
+
+    const subscription = await prisma.subscription.findUnique({
+      where: { id: subscriptionId },
+    });
+
+    if (!subscription) {
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        subscriptionId: subscription.id,
+        status: subscription.status,
+        tier: subscription.tier,
+        monthlyFee: subscription.monthlyFee,
+      },
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

@@ -1,5 +1,5 @@
 import { PrismaClient, LawyerTier, SubscriptionStatus } from '@prisma/client';
-import axios from 'axios';
+import { mpesaService } from './mpesaDarajaService';
 
 const prisma = new PrismaClient();
 
@@ -90,17 +90,28 @@ export const createSubscription = async (
   }
 
   try {
-    const mpesaResponse = await initiateMpesaPayment(
+    const mpesaResponse = await mpesaService.initiateSTKPush({
       phoneNumber,
-      monthlyFee,
-      `Wakili Pro ${targetTier} Subscription`,
-      subscription.id
-    );
+      amount: monthlyFee,
+      accountReference: `SUB-${subscription.id.substring(0, 8)}`,
+      transactionDesc: `Wakili Pro ${targetTier} Subscription`,
+    });
+
+    // Store M-Pesa request IDs in subscription metadata
+    await prisma.subscription.update({
+      where: { id: subscription.id },
+      data: {
+        metadata: {
+          merchantRequestID: mpesaResponse.MerchantRequestID,
+          checkoutRequestID: mpesaResponse.CheckoutRequestID,
+        } as any,
+      },
+    });
 
     return {
       subscriptionId: subscription.id,
       paymentRequired: true,
-      checkoutUrl: mpesaResponse.checkoutRequestID,
+      checkoutUrl: mpesaResponse.CheckoutRequestID,
     };
   } catch (error) {
     console.error('M-Pesa payment initiation failed:', error);
@@ -237,12 +248,23 @@ export const processSubscriptionRenewals = async (): Promise<void> => {
         continue;
       }
 
-      const mpesaResponse = await initiateMpesaPayment(
+      const mpesaResponse = await mpesaService.initiateSTKPush({
         phoneNumber,
-        subscription.monthlyFee,
-        `Wakili Pro ${subscription.tier} Renewal`,
-        subscription.id
-      );
+        amount: subscription.monthlyFee,
+        accountReference: `RENEW-${subscription.id.substring(0, 8)}`,
+        transactionDesc: `Wakili Pro ${subscription.tier} Renewal`,
+      });
+
+      // Store M-Pesa request IDs in subscription metadata
+      await prisma.subscription.update({
+        where: { id: subscription.id },
+        data: {
+          metadata: {
+            merchantRequestID: mpesaResponse.MerchantRequestID,
+            checkoutRequestID: mpesaResponse.CheckoutRequestID,
+          } as any,
+        },
+      });
 
       // Update next billing date
       const nextBillingDate = new Date(now);
@@ -365,79 +387,6 @@ export const getTierComparison = () => {
     },
   };
 };
-
-/**
- * M-Pesa STK Push integration
- */
-async function initiateMpesaPayment(
-  phoneNumber: string,
-  amount: number,
-  description: string,
-  referenceId: string
-): Promise<{ checkoutRequestID: string }> {
-  const mpesaConfig = {
-    shortCode: process.env.MPESA_SHORTCODE,
-    consumerKey: process.env.MPESA_CONSUMER_KEY,
-    consumerSecret: process.env.MPESA_CONSUMER_SECRET,
-    passkey: process.env.MPESA_PASSKEY,
-    callbackUrl: `${process.env.API_URL}/api/payments/mpesa/callback`,
-  };
-
-  // Get OAuth token
-  const auth = Buffer.from(
-    `${mpesaConfig.consumerKey}:${mpesaConfig.consumerSecret}`
-  ).toString('base64');
-
-  const tokenResponse = await axios.get(
-    'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
-    {
-      headers: { Authorization: `Basic ${auth}` },
-    }
-  );
-
-  const accessToken = tokenResponse.data.access_token;
-
-  // Generate timestamp and password
-  const timestamp = new Date()
-    .toISOString()
-    .replace(/[-:T.]/g, '')
-    .slice(0, 14);
-  const password = Buffer.from(
-    `${mpesaConfig.shortCode}${mpesaConfig.passkey}${timestamp}`
-  ).toString('base64');
-
-  // Format phone number (254XXXXXXXXX)
-  const formattedPhone = phoneNumber.startsWith('254')
-    ? phoneNumber
-    : phoneNumber.startsWith('0')
-    ? `254${phoneNumber.slice(1)}`
-    : `254${phoneNumber}`;
-
-  // Initiate STK Push
-  const stkResponse = await axios.post(
-    'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
-    {
-      BusinessShortCode: mpesaConfig.shortCode,
-      Password: password,
-      Timestamp: timestamp,
-      TransactionType: 'CustomerPayBillOnline',
-      Amount: amount,
-      PartyA: formattedPhone,
-      PartyB: mpesaConfig.shortCode,
-      PhoneNumber: formattedPhone,
-      CallBackURL: mpesaConfig.callbackUrl,
-      AccountReference: referenceId,
-      TransactionDesc: description,
-    },
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }
-  );
-
-  return {
-    checkoutRequestID: stkResponse.data.CheckoutRequestID,
-  };
-}
 
 /**
  * Helper to compare tier levels

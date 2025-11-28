@@ -126,6 +126,29 @@ async function main() {
     }
   }
 
+  // Create emergency contacts
+  console.log('\n📞 Creating emergency contacts...');
+  
+  const emergencyContacts = [
+    { phoneNumber: '0727114573', label: 'PRIMARY', displayOrder: 1 },
+    { phoneNumber: '0787679378', label: 'SECONDARY', displayOrder: 2 }
+  ];
+
+  for (const contact of emergencyContacts) {
+    const existing = await prisma.emergencyContact.findFirst({
+      where: { phoneNumber: contact.phoneNumber }
+    });
+    
+    if (!existing) {
+      await prisma.emergencyContact.create({
+        data: contact
+      });
+      console.log(`✅ Created emergency contact: ${contact.phoneNumber} (${contact.label})`);
+    } else {
+      console.log(`✅ Emergency contact exists: ${contact.phoneNumber}`);
+    }
+  }
+
   console.log('\n✅ Database seeding completed!');
 }
 

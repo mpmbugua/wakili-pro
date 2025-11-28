@@ -106,32 +106,50 @@ model RefreshToken {
 }
 
 model LawyerProfile {
-  id                                  String           @id @default(cuid())
-  providerId                          String           @unique
-  userId                              String           @unique
-  licenseNumber                       String?          @unique
-  tier                                LawyerTier?      @default(FREE)
-  specializations                     String[]
-  phoneNumber                         String?
-  yearOfAdmission                     Int?
-  location                            String?
-  linkedInProfile                     String?
-  profileImageUrl                     String?
-  bio                                 String?
-  yearsOfExperience                   Int?
-  availability                        Json?
-  isVerified                          Boolean          @default(false)
-  rating                              Float?           @default(0)
-  reviewCount                         Int?             @default(0)
-  isFeatured                          Boolean          @default(false)
-  featuredUntil                       DateTime?
-  status                              String?          @default("ACTIVE")
-  createdAt                           DateTime         @default(now())
-  updatedAt                           DateTime         @updatedAt
-  User_LawyerProfile_providerIdToUser User             @relation("LawyerProfile_providerIdToUser", fields: [providerId], references: [id])
-  user                                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String      @id @default(cuid())
+  providerId        String      @unique
+  userId            String      @unique
+  licenseNumber     String?     @unique
+  tier              LawyerTier? @default(FREE)
+  specializations   String[]
+  phoneNumber       String?
+  yearOfAdmission   Int?
+  location          String?
+  linkedInProfile   String?
+  profileImageUrl   String?
+  bio               String?
+  yearsOfExperience Int?
+  availability      Json?
+  isVerified        Boolean     @default(false)
+  rating            Float?      @default(0)
+  reviewCount       Int?        @default(0)
+  isFeatured        Boolean     @default(false)
+  featuredUntil     DateTime?
+  status            String?     @default("ACTIVE")
+
+  // Consultation Booking Fields
+  hourlyRate        Decimal? @db.Decimal(10, 2)
+  offPeakHourlyRate Decimal? @db.Decimal(10, 2)
+  available24_7     Boolean  @default(false)
+  workingHours      Json?
+  blockedSlots      Json?
+
+  // Calendar Integration
+  googleCalendarConnected  Boolean   @default(false)
+  googleCalendarId         String?
+  outlookCalendarConnected Boolean   @default(false)
+  outlookCalendarId        String?
+  calendarSyncEnabled      Boolean   @default(false)
+  lastCalendarSync         DateTime?
+
+  createdAt                           DateTime            @default(now())
+  updatedAt                           DateTime            @updatedAt
+  User_LawyerProfile_providerIdToUser User                @relation("LawyerProfile_providerIdToUser", fields: [providerId], references: [id])
+  user                                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   ServiceBooking                      ServiceBooking[]
-  User_LawyerProfileUser              User[]           @relation("LawyerProfileUser")
+  User_LawyerProfileUser              User[]              @relation("LawyerProfileUser")
+  wallet                              LawyerWallet?
+  withdrawalRequests                  WithdrawalRequest[]
 }
 
 model User {
@@ -197,6 +215,8 @@ model User {
   clientServiceRequests                                      ServiceRequest[]        @relation("ClientServiceRequests")
   selectedLawyerRequests                                     ServiceRequest[]        @relation("SelectedLawyerRequests")
   lawyerQuotes                                               LawyerQuote[]           @relation("LawyerQuotes")
+  consultationBookingsAsClient                               ConsultationBooking[]   @relation("ClientConsultationBookings")
+  consultationBookingsAsLawyer                               ConsultationBooking[]   @relation("LawyerConsultationBookings")
 }
 
 model UserProfile {
@@ -744,7 +764,7 @@ enum VideoConsultationType {
 }
 
 model DocumentReview {
-  id                    String                  @id @default(cuid())
+  id                    String            @id @default(cuid())
   userId                String
   lawyerId              String?
   documentSource        DocumentSource
@@ -753,56 +773,56 @@ model DocumentReview {
   originalFileName      String?
   documentType          String
   documentCategory      DocumentCategory?
-  
-  reviewType            ReviewType
-  aiReviewStatus        AIReviewStatus          @default(PENDING)
-  aiReviewResults       Json?
-  aiReviewCompletedAt   DateTime?
-  
-  certificationStatus   CertificationStatus?
-  certificationPrice    Float?
-  certifiedDocumentUrl  String?
+
+  reviewType          ReviewType
+  aiReviewStatus      AIReviewStatus @default(PENDING)
+  aiReviewResults     Json?
+  aiReviewCompletedAt DateTime?
+
+  certificationStatus    CertificationStatus?
+  certificationPrice     Float?
+  certifiedDocumentUrl   String?
   certificationLetterUrl String?
-  lawyerNotes           String?
-  
+  lawyerNotes            String?
+
   // Digital Certification Fields
-  certificateId         String?   @unique     // Unique verification ID (e.g., "WP-2024-ABC123")
-  verificationQRCodeUrl String?               // QR code image for verification
-  signedAt              DateTime?             // When lawyer signed the document
+  certificateId         String?   @unique // Unique verification ID (e.g., "WP-2024-ABC123")
+  verificationQRCodeUrl String? // QR code image for verification
+  signedAt              DateTime? // When lawyer signed the document
   signatureApplied      Boolean   @default(false)
   stampApplied          Boolean   @default(false)
   letterheadApplied     Boolean   @default(false)
-  
-  questionnaire         Json?
-  urgency               UrgencyLevel            @default(STANDARD)
-  deadline              DateTime
-  
-  price                 Float
-  paymentId             String?
-  paidAt                DateTime?
-  
-  qualityControlStatus  QualityControlStatus?
-  qualityControlNotes   String?
-  qualityCheckedBy      String?
-  qualityCheckedAt      DateTime?
-  
-  completedAt           DateTime?
-  deliveredAt           DateTime?
-  clientRating          Int?
-  clientFeedback        String?
-  
-  revisionCount         Int                     @default(0)
-  revisionRequested     Boolean                 @default(false)
-  revisionNotes         String?
-  
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
-  
-  user                  User                    @relation("DocumentReviewUser", fields: [userId], references: [id])
-  lawyer                User?                   @relation("DocumentReviewLawyer", fields: [lawyerId], references: [id])
-  marketplaceDocument   DocumentTemplate?       @relation(fields: [marketplaceDocumentId], references: [id])
-  qualityController     User?                   @relation("DocumentReviewQC", fields: [qualityCheckedBy], references: [id])
-  
+
+  questionnaire Json?
+  urgency       UrgencyLevel @default(STANDARD)
+  deadline      DateTime
+
+  price     Float
+  paymentId String?
+  paidAt    DateTime?
+
+  qualityControlStatus QualityControlStatus?
+  qualityControlNotes  String?
+  qualityCheckedBy     String?
+  qualityCheckedAt     DateTime?
+
+  completedAt    DateTime?
+  deliveredAt    DateTime?
+  clientRating   Int?
+  clientFeedback String?
+
+  revisionCount     Int     @default(0)
+  revisionRequested Boolean @default(false)
+  revisionNotes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user                User              @relation("DocumentReviewUser", fields: [userId], references: [id])
+  lawyer              User?             @relation("DocumentReviewLawyer", fields: [lawyerId], references: [id])
+  marketplaceDocument DocumentTemplate? @relation(fields: [marketplaceDocumentId], references: [id])
+  qualityController   User?             @relation("DocumentReviewQC", fields: [qualityCheckedBy], references: [id])
+
   @@index([userId])
   @@index([lawyerId])
   @@index([aiReviewStatus])
@@ -811,28 +831,28 @@ model DocumentReview {
 }
 
 model LawyerLetterhead {
-  id                String   @id @default(cuid())
-  lawyerId          String   @unique
+  id                String  @id @default(cuid())
+  lawyerId          String  @unique
   letterheadUrl     String
   stampUrl          String?
-  signatureUrl      String?              // Digital signature image
-  certificatePrefix String   @default("WP") // Prefix for certificate IDs (e.g., "WP", "LSK")
+  signatureUrl      String? // Digital signature image
+  certificatePrefix String  @default("WP") // Prefix for certificate IDs (e.g., "WP", "LSK")
   firmName          String
   firmAddress       String?
   firmPhone         String?
   firmEmail         String?
   licenseNumber     String
-  
-  isApproved        Boolean  @default(false)
-  approvedBy        String?
-  approvedAt        DateTime?
-  
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  lawyer            User     @relation("LawyerLetterhead", fields: [lawyerId], references: [id])
-  approver          User?    @relation("LetterheadApprover", fields: [approvedBy], references: [id])
+
+  isApproved Boolean   @default(false)
+  approvedBy String?
+  approvedAt DateTime?
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lawyer   User  @relation("LawyerLetterhead", fields: [lawyerId], references: [id])
+  approver User? @relation("LetterheadApprover", fields: [approvedBy], references: [id])
 }
 
 enum DocumentSource {
@@ -892,36 +912,36 @@ enum UrgencyLevel {
 }
 
 model ServiceRequest {
-  id                    String         @id @default(cuid())
-  userId                String
-  serviceCategory       String
-  serviceTitle          String
-  description           String
-  estimatedBudget       Int
-  estimatedFee          Int
-  tier                  String
-  urgency               String
-  phoneNumber           String
-  email                 String
-  transactionValue      Int?
-  dealValue             Int?
-  claimAmount           Int?
-  businessType          String?
-  complexity            String?
-  commitmentFeePaid     Boolean        @default(false)
-  commitmentFeeAmount   Int            @default(500)
-  commitmentFeeTxId     String?
-  status                RequestStatus  @default(PENDING)
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
-  selectedLawyerId      String?
-  user                  User           @relation("ClientServiceRequests", fields: [userId], references: [id])
-  selectedLawyer        User?          @relation("SelectedLawyerRequests", fields: [selectedLawyerId], references: [id])
-  quotes                LawyerQuote[]
-  completedAt           DateTime?
-  confirmedAt           DateTime?
-  rating                Int?
-  feedback              String?
+  id                  String        @id @default(cuid())
+  userId              String
+  serviceCategory     String
+  serviceTitle        String
+  description         String
+  estimatedBudget     Int
+  estimatedFee        Int
+  tier                String
+  urgency             String
+  phoneNumber         String
+  email               String
+  transactionValue    Int?
+  dealValue           Int?
+  claimAmount         Int?
+  businessType        String?
+  complexity          String?
+  commitmentFeePaid   Boolean       @default(false)
+  commitmentFeeAmount Int           @default(500)
+  commitmentFeeTxId   String?
+  status              RequestStatus @default(PENDING)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  selectedLawyerId    String?
+  user                User          @relation("ClientServiceRequests", fields: [userId], references: [id])
+  selectedLawyer      User?         @relation("SelectedLawyerRequests", fields: [selectedLawyerId], references: [id])
+  quotes              LawyerQuote[]
+  completedAt         DateTime?
+  confirmedAt         DateTime?
+  rating              Int?
+  feedback            String?
 
   @@index([userId])
   @@index([status])
@@ -957,4 +977,184 @@ enum RequestStatus {
   COMPLETED
   CONFIRMED
   CANCELLED
+}
+
+// ===========================
+// CONSULTATION BOOKING SYSTEM
+// ===========================
+
+model LawyerWallet {
+  id               String   @id @default(cuid())
+  lawyerId         String   @unique
+  balance          Decimal  @default(0) @db.Decimal(10, 2)
+  pendingBalance   Decimal  @default(0) @db.Decimal(10, 2)
+  availableBalance Decimal  @default(0) @db.Decimal(10, 2)
+  currency         String   @default("KES")
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  lawyer       LawyerProfile             @relation(fields: [lawyerId], references: [id])
+  transactions LawyerWalletTransaction[]
+
+  @@index([lawyerId])
+}
+
+model LawyerWalletTransaction {
+  id                    String                @id @default(cuid())
+  walletId              String
+  type                  WalletTransactionType
+  amount                Decimal               @db.Decimal(10, 2)
+  balanceBefore         Decimal               @db.Decimal(10, 2)
+  balanceAfter          Decimal               @db.Decimal(10, 2)
+  status                TransactionStatus     @default(PENDING)
+  paymentMethod         String?
+  mpesaTransactionId    String?
+  mpesaReceiptNumber    String?
+  consultationBookingId String?
+  marketplaceBookingId  String?
+  description           String?
+  metadata              Json?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  wallet              LawyerWallet         @relation(fields: [walletId], references: [id])
+  consultationBooking ConsultationBooking? @relation(fields: [consultationBookingId], references: [id])
+
+  @@index([walletId, createdAt])
+  @@index([type, status])
+}
+
+model ConsultationBooking {
+  id                     String                    @id @default(cuid())
+  clientId               String
+  lawyerId               String
+  scheduledStartTime     DateTime
+  scheduledEndTime       DateTime
+  duration               Int
+  consultationType       ConsultationType
+  clientPaymentAmount    Decimal                   @db.Decimal(10, 2)
+  platformCommissionRate Decimal                   @db.Decimal(5, 2)
+  platformCommission     Decimal                   @db.Decimal(10, 2)
+  lawyerPayout           Decimal                   @db.Decimal(10, 2)
+  clientPaymentStatus    PaymentStatus             @default(PENDING)
+  mpesaTransactionId     String?
+  mpesaReceiptNumber     String?
+  clientPaidAt           DateTime?
+  status                 ConsultationBookingStatus @default(PENDING_PAYMENT)
+  actualStartTime        DateTime?
+  actualEndTime          DateTime?
+  lawyerConfirmed        Boolean                   @default(false)
+  clientConfirmed        Boolean                   @default(false)
+  lawyerConfirmedAt      DateTime?
+  clientConfirmedAt      DateTime?
+  payoutStatus           PayoutStatus              @default(PENDING)
+  payoutTransactionId    String?
+  paidToLawyerAt         DateTime?
+  isEmergency            Boolean                   @default(false)
+  emergencyNotes         String?
+  createdByReceptionist  Boolean                   @default(false)
+  receptionistId         String?
+  callSid                String?
+  callDuration           Int?
+  callRecordingUrl       String?
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+
+  client             User                      @relation("ClientConsultationBookings", fields: [clientId], references: [id])
+  lawyer             User                      @relation("LawyerConsultationBookings", fields: [lawyerId], references: [id])
+  review             ConsultationReview?
+  walletTransactions LawyerWalletTransaction[]
+
+  @@index([lawyerId, scheduledStartTime])
+  @@index([clientId, status])
+  @@index([status, clientPaymentStatus])
+}
+
+model ConsultationReview {
+  id             String   @id @default(cuid())
+  bookingId      String   @unique
+  rating         Int
+  comment        String?
+  wouldRecommend Boolean
+  createdAt      DateTime @default(now())
+
+  booking ConsultationBooking @relation(fields: [bookingId], references: [id])
+}
+
+model WithdrawalRequest {
+  id                 String           @id @default(cuid())
+  lawyerId           String
+  amount             Decimal          @db.Decimal(10, 2)
+  withdrawalMethod   WithdrawalMethod
+  mpesaPhoneNumber   String?
+  mpesaName          String?
+  bankName           String?
+  accountNumber      String?
+  accountName        String?
+  branchCode         String?
+  status             WithdrawalStatus @default(PENDING)
+  requestedAt        DateTime         @default(now())
+  processedAt        DateTime?
+  completedAt        DateTime?
+  rejectionReason    String?
+  processedBy        String?
+  transactionId      String?
+  mpesaTransactionId String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  lawyer LawyerProfile @relation(fields: [lawyerId], references: [id])
+
+  @@index([lawyerId, status])
+  @@index([status, requestedAt])
+}
+
+model EmergencyContact {
+  id           String   @id @default(cuid())
+  phoneNumber  String
+  label        String
+  isActive     Boolean  @default(true)
+  displayOrder Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, displayOrder])
+}
+
+enum ConsultationType {
+  VIDEO_CALL
+  PHONE_CALL
+  IN_PERSON
+}
+
+enum ConsultationBookingStatus {
+  PENDING_PAYMENT
+  PAYMENT_CONFIRMED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum WithdrawalMethod {
+  MPESA
+  BANK_TRANSFER
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+  FAILED
 }

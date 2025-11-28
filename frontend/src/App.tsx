@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { EmergencyCallButton } from './components/EmergencyCallButton';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuthStore } from './store/authStore';
@@ -311,6 +312,7 @@ function App() {
         </Routes>
       </Router>
     </GoogleOAuthProvider>
+    <EmergencyCallButton />
   );
 }
 
