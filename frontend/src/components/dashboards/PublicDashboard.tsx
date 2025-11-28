@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MessageSquare, FileText, Video, Clock, Plus, ArrowRight } from 'lucide-react';
+import { Calendar, MessageSquare, FileText, Video, Clock, Plus, ArrowRight, Scale, FileCheck } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard } from '../ui';
 import type { AuthUser } from '@wakili-pro/shared/src/types/auth';
@@ -259,6 +259,14 @@ export const PublicDashboard: React.FC<PublicDashboardProps> = ({ user }) => {
           <Button variant="outline" className="justify-start" onClick={() => navigate('/ai')}>
             <Video className="h-4 w-4 mr-2" />
             AI Legal Assistant
+          </Button>
+          <Button variant="outline" className="justify-start" onClick={() => navigate('/services')}>
+            <Scale className="h-4 w-4 mr-2" />
+            Legal Services
+          </Button>
+          <Button variant="outline" className="justify-start" onClick={() => navigate('/documents/services')}>
+            <FileCheck className="h-4 w-4 mr-2" />
+            Document Review
           </Button>
           <Button variant="outline" className="justify-start" onClick={() => navigate('/marketplace')}>
             <FileText className="h-4 w-4 mr-2" />
