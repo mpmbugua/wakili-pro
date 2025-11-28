@@ -116,10 +116,6 @@ export const PublicDashboard: React.FC<PublicDashboardProps> = ({ user }) => {
               <MessageSquare className="h-4 w-4 mr-2" />
               Find a Lawyer
             </Button>
-            <Button variant="primary" onClick={() => navigate('/ai')}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Consultation
-            </Button>
           </>
         }
       />
