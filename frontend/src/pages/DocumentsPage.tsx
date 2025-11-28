@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FileText, Download, Eye, Trash2, Upload, Search, Filter, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
 interface Document {
   id: string;
@@ -16,6 +17,7 @@ interface Document {
 
 export const DocumentsPage: React.FC = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,6 +172,29 @@ export const DocumentsPage: React.FC = () => {
     }
   };
 
+  const handleRequestReview = (documentId: string, documentTitle: string) => {
+    // Update document status to UNDER_REVIEW
+    setDocuments(prev =>
+      prev.map(doc =>
+        doc.id === documentId
+          ? { ...doc, status: 'UNDER_REVIEW' as Document['status'] }
+          : doc
+      )
+    );
+
+    // TODO: Replace with actual API call
+    // await axiosInstance.post(`/documents/${documentId}/request-review`);
+
+    // Navigate to document services page for lawyer selection
+    navigate('/document-services', { 
+      state: { 
+        documentId,
+        documentTitle,
+        requestType: 'review'
+      } 
+    });
+  };
+
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          doc.category.toLowerCase().includes(searchQuery.toLowerCase());
@@ -295,7 +320,10 @@ export const DocumentsPage: React.FC = () => {
                   </button>
                 </div>
                 {document.status === 'DRAFT' && (
-                  <button className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                  <button 
+                    onClick={() => handleRequestReview(document.id, document.title)}
+                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  >
                     Request Review
                   </button>
                 )}
