@@ -932,9 +932,14 @@ export const MarketplaceBrowse: React.FC = () => {
                   <span className="font-semibold text-slate-900">{purchasingDocument.format}</span>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 text-center">
-                You will be redirected to M-Pesa payment to complete your purchase
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-blue-700 text-center font-medium">
+                  💳 Choose your payment method on the next page
+                </p>
+                <p className="text-xs text-blue-600 text-center mt-1">
+                  M-Pesa or Credit/Debit Card
+                </p>
+              </div>
             </div>
             <div className="flex space-x-3">
               <button
@@ -967,16 +972,16 @@ export const MarketplaceBrowse: React.FC = () => {
                         });
                       } else {
                         alert(response.data.message || 'Failed to initiate purchase');
-                      }
-                    } catch (error: any) {
+                    }
+                  } catch (error: any) {
                       console.error('Purchase initiation error:', error);
                       alert(error.response?.data?.message || 'Failed to initiate purchase. Please try again.');
                     }
                   }
                 }}
-                className="flex-1 px-4 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
+                className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
               >
-                Pay with M-Pesa
+                Continue to Payment
               </button>
             </div>
           </div>
