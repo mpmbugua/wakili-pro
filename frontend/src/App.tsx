@@ -22,17 +22,21 @@ import LawyerSignatureSetup from './pages/LawyerSignatureSetup';
 import DocumentCertificationPage from './pages/DocumentCertificationPage';
 import VerifyCertificate from './pages/VerifyCertificate';
 import ServiceRequestPage from './pages/ServiceRequestPage';
+import LawyerWalletPage from './pages/LawyerWalletPage';
 import LawyerQuoteSubmissionPage from './pages/LawyerQuoteSubmissionPage';
 import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
 import { AdminLawyerApproval } from './pages/admin/AdminLawyerApproval';
+import AdminWithdrawalManagement from './pages/admin/AdminWithdrawalManagement';
 import { AdminDashboard } from './components/dashboards/AdminDashboard';
 import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard';
 import { AdminLoginPage } from './pages/auth/AdminLoginPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
+import { MyBookings } from './components/MyBookings';
+import { BookingDetails } from './components/BookingDetails';
 
 const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com';
 
@@ -228,6 +232,22 @@ function App() {
               } 
             />
             <Route 
+              path="/bookings" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <MyBookings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/bookings/:bookingId" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <BookingDetails />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/profile/settings" 
               element={
                 <ProtectedRoute hydrated={hydrated}>
@@ -267,6 +287,14 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/lawyer/wallet" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <LawyerWalletPage />
+                </ProtectedRoute>
+              } 
+            />
             
             {/* Admin Routes */}
             <Route 
@@ -293,6 +321,14 @@ function App() {
                 </AdminRoute>
               } 
             />
+            <Route 
+              path="/admin/withdrawals" 
+              element={
+                <AdminRoute hydrated={hydrated}>
+                  <AdminWithdrawalManagement />
+                </AdminRoute>
+              } 
+            />
 
             {/* Super Admin Routes */}
             <Route 
@@ -311,8 +347,8 @@ function App() {
           } />
         </Routes>
       </Router>
+      <EmergencyCallButton />
     </GoogleOAuthProvider>
-    <EmergencyCallButton />
   );
 }
 

@@ -10,15 +10,15 @@ export default defineConfig({
     react(),
     {
       name: 'copy-spa-files',
-      closeBundle() {
+      writeBundle() {
         try {
-          copyFileSync('public/_redirects', 'dist/_redirects')
+          copyFileSync(path.resolve(__dirname, 'public/_redirects'), path.resolve(__dirname, 'dist/_redirects'))
           console.log('✓ Copied _redirects to dist/')
         } catch (err) {
           console.warn('Could not copy _redirects:', err)
         }
         try {
-          copyFileSync('public/_headers', 'dist/_headers')
+          copyFileSync(path.resolve(__dirname, 'public/_headers'), path.resolve(__dirname, 'dist/_headers'))
           console.log('✓ Copied _headers to dist/')
         } catch (err) {
           console.warn('Could not copy _headers:', err)
