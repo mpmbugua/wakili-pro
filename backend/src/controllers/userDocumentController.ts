@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/auth';
 import {
   uploadUserDocument,
   getUserDocuments,
@@ -14,9 +15,9 @@ import { DocumentType, DocumentStatus } from '@prisma/client';
  * Upload a new document
  * POST /api/documents/upload
  */
-export const uploadDocument = async (req: Request, res: Response) => {
+export const uploadDocument = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -82,9 +83,9 @@ export const uploadDocument = async (req: Request, res: Response) => {
  * Get all user documents
  * GET /api/documents
  */
-export const getDocuments = async (req: Request, res: Response) => {
+export const getDocuments = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -114,9 +115,9 @@ export const getDocuments = async (req: Request, res: Response) => {
  * Get a single document
  * GET /api/documents/:id
  */
-export const getDocument = async (req: Request, res: Response) => {
+export const getDocument = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -141,9 +142,9 @@ export const getDocument = async (req: Request, res: Response) => {
  * Update document metadata
  * PATCH /api/documents/:id
  */
-export const updateDocumentMetadata = async (req: Request, res: Response) => {
+export const updateDocumentMetadata = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -175,9 +176,9 @@ export const updateDocumentMetadata = async (req: Request, res: Response) => {
  * Delete a document
  * DELETE /api/documents/:id
  */
-export const deleteUserDocument = async (req: Request, res: Response) => {
+export const deleteUserDocument = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -202,9 +203,9 @@ export const deleteUserDocument = async (req: Request, res: Response) => {
  * Request review for a document
  * POST /api/documents/:id/request-review
  */
-export const requestReview = async (req: Request, res: Response) => {
+export const requestReview = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({
         success: false,

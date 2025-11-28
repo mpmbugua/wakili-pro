@@ -8,7 +8,7 @@ import {
   deleteUserDocument,
   requestReview,
 } from '../controllers/userDocumentController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ const upload = multer({
 });
 
 // All routes require authentication
-router.use(authMiddleware);
+router.use(authenticateToken);
 
 // Upload a new document
 router.post('/upload', upload.single('document'), uploadDocument);
