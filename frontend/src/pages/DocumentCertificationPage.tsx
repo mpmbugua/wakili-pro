@@ -38,7 +38,7 @@ const DocumentCertificationPage: React.FC = () => {
 
   const fetchCertificationQueue = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/certification/queue`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/certification/queue`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -65,7 +65,7 @@ const DocumentCertificationPage: React.FC = () => {
     setMessage(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/certification/certify`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/certification/certify`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

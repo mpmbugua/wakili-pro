@@ -59,7 +59,7 @@ const VerifyCertificate: React.FC = () => {
     setVerification(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/certification/verify/${id.trim()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/certification/verify/${id.trim()}`);
       const data = await response.json();
 
       if (data.success) {

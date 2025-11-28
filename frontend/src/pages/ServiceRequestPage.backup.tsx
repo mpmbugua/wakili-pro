@@ -73,7 +73,7 @@ export const ServiceRequestPage: React.FC = () => {
         formDataToSend.append(`documents`, doc);
       });
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/service-requests`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/service-requests`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

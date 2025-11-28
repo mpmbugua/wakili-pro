@@ -42,7 +42,7 @@ const LawyerSignatureSetup: React.FC = () => {
 
   const fetchLetterhead = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/lawyer/letterhead`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -89,7 +89,7 @@ const LawyerSignatureSetup: React.FC = () => {
       const formData = new FormData();
       formData.append('signature', blob, 'signature.png');
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/lawyer/letterhead/signature`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/signature`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -139,7 +139,7 @@ const LawyerSignatureSetup: React.FC = () => {
       const formData = new FormData();
       formData.append('stamp', stampFile);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/lawyer/letterhead/stamp`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/stamp`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -174,7 +174,7 @@ const LawyerSignatureSetup: React.FC = () => {
     setMessage(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/lawyer/letterhead/details`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/details`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -211,7 +211,7 @@ const LawyerSignatureSetup: React.FC = () => {
 
     setSaving(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/lawyer/letterhead/signature`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/signature`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -237,7 +237,7 @@ const LawyerSignatureSetup: React.FC = () => {
 
     setSaving(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/lawyer/letterhead/stamp`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/stamp`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

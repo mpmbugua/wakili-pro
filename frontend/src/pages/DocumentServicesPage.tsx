@@ -154,8 +154,8 @@ const DocumentServicesPage: React.FC = () => {
 
       const token = localStorage.getItem('token');
       const endpoint = selectedService === 'ai-review'
-        ? '/api/document-review/external/ai-review'
-        : '/api/document-review/certification';
+        ? '/document-review/external/ai-review'
+        : '/document-review/certification';
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
         method: 'POST',
