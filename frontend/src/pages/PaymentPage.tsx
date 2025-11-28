@@ -367,10 +367,60 @@ export const PaymentPage: React.FC = () => {
           {/* Booking/Document Summary */}
           <div>
             <h2 className="text-2xl font-display font-bold text-slate-900 mb-6">
-              {isDocumentPayment ? 'Service Summary' : 'Booking Summary'}
+              {isServiceRequest ? 'Payment Summary' : isDocumentPayment ? 'Service Summary' : 'Booking Summary'}
             </h2>
             <div className="card p-6 space-y-4">
-              {isDocumentPayment ? (
+              {isServiceRequest ? (
+                <>
+                  <div>
+                    <p className="text-sm text-slate-600">Service Type</p>
+                    <p className="font-semibold text-slate-900">Service Request Commitment Fee</p>
+                    <p className="text-sm text-blue-600">Lawyer Matching Service</p>
+                  </div>
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-slate-600">Description</p>
+                    <p className="font-semibold text-slate-900">
+                      {(bookingDetails as ServiceRequestPayment).description || 'Service Request Commitment Fee'}
+                    </p>
+                  </div>
+                  {(bookingDetails as ServiceRequestPayment).serviceDetails && (
+                    <>
+                      <div className="border-t pt-4">
+                        <p className="text-sm text-slate-600">Category</p>
+                        <p className="font-semibold text-slate-900">
+                          {(bookingDetails as ServiceRequestPayment).serviceDetails.category || 'Legal Service'}
+                        </p>
+                      </div>
+                      {(bookingDetails as ServiceRequestPayment).serviceDetails.estimatedFee && (
+                        <div className="border-t pt-4">
+                          <p className="text-sm text-slate-600">Estimated Service Fee</p>
+                          <p className="font-semibold text-slate-900">
+                            KES {(bookingDetails as ServiceRequestPayment).serviceDetails.estimatedFee.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            You'll pay this separately to your chosen lawyer
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-slate-600">What happens next?</p>
+                    <ul className="text-sm text-slate-700 mt-2 space-y-1">
+                      <li>• We match you with 3-5 qualified lawyers</li>
+                      <li>• Receive detailed quotes from each lawyer</li>
+                      <li>• Choose your preferred lawyer</li>
+                    </ul>
+                  </div>
+                  <div className="border-t pt-4 bg-blue-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-900 font-semibold">Commitment Fee</span>
+                      <span className="text-2xl font-bold text-blue-600">KES {getPrice().toLocaleString()}</span>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-2">Non-refundable • Ensures serious requests</p>
+                  </div>
+                </>
+              ) : isDocumentPayment ? (
                 <>
                   <div>
                     <p className="text-sm text-slate-600">Service Type</p>
