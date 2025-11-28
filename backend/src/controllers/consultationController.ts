@@ -31,9 +31,14 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
 
     const validatedData = CreateConsultationSchema.parse(req.body);
     
-    // Verify lawyer exists
+    // Verify lawyer exists and get their profile
     const lawyer = await prisma.lawyerProfile.findFirst({
-      where: { userId: validatedData.lawyerId },
+      where: { 
+        OR: [
+          { userId: validatedData.lawyerId },
+          { providerId: validatedData.lawyerId }
+        ]
+      },
       include: { user: true }
     });
 
@@ -44,8 +49,12 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Use the lawyer's userId for all references
+    const actualLawyerId = lawyer.userId;
+    const actualProviderId = lawyer.providerId;
+
     // Prevent self-booking
-    if (validatedData.lawyerId === userId) {
+    if (actualLawyerId === userId) {
       return res.status(400).json({
         success: false,
         message: 'Cannot book a consultation with yourself'
@@ -58,7 +67,7 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
     // Find or create a consultation service for this lawyer
     let consultationService = await prisma.marketplaceService.findFirst({
       where: {
-        providerId: validatedData.lawyerId,
+        providerId: actualProviderId,
         type: 'CONSULTATION',
         status: 'ACTIVE'
       }
@@ -68,7 +77,7 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
     if (!consultationService) {
       consultationService = await prisma.marketplaceService.create({
         data: {
-          providerId: validatedData.lawyerId,
+          providerId: actualProviderId,
           title: 'Legal Consultation',
           description: 'Professional legal consultation service',
           type: 'CONSULTATION',
@@ -87,8 +96,8 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
         userId: userId,
         serviceId: consultationService.id,
         clientId: userId,
-        providerId: validatedData.lawyerId,
-        lawyerId: validatedData.lawyerId,
+        providerId: actualProviderId,
+        lawyerId: actualLawyerId,
         scheduledAt: scheduledDateTime,
         status: 'PENDING',
         clientRequirements: validatedData.description
@@ -98,7 +107,7 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
     // Notify lawyer of new consultation request
     const client = await prisma.user.findUnique({ where: { id: userId } });
     await createNotification(
-      validatedData.lawyerId,
+      actualLawyerId,
       'BOOKING_CREATED',
       'New Consultation Request',
       `${client?.firstName || 'A client'} has requested a ${validatedData.consultationType} consultation on ${validatedData.date} at ${validatedData.time}`,
@@ -113,7 +122,7 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
       success: true,
       data: {
         id: booking.id,
-        lawyerId: validatedData.lawyerId,
+        lawyerId: actualLawyerId,
         lawyerName: `${lawyer.user.firstName} ${lawyer.user.lastName}`,
         date: validatedData.date,
         time: validatedData.time,
@@ -126,6 +135,7 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
 
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error('Validation error:', error.errors);
       return res.status(400).json({
         success: false,
         message: 'Validation error',
@@ -134,9 +144,16 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
     }
 
     console.error('Error creating consultation:', error);
+    console.error('Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    
     res.status(500).json({
       success: false,
-      message: 'Failed to create consultation booking'
+      message: 'Failed to create consultation booking',
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 };
