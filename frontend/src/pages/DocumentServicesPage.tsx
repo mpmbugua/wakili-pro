@@ -229,20 +229,41 @@ const DocumentServicesPage: React.FC = () => {
           }
         }
         
-        // TODO: Call API to request review for existing document
-        // For now, simulate the process
+        // Simulate upload progress
+        const progressInterval = setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 100) {
+              clearInterval(progressInterval);
+              return 100;
+            }
+            return prev + 20;
+          });
+        }, 100);
+        
+        // Simulate processing delay then redirect to payment
         setTimeout(() => {
+          clearInterval(progressInterval);
           setUploadProgress(100);
           setIsUploading(false);
           
           // Clear the active review from sessionStorage
           sessionStorage.removeItem('activeDocumentReview');
           
-          alert(`${selectedService === 'ai-review' ? 'AI Review' : 'Certification'} request submitted for "${documentType}"!`);
+          // Generate a temporary review ID (in production, this would come from API)
+          const reviewId = `review_${Date.now()}`;
           
-          // Redirect to documents page to see updated status
-          navigate('/documents');
-        }, 2000);
+          // Redirect to payment page
+          navigate(`/payment/document/${reviewId}`, {
+            state: {
+              reviewId: reviewId,
+              documentType: documentType,
+              serviceType: selectedService,
+              price: calculatePrice(),
+              fileName: documentType,
+              documentId: documentId
+            }
+          });
+        }, 1000);
         
         return;
       }
