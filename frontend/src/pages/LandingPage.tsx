@@ -141,28 +141,23 @@ export const LandingPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Popular Legal Service Packages */}
+          {/* Popular Legal Services */}
           <section id="service-packages" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                  Popular Legal Service Packages
+                  Popular Legal Services
                 </h2>
                 <p className="text-xs text-slate-600">
                   Fixed-price legal services by verified lawyers. Transparent pricing, clear deliverables.
                 </p>
               </div>
               
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 {[
                   { ...getFeaturedExamples()[0], icon: Home },
                   { ...getFeaturedExamples()[1], icon: Briefcase },
-                  { ...getFeaturedExamples()[2], icon: Heart },
-                  { ...getFeaturedExamples()[3], icon: FileText },
-                  { ...getFeaturedExamples()[4], icon: Copyright },
-                  { ...getFeaturedExamples()[5], icon: Gavel },
-                  { ...getFeaturedExamples()[6], icon: Users },
-                  { ...getFeaturedExamples()[7], icon: Home }
+                  { ...getFeaturedExamples()[2], icon: Heart }
                 ].map((service, i) => {
                   const IconComponent = service.icon;
                   return (
@@ -189,7 +184,7 @@ export const LandingPage: React.FC = () => {
                         </div>
                       </div>
                       <Link 
-                        to="/marketplace" 
+                        to="/services" 
                         className="block w-full text-center px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                       >
                         View Details
@@ -201,24 +196,106 @@ export const LandingPage: React.FC = () => {
               
               <div className="mt-6 text-center">
                 <Link 
+                  to="/services" 
+                  className="inline-flex items-center text-xs text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  View all legal services <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          {/* Popular Legal Documents */}
+          <section id="legal-documents" className="py-8 bg-white border-b border-slate-200">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-slate-900 mb-1">
+                  Popular Legal Documents
+                </h2>
+                <p className="text-xs text-slate-600">
+                  Professional legal templates ready for instant download. Free AI review included.
+                </p>
+              </div>
+              
+              <div className="grid md:grid-cols-3 gap-4">
+                {[
+                  { 
+                    title: 'Tenancy Agreement', 
+                    category: 'Real Estate', 
+                    price: 2000,
+                    description: 'Comprehensive rental agreement for residential or commercial properties',
+                    icon: Home
+                  },
+                  { 
+                    title: 'Employment Contract', 
+                    category: 'Employment', 
+                    price: 1500,
+                    description: 'Standard employment agreement compliant with Kenyan labour laws',
+                    icon: Briefcase
+                  },
+                  { 
+                    title: 'Sale Agreement', 
+                    category: 'Commercial', 
+                    price: 2500,
+                    description: 'Legally binding contract for sale of goods or property',
+                    icon: FileText
+                  }
+                ].map((doc, i) => {
+                  const IconComponent = doc.icon;
+                  return (
+                    <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                          {doc.category}
+                        </span>
+                        <IconComponent className="h-4 w-4 text-slate-400" />
+                      </div>
+                      <h3 className="text-sm font-semibold text-slate-900 mb-2">
+                        {doc.title}
+                      </h3>
+                      <p className="text-xs text-slate-600 mb-3">
+                        {doc.description}
+                      </p>
+                      <div className="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100">
+                        <div className="flex items-center gap-1 text-slate-500">
+                          <CheckCircle className="h-3 w-3 text-emerald-600" />
+                          <span>Instant Download</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-emerald-600 font-semibold">
+                          <span>KES {doc.price.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <Link 
+                        to="/marketplace" 
+                        className="block w-full text-center px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      >
+                        Purchase Now
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <div className="mt-6 text-center">
+                <Link 
                   to="/marketplace" 
                   className="inline-flex items-center text-xs text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  View all legal service packages <ArrowRight className="ml-1 h-3 w-3" />
+                  Browse all 500+ document templates <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </div>
             </div>
           </section>
 
           {/* Featured Lawyers Section */}
-          <section id="lawyers" className="py-8 bg-white border-b border-slate-200">
+          <section id="lawyers" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
                   Featured Lawyers
                 </h2>
                 <p className="text-xs text-slate-600">
-                  Connect with verified legal experts across Kenya
+                  Connect with verified legal experts across Kenya. Premium verified profiles.
                 </p>
               </div>
               <div className="grid md:grid-cols-3 gap-4">
@@ -226,7 +303,10 @@ export const LandingPage: React.FC = () => {
             {[
               { name: 'Dr. Sarah Kamau', specialty: 'Corporate Law', location: 'Nairobi', rating: 4.9, cases: '200+' },
               { name: 'Adv. James Mwangi', specialty: 'Family Law', location: 'Mombasa', rating: 4.8, cases: '150+' },
-              { name: 'Adv. Grace Njeri', specialty: 'Real Estate Law', location: 'Nairobi', rating: 4.7, cases: '180+' }
+              { name: 'Adv. Grace Njeri', specialty: 'Real Estate Law', location: 'Nairobi', rating: 4.7, cases: '180+' },
+              { name: 'Adv. Peter Ochieng', specialty: 'Criminal Law', location: 'Kisumu', rating: 4.9, cases: '220+' },
+              { name: 'Dr. Mary Wanjiru', specialty: 'Immigration Law', location: 'Nairobi', rating: 4.8, cases: '170+' },
+              { name: 'Adv. David Kiprono', specialty: 'Employment Law', location: 'Nakuru', rating: 4.7, cases: '160+' }
               ].map((lawyer, i) => (
                 <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
                 <div className="flex items-start space-x-3 mb-3">
@@ -276,7 +356,7 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Legal Resources & Guides Section */}
-          <section id="resources" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
+          <section id="resources" className="py-8 bg-white border-b border-slate-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
@@ -286,12 +366,11 @@ export const LandingPage: React.FC = () => {
                   Free information to help you understand Kenyan law
                 </p>
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
             {[
               { title: "Property Law Guide", category: "Real Estate", icon: Book },
               { title: "Business Registration Steps", category: "Corporate", icon: TrendingUp },
-              { title: "Employment Law Basics", category: "Labour", icon: Users },
-              { title: "Legal Document Templates", category: "Documents", icon: FileText }
+              { title: "Employment Law Basics", category: "Labour", icon: Users }
               ].map((resource, i) => (
                 <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-2">
@@ -316,7 +395,7 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Insights & Analysis (Thought Leadership) */}
-          <section id="insights" className="py-8 bg-white border-b border-slate-200">
+          <section id="insights" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
