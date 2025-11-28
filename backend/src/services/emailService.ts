@@ -42,7 +42,7 @@ const createTransporter = () => {
     return null;
   }
 
-  return nodemailer.createTransporter(config);
+  return nodemailer.createTransport(config);
 };
 
 let transporter: nodemailer.Transporter | null = null;
