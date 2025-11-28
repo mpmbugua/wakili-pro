@@ -89,6 +89,27 @@ export const ServiceRequestPage: React.FC = () => {
   const [paymentPhone, setPaymentPhone] = useState('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
+  // Check if returning from payment page
+  useEffect(() => {
+    const pendingServiceRequest = sessionStorage.getItem('pendingServiceRequest');
+    const paymentSuccess = location.state?.paymentSuccess;
+    
+    if (pendingServiceRequest && paymentSuccess) {
+      try {
+        const { formData: savedFormData, feeEstimate: savedFeeEstimate } = JSON.parse(pendingServiceRequest);
+        setFormData({
+          ...savedFormData,
+          commitmentFeePaid: true,
+          commitmentFeeAmount: 500
+        });
+        setFeeEstimate(savedFeeEstimate);
+        sessionStorage.removeItem('pendingServiceRequest');
+      } catch (error) {
+        console.error('Failed to restore service request data:', error);
+      }
+    }
+  }, [location]);
+
   // Calculate fee estimate whenever relevant fields change
   useEffect(() => {
     if (formData.serviceCategory) {
@@ -192,9 +213,27 @@ export const ServiceRequestPage: React.FC = () => {
       return;
     }
 
-    // Check if commitment fee is paid
+    // Check if commitment fee is paid - navigate to payment page instead of modal
     if (!formData.commitmentFeePaid) {
-      setShowPaymentModal(true);
+      // Store service request data in sessionStorage
+      sessionStorage.setItem('pendingServiceRequest', JSON.stringify({
+        formData,
+        feeEstimate
+      }));
+      
+      // Navigate to payment page for commitment fee
+      navigate('/payment/service-request', {
+        state: {
+          serviceType: 'service-request-commitment',
+          price: 500,
+          description: 'Service Request Commitment Fee',
+          serviceDetails: {
+            serviceType: formData.serviceType,
+            category: formData.category,
+            estimatedFee: feeEstimate?.estimatedFee
+          }
+        }
+      });
       return;
     }
 
@@ -726,66 +765,7 @@ export const ServiceRequestPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Payment Modal */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">Pay Commitment Fee</h2>
-            <p className="text-sm text-slate-600 mb-4">
-              A non-refundable commitment fee of <span className="font-bold text-blue-600">KES 500</span> ensures we match you with serious, qualified lawyers.
-            </p>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                M-Pesa Phone Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                value={paymentPhone}
-                onChange={(e) => setPaymentPhone(e.target.value)}
-                placeholder="254712345678"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-xs text-slate-500 mt-1">Enter phone number in format: 254XXXXXXXXX</p>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => setShowPaymentModal(false)}
-                disabled={isProcessingPayment}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCommitmentFeePayment}
-                disabled={isProcessingPayment}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 flex items-center space-x-2"
-              >
-                {isProcessingPayment ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <>
-                    <Shield className="h-4 w-4" />
-                    <span>Pay KES 500</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {isProcessingPayment && (
-              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-sm text-blue-800">
-                  Check your phone for the M-Pesa prompt and enter your PIN...
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Payment Modal removed - now navigates to payment page directly */}
     </GlobalLayout>
   );
 };
