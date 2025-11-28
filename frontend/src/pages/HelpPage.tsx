@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { GlobalLayout } from '../components/layout';
 import { HelpCircle, MessageCircle, BookOpen, FileText, Phone, Mail, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface FAQItem {
@@ -68,8 +67,7 @@ export const HelpPage: React.FC = () => {
     : faqs.filter(faq => faq.category === activeCategory);
 
   return (
-    <GlobalLayout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-slate-900 mb-4">Help & Support</h1>
@@ -242,7 +240,6 @@ export const HelpPage: React.FC = () => {
           </form>
         </div>
       </div>
-    </GlobalLayout>
   );
 };
 

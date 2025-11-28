@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
 import { User, Bell, Lock, Globe, CreditCard, Shield } from 'lucide-react';
 
@@ -17,8 +16,7 @@ export const SettingsPage: React.FC = () => {
   ];
 
   return (
-    <GlobalLayout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
           <p className="text-slate-600 mt-2">Manage your account settings and preferences</p>
@@ -223,7 +221,6 @@ export const SettingsPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </GlobalLayout>
   );
 };
 
