@@ -55,17 +55,43 @@ export const createConsultation = async (req: AuthRequest, res: Response) => {
     // Combine date and time into DateTime
     const scheduledDateTime = new Date(`${validatedData.date}T${validatedData.time}:00`);
 
+    // Find or create a consultation service for this lawyer
+    let consultationService = await prisma.marketplaceService.findFirst({
+      where: {
+        providerId: validatedData.lawyerId,
+        type: 'CONSULTATION',
+        status: 'ACTIVE'
+      }
+    });
+
+    // If no consultation service exists, create a default one
+    if (!consultationService) {
+      consultationService = await prisma.marketplaceService.create({
+        data: {
+          providerId: validatedData.lawyerId,
+          title: 'Legal Consultation',
+          description: 'Professional legal consultation service',
+          type: 'CONSULTATION',
+          price: 5000,
+          priceKES: 5000,
+          status: 'ACTIVE',
+          deliveryTimeframe: '60 minutes',
+          tags: ['consultation', validatedData.consultationType]
+        }
+      });
+    }
+
     // Create consultation booking as a service booking
-    // We'll create a temporary marketplace service for consultations
-    const consultationTitle = `${validatedData.consultationType.charAt(0).toUpperCase() + validatedData.consultationType.slice(1)} Consultation`;
-    
     const booking = await prisma.serviceBooking.create({
       data: {
-        serviceId: `consultation-${Date.now()}`, // Temporary ID
+        userId: userId,
+        serviceId: consultationService.id,
         clientId: userId,
         providerId: validatedData.lawyerId,
+        lawyerId: validatedData.lawyerId,
         scheduledAt: scheduledDateTime,
         status: 'PENDING',
+        clientRequirements: validatedData.description
       }
     });
 
