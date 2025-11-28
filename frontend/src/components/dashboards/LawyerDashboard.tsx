@@ -120,25 +120,25 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
 
   // Original dashboard for verified lawyers
   
-  const [stats] = useState({
-    activeClients: 24,
-    consultationsThisMonth: 18,
-    revenue: 245000,
-    completionRate: 94,
-    pendingConsultations: 5,
-    totalDocuments: 156,
+  const [stats, setStats] = useState({
+    activeClients: 0,
+    consultationsThisMonth: 0,
+    revenue: 0,
+    completionRate: 0,
+    pendingConsultations: 0,
+    totalDocuments: 0,
   });
 
-  // Tier usage state (would be fetched from /api/subscriptions/current)
+  // Tier usage state (fetched from lawyer profile)
   const [tierUsage, setTierUsage] = useState<TierUsage>({
-    currentTier: 'FREE', // Default to FREE, will be updated from API
+    currentTier: 'FREE',
     usage: {
-      bookings: { current: 1, limit: 2, percentage: 50 },
+      bookings: { current: 0, limit: 2, percentage: 0 },
       certifications: { current: 0, limit: 0, percentage: 0 },
       services: { current: 0, limit: 1, percentage: 0 },
-      specializations: { current: 1, limit: 1 },
+      specializations: { current: 0, limit: 2 },
     },
-    commissionRate: 0.50, // 50% for FREE tier
+    commissionRate: 0.50,
     pricingTier: 'ENTRY',
   });
 
@@ -148,35 +148,50 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const [showCertModal, setShowCertModal] = useState(false);
   const [showSavingsModal, setShowSavingsModal] = useState(false);
 
-  // Fetch tier usage on mount
+  // Fetch real lawyer data on mount
   useEffect(() => {
-    const fetchTierUsage = async () => {
+    const fetchLawyerData = async () => {
       try {
-        // TODO: Replace with actual API call to /api/subscriptions/current
-        // const response = await fetch('/api/subscriptions/current', {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
-        // const data = await response.json();
-        // setTierUsage(data);
-        
-        // Mock data for now - simulating LITE tier with high usage
-        setTierUsage({
-          currentTier: 'LITE',
-          usage: {
-            bookings: { current: 8, limit: 10, percentage: 80 },
-            certifications: { current: 3, limit: 5, percentage: 60 },
-            services: { current: 2, limit: 5, percentage: 40 },
-            specializations: { current: 2, limit: 2 },
-          },
-          commissionRate: 0.30,
-          pricingTier: 'STANDARD',
+        const response = await fetch('/api/lawyers/profile', {
+          headers: { 
+            Authorization: `Bearer ${localStorage.getItem('wakili-auth-storage') ? JSON.parse(localStorage.getItem('wakili-auth-storage')!).state?.accessToken : ''}`
+          }
         });
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          // Update tier usage based on actual lawyer profile
+          const profile = data.data;
+          const tier = profile.tier || 'FREE';
+          const specializationsCount = profile.specializations?.length || 0;
+          
+          // Set tier limits based on actual tier
+          const tierLimits = {
+            FREE: { bookings: 2, certifications: 0, services: 1, specializations: 2, commission: 0.50 },
+            LITE: { bookings: 10, certifications: 5, services: 5, specializations: 3, commission: 0.30 },
+            PRO: { bookings: 999, certifications: 999, services: 999, specializations: 10, commission: 0.15 }
+          };
+          
+          const limits = tierLimits[tier as keyof typeof tierLimits] || tierLimits.FREE;
+          
+          setTierUsage({
+            currentTier: tier as 'FREE' | 'LITE' | 'PRO',
+            usage: {
+              bookings: { current: 0, limit: limits.bookings, percentage: 0 },
+              certifications: { current: 0, limit: limits.certifications, percentage: 0 },
+              services: { current: 0, limit: limits.services, percentage: 0 },
+              specializations: { current: specializationsCount, limit: limits.specializations },
+            },
+            commissionRate: limits.commission,
+            pricingTier: tier === 'FREE' ? 'ENTRY' : tier === 'LITE' ? 'STANDARD' : 'PREMIUM',
+          });
+        }
       } catch (error) {
-        console.error('Failed to fetch tier usage:', error);
+        console.error('Failed to fetch lawyer data:', error);
       }
     };
 
-    fetchTierUsage();
+    fetchLawyerData();
   }, []);
 
   const handleUpgrade = () => {
@@ -216,66 +231,13 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
 
   const TierIcon = getTierIcon(tierUsage.currentTier);
 
-  const upcomingConsultations: Consultation[] = [
-    { 
-      id: '1', 
-      clientName: 'John Kamau', 
-      date: '2025-11-25', 
-      time: '10:00 AM', 
-      type: 'Contract Review',
-      status: 'upcoming',
-      fee: 15000
-    },
-    { 
-      id: '2', 
-      clientName: 'Mary Wanjiku', 
-      date: '2025-11-25', 
-      time: '2:00 PM', 
-      type: 'Court Representation',
-      status: 'upcoming',
-      fee: 35000
-    },
-    { 
-      id: '3', 
-      clientName: 'Peter Ochieng', 
-      date: '2025-11-26', 
-      time: '11:30 AM', 
-      type: 'Legal Consultation',
-      status: 'upcoming',
-      fee: 12000
-    },
-  ];
-
-  const recentClients: Client[] = [
-    { 
-      id: '1', 
-      name: 'Sarah Njeri', 
-      email: 'sarah.njeri@email.com', 
-      phone: '+254 712 345 678',
-      activeCase: 'Property Dispute',
-      lastContact: '2 hours ago'
-    },
-    { 
-      id: '2', 
-      name: 'David Otieno', 
-      email: 'david.otieno@email.com', 
-      phone: '+254 723 456 789',
-      activeCase: 'Business Formation',
-      lastContact: '1 day ago'
-    },
-    { 
-      id: '3', 
-      name: 'Grace Mwangi', 
-      email: 'grace.mwangi@email.com', 
-      phone: '+254 734 567 890',
-      activeCase: 'Employment Contract',
-      lastContact: '3 days ago'
-    },
-  ];
+  // Real data arrays - will be populated from API calls
+  const upcomingConsultations: Consultation[] = [];
+  const recentClients: Client[] = [];
 
   const performanceData = {
-    thisMonth: { consultations: 18, revenue: 245000 },
-    lastMonth: { consultations: 15, revenue: 198000 },
+    thisMonth: { consultations: stats.consultationsThisMonth, revenue: stats.revenue },
+    lastMonth: { consultations: 0, revenue: 0 },
   };
 
   const revenueChange = ((performanceData.thisMonth.revenue - performanceData.lastMonth.revenue) / performanceData.lastMonth.revenue * 100).toFixed(1);

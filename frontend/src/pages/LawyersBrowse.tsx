@@ -216,8 +216,8 @@ export const LawyersBrowse: React.FC = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState('All Specialties');
   const [selectedLocation, setSelectedLocation] = useState('All Locations');
   const [sortBy, setSortBy] = useState<'rating' | 'price' | 'experience'>('rating');
-  const [lawyers, setLawyers] = useState<Lawyer[]>(sampleLawyers);
-  const [loading, setLoading] = useState(false);
+  const [lawyers, setLawyers] = useState<Lawyer[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Fetch real lawyers from backend
   useEffect(() => {

@@ -67,9 +67,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick, onToggleCollapse, s
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center gap-2">
             <WakiliLogo size="sm" />
-            <span className="hidden sm:inline-block font-semibold text-slate-900 text-lg">
-              Wakili Pro
-            </span>
           </Link>
         </div>
 
