@@ -57,6 +57,7 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
     let targetId: string;
     let accountReference: string;
     let transactionDesc: string;
+    let actualBookingId: string | undefined;
 
     if (bookingId) {
       const booking = await prisma.serviceBooking.findUnique({
@@ -78,13 +79,38 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
       }
 
       targetId = bookingId;
+      actualBookingId = bookingId;
       accountReference = `BOOKING-${bookingId.substring(0, 8)}`;
       transactionDesc = 'Legal Consultation Payment';
     } else if (reviewId) {
-      // Validate document review exists
+      // For document reviews, we need to create or find a dummy booking
+      // since Payment model requires bookingId (non-optional field)
+      let dummyBooking = await prisma.serviceBooking.findFirst({
+        where: {
+          clientId: userId,
+          type: 'document-review-payment',
+        },
+      });
+
+      if (!dummyBooking) {
+        // Create a dummy booking for document payment tracking
+        dummyBooking = await prisma.serviceBooking.create({
+          data: {
+            clientId: userId,
+            lawyerId: 'system',
+            type: 'document-review-payment',
+            status: 'PENDING',
+            scheduledFor: new Date(),
+          },
+        });
+      }
+
       targetId = reviewId;
+      actualBookingId = dummyBooking.id;
       accountReference = `REVIEW-${reviewId.substring(0, 8)}`;
-      transactionDesc = 'Document Review Payment';
+      transactionDesc = paymentType === 'MARKETPLACE_PURCHASE' 
+        ? 'Legal Document Purchase'
+        : 'Document Review Payment';
     } else {
       return res.status(400).json({
         success: false,
@@ -96,7 +122,7 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
     const payment = await prisma.payment.create({
       data: {
         userId,
-        bookingId: bookingId || 'N/A', // Payment model requires bookingId
+        bookingId: actualBookingId,
         targetId,
         amount,
         type: 'DOCUMENT', // Use DOCUMENT type from PaymentType enum for all document-related payments
@@ -107,6 +133,8 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
           phoneNumber,
           accountReference,
           paymentType, // Store the specific payment type in metadata
+          isDocumentPayment: !!reviewId,
+          actualReviewId: reviewId,
         },
       },
     });
@@ -205,11 +233,31 @@ export const mpesaCallback = async (req: Request, res: Response) => {
       });
 
       // Update booking status if it's a booking payment
-      if (payment.bookingId && payment.bookingId !== 'N/A') {
+      const metadata = payment.metadata as any;
+      if (payment.bookingId && !metadata?.isDocumentPayment) {
         await prisma.serviceBooking.update({
           where: { id: payment.bookingId },
           data: { status: 'CONFIRMED' },
         });
+      } else if (metadata?.isDocumentPayment && metadata?.actualReviewId) {
+        // Update document review/purchase status
+        if (metadata.paymentType === 'MARKETPLACE_PURCHASE') {
+          await prisma.documentPurchase.update({
+            where: { id: metadata.actualReviewId },
+            data: { status: 'COMPLETED' },
+          });
+        } else {
+          // Update DocumentReview status if needed
+          const docReview = await prisma.documentReview.findUnique({
+            where: { id: metadata.actualReviewId },
+          });
+          if (docReview) {
+            await prisma.documentReview.update({
+              where: { id: metadata.actualReviewId },
+              data: { status: 'PAYMENT_VERIFIED' },
+            });
+          }
+        }
       }
 
       logger.info('Payment completed successfully:', {
