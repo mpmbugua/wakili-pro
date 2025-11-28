@@ -202,16 +202,16 @@ export const PublicLawyerProfile: React.FC = () => {
           Back to Lawyers
         </button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Profile Card */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden sticky top-20">
+        <div className="grid lg:grid-cols-12 gap-6">
+          {/* Left Column - Profile Card (Fixed, Sticky) */}
+          <div className="lg:col-span-4">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden sticky top-24">
               {/* Profile Image */}
-              <div className="relative">
+              <div className="relative h-72">
                 <img
                   src={imageUrl}
                   alt={lawyer.name}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-full object-cover"
                 />
                 {lawyer.isVerified && (
                   <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full flex items-center space-x-1 text-sm font-medium">
@@ -227,38 +227,38 @@ export const PublicLawyerProfile: React.FC = () => {
               </div>
 
               {/* Profile Info */}
-              <div className="p-6">
-                <h1 className="text-2xl font-bold text-slate-900 mb-2">{lawyer.name}</h1>
-                <p className="text-blue-600 font-medium mb-4">{lawyer.specialty}</p>
+              <div className="p-5">
+                <h1 className="text-xl font-bold text-slate-900 mb-1">{lawyer.name}</h1>
+                <p className="text-blue-600 font-medium mb-3 text-sm">{lawyer.specialty}</p>
 
                 {/* Rating */}
-                <div className="flex items-center mb-6 pb-6 border-b border-slate-200">
-                  <div className="flex items-center space-x-2">
-                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                    <span className="text-lg font-bold">{lawyer.rating.toFixed(1)}</span>
+                <div className="flex items-center mb-4 pb-4 border-b border-slate-200">
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                    <span className="text-base font-bold">{lawyer.rating.toFixed(1)}</span>
                   </div>
-                  <span className="text-slate-600 text-sm ml-2">
+                  <span className="text-slate-600 text-xs ml-2">
                     ({lawyer.reviewCount} {lawyer.reviewCount === 1 ? 'review' : 'reviews'})
                   </span>
                 </div>
 
                 {/* Consultation Fee */}
-                <div className="bg-blue-50 rounded-lg p-4 mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-600">Consultation Fee</span>
-                    <DollarSign className="h-5 w-5 text-blue-600" />
+                <div className="bg-blue-50 rounded-lg p-3 mb-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-slate-600 font-medium">Consultation Fee</span>
+                    <DollarSign className="h-4 w-4 text-blue-600" />
                   </div>
-                  <p className="text-2xl font-bold text-slate-900">
+                  <p className="text-xl font-bold text-slate-900">
                     KES {lawyer.consultationFee.toLocaleString()}
                   </p>
-                  <p className="text-xs text-slate-500 mt-1">per session</p>
+                  <p className="text-xs text-slate-500 mt-0.5">per session</p>
                 </div>
 
                 {/* Book Button */}
                 <button
                   onClick={handleBookConsultation}
                   disabled={!lawyer.isAvailable}
-                  className={`w-full py-3 rounded-lg font-semibold transition ${
+                  className={`w-full py-2.5 rounded-lg font-semibold text-sm transition ${
                     lawyer.isAvailable
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -270,9 +270,8 @@ export const PublicLawyerProfile: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column - Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* About */}
+          {/* Right Column - Details (Scrollable) */}
+          <div className="lg:col-span-8 space-y-6">{/* About */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold text-slate-900 mb-4">About</h2>
               <p className="text-slate-700 leading-relaxed">{lawyer.bio}</p>
