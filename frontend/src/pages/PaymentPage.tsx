@@ -24,6 +24,13 @@ interface DocumentPaymentDetails {
   templateId?: string;
 }
 
+interface ServiceRequestPayment {
+  serviceType: string;
+  price: number;
+  description: string;
+  serviceDetails?: any;
+}
+
 type PaymentMethod = 'card' | 'mpesa';
 
 export const PaymentPage: React.FC = () => {
@@ -32,8 +39,17 @@ export const PaymentPage: React.FC = () => {
   const { bookingId, reviewId } = useParams<{ bookingId?: string; reviewId?: string }>();
   const { isAuthenticated, user } = useAuthStore();
   
-  const bookingDetails = location.state as (BookingDetails | DocumentPaymentDetails) | null;
+  const bookingDetails = location.state as (BookingDetails | DocumentPaymentDetails | ServiceRequestPayment) | null;
   const isDocumentPayment = (bookingDetails && 'reviewId' in bookingDetails) || !!reviewId;
+  const isServiceRequest = bookingDetails && 'serviceType' in bookingDetails && bookingDetails.serviceType === 'service-request-commitment';
+  
+  // Safe price getter
+  const getPrice = () => {
+    if (!bookingDetails) return 0;
+    if ('price' in bookingDetails) return bookingDetails.price;
+    if ('fee' in bookingDetails) return bookingDetails.fee;
+    return 0;
+  };
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mpesa'); // Default to M-Pesa
   const [loading, setLoading] = useState(false);
@@ -303,7 +319,7 @@ export const PaymentPage: React.FC = () => {
                   </div>
                   <div className="flex justify-between border-t pt-2 mt-2">
                     <span className="text-slate-600">Amount Paid:</span>
-                    <span className="font-bold text-green-600">KES {(bookingDetails as DocumentPaymentDetails).price.toLocaleString()}</span>
+                    <span className="font-bold text-green-600">KES {getPrice().toLocaleString()}</span>
                   </div>
                 </>
               ) : (
@@ -322,7 +338,7 @@ export const PaymentPage: React.FC = () => {
                   </div>
                   <div className="flex justify-between border-t pt-2 mt-2">
                     <span className="text-slate-600">Amount Paid:</span>
-                    <span className="font-bold text-green-600">KES {(bookingDetails as BookingDetails).fee.toLocaleString()}</span>
+                    <span className="font-bold text-green-600">KES {getPrice().toLocaleString()}</span>
                   </div>
                 </>
               )}
@@ -398,7 +414,7 @@ export const PaymentPage: React.FC = () => {
                   <div className="border-t pt-4 bg-blue-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
                     <div className="flex justify-between items-center">
                       <span className="text-slate-900 font-semibold">Total Amount</span>
-                      <span className="text-2xl font-bold text-blue-600">KES {(bookingDetails as DocumentPaymentDetails).price.toLocaleString()}</span>
+                      <span className="text-2xl font-bold text-blue-600">KES {getPrice().toLocaleString()}</span>
                     </div>
                   </div>
                 </>
@@ -425,7 +441,7 @@ export const PaymentPage: React.FC = () => {
                   <div className="border-t pt-4 bg-blue-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
                     <div className="flex justify-between items-center">
                       <span className="text-slate-900 font-semibold">Total Amount</span>
-                      <span className="text-2xl font-bold text-blue-600">KES {(bookingDetails as BookingDetails).fee.toLocaleString()}</span>
+                      <span className="text-2xl font-bold text-blue-600">KES {getPrice().toLocaleString()}</span>
                     </div>
                   </div>
                 </>
@@ -644,12 +660,12 @@ export const PaymentPage: React.FC = () => {
                     {paymentMethod === 'mpesa' ? (
                       <>
                         <Smartphone className="inline h-5 w-5 mr-2" />
-                        Pay KES {(isDocumentPayment ? (bookingDetails as DocumentPaymentDetails).price : (bookingDetails as BookingDetails).fee).toLocaleString()} via M-Pesa
+                        Pay KES {getPrice().toLocaleString()} via M-Pesa
                       </>
                     ) : (
                       <>
                         <Lock className="inline h-5 w-5 mr-2" />
-                        Pay KES {(isDocumentPayment ? (bookingDetails as DocumentPaymentDetails).price : (bookingDetails as BookingDetails).fee).toLocaleString()}
+                        Pay KES {getPrice().toLocaleString()}
                       </>
                     )}
                   </>
