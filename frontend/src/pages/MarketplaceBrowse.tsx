@@ -815,24 +815,57 @@ export const MarketplaceBrowse: React.FC = () => {
                     )}
                     {previewDocument.category === 'Property' && (
                       <>
-                        <p><strong>LAND SALE AGREEMENT</strong></p>
-                        <p>This Agreement is made on _____ day of _________, 20___</p>
-                        <p><strong>BETWEEN:</strong></p>
-                        <p className="pl-4">Vendor: _________________________ ("Seller")</p>
-                        <p className="pl-4">Purchaser: _________________________ ("Buyer")</p>
-                        <p className="mt-4"><strong>1. PROPERTY DESCRIPTION</strong></p>
-                        <p className="pl-4">Land Reference No: _________________________</p>
-                        <p className="pl-4">Location: _________________________ County</p>
-                        <p className="pl-4">Size: _________ Acres/Hectares</p>
-                        <p className="mt-4"><strong>2. PURCHASE CONSIDERATION</strong></p>
-                        <p className="pl-4">Purchase Price: KES _________________________</p>
-                        <p className="pl-4">Deposit: KES _________ (payable upon signing)</p>
-                        <p className="pl-4">Balance: KES _________ (payable on completion)</p>
-                        <p className="mt-4"><strong>3. TITLE TRANSFER</strong></p>
-                        <p className="pl-4">3.1 Transfer of ownership within _____ days...</p>
-                        <p className="mt-4 text-slate-500 italic text-xs">
-                          [Includes: Encumbrances, Warranties, Vacant possession, Stamp duty provisions]
-                        </p>
+                        {previewDocument.title.includes('Rental') || previewDocument.title.includes('Tenancy') ? (
+                          <>
+                            <p><strong>RESIDENTIAL PROPERTY RENTAL AGREEMENT</strong></p>
+                            <p>This Agreement is made on _____ day of _________, 20___</p>
+                            <p><strong>BETWEEN:</strong></p>
+                            <p className="pl-4">Landlord: _________________________ ("Landlord")</p>
+                            <p className="pl-4">Tenant: _________________________ ("Tenant")</p>
+                            <p className="mt-4"><strong>1. PROPERTY DESCRIPTION</strong></p>
+                            <p className="pl-4">Address: _________________________</p>
+                            <p className="pl-4">Type: ☐ Apartment ☐ House ☐ Room</p>
+                            <p className="pl-4">Bedrooms: _____ Bathrooms: _____</p>
+                            <p className="mt-4"><strong>2. RENTAL TERMS</strong></p>
+                            <p className="pl-4">Monthly Rent: KES _________________________</p>
+                            <p className="pl-4">Security Deposit: KES _________________________</p>
+                            <p className="pl-4">Lease Period: ☐ Monthly ☐ 6 Months ☐ 1 Year</p>
+                            <p className="pl-4">Commencement Date: _________________________</p>
+                            <p className="mt-4"><strong>3. UTILITIES AND SERVICES</strong></p>
+                            <p className="pl-4">Water: ☐ Included ☐ Tenant pays</p>
+                            <p className="pl-4">Electricity: ☐ Included ☐ Tenant pays</p>
+                            <p className="pl-4">Garbage Collection: ☐ Included ☐ Tenant pays</p>
+                            <p className="mt-4"><strong>4. MAINTENANCE AND REPAIRS</strong></p>
+                            <p className="pl-4">4.1 Landlord responsible for: Structural repairs...</p>
+                            <p className="pl-4">4.2 Tenant responsible for: Day-to-day maintenance...</p>
+                            <p className="mt-4"><strong>5. NOTICE PERIOD</strong></p>
+                            <p className="pl-4">Termination Notice: _____ days written notice</p>
+                            <p className="mt-4 text-slate-500 italic text-xs">
+                              [Includes: Pet policy, Subletting restrictions, Entry rights, Renewal terms, Dispute resolution]
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p><strong>LAND SALE AGREEMENT</strong></p>
+                            <p>This Agreement is made on _____ day of _________, 20___</p>
+                            <p><strong>BETWEEN:</strong></p>
+                            <p className="pl-4">Vendor: _________________________ ("Seller")</p>
+                            <p className="pl-4">Purchaser: _________________________ ("Buyer")</p>
+                            <p className="mt-4"><strong>1. PROPERTY DESCRIPTION</strong></p>
+                            <p className="pl-4">Land Reference No: _________________________</p>
+                            <p className="pl-4">Location: _________________________ County</p>
+                            <p className="pl-4">Size: _________ Acres/Hectares</p>
+                            <p className="mt-4"><strong>2. PURCHASE CONSIDERATION</strong></p>
+                            <p className="pl-4">Purchase Price: KES _________________________</p>
+                            <p className="pl-4">Deposit: KES _________ (payable upon signing)</p>
+                            <p className="pl-4">Balance: KES _________ (payable on completion)</p>
+                            <p className="mt-4"><strong>3. TITLE TRANSFER</strong></p>
+                            <p className="pl-4">3.1 Transfer of ownership within _____ days...</p>
+                            <p className="mt-4 text-slate-500 italic text-xs">
+                              [Includes: Encumbrances, Warranties, Vacant possession, Stamp duty provisions]
+                            </p>
+                          </>
+                        )}
                       </>
                     )}
                     {previewDocument.category === 'Family Law' && (
