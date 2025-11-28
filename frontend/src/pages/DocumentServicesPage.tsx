@@ -123,6 +123,8 @@ const DocumentServicesPage: React.FC = () => {
       setUploadedFile(null);
     }
   };
+
+  const handleFileSelect = (file: File) => {
     if (file.size > 20 * 1024 * 1024) {
       alert('File size must be less than 20MB');
       return;
