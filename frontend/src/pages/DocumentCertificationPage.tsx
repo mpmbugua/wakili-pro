@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 import {
   FileCheck,
   AlertCircle,
@@ -24,7 +25,7 @@ interface PendingCertification {
 }
 
 const DocumentCertificationPage: React.FC = () => {
-  const token = localStorage.getItem('token');
+  const { accessToken } = useAuthStore();
   const [queue, setQueue] = useState<PendingCertification[]>([]);
   const [loading, setLoading] = useState(true);
   const [certifying, setCertifying] = useState<string | null>(null);
@@ -40,7 +41,7 @@ const DocumentCertificationPage: React.FC = () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/certification/queue`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${accessToken}`
         }
       });
 
@@ -68,7 +69,7 @@ const DocumentCertificationPage: React.FC = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/certification/certify`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

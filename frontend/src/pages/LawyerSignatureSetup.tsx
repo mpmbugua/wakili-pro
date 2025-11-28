@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SignatureCanvas from 'react-signature-canvas';
 import { Upload, Trash2, Save, CheckCircle, AlertCircle, FileText, Stamp } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
 
 interface LawyerLetterhead {
   signatureUrl?: string;
@@ -16,7 +17,7 @@ interface LawyerLetterhead {
 }
 
 const LawyerSignatureSetup: React.FC = () => {
-  const token = localStorage.getItem('token');
+  const { accessToken } = useAuthStore();
   
   const signatureCanvasRef = useRef<any>(null);
   const [letterhead, setLetterhead] = useState<LawyerLetterhead | null>(null);

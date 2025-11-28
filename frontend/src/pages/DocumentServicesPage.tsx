@@ -14,7 +14,7 @@ interface UploadedFile {
 
 const DocumentServicesPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, accessToken } = useAuthStore();
   const [selectedService, setSelectedService] = useState<ServiceType>(null);
   const [documentSource, setDocumentSource] = useState<DocumentSource>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -152,7 +152,6 @@ const DocumentServicesPage: React.FC = () => {
         });
       }, 200);
 
-      const token = localStorage.getItem('token');
       const endpoint = selectedService === 'ai-review'
         ? '/document-review/external/ai-review'
         : '/document-review/certification';
@@ -160,7 +159,7 @@ const DocumentServicesPage: React.FC = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${accessToken}`
         },
         body: formData
       });
