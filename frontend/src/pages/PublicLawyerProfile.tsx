@@ -257,9 +257,7 @@ export const PublicLawyerProfile: React.FC = () => {
           </div>
 
           {/* Right Column - Details */}
-          <div className="lg:col-span-2 space-y-6">{/* About */}
-            <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">{/* About */}
-            <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+          <div className="lg:col-span-2 space-y-6">
             {/* About */}
             <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
               <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center">
