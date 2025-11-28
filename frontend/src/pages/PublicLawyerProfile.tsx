@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { WakiliLogo } from '../components/ui/WakiliLogo';
 import axiosInstance from '../lib/axios';
 import {
   MapPin,
@@ -132,20 +132,38 @@ export const PublicLawyerProfile: React.FC = () => {
 
   if (loading) {
     return (
-      <GlobalLayout>
+      <div className="min-h-screen bg-slate-50">
+        {/* Simple Header */}
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <Link to="/" className="inline-block">
+              <WakiliLogo size="md" variant="full" />
+            </Link>
+          </div>
+        </header>
+
         <div className="max-w-5xl mx-auto px-4 py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-slate-600">Loading lawyer profile...</p>
           </div>
         </div>
-      </GlobalLayout>
+      </div>
     );
   }
 
   if (error || !lawyer) {
     return (
-      <GlobalLayout>
+      <div className="min-h-screen bg-slate-50">
+        {/* Simple Header */}
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <Link to="/" className="inline-block">
+              <WakiliLogo size="md" variant="full" />
+            </Link>
+          </div>
+        </header>
+
         <div className="max-w-5xl mx-auto px-4 py-12">
           <div className="text-center">
             <p className="text-red-600 mb-4">{error || 'Lawyer not found'}</p>
@@ -157,7 +175,7 @@ export const PublicLawyerProfile: React.FC = () => {
             </button>
           </div>
         </div>
-      </GlobalLayout>
+      </div>
     );
   }
 
@@ -165,9 +183,17 @@ export const PublicLawyerProfile: React.FC = () => {
     `https://ui-avatars.com/api/?name=${lawyer.firstName}+${lawyer.lastName}&background=3b82f6&color=fff&size=400`;
 
   return (
-    <GlobalLayout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
+    <div className="min-h-screen bg-slate-50">
+      {/* Simple Header */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Link to="/" className="inline-block">
+            <WakiliLogo size="md" variant="full" />
+          </Link>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{/* Back Button */}
         <button
           onClick={() => navigate('/lawyers')}
           className="flex items-center text-blue-600 hover:text-blue-700 mb-6 font-medium"
@@ -356,7 +382,7 @@ export const PublicLawyerProfile: React.FC = () => {
           </div>
         </div>
       </div>
-    </GlobalLayout>
+    </div>
   );
 };
 
