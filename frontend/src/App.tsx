@@ -26,6 +26,8 @@ import LawyerWalletPage from './pages/LawyerWalletPage';
 import LawyerQuoteSubmissionPage from './pages/LawyerQuoteSubmissionPage';
 import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import ServiceTrackingPage from './pages/ServiceTrackingPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { HelpPage } from './pages/HelpPage';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
 import { AdminLawyerApproval } from './pages/admin/AdminLawyerApproval';
 import AdminWithdrawalManagement from './pages/admin/AdminWithdrawalManagement';
@@ -252,6 +254,22 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <LawyerProfileSettings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <SettingsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/help" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <HelpPage />
                 </ProtectedRoute>
               } 
             />
