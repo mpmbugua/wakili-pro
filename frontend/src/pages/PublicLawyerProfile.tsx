@@ -208,8 +208,8 @@ export const PublicLawyerProfile: React.FC = () => {
             {/* Left Column - Profile Card (Fixed, Sticky) */}
             <div className="lg:col-span-4">
               <div className="bg-white rounded-lg shadow-md overflow-hidden sticky top-6">
-              {/* Profile Image */}
-              <div className="relative h-72">
+                {/* Profile Image */}
+                <div className="relative h-72">
                 <img
                   src={imageUrl}
                   alt={lawyer.name}
