@@ -30,7 +30,7 @@ export const ResourcesPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axiosInstance.get('/api/articles/published?limit=6');
+      const response = await axiosInstance.get('/articles/published?limit=6');
       
       if (response.data.success) {
         setArticles(response.data.data.articles || []);

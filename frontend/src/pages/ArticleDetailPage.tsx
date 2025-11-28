@@ -39,7 +39,7 @@ export const ArticleDetailPage: React.FC = () => {
   const fetchArticle = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`/api/articles/${id}`);
+      const response = await axiosInstance.get(`/articles/${id}`);
       
       if (response.data.success) {
         setArticle(response.data.data);

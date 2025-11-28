@@ -38,7 +38,7 @@ export const PublicDashboard: React.FC<PublicDashboardProps> = ({ user }) => {
     const fetchDashboardData = async () => {
       try {
         // Fetch consultations
-        const response = await axiosInstance.get('/api/consultations/my-consultations');
+        const response = await axiosInstance.get('/consultations/my-consultations');
         if (response.data.success) {
           const consultations = response.data.data as Consultation[];
           

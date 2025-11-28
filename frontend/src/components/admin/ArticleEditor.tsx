@@ -53,7 +53,7 @@ export const ArticleEditor: React.FC<ArticleEditorProps> = ({ articleId, onSave,
 
   const loadArticle = async () => {
     try {
-      const response = await axiosInstance.get(`/api/articles/${articleId}`);
+      const response = await axiosInstance.get(`/articles/${articleId}`);
       if (response.data.success && response.data.data) {
         const article = response.data.data;
         setFormData({
