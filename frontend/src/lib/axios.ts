@@ -3,6 +3,11 @@ import axios from 'axios';
 // Use environment variable for API URL in production
 const baseURL = import.meta.env.VITE_API_URL || 'https://wakili-pro.onrender.com/api';
 
+console.log('🔧 Axios Configuration:');
+console.log('   VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('   Base URL:', baseURL);
+console.log('   Mode:', import.meta.env.MODE);
+
 const axiosInstance = axios.create({
   baseURL,
   withCredentials: true,
@@ -14,6 +19,9 @@ const axiosInstance = axios.create({
 // Add request interceptor to attach auth token
 axiosInstance.interceptors.request.use(
   (config) => {
+    console.log('📤 API Request:', config.method?.toUpperCase(), config.url);
+    console.log('   Full URL:', config.baseURL + config.url);
+    
     // Get token from localStorage (zustand persist storage)
     const authStorage = localStorage.getItem('wakili-auth-storage');
     console.log('Auth storage:', authStorage ? 'Found' : 'Not found');
