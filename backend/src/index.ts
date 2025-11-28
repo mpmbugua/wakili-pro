@@ -293,6 +293,10 @@ app.use('/api/service-requests', serviceRequestRouter);
 import consultationsRouter from './routes/consultations';
 app.use('/api/consultations', consultationsRouter);
 
+// Mount wallet routes
+import walletRouter from './routes/wallet';
+app.use('/api/wallet', walletRouter);
+
 // Mount document review routes
 import documentReviewRouter from './routes/documentReview';
 app.use('/api/document-review', documentReviewRouter);
@@ -362,6 +366,13 @@ app.listen(port, host, () => {
   console.log(`🌍 Health check: http://${host}:${port}/health`);
   console.log(`📡 API root: http://${host}:${port}/api`);
   console.log(`🎯 Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Start scheduled jobs
+  import('./services/scheduledJobs').then(({ ScheduledJobs }) => {
+    ScheduledJobs.startAll();
+  }).catch((error) => {
+    console.error('❌ Failed to start scheduled jobs:', error);
+  });
 });
 
 // Start legal scraper scheduler

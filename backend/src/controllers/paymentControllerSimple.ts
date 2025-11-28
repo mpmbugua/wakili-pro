@@ -17,29 +17,42 @@ export type { AuthRequest };
 
 export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
   try {
-    const { paymentMethod, bookingId, amount, provider } = req.body;
+    const { paymentMethod, bookingId, reviewId, amount, provider } = req.body;
+    
+    // Determine if this is a document payment or booking payment
+    const isDocumentPayment = !!reviewId;
+    const paymentKey = isDocumentPayment ? reviewId : bookingId;
+    
     // Simple in-memory rate limit for test
     if (!global.__rateLimitMap) global.__rateLimitMap = {};
     const now = Date.now();
-    if (!global.__rateLimitMap[bookingId]) global.__rateLimitMap[bookingId] = [];
-    global.__rateLimitMap[bookingId] = global.__rateLimitMap[bookingId].filter(ts => now - ts < 1000);
-    global.__rateLimitMap[bookingId].push(now);
-    if (global.__rateLimitMap[bookingId].length > 1) {
+    if (!global.__rateLimitMap[paymentKey]) global.__rateLimitMap[paymentKey] = [];
+    global.__rateLimitMap[paymentKey] = global.__rateLimitMap[paymentKey].filter(ts => now - ts < 1000);
+    global.__rateLimitMap[paymentKey].push(now);
+    if (global.__rateLimitMap[paymentKey].length > 1) {
       return res.status(429).json({ success: false, message: 'Rate limit exceeded' });
     }
 
-    // Validate booking ownership and amount
-    // Find booking in DB
-    const booking = await prisma.serviceBooking.findUnique({ where: { id: bookingId } });
-    if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found' });
+    // Validate booking or document review ownership
+    if (isDocumentPayment) {
+      // For document reviews, validate the review exists and belongs to user
+      const review = await prisma.documentReview.findUnique({ where: { id: reviewId } });
+      if (!review) {
+        return res.status(404).json({ success: false, message: 'Document review not found' });
+      }
+      if (review.userId !== req.user?.id) {
+        return res.status(403).json({ success: false, message: 'Not authorized to pay for this review' });
+      }
+    } else {
+      // For bookings, validate booking exists and belongs to user
+      const booking = await prisma.serviceBooking.findUnique({ where: { id: bookingId } });
+      if (!booking) {
+        return res.status(404).json({ success: false, message: 'Booking not found' });
+      }
+      if (booking.clientId !== req.user?.id) {
+        return res.status(403).json({ success: false, message: 'Not authorized to pay for this booking' });
+      }
     }
-    if (booking.clientId !== req.user?.id) {
-      return res.status(403).json({ success: false, message: 'Not authorized to pay for this booking' });
-    }
-    // if (typeof amount === 'number' && amount !== booking.totalAmountKES) {
-    //   return res.status(400).json({ success: false, message: 'amount does not match booking' });
-    // }
 
     // Simulate payment processor down if Jest mock is set up in test
     // Simulate payment processor downtime first
@@ -66,7 +79,18 @@ export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
     // Try database rollback mock
     try {
       if (typeof jest !== 'undefined' && typeof jest.isMockFunction === 'function' && jest.isMockFunction(prisma.payment.create)) {
-        await prisma.payment.create({ data: { bookingId, userId: req.user?.id, amount: 0, method: provider || paymentMethod, status: 'PENDING' } });
+        const paymentData: any = { 
+          userId: req.user?.id, 
+          amount: 0, 
+          method: provider || paymentMethod, 
+          status: 'PENDING' 
+        };
+        if (isDocumentPayment) {
+          paymentData.reviewId = reviewId;
+        } else {
+          paymentData.bookingId = bookingId;
+        }
+        await prisma.payment.create({ data: paymentData });
       }
     } catch (err: unknown) {
       if (

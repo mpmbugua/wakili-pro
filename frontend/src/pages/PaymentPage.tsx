@@ -29,7 +29,7 @@ type PaymentMethod = 'card' | 'mpesa';
 export const PaymentPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { bookingId } = useParams<{ bookingId: string }>();
+  const { bookingId, reviewId } = useParams<{ bookingId?: string; reviewId?: string }>();
   const { isAuthenticated, user } = useAuthStore();
   
   const bookingDetails = location.state as (BookingDetails | DocumentPaymentDetails) | null;
@@ -55,6 +55,7 @@ export const PaymentPage: React.FC = () => {
     console.log('PaymentPage mounted');
     console.log('isAuthenticated:', isAuthenticated);
     console.log('bookingId:', bookingId);
+    console.log('reviewId:', reviewId);
     console.log('bookingDetails:', bookingDetails);
     
     if (!isAuthenticated) {
@@ -63,12 +64,12 @@ export const PaymentPage: React.FC = () => {
       return;
     }
     
-    // Only redirect if we have neither bookingDetails nor bookingId
-    if (!bookingDetails && !bookingId) {
-      console.log('No booking details or ID, redirecting to lawyers');
+    // Only redirect if we have neither bookingDetails, bookingId, nor reviewId
+    if (!bookingDetails && !bookingId && !reviewId) {
+      console.log('No booking details, booking ID, or review ID, redirecting to lawyers');
       navigate('/lawyers');
     }
-  }, [isAuthenticated, bookingDetails, bookingId, navigate]);
+  }, [isAuthenticated, bookingDetails, bookingId, reviewId, navigate]);
 
   const formatCardNumber = (value: string) => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
