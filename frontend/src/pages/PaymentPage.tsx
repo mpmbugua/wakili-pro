@@ -225,7 +225,7 @@ export const PaymentPage: React.FC = () => {
               }
             };
 
-        const paymentIntent = await axiosInstance.post('/payments/create-intent', paymentIntentData);
+        const paymentIntent = await axiosInstance.post('/payments/intent', paymentIntentData);
 
         if (!paymentIntent.data.success) {
           throw new Error(paymentIntent.data.message || 'Failed to create payment intent');
