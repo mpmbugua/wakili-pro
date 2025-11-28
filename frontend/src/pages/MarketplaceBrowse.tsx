@@ -453,20 +453,16 @@ export const MarketplaceBrowse: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'popular' | 'price-low' | 'price-high' | 'rating'>('popular');
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
-  const [purchasingDocument, setPurchasingDocument] = useState<Document | null>(null);
 
   // Check for pending purchase after login/registration
   useEffect(() => {
     const pendingPurchase = sessionStorage.getItem('pendingPurchase');
     if (pendingPurchase && isAuthenticated) {
       try {
-        const { docId } = JSON.parse(pendingPurchase);
-        const doc = sampleDocuments.find(d => d.id === docId);
-        if (doc) {
-          // Auto-trigger purchase for this document
-          setPurchasingDocument(doc);
-          sessionStorage.removeItem('pendingPurchase');
-        }
+        const { docId, docTitle } = JSON.parse(pendingPurchase);
+        sessionStorage.removeItem('pendingPurchase');
+        // Auto-trigger purchase for this document
+        handlePurchaseDocument(docId, docTitle);
       } catch (error) {
         console.error('Error parsing pending purchase:', error);
         sessionStorage.removeItem('pendingPurchase');
@@ -490,15 +486,40 @@ export const MarketplaceBrowse: React.FC = () => {
       return 0;
     });
 
-  const handlePurchaseDocument = (docId: string, docTitle: string) => {
+  const handlePurchaseDocument = async (docId: string, docTitle: string) => {
     if (!isAuthenticated) {
       sessionStorage.setItem('pendingPurchase', JSON.stringify({ docId, docTitle }));
       navigate('/login', { state: { from: '/marketplace', message: 'Please log in to purchase documents' } });
     } else {
-      // Find the document and show purchase confirmation
+      // Find the document and initiate purchase directly
       const doc = sampleDocuments.find(d => d.id === docId);
       if (doc) {
-        setPurchasingDocument(doc);
+        try {
+          // Create purchase record in backend first
+          const response = await axiosInstance.post('/documents/marketplace/purchase', {
+            templateId: doc.id,
+            documentTitle: doc.title,
+            price: doc.price
+          });
+
+          if (response.data.success) {
+            // Navigate directly to payment page with purchase details
+            navigate(`/payment/document/${response.data.data.purchaseId}`, {
+              state: {
+                reviewId: response.data.data.purchaseId,
+                documentType: doc.title,
+                serviceType: 'marketplace-purchase',
+                price: doc.price,
+                fileName: doc.title,
+              }
+            });
+          } else {
+            alert(response.data.message || 'Failed to initiate purchase');
+          }
+        } catch (error: any) {
+          console.error('Purchase initiation error:', error);
+          alert(error.response?.data?.message || 'Failed to initiate purchase. Please try again.');
+        }
       }
     }
   };
@@ -909,80 +930,6 @@ export const MarketplaceBrowse: React.FC = () => {
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Purchase Confirmation Modal */}
-      {purchasingDocument && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">Confirm Purchase</h3>
-            <div className="mb-6">
-              <p className="text-slate-700 font-medium mb-2">{purchasingDocument.title}</p>
-              <p className="text-sm text-slate-600 mb-4">{purchasingDocument.description}</p>
-              <div className="bg-slate-50 rounded-lg p-4 mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-slate-600">Document Price</span>
-                  <span className="font-semibold text-slate-900">KES {purchasingDocument.price.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-600">Format</span>
-                  <span className="font-semibold text-slate-900">{purchasingDocument.format}</span>
-                </div>
-              </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                <p className="text-xs text-blue-700 text-center font-medium">
-                  💳 Choose your payment method on the next page
-                </p>
-                <p className="text-xs text-blue-600 text-center mt-1">
-                  M-Pesa or Credit/Debit Card
-                </p>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setPurchasingDocument(null)}
-                className="flex-1 px-4 py-3 border-2 border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-100 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={async () => {
-                  if (purchasingDocument) {
-                    try {
-                      // Create purchase record in backend first
-                      const response = await axiosInstance.post('/documents/marketplace/purchase', {
-                        templateId: purchasingDocument.id,
-                        documentTitle: purchasingDocument.title,
-                        price: purchasingDocument.price
-                      });
-
-                      if (response.data.success) {
-                        // Redirect to payment page with purchase details
-                        navigate(`/payment/document/${response.data.data.purchaseId}`, {
-                          state: {
-                            reviewId: response.data.data.purchaseId,
-                            documentType: purchasingDocument.title,
-                            serviceType: 'marketplace-purchase',
-                            price: purchasingDocument.price,
-                            fileName: purchasingDocument.title,
-                          }
-                        });
-                      } else {
-                        alert(response.data.message || 'Failed to initiate purchase');
-                    }
-                  } catch (error: any) {
-                      console.error('Purchase initiation error:', error);
-                      alert(error.response?.data?.message || 'Failed to initiate purchase. Please try again.');
-                    }
-                  }
-                }}
-                className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
-              >
-                Continue to Payment
-              </button>
             </div>
           </div>
         </div>
