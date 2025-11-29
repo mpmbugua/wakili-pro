@@ -239,8 +239,8 @@ model UserDocument {
   fileSize    Int
   fileName    String
   mimeType    String
-  status      DocumentStatus @default(DRAFT)
-  source      DocumentSource @default(UPLOADED)
+  status      DocumentStatus
+  source      DocumentSource
   templateId  String?
   uploadedAt  DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
