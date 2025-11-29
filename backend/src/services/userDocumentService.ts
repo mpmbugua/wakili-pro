@@ -280,7 +280,7 @@ export const requestDocumentReview = async (
         documentSource: DocumentOrigin.EXTERNAL,
         uploadedDocumentUrl: document.fileUrl,
         originalFileName: document.fileName,
-        documentType: document.type,
+        documentType: String(document.type), // Convert enum to string
         reviewType: reviewType as ReviewType,
         urgency: UrgencyLevel.STANDARD,
         deadline: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
