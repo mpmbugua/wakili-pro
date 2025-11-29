@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { uploadProfilePhoto, isValidImageType } from '../services/fileUploadService';
 
 const prisma = new PrismaClient();
 
@@ -24,20 +25,35 @@ export const uploadPhoto = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
 
-    // Convert buffer to base64 data URL for storage
-    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    // Validate image type
+    if (!isValidImageType(req.file.mimetype)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid file type. Only JPEG, PNG, GIF, WebP, and SVG images are allowed'
+      });
+      return;
+    }
 
-    // Update user profile with photo
+    // Upload to Cloudinary
+    const uploadResult = await uploadProfilePhoto(
+      req.file.buffer,
+      req.file.originalname,
+      userId
+    );
+
+    // Update user profile with Cloudinary URL
     await prisma.user.update({
       where: { id: userId },
-      data: { profileImageUrl: base64Image }
+      data: { profileImageUrl: uploadResult.url }
     });
 
     res.json({
       success: true,
       message: 'Photo uploaded successfully',
       data: {
-        url: base64Image
+        url: uploadResult.url,
+        publicId: uploadResult.publicId,
+        fileSize: uploadResult.fileSize
       }
     });
   } catch (error) {

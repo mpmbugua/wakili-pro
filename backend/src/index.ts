@@ -18,16 +18,6 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 
-// Serve uploaded files
-app.use('/uploads/profile-photos', express.static(path.join(__dirname, '../storage/profile-photos')));
-app.use('/uploads/document-reviews', express.static(path.join(__dirname, '../storage/document-reviews')));
-app.use('/uploads/lawyer-signatures', express.static(path.join(__dirname, '../storage/lawyer-signatures')));
-app.use('/uploads/lawyer-stamps', express.static(path.join(__dirname, '../storage/lawyer-stamps')));
-app.use('/uploads/letterheads', express.static(path.join(__dirname, '../storage/letterheads')));
-app.use('/uploads/certified-documents', express.static(path.join(__dirname, '../storage/certified-documents')));
-app.use('/uploads/certificates', express.static(path.join(__dirname, '../storage/certificates')));
-app.use('/uploads/qr-codes', express.static(path.join(__dirname, '../storage/qr-codes')));
-
 // Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {
   const mem = process.memoryUsage();

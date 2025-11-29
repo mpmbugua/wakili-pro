@@ -3,8 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middleware/auth';
 import type { ApiResponse, UserRole } from '@wakili-pro/shared';
 import { LawyerOnboardingSchema, UpdateAvailabilitySchema } from '@wakili-pro/shared';
-import fs from 'fs/promises';
-import path from 'path';
+import { uploadProfilePhoto as uploadToCloudinary, isValidImageType } from '../services/fileUploadService';
 
 const prisma = new PrismaClient();
 
@@ -485,21 +484,17 @@ export const uploadProfilePhoto = async (req: AuthenticatedRequest, res: Respons
       return;
     }
 
-    // Check file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    if (!allowedTypes.includes(file.mimetype)) {
-      // Delete the uploaded file
-      await fs.unlink(file.path);
+    // Validate image type
+    if (!isValidImageType(file.mimetype)) {
       res.status(400).json({
         success: false,
-        message: 'Invalid file type. Only JPEG, PNG, and GIF images are allowed.'
+        message: 'Invalid file type. Only JPEG, PNG, GIF, WebP, and SVG images are allowed.'
       });
       return;
     }
 
     // Check file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      await fs.unlink(file.path);
       res.status(400).json({
         success: false,
         message: 'File too large. Maximum size is 5MB.'
@@ -507,25 +502,17 @@ export const uploadProfilePhoto = async (req: AuthenticatedRequest, res: Respons
       return;
     }
 
-    // For now, we'll store the file locally and return a relative URL
-    // In production, you'd upload to cloud storage (Cloudinary, AWS S3, etc.)
-    const uploadsDir = path.join(__dirname, '../../storage/profile-photos');
-    await fs.mkdir(uploadsDir, { recursive: true });
+    // Upload to Cloudinary
+    const uploadResult = await uploadToCloudinary(
+      file.buffer,
+      file.originalname,
+      userId
+    );
 
-    const fileExtension = path.extname(file.originalname);
-    const fileName = `${userId}-${Date.now()}${fileExtension}`;
-    const filePath = path.join(uploadsDir, fileName);
-
-    // Move file from temp location to permanent storage
-    await fs.rename(file.path, filePath);
-
-    // Generate URL (adjust based on your server setup)
-    const profileImageUrl = `/uploads/profile-photos/${fileName}`;
-
-    // Update lawyer profile with new image URL
+    // Update lawyer profile with Cloudinary URL
     const updatedProfile = await prisma.lawyerProfile.update({
       where: { userId },
-      data: { profileImageUrl },
+      data: { profileImageUrl: uploadResult.url },
       include: {
         user: {
           select: {
@@ -542,20 +529,14 @@ export const uploadProfilePhoto = async (req: AuthenticatedRequest, res: Respons
       success: true,
       message: 'Profile photo uploaded successfully',
       data: {
-        profileImageUrl,
+        profileImageUrl: uploadResult.url,
+        publicId: uploadResult.publicId,
+        fileSize: uploadResult.fileSize,
         profile: updatedProfile
       }
     });
   } catch (error) {
     console.error('Upload profile photo error:', error);
-    // Clean up file if it exists
-    if (req.file) {
-      try {
-        await fs.unlink(req.file.path);
-      } catch (unlinkError) {
-        console.error('Error deleting file:', unlinkError);
-      }
-    }
     res.status(500).json({
       success: false,
       message: 'Internal server error while uploading profile photo'

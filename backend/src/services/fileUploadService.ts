@@ -115,3 +115,153 @@ export const isValidFileSize = (fileSize: number): boolean => {
   const maxSize = 20 * 1024 * 1024; // 20MB
   return fileSize <= maxSize;
 };
+
+/**
+ * Validate image file type (for profile photos, signatures, stamps)
+ * @param mimeType - File MIME type
+ * @returns True if valid image
+ */
+export const isValidImageType = (mimeType: string): boolean => {
+  const allowedTypes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/svg+xml',
+  ];
+  return allowedTypes.includes(mimeType);
+};
+
+/**
+ * Validate video file type (for consultations, recordings)
+ * @param mimeType - File MIME type
+ * @returns True if valid video
+ */
+export const isValidVideoType = (mimeType: string): boolean => {
+  const allowedTypes = [
+    'video/mp4',
+    'video/webm',
+    'video/ogg',
+    'video/quicktime',
+  ];
+  return allowedTypes.includes(mimeType);
+};
+
+/**
+ * Upload profile photo to Cloudinary
+ */
+export const uploadProfilePhoto = async (
+  fileBuffer: Buffer,
+  fileName: string,
+  userId: string
+): Promise<UploadResult> => {
+  return uploadToCloudinary(fileBuffer, fileName, `wakili-pro/profile-photos/${userId}`);
+};
+
+/**
+ * Upload lawyer signature to Cloudinary
+ */
+export const uploadSignature = async (
+  fileBuffer: Buffer,
+  fileName: string,
+  lawyerId: string
+): Promise<UploadResult> => {
+  return uploadToCloudinary(fileBuffer, fileName, `wakili-pro/lawyer-signatures/${lawyerId}`);
+};
+
+/**
+ * Upload lawyer stamp to Cloudinary
+ */
+export const uploadStamp = async (
+  fileBuffer: Buffer,
+  fileName: string,
+  lawyerId: string
+): Promise<UploadResult> => {
+  return uploadToCloudinary(fileBuffer, fileName, `wakili-pro/lawyer-stamps/${lawyerId}`);
+};
+
+/**
+ * Upload lawyer letterhead to Cloudinary
+ */
+export const uploadLetterhead = async (
+  fileBuffer: Buffer,
+  fileName: string,
+  lawyerId: string
+): Promise<UploadResult> => {
+  return uploadToCloudinary(fileBuffer, fileName, `wakili-pro/letterheads/${lawyerId}`);
+};
+
+/**
+ * Upload certificate to Cloudinary
+ */
+export const uploadCertificate = async (
+  fileBuffer: Buffer,
+  fileName: string,
+  userId: string
+): Promise<UploadResult> => {
+  return uploadToCloudinary(fileBuffer, fileName, `wakili-pro/certificates/${userId}`);
+};
+
+/**
+ * Upload QR code to Cloudinary
+ */
+export const uploadQRCode = async (
+  fileBuffer: Buffer,
+  fileName: string,
+  documentId: string
+): Promise<UploadResult> => {
+  return uploadToCloudinary(fileBuffer, fileName, `wakili-pro/qr-codes/${documentId}`);
+};
+
+/**
+ * Upload video recording to Cloudinary
+ */
+export const uploadVideoRecording = async (
+  fileBuffer: Buffer,
+  fileName: string,
+  consultationId: string
+): Promise<UploadResult> => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: `wakili-pro/video-recordings/${consultationId}`,
+        resource_type: 'video',
+        public_id: `${Date.now()}-${fileName.replace(/\.[^/.]+$/, '')}`,
+        use_filename: true,
+        unique_filename: true,
+        chunk_size: 6000000, // 6MB chunks for large videos
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary video upload error:', error);
+          reject(new Error('Failed to upload video to cloud storage'));
+        } else if (result) {
+          resolve({
+            url: result.secure_url,
+            publicId: result.public_id,
+            fileName: fileName,
+            fileSize: result.bytes,
+            mimeType: result.format || 'video/mp4',
+          });
+        }
+      }
+    );
+
+    const readableStream = new Readable();
+    readableStream.push(fileBuffer);
+    readableStream.push(null);
+    readableStream.pipe(uploadStream);
+  });
+};
+
+/**
+ * Upload document review file to Cloudinary
+ */
+export const uploadDocumentReview = async (
+  fileBuffer: Buffer,
+  fileName: string,
+  reviewId: string
+): Promise<UploadResult> => {
+  return uploadToCloudinary(fileBuffer, fileName, `wakili-pro/document-reviews/${reviewId}`);
+};

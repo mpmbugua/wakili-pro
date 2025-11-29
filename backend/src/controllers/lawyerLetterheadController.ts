@@ -1,8 +1,7 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middleware/auth';
-import fs from 'fs/promises';
-import path from 'path';
+import { uploadSignature as uploadSignatureToCloudinary, uploadStamp as uploadStampToCloudinary, isValidImageType, deleteFromCloudinary } from '../services/fileUploadService';
 
 const prisma = new PrismaClient();
 
@@ -31,15 +30,19 @@ export const uploadSignature = async (req: AuthenticatedRequest, res: Response):
       return;
     }
 
-    // Move file to permanent storage
-    const signaturesDir = path.join(__dirname, '../../storage/lawyer-signatures');
-    await fs.mkdir(signaturesDir, { recursive: true });
+    // Validate image type
+    if (!isValidImageType(file.mimetype)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid file type. Only PNG, JPEG, and JPG images are allowed.'
+      });
+      return;
+    }
 
-    const fileName = `signature-${userId}-${Date.now()}.png`;
-    const filePath = path.join(signaturesDir, fileName);
-    await fs.rename(file.path, filePath);
+    // Upload to Cloudinary
+    const uploadResult = await uploadSignatureToCloudinary(file.buffer, file.originalname, userId);
 
-    const signatureUrl = `/uploads/lawyer-signatures/${fileName}`;
+    const signatureUrl = uploadResult.url;
 
     // Update or create letterhead
     const letterhead = await prisma.lawyerLetterhead.upsert({
@@ -61,19 +64,12 @@ export const uploadSignature = async (req: AuthenticatedRequest, res: Response):
       success: true,
       message: 'Signature uploaded successfully',
       data: {
-        signatureUrl: letterhead.signatureUrl
+        signatureUrl: letterhead.signatureUrl,
+        publicId: uploadResult.publicId
       }
     });
   } catch (error) {
     console.error('Upload signature error:', error);
-    // Clean up file if exists
-    if (req.file) {
-      try {
-        await fs.unlink(req.file.path);
-      } catch (unlinkError) {
-        console.error('Error deleting file:', unlinkError);
-      }
-    }
     res.status(500).json({
       success: false,
       message: 'Failed to upload signature'
@@ -106,15 +102,19 @@ export const uploadStamp = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
 
-    // Move file to permanent storage
-    const stampsDir = path.join(__dirname, '../../storage/lawyer-stamps');
-    await fs.mkdir(stampsDir, { recursive: true });
+    // Validate image type
+    if (!isValidImageType(file.mimetype)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid file type. Only PNG, JPEG, and JPG images are allowed.'
+      });
+      return;
+    }
 
-    const fileName = `stamp-${userId}-${Date.now()}.png`;
-    const filePath = path.join(stampsDir, fileName);
-    await fs.rename(file.path, filePath);
+    // Upload to Cloudinary
+    const uploadResult = await uploadStampToCloudinary(file.buffer, file.originalname, userId);
 
-    const stampUrl = `/uploads/lawyer-stamps/${fileName}`;
+    const stampUrl = uploadResult.url;
 
     // Update or create letterhead
     const letterhead = await prisma.lawyerLetterhead.upsert({
@@ -136,19 +136,12 @@ export const uploadStamp = async (req: AuthenticatedRequest, res: Response): Pro
       success: true,
       message: 'Stamp uploaded successfully',
       data: {
-        stampUrl: letterhead.stampUrl
+        stampUrl: letterhead.stampUrl,
+        publicId: uploadResult.publicId
       }
     });
   } catch (error) {
     console.error('Upload stamp error:', error);
-    // Clean up file if exists
-    if (req.file) {
-      try {
-        await fs.unlink(req.file.path);
-      } catch (unlinkError) {
-        console.error('Error deleting file:', unlinkError);
-      }
-    }
     res.status(500).json({
       success: false,
       message: 'Failed to upload stamp'
