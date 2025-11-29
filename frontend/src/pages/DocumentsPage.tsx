@@ -257,11 +257,10 @@ export const DocumentsPage: React.FC = () => {
         amount: selection.totalPrice
       });
 
-      // Validate documentId is a valid UUID
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (!selectedDocument.id || typeof selectedDocument.id !== 'string' || !uuidRegex.test(selectedDocument.id)) {
+      // Validate documentId exists and is a non-empty string
+      if (!selectedDocument.id || typeof selectedDocument.id !== 'string' || selectedDocument.id.trim() === '') {
         console.error('[DocumentsPage] Invalid document ID:', selectedDocument.id);
-        alert(`Invalid document ID format: "${selectedDocument.id}". Please upload the document again.`);
+        alert(`Invalid document ID. Please try uploading the document again.`);
         return;
       }
 
