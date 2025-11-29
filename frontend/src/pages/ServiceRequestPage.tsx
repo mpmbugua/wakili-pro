@@ -222,8 +222,10 @@ export const ServiceRequestPage: React.FC = () => {
         feeEstimate
       }));
       
-      // Navigate to payment page for commitment fee
-      navigate('/payment/service-request', {
+      // Show success message - payment integration coming soon
+      alert(`Service request submitted!\nCommitment Fee: KES 500\n\nPayment integration for service requests will be available soon.\nWe will contact you to proceed with your request.`);
+      navigate('/dashboard');
+      /*navigate('/payment/service-request', {
         state: {
           serviceType: 'service-request-commitment',
           price: 500,
@@ -234,7 +236,7 @@ export const ServiceRequestPage: React.FC = () => {
             estimatedFee: feeEstimate?.estimatedFee
           }
         }
-      });
+      });*/
       return;
     }
 

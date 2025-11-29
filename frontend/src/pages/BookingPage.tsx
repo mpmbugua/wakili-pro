@@ -80,27 +80,10 @@ export const BookingPage: React.FC = () => {
       console.log('Booking response:', response.data);
 
       if (response.data.success) {
-        // Redirect to payment page instead of showing success
+        // Show success message - consultation payment integration coming soon
         const booking = response.data.data;
-        console.log('Navigating to payment with booking:', booking);
-        
-        const paymentState = {
-          id: booking.id,
-          lawyerName: lawyerName || booking.lawyerName,
-          lawyerPhoto,
-          lawyerSpecialty: lawyerSpecialty,
-          date: formData.date,
-          time: formData.time,
-          consultationType: formData.consultationType,
-          fee: lawyerRate,
-        };
-        
-        console.log('Payment state:', paymentState);
-        console.log('Navigation path:', `/payment/${booking.id}`);
-        
-        navigate(`/payment/${booking.id}`, {
-          state: paymentState
-        });
+        alert(`Consultation booked successfully!\n\nLawyer: ${lawyerName}\nDate: ${formData.date}\nTime: ${formData.time}\nFee: KES ${lawyerRate}\n\nPayment link will be sent to you via email/SMS.`);
+        navigate('/dashboard');
       }
     } catch (err: any) {
       console.error('Booking error:', err);

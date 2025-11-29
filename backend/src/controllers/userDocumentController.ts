@@ -93,6 +93,8 @@ export const getDocuments = async (req: AuthenticatedRequest, res: Response) => 
       });
     }
 
+    console.log('[UserDocuments] Getting documents for user:', userId);
+
     const { status, type, search } = req.query;
 
     const result = await getUserDocuments(userId, {
@@ -101,7 +103,12 @@ export const getDocuments = async (req: AuthenticatedRequest, res: Response) => 
       search: search as string | undefined,
     });
 
-    res.json(result);
+    console.log('[UserDocuments] Found', result.data?.length, 'documents');
+    if (result.data && result.data.length > 0) {
+      console.log('[UserDocuments] First document ID:', result.data[0].id, 'Type:', typeof result.data[0].id);
+    }
+
+    res.status(200).json(result);
   } catch (error: any) {
     console.error('Get documents controller error:', error);
     res.status(500).json({

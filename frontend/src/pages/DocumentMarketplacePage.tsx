@@ -58,7 +58,10 @@ const DocumentMarketplacePage: React.FC = () => {
       toast.dismiss();
       
       // Redirect to payment page with document purchase details
-      navigate(`/payment/document/${result.purchase.id}`, {
+      // Show success message instead of navigating to deleted payment page
+      alert(`Purchase initiated! Document will be available after payment integration is complete.`);
+      navigate('/documents');
+      /*navigate(`/payment/document/${result.purchase.id}`, {
         state: {
           reviewId: result.purchase.id,
           documentType: template.name,

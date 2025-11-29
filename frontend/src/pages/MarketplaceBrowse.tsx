@@ -503,16 +503,9 @@ export const MarketplaceBrowse: React.FC = () => {
           });
 
           if (response.data.success) {
-            // Navigate directly to payment page with purchase details
-            navigate(`/payment/document/${response.data.data.purchaseId}`, {
-              state: {
-                reviewId: response.data.data.purchaseId,
-                documentType: doc.title,
-                serviceType: 'marketplace-purchase',
-                price: doc.price,
-                fileName: doc.title,
-              }
-            });
+            // Show success message and redirect to documents
+            alert(`Purchase initiated! Document: ${doc.title}\nPrice: KES ${doc.price}\n\nMarketplace purchases will be available after payment integration is complete.`);
+            navigate('/documents');
           } else {
             alert(response.data.message || 'Failed to initiate purchase');
           }
