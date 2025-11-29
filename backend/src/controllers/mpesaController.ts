@@ -83,30 +83,10 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
       accountReference = `BOOKING-${bookingId.substring(0, 8)}`;
       transactionDesc = 'Legal Consultation Payment';
     } else if (reviewId) {
-      // For document reviews, we need to create or find a dummy booking
-      // since Payment model requires bookingId (non-optional field)
-      let dummyBooking = await prisma.serviceBooking.findFirst({
-        where: {
-          clientId: userId,
-          type: 'document-review-payment',
-        },
-      });
-
-      if (!dummyBooking) {
-        // Create a dummy booking for document payment tracking
-        dummyBooking = await prisma.serviceBooking.create({
-          data: {
-            clientId: userId,
-            lawyerId: 'system',
-            type: 'document-review-payment',
-            status: 'PENDING',
-            scheduledFor: new Date(),
-          },
-        });
-      }
-
+      // For document reviews, payment doesn't require a booking
+      // The Payment model has optional bookingId field
       targetId = reviewId;
-      actualBookingId = dummyBooking.id;
+      actualBookingId = null; // Payment can exist without a booking
       accountReference = `REVIEW-${reviewId.substring(0, 8)}`;
       transactionDesc = paymentType === 'MARKETPLACE_PURCHASE' 
         ? 'Legal Document Purchase'
