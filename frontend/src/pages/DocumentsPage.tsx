@@ -167,7 +167,11 @@ export const DocumentsPage: React.FC = () => {
         },
       });
 
+      console.log('[DocumentsPage] Upload response:', response.data);
+
       if (response.data.success) {
+        console.log('[DocumentsPage] Document uploaded successfully, ID:', response.data.data?.id);
+        
         // Refresh documents list
         await fetchDocuments();
         
@@ -254,9 +258,10 @@ export const DocumentsPage: React.FC = () => {
       });
 
       // Validate documentId is a valid UUID
-      if (!selectedDocument.id || typeof selectedDocument.id !== 'string') {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!selectedDocument.id || typeof selectedDocument.id !== 'string' || !uuidRegex.test(selectedDocument.id)) {
         console.error('[DocumentsPage] Invalid document ID:', selectedDocument.id);
-        alert('Invalid document selected. Please try again.');
+        alert(`Invalid document ID format: "${selectedDocument.id}". Please upload the document again.`);
         return;
       }
 
