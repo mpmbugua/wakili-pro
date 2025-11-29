@@ -118,7 +118,7 @@ ALTER TYPE "UrgencyLevel" ADD VALUE IF NOT EXISTS 'STANDARD';
 ALTER TYPE "UrgencyLevel" ADD VALUE IF NOT EXISTS 'ECONOMY';
 
 -- CreateTable
-CREATE TABLE "UserDocument" (
+CREATE TABLE IF NOT EXISTS "UserDocument" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -139,7 +139,7 @@ CREATE TABLE "UserDocument" (
 );
 
 -- CreateTable
-CREATE TABLE "DocumentReview" (
+CREATE TABLE IF NOT EXISTS "DocumentReview" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "lawyerId" TEXT,
@@ -189,7 +189,7 @@ CREATE TABLE "DocumentReview" (
 );
 
 -- CreateTable
-CREATE TABLE "LawyerLetterhead" (
+CREATE TABLE IF NOT EXISTS "LawyerLetterhead" (
     "id" TEXT NOT NULL,
     "lawyerId" TEXT NOT NULL,
     "letterheadUrl" TEXT NOT NULL,
@@ -212,58 +212,94 @@ CREATE TABLE "LawyerLetterhead" (
 );
 
 -- CreateIndex
-CREATE INDEX "UserDocument_userId_idx" ON "UserDocument"("userId");
+CREATE INDEX IF NOT EXISTS "UserDocument_userId_idx" ON "UserDocument"("userId");
 
 -- CreateIndex
-CREATE INDEX "UserDocument_status_idx" ON "UserDocument"("status");
+CREATE INDEX IF NOT EXISTS "UserDocument_status_idx" ON "UserDocument"("status");
 
 -- CreateIndex
-CREATE INDEX "UserDocument_type_idx" ON "UserDocument"("type");
+CREATE INDEX IF NOT EXISTS "UserDocument_type_idx" ON "UserDocument"("type");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "DocumentReview_certificateId_key" ON "DocumentReview"("certificateId");
+CREATE UNIQUE INDEX IF NOT EXISTS "DocumentReview_certificateId_key" ON "DocumentReview"("certificateId");
 
 -- CreateIndex
-CREATE INDEX "DocumentReview_userId_idx" ON "DocumentReview"("userId");
+CREATE INDEX IF NOT EXISTS "DocumentReview_userId_idx" ON "DocumentReview"("userId");
 
 -- CreateIndex
-CREATE INDEX "DocumentReview_lawyerId_idx" ON "DocumentReview"("lawyerId");
+CREATE INDEX IF NOT EXISTS "DocumentReview_lawyerId_idx" ON "DocumentReview"("lawyerId");
 
 -- CreateIndex
-CREATE INDEX "DocumentReview_aiReviewStatus_idx" ON "DocumentReview"("aiReviewStatus");
+CREATE INDEX IF NOT EXISTS "DocumentReview_aiReviewStatus_idx" ON "DocumentReview"("aiReviewStatus");
 
 -- CreateIndex
-CREATE INDEX "DocumentReview_certificationStatus_idx" ON "DocumentReview"("certificationStatus");
+CREATE INDEX IF NOT EXISTS "DocumentReview_certificationStatus_idx" ON "DocumentReview"("certificationStatus");
 
 -- CreateIndex
-CREATE INDEX "DocumentReview_qualityControlStatus_idx" ON "DocumentReview"("qualityControlStatus");
+CREATE INDEX IF NOT EXISTS "DocumentReview_qualityControlStatus_idx" ON "DocumentReview"("qualityControlStatus");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "LawyerLetterhead_lawyerId_key" ON "LawyerLetterhead"("lawyerId");
+CREATE UNIQUE INDEX IF NOT EXISTS "LawyerLetterhead_lawyerId_key" ON "LawyerLetterhead"("lawyerId");
 
 -- AddForeignKey
-ALTER TABLE "UserDocument" ADD CONSTRAINT "UserDocument_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'UserDocument_userId_fkey') THEN
+        ALTER TABLE "UserDocument" ADD CONSTRAINT "UserDocument_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "UserDocument" ADD CONSTRAINT "UserDocument_templateId_fkey" FOREIGN KEY ("templateId") REFERENCES "DocumentTemplate"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'UserDocument_templateId_fkey') THEN
+        ALTER TABLE "UserDocument" ADD CONSTRAINT "UserDocument_templateId_fkey" FOREIGN KEY ("templateId") REFERENCES "DocumentTemplate"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'DocumentReview_userId_fkey') THEN
+        ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_lawyerId_fkey" FOREIGN KEY ("lawyerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'DocumentReview_lawyerId_fkey') THEN
+        ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_lawyerId_fkey" FOREIGN KEY ("lawyerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_marketplaceDocumentId_fkey" FOREIGN KEY ("marketplaceDocumentId") REFERENCES "DocumentTemplate"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'DocumentReview_marketplaceDocumentId_fkey') THEN
+        ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_marketplaceDocumentId_fkey" FOREIGN KEY ("marketplaceDocumentId") REFERENCES "DocumentTemplate"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_qualityCheckedBy_fkey" FOREIGN KEY ("qualityCheckedBy") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'DocumentReview_qualityCheckedBy_fkey') THEN
+        ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_qualityCheckedBy_fkey" FOREIGN KEY ("qualityCheckedBy") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_userDocumentId_fkey" FOREIGN KEY ("userDocumentId") REFERENCES "UserDocument"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'DocumentReview_userDocumentId_fkey') THEN
+        ALTER TABLE "DocumentReview" ADD CONSTRAINT "DocumentReview_userDocumentId_fkey" FOREIGN KEY ("userDocumentId") REFERENCES "UserDocument"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "LawyerLetterhead" ADD CONSTRAINT "LawyerLetterhead_lawyerId_fkey" FOREIGN KEY ("lawyerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'LawyerLetterhead_lawyerId_fkey') THEN
+        ALTER TABLE "LawyerLetterhead" ADD CONSTRAINT "LawyerLetterhead_lawyerId_fkey" FOREIGN KEY ("lawyerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+    END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "LawyerLetterhead" ADD CONSTRAINT "LawyerLetterhead_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'LawyerLetterhead_approvedBy_fkey') THEN
+        ALTER TABLE "LawyerLetterhead" ADD CONSTRAINT "LawyerLetterhead_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+    END IF;
+END $$;
