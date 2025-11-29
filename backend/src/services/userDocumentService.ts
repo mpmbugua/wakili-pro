@@ -68,7 +68,9 @@ export const uploadUserDocument = async (data: CreateDocumentData) => {
     };
   } catch (error) {
     console.error('Upload user document error:', error);
-    throw new Error('Failed to upload document');
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    throw error;
   }
 };
 
