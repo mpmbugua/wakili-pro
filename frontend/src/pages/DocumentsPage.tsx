@@ -248,20 +248,40 @@ export const DocumentsPage: React.FC = () => {
     }
 
     try {
+      // Fetch the file as a blob to bypass CORS and authentication issues
+      const response = await fetch(doc.fileUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf,application/octet-stream',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to download: ${response.status}`);
+      }
+
+      // Create a blob from the response
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+      
       // Create a temporary anchor element to trigger download
       const link = window.document.createElement('a');
-      link.href = doc.fileUrl;
-      link.download = doc.title; // Suggest filename
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
+      link.href = blobUrl;
+      link.download = doc.title || 'document.pdf';
       
       // Append to body, click, and remove
       window.document.body.appendChild(link);
       link.click();
       window.document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error('Error downloading document:', error);
-      // Fallback to opening in new tab
+      // Fallback: just open in new tab
+      alert('Direct download failed. Opening document in new tab instead.');
       window.open(doc.fileUrl, '_blank');
     }
   };
