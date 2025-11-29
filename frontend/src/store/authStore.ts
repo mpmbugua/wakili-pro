@@ -136,12 +136,16 @@ export const useAuthStore = create<AuthStore>()(
         try {
           const { refreshToken } = get();
           
+          console.log('[AuthStore] Logging out, refreshToken:', refreshToken ? 'exists' : 'none');
+          
           if (refreshToken) {
             await authService.logout(refreshToken);
           }
         } catch (error) {
-          console.error('Logout error:', error);
+          console.error('[AuthStore] Logout API error:', error);
         } finally {
+          console.log('[AuthStore] Clearing all storage...');
+          
           // Clear all auth-related items from localStorage
           localStorage.removeItem('wakili-auth-storage');
           localStorage.removeItem('token');
@@ -151,6 +155,8 @@ export const useAuthStore = create<AuthStore>()(
           // Clear sessionStorage as well
           sessionStorage.clear();
           
+          console.log('[AuthStore] Setting state to logged out...');
+          
           // Clear state
           set({
             user: null,
@@ -159,6 +165,8 @@ export const useAuthStore = create<AuthStore>()(
             isAuthenticated: false,
             error: null
           });
+          
+          console.log('[AuthStore] Logout complete');
         }
       },
 

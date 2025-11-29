@@ -52,8 +52,19 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Redirect to login on unauthorized
-      window.location.href = '/login';
+      // Check if this is a logout endpoint - don't redirect
+      const isLogoutRequest = error.config?.url?.includes('/logout');
+      
+      if (!isLogoutRequest) {
+        // Clear auth storage
+        localStorage.removeItem('wakili-auth-storage');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        
+        // Redirect to home page on unauthorized
+        window.location.href = '/';
+      }
     }
     return Promise.reject(error);
   }
