@@ -271,14 +271,8 @@ export const DocumentsPage: React.FC = () => {
       alert('Document URL not available');
       return;
     }
-    // For PDFs, use Google Docs viewer for better in-browser experience
-    if (doc.fileUrl.toLowerCase().endsWith('.pdf')) {
-      const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.fileUrl)}&embedded=true`;
-      window.open(viewerUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      // For other file types, open directly
-      window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
-    }
+    // Open document directly in new tab - works best for Cloudinary URLs
+    window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
   };
 
   const filteredDocuments = documents.filter(doc => {
