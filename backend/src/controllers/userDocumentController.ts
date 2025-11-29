@@ -214,12 +214,12 @@ export const requestReview = async (req: AuthenticatedRequest, res: Response) =>
     }
 
     const { id } = req.params;
-    const { reviewType } = req.body; // 'AI_REVIEW' or 'CERTIFICATION'
+    const { reviewType } = req.body; // 'AI_ONLY', 'CERTIFICATION', or 'AI_PLUS_CERTIFICATION'
 
-    if (!reviewType || !['AI_REVIEW', 'CERTIFICATION'].includes(reviewType)) {
+    if (!reviewType || !['AI_ONLY', 'CERTIFICATION', 'AI_PLUS_CERTIFICATION'].includes(reviewType)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid review type',
+        message: 'Invalid review type. Must be AI_ONLY, CERTIFICATION, or AI_PLUS_CERTIFICATION',
       });
     }
 

@@ -251,7 +251,7 @@ export const deleteDocument = async (documentId: string, userId: string) => {
 export const requestDocumentReview = async (
   documentId: string,
   userId: string,
-  reviewType: 'AI_REVIEW' | 'CERTIFICATION'
+  reviewType: 'AI_ONLY' | 'CERTIFICATION' | 'AI_PLUS_CERTIFICATION'
 ) => {
   try {
     const document = await prisma.userDocument.findFirst({
@@ -284,7 +284,7 @@ export const requestDocumentReview = async (
         reviewType: reviewType as any,
         urgency: 'STANDARD' as any,
         deadline: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-        price: reviewType === 'AI_REVIEW' ? 500 : 3000,
+        price: reviewType === 'AI_ONLY' ? 500 : reviewType === 'AI_PLUS_CERTIFICATION' ? 3500 : 3000,
       },
     });
 
