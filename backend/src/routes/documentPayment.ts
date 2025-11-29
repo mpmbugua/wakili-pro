@@ -6,6 +6,8 @@ import { mpesaService } from '../services/payment/mpesaService';
 import { flutterwaveService } from '../services/payment/flutterwaveService';
 import * as documentReviewPricingService from '../services/documentReviewPricingService';
 import { authenticateToken as authenticate } from '../middleware/auth';
+import { reviewDocumentWithAI } from '../services/documentAIReview';
+import { assignLawyerToDocumentReview } from '../services/lawyerAssignmentService';
 
 const router = Router();
 
@@ -467,7 +469,16 @@ async function createDocumentReviewRequest(payment: any): Promise<void> {
       urgency = 'EXPRESS'; // Map emergency to express
     }
 
-    await prisma.documentReview.create({
+    // Get document details for AI review
+    const userDocument = await prisma.userDocument.findUnique({
+      where: { id: metadata.documentId }
+    });
+
+    if (!userDocument) {
+      throw new Error('User document not found');
+    }
+
+    const documentReview = await prisma.documentReview.create({
       data: {
         userId: payment.userId,
         userDocumentId: metadata.documentId,
@@ -480,13 +491,45 @@ async function createDocumentReviewRequest(payment: any): Promise<void> {
         paymentId: payment.id,
         paidAt: new Date(),
         deadline: deliveryEstimate.estimatedDate,
-        estimatedDeliveryDate: deliveryEstimate.estimatedDate
+        estimatedDeliveryDate: deliveryEstimate.estimatedDate,
+        uploadedDocumentUrl: userDocument.uploadUrl,
+        originalFileName: userDocument.title
       }
     });
 
-    console.log('Document review created for payment:', payment.id);
+    console.log('[DocumentPayment] Document review created for payment:', payment.id);
+
+    // Trigger AI review if service includes AI analysis
+    if (reviewType === 'AI_ONLY' || reviewType === 'AI_PLUS_CERTIFICATION') {
+      console.log('[DocumentPayment] Triggering AI review for:', documentReview.id);
+      
+      // Trigger asynchronously - don't wait for completion
+      reviewDocumentWithAI(
+        documentReview.id,
+        userDocument.uploadUrl,
+        userDocument.documentType || 'GENERAL',
+        null
+      ).catch(err => console.error('[DocumentPayment] AI review trigger error:', err));
+    }
+
+    // Assign lawyer if service includes certification
+    if (reviewType === 'CERTIFICATION' || reviewType === 'AI_PLUS_CERTIFICATION') {
+      console.log('[DocumentPayment] Assigning lawyer for:', documentReview.id);
+      
+      // For AI_PLUS_CERTIFICATION, wait for AI review to complete before assigning lawyer
+      if (reviewType === 'AI_PLUS_CERTIFICATION') {
+        // Lawyer will be assigned after AI review completes
+        console.log('[DocumentPayment] Lawyer assignment will occur after AI review completion');
+      } else {
+        // Immediate lawyer assignment for CERTIFICATION only
+        assignLawyerToDocumentReview(documentReview.id)
+          .catch(err => console.error('[DocumentPayment] Lawyer assignment error:', err));
+      }
+    }
+
+    console.log('[DocumentPayment] Post-payment workflow initiated successfully');
   } catch (error: any) {
-    console.error('Failed to create document review:', error);
+    console.error('[DocumentPayment] Failed to create document review:', error);
   }
 }
 

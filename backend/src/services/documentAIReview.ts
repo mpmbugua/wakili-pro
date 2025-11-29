@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs/promises';
 import path from 'path';
+import { assignLawyerToDocumentReview } from './lawyerAssignmentService';
 
 const prisma = new PrismaClient();
 
@@ -80,6 +81,17 @@ export const reviewDocumentWithAI = async (
     });
 
     console.log(`AI review completed for document ${reviewId}`);
+
+    // If this review also requires certification, assign lawyer now
+    const review = await prisma.documentReview.findUnique({
+      where: { id: reviewId }
+    });
+
+    if (review && review.reviewType === 'AI_PLUS_CERTIFICATION') {
+      console.log(`[AIReview] Review requires certification, assigning lawyer for: ${reviewId}`);
+      assignLawyerToDocumentReview(reviewId)
+        .catch(err => console.error('[AIReview] Lawyer assignment error:', err));
+    }
   } catch (error) {
     console.error('AI review error:', error);
     
