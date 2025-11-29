@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SignatureCanvas from 'react-signature-canvas';
 import { Upload, Trash2, Save, CheckCircle, AlertCircle, FileText, Stamp } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
+import axiosInstance from '../lib/axios';
 
 interface LawyerLetterhead {
   signatureUrl?: string;
@@ -17,8 +17,6 @@ interface LawyerLetterhead {
 }
 
 const LawyerSignatureSetup: React.FC = () => {
-  const { accessToken } = useAuthStore();
-  
   const signatureCanvasRef = useRef<any>(null);
   const [letterhead, setLetterhead] = useState<LawyerLetterhead | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,24 +41,18 @@ const LawyerSignatureSetup: React.FC = () => {
 
   const fetchLetterhead = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
+      const response = await axiosInstance.get('/lawyer/letterhead');
       
-      if (data.success) {
-        setLetterhead(data.data);
-        setFirmName(data.data.firmName || '');
-        setFirmAddress(data.data.firmAddress || '');
-        setFirmPhone(data.data.firmPhone || '');
-        setFirmEmail(data.data.firmEmail || '');
-        setLicenseNumber(data.data.licenseNumber || '');
-        setCertificatePrefix(data.data.certificatePrefix || 'WP');
-        if (data.data.stampUrl) {
-          setStampPreview(`${import.meta.env.VITE_API_URL}${data.data.stampUrl}`);
+      if (response.data.success) {
+        setLetterhead(response.data.data);
+        setFirmName(response.data.data.firmName || '');
+        setFirmAddress(response.data.data.firmAddress || '');
+        setFirmPhone(response.data.data.firmPhone || '');
+        setFirmEmail(response.data.data.firmEmail || '');
+        setLicenseNumber(response.data.data.licenseNumber || '');
+        setCertificatePrefix(response.data.data.certificatePrefix || 'WP');
+        if (response.data.data.stampUrl) {
+          setStampPreview(response.data.data.stampUrl);
         }
       }
     } catch (error) {
@@ -90,26 +82,22 @@ const LawyerSignatureSetup: React.FC = () => {
       const formData = new FormData();
       formData.append('signature', blob, 'signature.png');
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/signature`, {
-        method: 'POST',
+      const response = await axiosInstance.post('/lawyer/letterhead/signature', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         setMessage({ type: 'success', text: 'Signature saved successfully!' });
         fetchLetterhead();
         signatureCanvasRef.current?.clear();
       } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to save signature' });
+        setMessage({ type: 'error', text: response.data.message || 'Failed to save signature' });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving signature:', error);
-      setMessage({ type: 'error', text: 'Failed to save signature' });
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to save signature' });
     } finally {
       setSaving(false);
     }
@@ -140,26 +128,22 @@ const LawyerSignatureSetup: React.FC = () => {
       const formData = new FormData();
       formData.append('stamp', stampFile);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/stamp`, {
-        method: 'POST',
+      const response = await axiosInstance.post('/lawyer/letterhead/stamp', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         setMessage({ type: 'success', text: 'Stamp uploaded successfully!' });
         fetchLetterhead();
         setStampFile(null);
       } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to upload stamp' });
+        setMessage({ type: 'error', text: response.data.message || 'Failed to upload stamp' });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading stamp:', error);
-      setMessage({ type: 'error', text: 'Failed to upload stamp' });
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to upload stamp' });
     } finally {
       setSaving(false);
     }
@@ -175,33 +159,24 @@ const LawyerSignatureSetup: React.FC = () => {
     setMessage(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/details`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          firmName,
-          firmAddress,
-          firmPhone,
-          firmEmail,
-          licenseNumber,
-          certificatePrefix
-        })
+      const response = await axiosInstance.put('/lawyer/letterhead/details', {
+        firmName,
+        firmAddress,
+        firmPhone,
+        firmEmail,
+        licenseNumber,
+        certificatePrefix
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         setMessage({ type: 'success', text: 'Details saved successfully!' });
         fetchLetterhead();
       } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to save details' });
+        setMessage({ type: 'error', text: response.data.message || 'Failed to save details' });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving details:', error);
-      setMessage({ type: 'error', text: 'Failed to save details' });
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to save details' });
     } finally {
       setSaving(false);
     }
@@ -212,22 +187,15 @@ const LawyerSignatureSetup: React.FC = () => {
 
     setSaving(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/signature`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await axiosInstance.delete('/lawyer/letterhead/signature');
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         setMessage({ type: 'success', text: 'Signature deleted successfully' });
         fetchLetterhead();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting signature:', error);
-      setMessage({ type: 'error', text: 'Failed to delete signature' });
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to delete signature' });
     } finally {
       setSaving(false);
     }
@@ -238,23 +206,16 @@ const LawyerSignatureSetup: React.FC = () => {
 
     setSaving(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/lawyer/letterhead/stamp`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await axiosInstance.delete('/lawyer/letterhead/stamp');
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         setMessage({ type: 'success', text: 'Stamp deleted successfully' });
         setStampPreview(null);
         fetchLetterhead();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting stamp:', error);
-      setMessage({ type: 'error', text: 'Failed to delete stamp' });
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to delete stamp' });
     } finally {
       setSaving(false);
     }

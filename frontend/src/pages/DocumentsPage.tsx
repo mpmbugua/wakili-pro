@@ -32,8 +32,10 @@ export const DocumentsPage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetchDocuments();
-  }, []);
+    if (user) {
+      fetchDocuments();
+    }
+  }, [user]);
 
   const fetchDocuments = async () => {
     try {
@@ -88,7 +90,14 @@ export const DocumentsPage: React.FC = () => {
   };
 
   const getTypeIcon = (type: Document['type']) => {
-    return <FileText className="h-10 w-10 text-blue-600" />;
+    const colors = {
+      CONTRACT: 'text-blue-600',
+      AGREEMENT: 'text-purple-600',
+      CERTIFICATE: 'text-green-600',
+      COURT_FILING: 'text-red-600',
+      OTHER: 'text-gray-600'
+    };
+    return <FileText className={`h-10 w-10 ${colors[type] || colors.OTHER}`} />;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -166,7 +175,7 @@ export const DocumentsPage: React.FC = () => {
 
       // Call API to update document status
       await axiosInstance.post(`/user-documents/${documentId}/request-review`, {
-        reviewType: 'AI_REVIEW',
+        reviewType: 'AI_ONLY',
       });
 
       // Navigate to document services page for payment
@@ -182,6 +191,30 @@ export const DocumentsPage: React.FC = () => {
       // Revert optimistic update on error
       await fetchDocuments();
       alert('Failed to request review. Please try again.');
+    }
+  };
+
+  const handleDelete = async (documentId: string) => {
+    if (!window.confirm('Are you sure you want to delete this document?')) {
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.delete(`/user-documents/${documentId}`);
+      if (response.data.success) {
+        setDocuments(prev => prev.filter(doc => doc.id !== documentId));
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Failed to delete document. Please try again.');
+    }
+  };
+
+  const handleDownload = (document: Document) => {
+    if (document.fileUrl) {
+      window.open(document.fileUrl, '_blank');
+    } else {
+      alert('Document URL not available');
     }
   };
 
@@ -299,13 +332,25 @@ export const DocumentsPage: React.FC = () => {
 
               <div className="flex items-center justify-between pt-4 border-t border-slate-200">
                 <div className="flex space-x-2">
-                  <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition" title="View">
+                  <button 
+                    onClick={() => handleDownload(document)}
+                    className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition" 
+                    title="View"
+                  >
                     <Eye className="h-5 w-5" />
                   </button>
-                  <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition" title="Download">
+                  <button 
+                    onClick={() => handleDownload(document)}
+                    className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition" 
+                    title="Download"
+                  >
                     <Download className="h-5 w-5" />
                   </button>
-                  <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+                  <button 
+                    onClick={() => handleDelete(document.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" 
+                    title="Delete"
+                  >
                     <Trash2 className="h-5 w-5" />
                   </button>
                 </div>
