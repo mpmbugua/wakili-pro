@@ -45,11 +45,18 @@ export const uploadToCloudinary = async (
   return new Promise((resolve, reject) => {
     console.log(`[Cloudinary] Starting upload: ${fileName} to folder: ${folder}`);
     
+    // Sanitize filename: remove extension, trim whitespace, and replace spaces/special chars
+    const sanitizedName = fileName
+      .replace(/\.[^/.]+$/, '') // Remove extension
+      .trim() // Remove leading/trailing whitespace
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^a-zA-Z0-9-_]/g, ''); // Remove special characters
+    
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
         resource_type: 'auto', // Automatically detect file type
-        public_id: `${Date.now()}-${fileName.replace(/\.[^/.]+$/, '')}`, // Remove extension
+        public_id: `${Date.now()}-${sanitizedName}`,
         use_filename: true,
         unique_filename: true,
       },
@@ -244,11 +251,18 @@ export const uploadVideoRecording = async (
   consultationId: string
 ): Promise<UploadResult> => {
   return new Promise((resolve, reject) => {
+    // Sanitize filename: remove extension, trim whitespace, and replace spaces/special chars
+    const sanitizedName = fileName
+      .replace(/\.[^/.]+$/, '') // Remove extension
+      .trim() // Remove leading/trailing whitespace
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^a-zA-Z0-9-_]/g, ''); // Remove special characters
+    
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: `wakili-pro/video-recordings/${consultationId}`,
         resource_type: 'video',
-        public_id: `${Date.now()}-${fileName.replace(/\.[^/.]+$/, '')}`,
+        public_id: `${Date.now()}-${sanitizedName}`,
         use_filename: true,
         unique_filename: true,
         chunk_size: 6000000, // 6MB chunks for large videos
