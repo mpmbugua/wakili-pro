@@ -260,7 +260,7 @@ export const PublicDashboard: React.FC<PublicDashboardProps> = ({ user }) => {
             <Scale className="h-4 w-4 mr-2" />
             Legal Services
           </Button>
-          <Button variant="outline" className="justify-start" onClick={() => navigate('/document-services')}>
+          <Button variant="outline" className="justify-start" onClick={() => navigate('/documents')}>
             <FileCheck className="h-4 w-4 mr-2" />
             Case Analysis & Documents Review
           </Button>
