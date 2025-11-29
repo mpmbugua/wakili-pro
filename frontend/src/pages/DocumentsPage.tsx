@@ -267,7 +267,7 @@ export const DocumentsPage: React.FC = () => {
 
       console.log('[DocumentsPage] M-Pesa initiation response:', response.data);
 
-      if (response.data.success) {
+      if (response.data.success && response.data.data) {
         const { paymentId, customerMessage } = response.data.data;
 
         console.log('[DocumentsPage] Setting payment in progress:', paymentId);
@@ -281,11 +281,15 @@ export const DocumentsPage: React.FC = () => {
         // Close service modal
         setShowServiceModal(false);
       } else {
-        alert(response.data.message || 'Failed to initiate payment');
+        // Handle error response
+        const errorMsg = response.data.error || response.data.message || 'Failed to initiate payment';
+        console.error('[DocumentsPage] Payment initiation failed:', errorMsg);
+        alert(errorMsg);
       }
     } catch (error: any) {
       console.error('[DocumentsPage] Error initiating payment:', error);
-      alert(error.response?.data?.message || 'Failed to initiate payment. Please try again.');
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Failed to initiate payment. Please try again.';
+      alert(errorMsg);
     }
   };
 
