@@ -238,6 +238,12 @@ export const DocumentsPage: React.FC = () => {
         return;
       }
 
+      console.log('[DocumentsPage] Initiating M-Pesa payment:', {
+        documentId: selectedDocument.id,
+        phoneNumber,
+        amount: selection.totalPrice
+      });
+
       // Initiate M-Pesa payment
       const response = await axiosInstance.post('/document-payment/initiate', {
         documentId: selectedDocument.id,
@@ -248,19 +254,26 @@ export const DocumentsPage: React.FC = () => {
         phoneNumber: phoneNumber
       });
 
+      console.log('[DocumentsPage] M-Pesa initiation response:', response.data);
+
       if (response.data.success) {
-        const { paymentId } = response.data.data;
+        const { paymentId, customerMessage } = response.data.data;
+
+        console.log('[DocumentsPage] Setting payment in progress:', paymentId);
 
         // Start polling for M-Pesa payment status
         setPaymentInProgress({
           paymentId,
           paymentMethod: 'MPESA'
         });
+
+        // Close service modal
+        setShowServiceModal(false);
       } else {
         alert(response.data.message || 'Failed to initiate payment');
       }
     } catch (error: any) {
-      console.error('Error initiating payment:', error);
+      console.error('[DocumentsPage] Error initiating payment:', error);
       alert(error.response?.data?.message || 'Failed to initiate payment. Please try again.');
     }
   };

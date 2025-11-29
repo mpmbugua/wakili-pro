@@ -19,22 +19,29 @@ export const PaymentStatusPoller: React.FC<PaymentStatusPollerProps> = ({
   const [attempts, setAttempts] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
 
+  console.log('[PaymentStatusPoller] Mounted with:', { paymentId, paymentMethod });
+
   useEffect(() => {
     const maxAttempts = 60; // 5 minutes (60 * 5 seconds)
     const pollInterval = 5000; // 5 seconds
 
     const checkPaymentStatus = async () => {
       try {
+        console.log('[PaymentStatusPoller] Checking payment status, attempt:', attempts + 1);
         const response = await axiosInstance.get(`/document-payment/${paymentId}/status`);
+        
+        console.log('[PaymentStatusPoller] Status response:', response.data);
         
         if (response.data.success) {
           const payment = response.data.data;
           
           if (payment.status === 'COMPLETED') {
+            console.log('[PaymentStatusPoller] Payment completed!');
             setStatus('success');
             onSuccess(payment);
             return true;
           } else if (payment.status === 'FAILED' || payment.status === 'CANCELLED') {
+            console.log('[PaymentStatusPoller] Payment failed or cancelled');
             setStatus('failed');
             onError(payment.metadata?.failureReason || 'Payment failed');
             return true;
@@ -42,12 +49,13 @@ export const PaymentStatusPoller: React.FC<PaymentStatusPollerProps> = ({
         }
         return false;
       } catch (error: any) {
-        console.error('Error checking payment status:', error);
+        console.error('[PaymentStatusPoller] Error checking payment status:', error);
         return false;
       }
     };
 
     // Start polling
+    console.log('[PaymentStatusPoller] Starting payment status polling');
     setStatus('processing');
     const pollTimer = setInterval(async () => {
       setAttempts(prev => prev + 1);
@@ -59,6 +67,7 @@ export const PaymentStatusPoller: React.FC<PaymentStatusPollerProps> = ({
         clearInterval(pollTimer);
         
         if (!completed && attempts >= maxAttempts) {
+          console.log('[PaymentStatusPoller] Polling timed out');
           setStatus('failed');
           onError('Payment verification timed out. Please check your payment history.');
         }
@@ -68,7 +77,10 @@ export const PaymentStatusPoller: React.FC<PaymentStatusPollerProps> = ({
     // Initial check
     checkPaymentStatus();
 
-    return () => clearInterval(pollTimer);
+    return () => {
+      console.log('[PaymentStatusPoller] Unmounting, clearing interval');
+      clearInterval(pollTimer);
+    };
   }, [paymentId, attempts, onSuccess, onError]);
 
   return (
