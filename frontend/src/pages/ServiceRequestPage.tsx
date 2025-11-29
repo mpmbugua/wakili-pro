@@ -151,32 +151,33 @@ export const ServiceRequestPage: React.FC = () => {
 
     setIsProcessingPayment(true);
     try {
-      // Call M-Pesa STK Push API
-      const response = await fetch('/api/payments/mpesa/initiate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: 500,
-          phoneNumber: paymentPhone,
-          description: 'Service Request Commitment Fee'
-        })
+      // Import axiosInstance at the top if not already imported
+      const axiosInstance = (await import('../lib/axios')).default;
+      
+      // Call M-Pesa STK Push API with proper auth
+      const response = await axiosInstance.post('/document-payment/initiate', {
+        amount: 500,
+        phoneNumber: paymentPhone,
+        paymentType: 'SERVICE_REQUEST_COMMITMENT'
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
+        const { paymentId } = data.data;
+        
         // Poll for payment status
         const checkPayment = setInterval(async () => {
-          const statusResponse = await fetch(`/api/payments/mpesa/status/${data.checkoutRequestId}`);
-          const statusData = await statusResponse.json();
+          const statusResponse = await axiosInstance.get(`/document-payment/${paymentId}/status`);
+          const statusData = statusResponse.data;
 
-          if (statusData.status === 'SUCCESS') {
+          if (statusData.success && statusData.data.status === 'COMPLETED') {
             clearInterval(checkPayment);
             setFormData(prev => ({
               ...prev,
               commitmentFeePaid: true,
               commitmentFeeAmount: 500,
-              commitmentFeeTxId: statusData.transactionId
+              commitmentFeeTxId: statusData.data.transactionId || paymentId
             }));
             setShowPaymentModal(false);
             setIsProcessingPayment(false);

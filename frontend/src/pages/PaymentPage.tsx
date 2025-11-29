@@ -140,7 +140,7 @@ export const PaymentPage: React.FC = () => {
 
     try {
       if (paymentMethod === 'mpesa') {
-        // M-Pesa Daraja API payment flow
+        // M-Pesa Daraja API payment flow - use document-payment endpoint for consistency
         const paymentData = isDocumentPayment
           ? {
               reviewId: reviewId || (bookingDetails as DocumentPaymentDetails).reviewId,
@@ -157,8 +157,11 @@ export const PaymentPage: React.FC = () => {
               paymentType: 'CONSULTATION'
             };
 
-        const mpesaResponse = await axiosInstance.post('/payments/mpesa/initiate', paymentData);
+        console.log('[PaymentPage] Initiating M-Pesa payment:', paymentData);
+        const mpesaResponse = await axiosInstance.post('/document-payment/initiate', paymentData);
 
+        console.log('[PaymentPage] M-Pesa response:', mpesaResponse.data);
+        
         if (!mpesaResponse.data.success) {
           throw new Error(mpesaResponse.data.message || 'Failed to initiate M-Pesa payment');
         }
@@ -176,7 +179,7 @@ export const PaymentPage: React.FC = () => {
 
         const checkStatus = async (): Promise<boolean> => {
           try {
-            const statusResponse = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
+            const statusResponse = await axiosInstance.get(`/document-payment/${paymentId}/status`);
             
             if (statusResponse.data.success) {
               const { status } = statusResponse.data.data;
