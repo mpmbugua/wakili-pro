@@ -262,7 +262,7 @@ export const PublicDashboard: React.FC<PublicDashboardProps> = ({ user }) => {
           </Button>
           <Button variant="outline" className="justify-start" onClick={() => navigate('/document-services')}>
             <FileCheck className="h-4 w-4 mr-2" />
-            Case Analysis & Review
+            Case Analysis and Documents Review
           </Button>
           <Button variant="outline" className="justify-start" onClick={() => navigate('/marketplace')}>
             <FileText className="h-4 w-4 mr-2" />
