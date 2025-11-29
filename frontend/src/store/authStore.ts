@@ -133,41 +133,40 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: async (): Promise<void> => {
+        console.log('[AuthStore] Logging out...');
+        
+        // Clear state FIRST before making API call
+        const currentRefreshToken = get().refreshToken;
+        
+        // Immediately clear local state and storage
+        localStorage.removeItem('wakili-auth-storage');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        sessionStorage.clear();
+        
+        set({
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          isAuthenticated: false,
+          error: null
+        });
+        
+        console.log('[AuthStore] State cleared');
+        
+        // Try to notify backend (but don't wait or care if it fails)
         try {
-          const { refreshToken } = get();
-          
-          console.log('[AuthStore] Logging out, refreshToken:', refreshToken ? 'exists' : 'none');
-          
-          if (refreshToken) {
-            await authService.logout(refreshToken);
+          if (currentRefreshToken) {
+            await authService.logout(currentRefreshToken).catch(() => {
+              // Ignore errors - we're already logged out locally
+            });
           }
         } catch (error) {
-          console.error('[AuthStore] Logout API error:', error);
-        } finally {
-          console.log('[AuthStore] Clearing all storage...');
-          
-          // Clear all auth-related items from localStorage
-          localStorage.removeItem('wakili-auth-storage');
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          
-          // Clear sessionStorage as well
-          sessionStorage.clear();
-          
-          console.log('[AuthStore] Setting state to logged out...');
-          
-          // Clear state
-          set({
-            user: null,
-            accessToken: null,
-            refreshToken: null,
-            isAuthenticated: false,
-            error: null
-          });
-          
-          console.log('[AuthStore] Logout complete');
+          // Ignore - logout is already complete locally
         }
+        
+        console.log('[AuthStore] Logout complete');
       },
 
       refreshAuth: async (): Promise<boolean> => {

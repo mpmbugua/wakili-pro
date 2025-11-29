@@ -52,10 +52,12 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Check if this is a logout endpoint - don't redirect
-      const isLogoutRequest = error.config?.url?.includes('/logout');
+      // Don't redirect on logout or refresh endpoints
+      const url = error.config?.url || '';
+      const isAuthEndpoint = url.includes('/logout') || url.includes('/refresh');
       
-      if (!isLogoutRequest) {
+      if (!isAuthEndpoint) {
+        console.log('401 error on non-auth endpoint, clearing storage');
         // Clear auth storage
         localStorage.removeItem('wakili-auth-storage');
         localStorage.removeItem('token');
@@ -63,7 +65,9 @@ axiosInstance.interceptors.response.use(
         localStorage.removeItem('user');
         
         // Redirect to home page on unauthorized
-        window.location.href = '/';
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
       }
     }
     return Promise.reject(error);
