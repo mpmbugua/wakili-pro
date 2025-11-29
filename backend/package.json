@@ -15,7 +15,7 @@
     "test": "node --max-old-space-size=4096 ./node_modules/.bin/jest",
     "postinstall": "npm run db:prepare",
     "db:prepare": "prisma generate && (prisma migrate deploy || npm run db:fix)",
-    "db:fix": "prisma migrate resolve --rolled-back 20251123074255_update_oauth_fields && prisma migrate deploy",
+    "db:fix": "prisma migrate resolve --applied 20251123074255_update_oauth_fields && prisma migrate deploy",
     "seed": "ts-node ./prisma/seed.ts",
     "seed:users": "ts-node ./prisma/seedUsers.ts",
     "seed:lawyers": "ts-node ./prisma/seedLawyerSubscriptions.ts",
