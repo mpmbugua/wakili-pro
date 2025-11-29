@@ -242,61 +242,42 @@ const DocumentServicesPage: React.FC = () => {
     setUploadProgress(0);
 
     try {
-      // If document is from uploaded documents (already on server), handle differently
+      // UNIFIED FLOW: Always redirect to Documents page for payment
+      // This eliminates the confusing dual payment flow
+      
       if (fromUploadedDocument) {
-        const savedReview = sessionStorage.getItem('activeDocumentReview');
-        let documentId = '';
-        
-        if (savedReview) {
-          try {
-            const reviewData = JSON.parse(savedReview);
-            documentId = reviewData.documentId;
-          } catch (error) {
-            console.error('Error parsing review data:', error);
-          }
-        }
-        
-        // Simulate upload progress
-        const progressInterval = setInterval(() => {
-          setUploadProgress(prev => {
-            if (prev >= 100) {
-              clearInterval(progressInterval);
-              return 100;
-            }
-            return prev + 20;
-          });
-        }, 100);
-        
-        // Simulate processing delay then redirect to payment
-        setTimeout(() => {
-          clearInterval(progressInterval);
-          setUploadProgress(100);
-          setIsUploading(false);
-          
-          // Clear the active review from sessionStorage
-          sessionStorage.removeItem('activeDocumentReview');
-          
-          // Generate a temporary review ID (in production, this would come from API)
-          const reviewId = `review_${Date.now()}`;
-          
-          // Redirect to payment page
-          navigate(`/payment/document/${reviewId}`, {
-            state: {
-              reviewId: reviewId,
-              documentType: documentType,
-              serviceType: selectedService,
-              price: calculatePrice(),
-              fileName: documentType,
-              documentId: documentId
-            }
-          });
-        }, 1000);
-        
+        // Document already uploaded - redirect to Documents page
+        alert('Please use the "Request Review" button from your uploaded documents.');
+        navigate('/documents');
         return;
       }
 
-      const formData = new FormData();
-      formData.append('document', uploadedFile.file);
+      // For new documents from landing page, redirect user to login then Documents page  
+      alert('Please log in to upload and submit documents for review.');
+      
+      // Store document details to restore after login
+      sessionStorage.setItem('pendingDocumentUpload', JSON.stringify({
+        fileName: uploadedFile.file.name,
+        documentType,
+        documentCategory,
+        selectedService
+      }));
+      
+      navigate('/login', {
+        state: {
+          returnTo: '/documents',
+          message: 'Please log in to upload and review your document'
+        }
+      });
+      return;
+    } catch (error: any) {
+      console.error('Error submitting document:', error);
+      alert(error.message || 'Failed to submit document. Please try again.');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
       formData.append('documentType', documentType);
       formData.append('documentCategory', documentCategory);
 

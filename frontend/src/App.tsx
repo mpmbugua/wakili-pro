@@ -219,8 +219,7 @@ function App() {
             />
             
             <Route path="/booking/:lawyerId" element={<BookingPage />} />
-            <Route path="/payment/:bookingId" element={<PaymentPage />} />
-            <Route path="/payment/document/:reviewId" element={<PaymentPage />} />
+            {/* Payment routes removed - all payments now handled via ServiceSelectionModal with PaymentStatusPoller */}
             <Route path="/payment-callback" element={<PaymentCallbackPage />} />
             
             {/* Public Certificate Verification */}
