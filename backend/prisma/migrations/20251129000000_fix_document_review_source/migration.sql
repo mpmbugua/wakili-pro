@@ -1,25 +1,20 @@
 -- Fix DocumentReview.documentSource column type
 -- The column was created with the wrong enum type (DocumentSource instead of DocumentOrigin)
 
--- First, add 'EXTERNAL' to DocumentSource enum if needed
-DO $$ BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_enum e
-        JOIN pg_type t ON e.enumtypid = t.oid
-        WHERE t.typname = 'DocumentSource' AND e.enumlabel = 'EXTERNAL'
-    ) THEN
-        -- Add EXTERNAL to DocumentSource temporarily
-        ALTER TYPE "DocumentSource" ADD VALUE IF NOT EXISTS 'EXTERNAL';
-    END IF;
-END $$;
+-- Strategy: Since DocumentSource and DocumentOrigin are different enums,
+-- we need to drop and recreate the column
 
--- Update any existing rows to use a valid DocumentSource value temporarily
-UPDATE "DocumentReview" SET "documentSource" = 'UPLOADED' WHERE "documentSource" IS NOT NULL;
+-- Step 1: Add a temporary column with the correct type
+ALTER TABLE "DocumentReview" ADD COLUMN "documentSource_new" "DocumentOrigin";
 
--- Now we can safely change the column type
-ALTER TABLE "DocumentReview" 
-    ALTER COLUMN "documentSource" TYPE "DocumentOrigin" 
-    USING "documentSource"::text::"DocumentOrigin";
+-- Step 2: Set default value for new column (EXTERNAL for user-uploaded docs)
+UPDATE "DocumentReview" SET "documentSource_new" = 'EXTERNAL';
 
--- Update rows back to EXTERNAL
-UPDATE "DocumentReview" SET "documentSource" = 'EXTERNAL';
+-- Step 3: Make the new column NOT NULL
+ALTER TABLE "DocumentReview" ALTER COLUMN "documentSource_new" SET NOT NULL;
+
+-- Step 4: Drop the old column
+ALTER TABLE "DocumentReview" DROP COLUMN "documentSource";
+
+-- Step 5: Rename the new column to the original name
+ALTER TABLE "DocumentReview" RENAME COLUMN "documentSource_new" TO "documentSource";
