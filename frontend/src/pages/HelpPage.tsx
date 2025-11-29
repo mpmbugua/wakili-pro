@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HelpCircle, MessageCircle, BookOpen, FileText, Phone, Mail, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface FAQItem {
@@ -8,6 +9,7 @@ interface FAQItem {
 }
 
 export const HelpPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('all');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
@@ -165,23 +167,29 @@ export const HelpPage: React.FC = () => {
             <div className="flex items-center space-x-3 mb-4">
               <BookOpen className="h-8 w-8 text-blue-600" />
               <h3 className="text-xl font-semibold text-slate-900">User Guide</h3>
-            </div>
             <p className="text-slate-700 mb-4">
               Learn how to make the most of Wakili Pro with our comprehensive user guide
             </p>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <button 
+              onClick={() => window.open('/docs/getting-started.md', '_blank')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
               View Guide
+            </button>ide
             </button>
           </div>
 
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <FileText className="h-8 w-8 text-purple-600" />
-              <h3 className="text-xl font-semibold text-slate-900">Legal Resources</h3>
-            </div>
             <p className="text-slate-700 mb-4">
               Access helpful legal resources, guides, and information
             </p>
+            <button 
+              onClick={() => navigate('/resources')}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+            >
+              Browse Resources
+            </button>
             <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
               Browse Resources
             </button>
@@ -191,53 +199,55 @@ export const HelpPage: React.FC = () => {
         {/* Contact Form */}
         <div className="bg-white rounded-lg border border-slate-200 p-6 mt-8">
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Still Need Help?</h2>
-          <p className="text-slate-600 mb-6">Send us a message and we'll get back to you as soon as possible</p>
+          <p className="text-slate-600 mb-6">Chat with our AI assistant for instant answers to your questions</p>
           
-          <form className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Name</label>
+          <div className="border-2 border-slate-200 rounded-xl overflow-hidden">
+            {/* Chat Messages Area */}
+            <div className="h-96 bg-slate-50 p-4 overflow-y-auto space-y-4">
+              {/* Welcome Message */}
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <MessageCircle className="w-4 h-4 text-white" />
+                </div>
+                <div className="bg-white rounded-lg rounded-tl-none p-4 shadow-sm max-w-md">
+                  <p className="text-slate-800">
+                    👋 Hello! I'm Wakili AI Assistant. How can I help you today?
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    <button className="block w-full text-left px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm text-blue-700 transition">
+                      💼 How do I upload documents for review?
+                    </button>
+                    <button className="block w-full text-left px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm text-blue-700 transition">
+                      💳 What payment methods do you accept?
+                    </button>
+                    <button className="block w-full text-left px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm text-blue-700 transition">
+                      📜 How does document certification work?
+                    </button>
+                    <button className="block w-full text-left px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm text-blue-700 transition">
+                      ⏱️ How long does AI review take?
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Chat Input */}
+            <div className="bg-white border-t-2 border-slate-200 p-4">
+              <div className="flex items-center space-x-3">
                 <input
                   type="text"
-                  placeholder="Your name"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Type your question here..."
+                  className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
+                <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-medium">
+                  Send
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  placeholder="your.email@example.com"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                💡 Powered by AI • Available 24/7 • Instant responses
+              </p>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Subject</label>
-              <input
-                type="text"
-                placeholder="What do you need help with?"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Message</label>
-              <textarea
-                rows={6}
-                placeholder="Describe your issue or question in detail..."
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              ></textarea>
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full md:w-auto px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-            >
-              Send Message
-            </button>
-          </form>
+          </div>
         </div>
       </div>
   );
