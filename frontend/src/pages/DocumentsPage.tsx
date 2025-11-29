@@ -238,8 +238,20 @@ export const DocumentsPage: React.FC = () => {
         return;
       }
 
+      // Convert frontend service types to backend format
+      const backendServiceType = selection.serviceType === 'AI_ONLY'
+        ? 'ai_review'
+        : selection.serviceType === 'CERTIFICATION'
+        ? 'certification'
+        : 'ai_and_certification';
+
+      // Convert urgency levels to backend format
+      const backendUrgency = selection.urgencyLevel.toLowerCase();
+
       console.log('[DocumentsPage] Initiating M-Pesa payment:', {
         documentId: selectedDocument.id,
+        serviceType: backendServiceType,
+        urgencyLevel: backendUrgency,
         phoneNumber,
         amount: selection.totalPrice
       });
@@ -247,10 +259,9 @@ export const DocumentsPage: React.FC = () => {
       // Initiate M-Pesa payment
       const response = await axiosInstance.post('/document-payment/initiate', {
         documentId: selectedDocument.id,
-        serviceType: selection.serviceType,
-        urgencyLevel: selection.urgencyLevel,
-        paymentMethod: 'MPESA',
-        amount: selection.totalPrice,
+        serviceType: backendServiceType,
+        urgencyLevel: backendUrgency,
+        paymentMethod: 'mpesa',
         phoneNumber: phoneNumber
       });
 
