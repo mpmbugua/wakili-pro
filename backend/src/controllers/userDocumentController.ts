@@ -234,3 +234,62 @@ export const requestReview = async (req: AuthenticatedRequest, res: Response) =>
     });
   }
 };
+
+/**
+ * Download a document (proxy through backend to avoid CORS issues)
+ * GET /api/user-documents/:id/download
+ */
+export const downloadDocument = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const { id } = req.params;
+    const document = await getDocumentById(id, userId);
+
+    if (!document.success || !document.data) {
+      return res.status(404).json({
+        success: false,
+        message: 'Document not found',
+      });
+    }
+
+    const fileUrl = document.data.fileUrl;
+    if (!fileUrl) {
+      return res.status(404).json({
+        success: false,
+        message: 'File URL not available',
+      });
+    }
+
+    // Fetch the file from Cloudinary
+    const fetch = (await import('node-fetch')).default;
+    const response = await fetch(fileUrl);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.status}`);
+    }
+
+    // Get the content type from Cloudinary response
+    const contentType = response.headers.get('content-type') || 'application/pdf';
+    
+    // Set response headers for download
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${document.data.title}.pdf"`);
+    
+    // Pipe the file stream to response
+    const buffer = await response.buffer();
+    res.send(buffer);
+  } catch (error: any) {
+    console.error('Download document controller error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to download document',
+    });
+  }
+};

@@ -7,6 +7,7 @@ import {
   updateDocumentMetadata,
   deleteUserDocument,
   requestReview,
+  downloadDocument,
 } from '../controllers/userDocumentController';
 import { authenticateToken } from '../middleware/auth';
 
@@ -31,6 +32,9 @@ router.get('/', getDocuments);
 
 // Get a single document
 router.get('/:id', getDocument);
+
+// Download a document (proxy through backend)
+router.get('/:id/download', downloadDocument);
 
 // Update document metadata
 router.patch('/:id', updateDocumentMetadata);

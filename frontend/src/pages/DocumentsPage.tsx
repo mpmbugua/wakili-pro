@@ -242,34 +242,25 @@ export const DocumentsPage: React.FC = () => {
   };
 
   const handleDownload = async (doc: Document) => {
-    if (!doc.fileUrl) {
-      alert('Document URL not available');
+    if (!doc.id) {
+      alert('Document ID not available');
       return;
     }
 
     try {
-      // Fetch the file as a blob to bypass CORS and authentication issues
-      const response = await fetch(doc.fileUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/pdf,application/octet-stream',
-        },
+      // Use backend proxy to download file (avoids CORS issues)
+      const response = await axiosInstance.get(`/user-documents/${doc.id}/download`, {
+        responseType: 'blob',
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to download: ${response.status}`);
-      }
-
-      // Create a blob from the response
-      const blob = await response.blob();
-      
-      // Create a temporary URL for the blob
+      // Create a blob URL from the response
+      const blob = new Blob([response.data], { type: response.headers['content-type'] || 'application/pdf' });
       const blobUrl = window.URL.createObjectURL(blob);
       
       // Create a temporary anchor element to trigger download
       const link = window.document.createElement('a');
       link.href = blobUrl;
-      link.download = doc.title || 'document.pdf';
+      link.download = `${doc.title}.pdf`;
       
       // Append to body, click, and remove
       window.document.body.appendChild(link);
@@ -278,21 +269,20 @@ export const DocumentsPage: React.FC = () => {
       
       // Clean up the blob URL
       window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error downloading document:', error);
-      // Fallback: just open in new tab
-      alert('Direct download failed. Opening document in new tab instead.');
-      window.open(doc.fileUrl, '_blank');
+      alert('Failed to download document. Please try again.');
     }
   };
 
   const handleView = (doc: Document) => {
-    if (!doc.fileUrl) {
-      alert('Document URL not available');
+    if (!doc.id) {
+      alert('Document ID not available');
       return;
     }
-    // Open document directly in new tab - works best for Cloudinary URLs
-    window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
+    // Use backend proxy to view file in new tab
+    const viewUrl = `${axiosInstance.defaults.baseURL}/user-documents/${doc.id}/download`;
+    window.open(viewUrl, '_blank', 'noopener,noreferrer');
   };
 
   const filteredDocuments = documents.filter(doc => {
