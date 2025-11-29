@@ -189,38 +189,42 @@ export const PaymentPage: React.FC = () => {
               if (statusResponse.data.success) {
                 const { status } = statusResponse.data.data;
               
-              if (status === 'COMPLETED') {
-                setPaymentSuccess(true);
-                setTimeout(() => {
-                  navigate('/dashboard');
-                }, 3000);
-                return true;
-              } else if (status === 'FAILED') {
-                throw new Error('Payment failed or was cancelled');
+                if (status === 'COMPLETED') {
+                  setPaymentSuccess(true);
+                  setTimeout(() => {
+                    navigate('/dashboard');
+                  }, 3000);
+                  return true;
+                } else if (status === 'FAILED') {
+                  throw new Error('Payment failed or was cancelled');
+                }
+              }
+              return false;
+            } catch (err) {
+              console.error('Status check error:', err);
+              return false;
+            }
+          };
+
+          // Start polling
+          const pollPaymentStatus = setInterval(async () => {
+            attempts++;
+            const completed = await checkStatus();
+            
+            if (completed || attempts >= maxAttempts) {
+              clearInterval(pollPaymentStatus);
+              setLoading(false);
+              
+              if (!completed && attempts >= maxAttempts) {
+                setError('Payment verification timed out. Please check your payment history or contact support.');
               }
             }
-            return false;
-          } catch (err) {
-            console.error('Status check error:', err);
-            return false;
-          }
-        };
+          }, pollInterval);
 
-        // Start polling
-        const pollPaymentStatus = setInterval(async () => {
-          attempts++;
-          const completed = await checkStatus();
-          
-          if (completed || attempts >= maxAttempts) {
-            clearInterval(pollPaymentStatus);
-            setLoading(false);
-            
-            if (!completed && attempts >= maxAttempts) {
-              setError('Payment verification timed out. Please check your payment history or contact support.');
-            }
-          }
-        }, pollInterval);
-
+        } else {
+          // For booking payments (consultation), use old endpoint
+          throw new Error('Consultation payments not yet implemented with new endpoint');
+        }
       } else {
         // Card payment flow (Flutterwave)
         const paymentIntentData = isDocumentPayment
