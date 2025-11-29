@@ -34,6 +34,7 @@ import ConsultationsPage from './pages/ConsultationsPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import MessagesPage from './pages/MessagesPage';
 import DocumentsPage from './pages/DocumentsPage';
+import DocumentReviewDashboard from './pages/DocumentReviewDashboard';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
 import { AdminLawyerApproval } from './pages/admin/AdminLawyerApproval';
 import AdminWithdrawalManagement from './pages/admin/AdminWithdrawalManagement';
@@ -314,6 +315,14 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <DocumentsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/document-reviews" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <DocumentReviewDashboard />
                 </ProtectedRoute>
               } 
             />

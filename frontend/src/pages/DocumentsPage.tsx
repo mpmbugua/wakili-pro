@@ -422,13 +422,22 @@ export const DocumentsPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-slate-900">My Documents</h1>
           <p className="text-slate-600 mt-2">Manage your legal documents and templates</p>
         </div>
-        <button 
-          onClick={() => setShowUploadModal(true)}
-          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-        >
-          <Upload className="h-5 w-5 mr-2" />
-          Upload Documents for Review
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => navigate('/document-reviews')}
+            className="inline-flex items-center px-5 py-2.5 bg-white border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50 transition-all duration-200 font-semibold shadow-md"
+          >
+            <FileText className="h-5 w-5 mr-2" />
+            View Reviews
+          </button>
+          <button 
+            onClick={() => setShowUploadModal(true)}
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            <Upload className="h-5 w-5 mr-2" />
+            Upload Documents for Review
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
