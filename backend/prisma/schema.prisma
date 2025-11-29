@@ -343,20 +343,24 @@ model Payment {
   id                    String             @id @default(cuid())
   userId                String
   documentId            String?
-  bookingId             String
+  bookingId             String?
+  documentReviewId      String?
   type                  PaymentType
   targetId              String?
   amount                Int
+  currency              String             @default("USD")
   status                PaymentStatus
   provider              String
   transactionId         String?
   method                PaymentMethod?
   externalTransactionId String?
   verifiedAt            DateTime?
+  errorMessage          String?
   metadata              Json?
   EscrowTransaction     EscrowTransaction?
-  booking               ServiceBooking     @relation(fields: [bookingId], references: [id])
+  booking               ServiceBooking?    @relation(fields: [bookingId], references: [id])
   DocumentTemplate      DocumentTemplate?  @relation(fields: [documentId], references: [id])
+  documentReview        DocumentReview?    @relation(fields: [documentReviewId], references: [id])
   user                  User               @relation(fields: [userId], references: [id])
   refunds               Refund[]
 }
@@ -848,6 +852,11 @@ model DocumentReview {
   paymentId String?
   paidAt    DateTime?
 
+  // Status tracking
+  status                String    @default("pending_payment") // pending_payment, pending_lawyer_assignment, assigned, in_progress, in_qc, completed, failed
+  assignedAt            DateTime?
+  estimatedDeliveryDate DateTime?
+
   qualityControlStatus QualityControlStatus?
   qualityControlNotes  String?
   qualityCheckedBy     String?
@@ -870,12 +879,14 @@ model DocumentReview {
   marketplaceDocument DocumentTemplate? @relation(fields: [marketplaceDocumentId], references: [id])
   qualityController   User?             @relation("DocumentReviewQC", fields: [qualityCheckedBy], references: [id])
   userDocument        UserDocument?     @relation("UserDocumentReviews", fields: [userDocumentId], references: [id])
+  payments            Payment[]
 
   @@index([userId])
   @@index([lawyerId])
   @@index([aiReviewStatus])
   @@index([certificationStatus])
   @@index([qualityControlStatus])
+  @@index([status])
 }
 
 model LawyerLetterhead {

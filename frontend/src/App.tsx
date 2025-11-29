@@ -14,6 +14,7 @@ import { ServicesPage } from './pages/ServicesPage';
 import { LegalServicesPage } from './pages/LegalServicesPage';
 import { BookingPage } from './pages/BookingPage';
 import { PaymentPage } from './pages/PaymentPage';
+import PaymentCallbackPage from './pages/PaymentCallbackPage';
 import { LawyerProfileSettings } from './pages/LawyerProfileSettings';
 import LawyerOnboarding from './pages/LawyerOnboarding';
 import LawyerProfile from './pages/LawyerProfile';
@@ -220,6 +221,7 @@ function App() {
             <Route path="/booking/:lawyerId" element={<BookingPage />} />
             <Route path="/payment/:bookingId" element={<PaymentPage />} />
             <Route path="/payment/document/:reviewId" element={<PaymentPage />} />
+            <Route path="/payment-callback" element={<PaymentCallbackPage />} />
             
             {/* Public Certificate Verification */}
             <Route path="/verify/:certificateId" element={<VerifyCertificate />} />

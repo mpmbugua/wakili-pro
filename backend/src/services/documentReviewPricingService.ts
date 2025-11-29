@@ -209,8 +209,8 @@ export function getAllDocumentReviewServiceTiers() {
     estimatedHours: config.estimatedHours,
     pricing: {
       standard: calculateDocumentReviewPricing(type as ReviewType, 'STANDARD'),
-      urgent: calculateDocumentReviewPricing(type as ReviewType, 'HIGH'),
-      emergency: calculateDocumentReviewPricing(type as ReviewType, 'EMERGENCY')
+      urgent: calculateDocumentReviewPricing(type as ReviewType, 'EXPRESS'), // Use EXPRESS instead of HIGH
+      emergency: calculateDocumentReviewPricing(type as ReviewType, 'EXPRESS') // Map EMERGENCY to EXPRESS
     }
   }));
 }

@@ -3,6 +3,8 @@ import { FileText, Download, Eye, Trash2, Upload, Search, Filter, X } from 'luci
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../lib/axios';
+import { ServiceSelectionModal } from '../components/documents/ServiceSelectionModal';
+import { PaymentStatusPoller } from '../components/payments/PaymentStatusPoller';
 
 interface Document {
   id: string;
@@ -30,6 +32,14 @@ export const DocumentsPage: React.FC = () => {
   const [uploadCategory, setUploadCategory] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Service selection and payment states
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<{ id: string; title: string } | null>(null);
+  const [paymentInProgress, setPaymentInProgress] = useState<{
+    paymentId: string;
+    paymentMethod: 'MPESA' | 'FLUTTERWAVE';
+  } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -205,24 +215,88 @@ export const DocumentsPage: React.FC = () => {
       return;
     }
 
+    // Show service selection modal
+    setSelectedDocument({ id: documentId, title: documentTitle });
+    setShowServiceModal(true);
+  };
+
+  const handleServiceConfirm = async (selection: {
+    serviceType: string;
+    urgencyLevel: string;
+    totalPrice: number;
+  }) => {
+    if (!selectedDocument) return;
+
+    setShowServiceModal(false);
+
     try {
-      // Call API to update document status
-      await axiosInstance.post(`/user-documents/${documentId}/request-review`, {
-        reviewType: 'AI_ONLY',
+      // Get phone number for M-Pesa payment
+      const phoneNumber = await getPhoneNumber();
+      
+      if (!phoneNumber) {
+        alert('Phone number is required for M-Pesa payment');
+        return;
+      }
+
+      // Initiate M-Pesa payment
+      const response = await axiosInstance.post('/document-payment/initiate', {
+        documentId: selectedDocument.id,
+        serviceType: selection.serviceType,
+        urgencyLevel: selection.urgencyLevel,
+        paymentMethod: 'MPESA',
+        amount: selection.totalPrice,
+        phoneNumber: phoneNumber
       });
 
-      // Navigate to document services page for payment
-      navigate('/document-services', { 
-        state: { 
-          documentId,
-          documentTitle,
-          requestType: 'review'
-        } 
-      });
-    } catch (error) {
-      console.error('Error requesting review:', error);
-      alert('Failed to request review. Please try again.');
+      if (response.data.success) {
+        const { paymentId } = response.data.data;
+
+        // Start polling for M-Pesa payment status
+        setPaymentInProgress({
+          paymentId,
+          paymentMethod: 'MPESA'
+        });
+      } else {
+        alert(response.data.message || 'Failed to initiate payment');
+      }
+    } catch (error: any) {
+      console.error('Error initiating payment:', error);
+      alert(error.response?.data?.message || 'Failed to initiate payment. Please try again.');
     }
+  };
+
+  const getPhoneNumber = (): Promise<string> => {
+    return new Promise((resolve) => {
+      const phone = window.prompt(
+        '💳 M-Pesa Payment\n\n' +
+        'Enter your M-Pesa phone number:\n' +
+        'Format: 254XXXXXXXXX\n' +
+        'Example: 254712345678'
+      );
+      
+      // Basic validation
+      if (phone && phone.startsWith('254') && phone.length === 12) {
+        resolve(phone);
+      } else if (phone && phone.startsWith('0') && phone.length === 10) {
+        // Convert 07XX format to 254 format
+        resolve('254' + phone.substring(1));
+      } else {
+        resolve(phone || '');
+      }
+    });
+  };
+
+  const handlePaymentSuccess = (payment: any) => {
+    setPaymentInProgress(null);
+    console.log('Payment successful:', payment);
+    alert('Payment successful! Your document review will begin shortly.');
+    fetchDocuments(); // Refresh documents to show updated status
+    navigate('/dashboard');
+  };
+
+  const handlePaymentError = (error: string) => {
+    setPaymentInProgress(null);
+    alert(`Payment failed: ${error}`);
   };
 
   const handleDelete = async (documentId: string) => {
@@ -596,6 +670,30 @@ export const DocumentsPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Service Selection Modal */}
+      {showServiceModal && selectedDocument && (
+        <ServiceSelectionModal
+          isOpen={showServiceModal}
+          onClose={() => {
+            setShowServiceModal(false);
+            setSelectedDocument(null);
+          }}
+          documentId={selectedDocument.id}
+          documentTitle={selectedDocument.title}
+          onConfirm={handleServiceConfirm}
+        />
+      )}
+
+      {/* Payment Status Poller for M-Pesa */}
+      {paymentInProgress && (
+        <PaymentStatusPoller
+          paymentId={paymentInProgress.paymentId}
+          paymentMethod={paymentInProgress.paymentMethod}
+          onSuccess={handlePaymentSuccess}
+          onError={handlePaymentError}
+        />
       )}
     </div>
   );

@@ -53,7 +53,7 @@ export const HelpPage: React.FC = () => {
     {
       category: 'account',
       question: 'What payment methods do you accept?',
-      answer: 'We accept M-Pesa for mobile payments and card payments through Flutterwave for your convenience.',
+      answer: 'We accept M-Pesa for mobile payments. Simply select your service, and you\'ll receive an M-Pesa prompt on your phone to complete the payment.',
     },
     {
       category: 'services',

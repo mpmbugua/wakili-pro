@@ -325,6 +325,10 @@ app.use('/api/lawyer/letterhead', lawyerLetterheadRouter);
 import documentCertificationRouter from './routes/documentCertification';
 app.use('/api/certification', documentCertificationRouter);
 
+// Mount document payment routes (for document review payments)
+import documentPaymentRouter from './routes/documentPayment';
+app.use('/api/document-payment', documentPaymentRouter);
+
 // Mount article routes
 import articlesRouter from './routes/articles';
 app.use('/api/articles', articlesRouter);
