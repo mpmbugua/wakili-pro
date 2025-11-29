@@ -288,10 +288,15 @@ export const DocumentsPage: React.FC = () => {
         // Handle error response
         const errorMsg = response.data.error || response.data.message || 'Failed to initiate payment';
         console.error('[DocumentsPage] Payment initiation failed:', errorMsg);
+        console.error('[DocumentsPage] Full response:', response.data);
         alert(errorMsg);
       }
     } catch (error: any) {
       console.error('[DocumentsPage] Error initiating payment:', error);
+      console.error('[DocumentsPage] Error response data:', error.response?.data);
+      console.error('[DocumentsPage] Error response status:', error.response?.status);
+      console.error('[DocumentsPage] Full error object:', JSON.stringify(error.response?.data, null, 2));
+      
       const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Failed to initiate payment. Please try again.';
       alert(errorMsg);
     }
