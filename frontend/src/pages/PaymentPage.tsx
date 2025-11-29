@@ -17,6 +17,7 @@ interface BookingDetails {
 
 interface DocumentPaymentDetails {
   reviewId: string;
+  documentId?: string; // UUID of the uploaded document
   documentType: string;
   serviceType: 'ai-review' | 'certification' | 'marketplace-purchase';
   price: number;
@@ -141,48 +142,52 @@ export const PaymentPage: React.FC = () => {
     try {
       if (paymentMethod === 'mpesa') {
         // M-Pesa Daraja API payment flow - use document-payment endpoint for consistency
-        const paymentData = isDocumentPayment
-          ? {
-              reviewId: reviewId || (bookingDetails as DocumentPaymentDetails).reviewId,
-              amount: (bookingDetails as DocumentPaymentDetails).price,
-              phoneNumber: mpesaDetails.phoneNumber,
-              paymentType: (bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase' 
-                ? 'MARKETPLACE_PURCHASE' 
-                : 'DOCUMENT_REVIEW'
-            }
-          : {
-              bookingId: bookingId || (bookingDetails as BookingDetails).id,
-              amount: (bookingDetails as BookingDetails).fee || 5000,
-              phoneNumber: mpesaDetails.phoneNumber,
-              paymentType: 'CONSULTATION'
-            };
-
-        console.log('[PaymentPage] Initiating M-Pesa payment:', paymentData);
-        const mpesaResponse = await axiosInstance.post('/document-payment/initiate', paymentData);
-
-        console.log('[PaymentPage] M-Pesa response:', mpesaResponse.data);
         
-        if (!mpesaResponse.data.success) {
-          throw new Error(mpesaResponse.data.message || 'Failed to initiate M-Pesa payment');
-        }
+        if (isDocumentPayment) {
+          // For document payments, use the document-payment/initiate endpoint
+          const documentDetails = bookingDetails as DocumentPaymentDetails;
+          
+          // Convert frontend service type to backend format
+          const backendServiceType = documentDetails.serviceType === 'ai-review' 
+            ? 'ai_review' 
+            : documentDetails.serviceType === 'certification'
+            ? 'certification'
+            : 'ai_and_certification';
+          
+          const paymentData = {
+            documentId: (documentDetails as any).documentId || reviewId || '', // documentId from navigation state
+            serviceType: backendServiceType,
+            urgencyLevel: 'standard', // Default to standard
+            paymentMethod: 'mpesa',
+            phoneNumber: mpesaDetails.phoneNumber,
+          };
 
-        const { paymentId, customerMessage } = mpesaResponse.data.data;
+          console.log('[PaymentPage] Initiating M-Pesa payment for document:', paymentData);
+          const mpesaResponse = await axiosInstance.post('/document-payment/initiate', paymentData);
 
-        // Show M-Pesa prompt message
-        setError(null);
-        alert(customerMessage || `Please check your phone (${mpesaDetails.phoneNumber}) and enter your M-Pesa PIN to complete the payment.`);
+          console.log('[PaymentPage] M-Pesa response:', mpesaResponse.data);
+          
+          if (!mpesaResponse.data.success) {
+            throw new Error(mpesaResponse.data.message || 'Failed to initiate M-Pesa payment');
+          }
 
-        // Poll for payment status every 3 seconds (max 60 seconds)
-        let attempts = 0;
-        const maxAttempts = 20;
-        const pollInterval = 3000;
+          const { paymentId, customerMessage } = mpesaResponse.data.data;
 
-        const checkStatus = async (): Promise<boolean> => {
-          try {
-            const statusResponse = await axiosInstance.get(`/document-payment/${paymentId}/status`);
-            
-            if (statusResponse.data.success) {
-              const { status } = statusResponse.data.data;
+          // Show M-Pesa prompt message
+          setError(null);
+          alert(customerMessage || `Please check your phone (${mpesaDetails.phoneNumber}) and enter your M-Pesa PIN to complete the payment.`);
+
+          // Poll for payment status every 3 seconds (max 60 seconds)
+          let attempts = 0;
+          const maxAttempts = 20;
+          const pollInterval = 3000;
+
+          const checkStatus = async (): Promise<boolean> => {
+            try {
+              const statusResponse = await axiosInstance.get(`/document-payment/${paymentId}/status`);
+              
+              if (statusResponse.data.success) {
+                const { status } = statusResponse.data.data;
               
               if (status === 'COMPLETED') {
                 setPaymentSuccess(true);
