@@ -8,6 +8,20 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Log configuration status
+const isConfigured = !!(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+);
+
+console.log('[Cloudinary] Configuration:', {
+  status: isConfigured ? '✓ Configured' : '✗ Not Configured',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'NOT SET',
+  has_api_key: !!process.env.CLOUDINARY_API_KEY,
+  has_api_secret: !!process.env.CLOUDINARY_API_SECRET,
+});
+
 export interface UploadResult {
   url: string;
   publicId: string;
@@ -29,6 +43,8 @@ export const uploadToCloudinary = async (
   folder: string = 'user-documents'
 ): Promise<UploadResult> => {
   return new Promise((resolve, reject) => {
+    console.log(`[Cloudinary] Starting upload: ${fileName} to folder: ${folder}`);
+    
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
@@ -39,9 +55,14 @@ export const uploadToCloudinary = async (
       },
       (error, result) => {
         if (error) {
-          console.error('Cloudinary upload error:', error);
-          reject(new Error('Failed to upload file to cloud storage'));
+          console.error('[Cloudinary] Upload error:', {
+            message: error.message,
+            http_code: error.http_code,
+            name: error.name
+          });
+          reject(new Error(`Failed to upload file to cloud storage: ${error.message}`));
         } else if (result) {
+          console.log(`[Cloudinary] Upload successful: ${result.secure_url}`);
           resolve({
             url: result.secure_url,
             publicId: result.public_id,

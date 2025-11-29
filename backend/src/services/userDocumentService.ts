@@ -31,7 +31,7 @@ export const uploadUserDocument = async (data: CreateDocumentData) => {
     const uploadResult: UploadResult = await uploadToCloudinary(
       data.fileBuffer,
       data.fileName,
-      `user-documents/${data.userId}`
+      `wakili-pro/user-documents/${data.userId}`
     );
 
     // Create database record
@@ -320,7 +320,7 @@ export const storePurchasedDocument = async (
     const uploadResult = await uploadToCloudinary(
       fileBuffer,
       fileName,
-      `user-documents/${userId}/purchased`
+      `wakili-pro/user-documents/${userId}/purchased`
     );
 
     const document = await prisma.userDocument.create({
