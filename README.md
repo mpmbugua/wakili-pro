@@ -119,7 +119,26 @@ PORT=5000
 DATABASE_URL=postgresql://user:pass@localhost:5432/wakili_pro
 JWT_SECRET=your-secret-key
 FRONTEND_URL=http://localhost:3000
+
+# Cloudinary (Document Storage)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
+
+### Cloudinary Setup
+
+Wakili Pro uses Cloudinary for document storage. To configure:
+
+1. **Sign up** at [cloudinary.com/users/register/free](https://cloudinary.com/users/register/free)
+2. **Get credentials** from Dashboard → Account Details
+3. **Add to .env** file (see above)
+4. **Validate setup**:
+   ```bash
+   node scripts/validate-cloudinary.js
+   ```
+
+For detailed setup instructions, see [CLOUDINARY_SETUP.md](./CLOUDINARY_SETUP.md)
 
 ## 📈 Deployment
 
