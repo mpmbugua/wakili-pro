@@ -360,73 +360,99 @@ export const DocumentsPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-4">
           {filteredDocuments.map((document) => (
-            <div key={document.id} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all duration-200">
-              <div className="flex items-start justify-between mb-5">
-                <div className="flex items-start space-x-3 flex-1">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 shadow-sm">
+            <div key={document.id} className="bg-white rounded-xl border border-slate-200 hover:shadow-lg hover:border-blue-300 transition-all duration-200">
+              <div className="flex items-center p-6 gap-6">
+                {/* Icon */}
+                <div className="flex-shrink-0">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 shadow-sm">
                     {getTypeIcon(document.type)}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-bold text-slate-900 mb-1.5 truncate leading-tight">{document.title}</h3>
-                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">{document.category}</p>
+                </div>
+
+                {/* Document Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-slate-900 mb-1">{document.title}</h3>
+                      <p className="text-sm text-slate-500 font-medium uppercase tracking-wide">{document.category}</p>
+                    </div>
+                    <div className="ml-4">
+                      {getStatusBadge(document.status)}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6 text-sm text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-slate-500">Uploaded:</span>
+                      <span>{new Date(document.uploadedAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-slate-500">Size:</span>
+                      <span className="font-semibold">{formatFileSize(document.size)}</span>
+                    </div>
+                    {document.lawyerName && (
+                      <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-lg">
+                        <span className="font-medium text-slate-500">Reviewed by:</span>
+                        <span className="font-semibold text-green-700">{document.lawyerName}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="ml-2">
-                  {getStatusBadge(document.status)}
-                </div>
-              </div>
 
-              <div className="space-y-2.5 mb-5 text-sm">
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-slate-500 font-medium">Uploaded</span>
-                  <span className="text-slate-700">{new Date(document.uploadedAt).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span className="text-slate-500 font-medium">Size</span>
-                  <span className="text-slate-700 font-semibold">{formatFileSize(document.size)}</span>
-                </div>
-                {document.lawyerName && (
-                  <div className="flex justify-between items-center py-1 bg-green-50 -mx-3 px-3 rounded-lg">
-                    <span className="text-slate-500 font-medium">Reviewed by</span>
-                    <span className="font-semibold text-green-700">{document.lawyerName}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <div className="flex space-x-1.5">
+                {/* Action Buttons */}
+                <div className="flex-shrink-0 flex items-center gap-2">
                   <button 
-                    onClick={() => handleView(document)}
-                    className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all hover:scale-105" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleView(document);
+                    }}
+                    className="px-4 py-2.5 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm" 
                     title="View Document"
                   >
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-4 w-4" />
+                    <span className="text-sm font-medium">View</span>
                   </button>
                   <button 
-                    onClick={() => handleDownload(document)}
-                    className="p-2.5 text-green-600 hover:bg-green-50 rounded-lg transition-all hover:scale-105" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDownload(document);
+                    }}
+                    className="px-4 py-2.5 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm" 
                     title="Download"
                   >
-                    <Download className="h-5 w-5" />
+                    <Download className="h-4 w-4" />
+                    <span className="text-sm font-medium">Download</span>
                   </button>
                   <button 
-                    onClick={() => handleDelete(document.id)}
-                    className="p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-105" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(document.id);
+                    }}
+                    className="px-4 py-2.5 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm" 
                     title="Delete"
                   >
-                    <Trash2 className="h-5 w-5" />
+                    <Trash2 className="h-4 w-4" />
+                    <span className="text-sm font-medium">Delete</span>
                   </button>
+                  {document.status === 'DRAFT' && (
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRequestReview(document.id, document.title);
+                      }}
+                      className="px-4 py-2.5 text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm font-medium"
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span className="text-sm">Request Review</span>
+                    </button>
+                  )}
                 </div>
-                {document.status === 'DRAFT' && (
-                  <button 
-                    onClick={() => handleRequestReview(document.id, document.title)}
-                    className="px-4 py-2.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-semibold"
-                  >
-                    Request Review
-                  </button>
-                )}
               </div>
             </div>
           ))}

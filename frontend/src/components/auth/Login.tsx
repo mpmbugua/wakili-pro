@@ -78,7 +78,7 @@ const Login: React.FC = () => {
     const result = await login(formData);
     
     if (result.success) {
-      // Check for pending actions in sessionStorage
+      // Check for pending actions in sessionStorage - these take PRIORITY over 'from' path
       const pendingBooking = sessionStorage.getItem('pendingBooking');
       const pendingPurchase = sessionStorage.getItem('pendingPurchase');
       const pendingReviewRequest = sessionStorage.getItem('pendingReviewRequest');
@@ -86,13 +86,21 @@ const Login: React.FC = () => {
       console.log('Login success - checking pending actions:', { 
         pendingBooking: !!pendingBooking, 
         pendingPurchase: !!pendingPurchase, 
-        pendingReviewRequest: !!pendingReviewRequest 
+        pendingReviewRequest: !!pendingReviewRequest,
+        fromPath: from
       });
       
-      let redirectPath = from;
+      let redirectPath: string;
       let redirectState: any = undefined;
       
-      if (pendingBooking) {
+      // Prioritize pending actions FIRST, then use 'from' path as fallback
+      if (pendingReviewRequest) {
+        // HIGHEST PRIORITY: Redirect to documents page where useEffect will handle the review request
+        console.log('Pending review request found, redirecting to /documents');
+        redirectPath = '/documents';
+        // Keep in sessionStorage so DocumentsPage can process it
+        // Don't remove it yet - let DocumentsPage handle it
+      } else if (pendingBooking) {
         const booking = JSON.parse(pendingBooking);
         redirectPath = `/booking/${booking.lawyerId}`;
         redirectState = {
@@ -111,12 +119,9 @@ const Login: React.FC = () => {
         };
         // Keep in sessionStorage so marketplace page can handle it
         // Don't remove it yet - let marketplace page handle it
-      } else if (pendingReviewRequest) {
-        // Redirect to documents page where useEffect will handle the review request
-        console.log('Pending review request found, redirecting to /documents');
-        redirectPath = '/documents';
-        // Keep in sessionStorage so DocumentsPage can process it
-        // Don't remove it yet - let DocumentsPage handle it
+      } else {
+        // No pending actions, use the 'from' path
+        redirectPath = from;
       }
       
       console.log('Redirecting to:', redirectPath);
