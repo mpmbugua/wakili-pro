@@ -102,8 +102,8 @@ export const LawyerOnboarding: React.FC = () => {
     profileImageUrl: '',
     linkedInProfile: '',
     // Rates & Availability defaults
-    hourlyRate: undefined,
-    offPeakHourlyRate: undefined,
+    hourlyRate: 1000,
+    offPeakHourlyRate: 800,
     available24_7: false,
     workingHours: {
       monday: { start: '09:00', end: '17:00', available: true },
@@ -600,7 +600,7 @@ export const LawyerOnboarding: React.FC = () => {
           <input
             type="number"
             value={formData.hourlyRate || ''}
-            onChange={(e) => setFormData({ ...formData, hourlyRate: parseFloat(e.target.value) || undefined })}
+            onChange={(e) => setFormData({ ...formData, hourlyRate: parseFloat(e.target.value) || 0 })}
             placeholder="5000"
             min="500"
             step="100"
@@ -624,7 +624,7 @@ export const LawyerOnboarding: React.FC = () => {
           <input
             type="number"
             value={formData.offPeakHourlyRate || ''}
-            onChange={(e) => setFormData({ ...formData, offPeakHourlyRate: parseFloat(e.target.value) || undefined })}
+            onChange={(e) => setFormData({ ...formData, offPeakHourlyRate: parseFloat(e.target.value) || 0 })}
             placeholder="4000"
             min="500"
             step="100"
