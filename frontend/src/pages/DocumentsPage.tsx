@@ -34,6 +34,20 @@ export const DocumentsPage: React.FC = () => {
   useEffect(() => {
     if (user) {
       fetchDocuments();
+
+      // Check for pending review request after login
+      const pendingReview = sessionStorage.getItem('pendingReviewRequest');
+      if (pendingReview) {
+        try {
+          const { documentId, documentTitle } = JSON.parse(pendingReview);
+          sessionStorage.removeItem('pendingReviewRequest');
+          // Automatically trigger review request
+          handleRequestReview(documentId, documentTitle);
+        } catch (error) {
+          console.error('Error processing pending review request:', error);
+          sessionStorage.removeItem('pendingReviewRequest');
+        }
+      }
     }
   }, [user]);
 
@@ -163,16 +177,24 @@ export const DocumentsPage: React.FC = () => {
   };
 
   const handleRequestReview = async (documentId: string, documentTitle: string) => {
-    try {
-      // Update local state optimistically
-      setDocuments(prev =>
-        prev.map(doc =>
-          doc.id === documentId
-            ? { ...doc, status: 'UNDER_REVIEW' as Document['status'] }
-            : doc
-        )
-      );
+    // Check if user is authenticated
+    if (!user) {
+      // Store pending review request in sessionStorage
+      sessionStorage.setItem('pendingReviewRequest', JSON.stringify({
+        documentId,
+        documentTitle
+      }));
+      // Redirect to login with return path
+      navigate('/login', { 
+        state: { 
+          from: { pathname: '/documents' },
+          message: 'Please log in to request document review'
+        }
+      });
+      return;
+    }
 
+    try {
       // Call API to update document status
       await axiosInstance.post(`/user-documents/${documentId}/request-review`, {
         reviewType: 'AI_ONLY',
@@ -188,8 +210,6 @@ export const DocumentsPage: React.FC = () => {
       });
     } catch (error) {
       console.error('Error requesting review:', error);
-      // Revert optimistic update on error
-      await fetchDocuments();
       alert('Failed to request review. Please try again.');
     }
   };
@@ -297,7 +317,7 @@ export const DocumentsPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredDocuments.map((document) => (
             <div key={document.id} className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition">
               <div className="flex items-start justify-between mb-4">

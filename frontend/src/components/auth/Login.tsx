@@ -81,6 +81,7 @@ const Login: React.FC = () => {
       // Check for pending actions in sessionStorage
       const pendingBooking = sessionStorage.getItem('pendingBooking');
       const pendingPurchase = sessionStorage.getItem('pendingPurchase');
+      const pendingReviewRequest = sessionStorage.getItem('pendingReviewRequest');
       
       let redirectPath = from;
       let redirectState: any = undefined;
@@ -104,6 +105,11 @@ const Login: React.FC = () => {
         };
         // Keep in sessionStorage so marketplace page can handle it
         // Don't remove it yet - let marketplace page handle it
+      } else if (pendingReviewRequest) {
+        // Redirect to documents page where useEffect will handle the review request
+        redirectPath = '/documents';
+        // Keep in sessionStorage so DocumentsPage can process it
+        // Don't remove it yet - let DocumentsPage handle it
       }
       
       // Redirect to the intended destination
