@@ -188,6 +188,13 @@ CREATE TABLE IF NOT EXISTS "DocumentReview" (
     CONSTRAINT "DocumentReview_pkey" PRIMARY KEY ("id")
 );
 
+-- Add missing column if DocumentReview table already exists
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'DocumentReview' AND column_name = 'userDocumentId') THEN
+        ALTER TABLE "DocumentReview" ADD COLUMN "userDocumentId" TEXT;
+    END IF;
+END $$;
+
 -- CreateTable
 CREATE TABLE IF NOT EXISTS "LawyerLetterhead" (
     "id" TEXT NOT NULL,
