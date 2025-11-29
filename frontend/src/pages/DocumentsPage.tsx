@@ -230,12 +230,38 @@ export const DocumentsPage: React.FC = () => {
     }
   };
 
-  const handleDownload = (document: Document) => {
-    if (document.fileUrl) {
-      window.open(document.fileUrl, '_blank');
-    } else {
+  const handleDownload = async (doc: Document) => {
+    if (!doc.fileUrl) {
       alert('Document URL not available');
+      return;
     }
+
+    try {
+      // Create a temporary anchor element to trigger download
+      const link = window.document.createElement('a');
+      link.href = doc.fileUrl;
+      link.download = doc.title; // Suggest filename
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      
+      // Append to body, click, and remove
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      // Fallback to opening in new tab
+      window.open(doc.fileUrl, '_blank');
+    }
+  };
+
+  const handleView = (doc: Document) => {
+    if (!doc.fileUrl) {
+      alert('Document URL not available');
+      return;
+    }
+    // Open in new tab for viewing
+    window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
   };
 
   const filteredDocuments = documents.filter(doc => {
@@ -353,7 +379,7 @@ export const DocumentsPage: React.FC = () => {
               <div className="flex items-center justify-between pt-4 border-t border-slate-200">
                 <div className="flex space-x-2">
                   <button 
-                    onClick={() => handleDownload(document)}
+                    onClick={() => handleView(document)}
                     className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition" 
                     title="View"
                   >
