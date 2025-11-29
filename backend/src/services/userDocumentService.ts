@@ -1,4 +1,4 @@
-import { PrismaClient, DocumentType, DocumentStatus, DocumentSource } from '@prisma/client';
+import { PrismaClient, DocumentType, DocumentStatus, DocumentSource, DocumentOrigin, ReviewType, UrgencyLevel } from '@prisma/client';
 import { uploadToCloudinary, deleteFromCloudinary, UploadResult } from './fileUploadService';
 
 const prisma = new PrismaClient();
@@ -277,12 +277,12 @@ export const requestDocumentReview = async (
       data: {
         userId,
         userDocumentId: documentId, // Link to the UserDocument
-        documentSource: 'EXTERNAL' as any,
+        documentSource: DocumentOrigin.EXTERNAL,
         uploadedDocumentUrl: document.fileUrl,
         originalFileName: document.fileName,
         documentType: document.type,
-        reviewType: reviewType as any,
-        urgency: 'STANDARD' as any,
+        reviewType: reviewType as ReviewType,
+        urgency: UrgencyLevel.STANDARD,
         deadline: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         price: reviewType === 'AI_ONLY' ? 500 : reviewType === 'AI_PLUS_CERTIFICATION' ? 3500 : 3000,
       },
