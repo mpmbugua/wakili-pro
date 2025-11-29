@@ -85,6 +85,28 @@ app.get('/debug/last-error', async (req, res) => {
   getLastError(req, res);
 });
 
+// Debug endpoint to test Cloudinary configuration
+app.get('/debug/cloudinary', (_req: Request, res: Response) => {
+  const cloudinaryConfig = {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  };
+
+  const isConfigured = !!(cloudinaryConfig.cloud_name && cloudinaryConfig.api_key && cloudinaryConfig.api_secret);
+
+  res.json({
+    success: isConfigured,
+    configured: isConfigured,
+    cloud_name: cloudinaryConfig.cloud_name || 'NOT SET',
+    has_api_key: !!cloudinaryConfig.api_key,
+    has_api_secret: !!cloudinaryConfig.api_secret,
+    message: isConfigured 
+      ? 'Cloudinary is properly configured' 
+      : 'Cloudinary credentials are missing. Check environment variables.',
+  });
+});
+
 
 // Debug endpoint to test registration validation
 app.post('/debug/register-test', async (req: Request, res: Response) => {
