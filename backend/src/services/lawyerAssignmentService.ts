@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { sendLawyerAssignedEmail, sendLawyerAssignedSMS, notifyLawyerOfAssignment } from './documentNotificationService';
 
 const prisma = new PrismaClient();
 
@@ -12,7 +13,16 @@ export const assignLawyerToDocumentReview = async (reviewId: string): Promise<vo
     const review = await prisma.documentReview.findUnique({
       where: { id: reviewId },
       include: {
-        userDocument: true
+        userDocument: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phoneNumber: true
+          }
+        }
       }
     });
 
@@ -75,7 +85,7 @@ export const assignLawyerToDocumentReview = async (reviewId: string): Promise<vo
     });
 
     // Update document review with assigned lawyer
-    await prisma.documentReview.update({
+    const updatedReview = await prisma.documentReview.update({
       where: { id: reviewId },
       data: {
         lawyerId: assignedLawyer.id,
@@ -85,6 +95,51 @@ export const assignLawyerToDocumentReview = async (reviewId: string): Promise<vo
     });
 
     console.log('[LawyerAssignment] Lawyer assigned successfully');
+
+    // Send SMS notification to user
+    if (review.user?.phoneNumber) {
+      const userName = `${review.user.firstName} ${review.user.lastName}`;
+      const lawyerName = `${assignedLawyer.firstName} ${assignedLawyer.lastName}`;
+      const documentTitle = review.userDocument?.title || 'your document';
+      
+      sendLawyerAssignedSMS(
+        review.user.phoneNumber,
+        userName,
+        lawyerName,
+        documentTitle
+      ).catch(err => console.error('[LawyerAssignment] SMS notification error:', err));
+    }
+
+    // Send email notification to user
+    if (review.user?.email) {
+      const userName = `${review.user.firstName} ${review.user.lastName}`;
+      const lawyerName = `${assignedLawyer.firstName} ${assignedLawyer.lastName}`;
+      const documentTitle = review.userDocument?.title || 'your document';
+      
+      sendLawyerAssignedEmail(
+        review.user.email,
+        userName,
+        lawyerName,
+        documentTitle,
+        updatedReview.estimatedDeliveryDate || new Date(Date.now() + 24 * 60 * 60 * 1000)
+      ).catch(err => console.error('[LawyerAssignment] Email notification error:', err));
+    }
+
+    // Notify lawyer of assignment
+    if (assignedLawyer.email) {
+      const lawyerName = `${assignedLawyer.firstName} ${assignedLawyer.lastName}`;
+      const documentTitle = review.userDocument?.title || 'Document';
+      
+      notifyLawyerOfAssignment(
+        assignedLawyer.email,
+        assignedLawyer.phoneNumber || '',
+        lawyerName,
+        documentTitle,
+        reviewId,
+        updatedReview.urgency || 'STANDARD',
+        updatedReview.deadline || new Date(Date.now() + 24 * 60 * 60 * 1000)
+      ).catch(err => console.error('[LawyerAssignment] Lawyer notification error:', err));
+    }
   } catch (error) {
     console.error('[LawyerAssignment] Error assigning lawyer:', error);
     

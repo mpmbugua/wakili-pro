@@ -4,6 +4,7 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { pdfSigningService } from '../services/pdfSigningService';
 import { generateCertificateId } from '../services/certificateIdService';
 import { generateVerificationQRCode } from '../services/qrCodeService';
+import { sendCertificationCompleteEmail, sendCertificationCompleteSMS } from '../services/documentNotificationService';
 
 const prisma = new PrismaClient();
 
@@ -137,8 +138,53 @@ export const certifyDocument = async (req: AuthenticatedRequest, res: Response):
         letterheadApplied: true,
         certificationStatus: 'PENDING_QC', // Send to quality control
         lawyerNotes: lawyerNotes || null
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true,
+            phoneNumber: true
+          }
+        },
+        userDocument: {
+          select: {
+            title: true
+          }
+        }
       }
     });
+
+    // Send email notification with download links
+    if (updatedReview.user?.email) {
+      const userName = `${updatedReview.user.firstName} ${updatedReview.user.lastName}`;
+      const documentTitle = updatedReview.userDocument?.title || 'Your document';
+      const lawyerName = `${documentReview.lawyer?.firstName} ${documentReview.lawyer?.lastName}`;
+      
+      sendCertificationCompleteEmail(
+        updatedReview.user.email,
+        userName,
+        documentTitle,
+        certificateId,
+        certifiedDocumentUrl,
+        certificateUrl,
+        lawyerName
+      ).catch(err => console.error('[Certification] Email notification error:', err));
+    }
+
+    // Send SMS notification
+    if (updatedReview.user?.phoneNumber) {
+      const userName = `${updatedReview.user.firstName} ${updatedReview.user.lastName}`;
+      const documentTitle = updatedReview.userDocument?.title || 'Your document';
+      
+      sendCertificationCompleteSMS(
+        updatedReview.user.phoneNumber,
+        userName,
+        documentTitle,
+        certificateId
+      ).catch(err => console.error('[Certification] SMS notification error:', err));
+    }
 
     res.json({
       success: true,

@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import fs from 'fs/promises';
 import path from 'path';
 import { assignLawyerToDocumentReview } from './lawyerAssignmentService';
+import { sendAIReviewCompleteEmail } from './documentNotificationService';
 
 const prisma = new PrismaClient();
 
@@ -71,23 +72,47 @@ export const reviewDocumentWithAI = async (
     const reviewResults = parseAIResponse(aiAnalysis);
 
     // Update document review with results
-    await prisma.documentReview.update({
+    const updatedReview = await prisma.documentReview.update({
       where: { id: reviewId },
       data: {
         aiReviewStatus: 'COMPLETED',
         aiReviewResults: reviewResults as any,
         aiReviewCompletedAt: new Date()
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        userDocument: {
+          select: {
+            title: true
+          }
+        }
       }
     });
 
     console.log(`AI review completed for document ${reviewId}`);
 
-    // If this review also requires certification, assign lawyer now
-    const review = await prisma.documentReview.findUnique({
-      where: { id: reviewId }
-    });
+    // Send email notification to user
+    if (updatedReview.user?.email) {
+      const userName = `${updatedReview.user.firstName} ${updatedReview.user.lastName}`;
+      const documentTitle = updatedReview.userDocument?.title || 'Your document';
+      
+      sendAIReviewCompleteEmail(
+        updatedReview.user.email,
+        userName,
+        documentTitle,
+        reviewId,
+        reviewResults.overallScore
+      ).catch(err => console.error('[AIReview] Email notification error:', err));
+    }
 
-    if (review && review.reviewType === 'AI_PLUS_CERTIFICATION') {
+    // If this review also requires certification, assign lawyer now
+    if (updatedReview.reviewType === 'AI_PLUS_CERTIFICATION') {
       console.log(`[AIReview] Review requires certification, assigning lawyer for: ${reviewId}`);
       assignLawyerToDocumentReview(reviewId)
         .catch(err => console.error('[AIReview] Lawyer assignment error:', err));
