@@ -276,6 +276,7 @@ export const requestDocumentReview = async (
     const review = await prisma.documentReview.create({
       data: {
         userId,
+        userDocumentId: documentId, // Link to the UserDocument
         documentSource: 'EXTERNAL' as any,
         uploadedDocumentUrl: document.fileUrl,
         originalFileName: document.fileName,
@@ -294,6 +295,8 @@ export const requestDocumentReview = async (
     };
   } catch (error) {
     console.error('Request document review error:', error);
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     throw error;
   }
 };
