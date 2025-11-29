@@ -75,36 +75,27 @@ export const DocumentsPage: React.FC = () => {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
+      console.log('[DocumentsPage] Fetching documents...');
       const response = await axiosInstance.get('/user-documents');
+      
+      console.log('[DocumentsPage] Documents response:', response.data);
       
       if (response.data.success) {
         setDocuments(response.data.data);
+        console.log('[DocumentsPage] Loaded', response.data.data.length, 'documents');
+      } else {
+        console.warn('[DocumentsPage] API returned success=false');
+        setDocuments([]);
       }
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-      // Fallback to mock data if API fails
-      setDocuments([
-        {
-          id: '1',
-          title: 'Employment Contract - Tech Corp',
-          type: 'CONTRACT',
-          category: 'Employment',
-          uploadedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          size: 245000,
-          status: 'REVIEWED',
-          lawyerName: 'Sarah Mwangi',
-        },
-        {
-          id: '2',
-          title: 'Rental Agreement - Westlands Apartment',
-          type: 'AGREEMENT',
-          category: 'Real Estate',
-          uploadedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-          size: 189000,
-          status: 'FINALIZED',
-          lawyerName: 'David Ochieng',
-        },
-      ]);
+    } catch (error: any) {
+      console.error('[DocumentsPage] Error fetching documents:', error);
+      console.error('[DocumentsPage] Error response:', error.response?.data);
+      
+      // Show error to user
+      alert('Failed to load documents. Using offline mode.');
+      
+      // Set empty array instead of mock data to avoid UUID issues
+      setDocuments([]);
     } finally {
       setLoading(false);
     }
@@ -248,6 +239,12 @@ export const DocumentsPage: React.FC = () => {
       // Convert urgency levels to backend format
       const backendUrgency = selection.urgencyLevel.toLowerCase();
 
+      console.log('[DocumentsPage] Selected document:', {
+        id: selectedDocument.id,
+        idType: typeof selectedDocument.id,
+        title: selectedDocument.title
+      });
+      
       console.log('[DocumentsPage] Initiating M-Pesa payment:', {
         documentId: selectedDocument.id,
         serviceType: backendServiceType,
@@ -255,6 +252,13 @@ export const DocumentsPage: React.FC = () => {
         phoneNumber,
         amount: selection.totalPrice
       });
+
+      // Validate documentId is a valid UUID
+      if (!selectedDocument.id || typeof selectedDocument.id !== 'string') {
+        console.error('[DocumentsPage] Invalid document ID:', selectedDocument.id);
+        alert('Invalid document selected. Please try again.');
+        return;
+      }
 
       // Initiate M-Pesa payment
       const response = await axiosInstance.post('/document-payment/initiate', {
