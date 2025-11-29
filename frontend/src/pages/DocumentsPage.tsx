@@ -424,10 +424,10 @@ export const DocumentsPage: React.FC = () => {
         </div>
         <button 
           onClick={() => setShowUploadModal(true)}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
         >
           <Upload className="h-5 w-5 mr-2" />
-          Upload Document
+          Upload Documents for Review
         </button>
       </div>
 
@@ -472,10 +472,10 @@ export const DocumentsPage: React.FC = () => {
           </p>
           <button 
             onClick={() => setShowUploadModal(true)}
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             <Upload className="h-5 w-5 mr-2" />
-            Upload Document
+            Upload Documents for Review
           </button>
         </div>
       ) : (
@@ -583,7 +583,7 @@ export const DocumentsPage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-slate-900">Upload Document</h2>
+              <h2 className="text-2xl font-bold text-slate-900">Upload Documents for Review</h2>
               <button
                 onClick={() => {
                   setShowUploadModal(false);
@@ -704,9 +704,9 @@ export const DocumentsPage: React.FC = () => {
               <button
                 onClick={handleUpload}
                 disabled={!uploadFile || !uploadTitle.trim() || uploading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {uploading ? 'Uploading...' : 'Upload Document'}
+                {uploading ? 'Uploading...' : 'Upload Documents for Review'}
               </button>
             </div>
           </div>
