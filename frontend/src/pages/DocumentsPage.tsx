@@ -37,18 +37,29 @@ export const DocumentsPage: React.FC = () => {
 
       // Check for pending review request after login
       const pendingReview = sessionStorage.getItem('pendingReviewRequest');
+      console.log('DocumentsPage mounted, checking pending review:', { 
+        hasPendingReview: !!pendingReview, 
+        user: !!user 
+      });
+      
       if (pendingReview) {
         try {
           const { documentId, documentTitle } = JSON.parse(pendingReview);
+          console.log('Processing pending review request:', { documentId, documentTitle });
           sessionStorage.removeItem('pendingReviewRequest');
-          // Automatically trigger review request
-          handleRequestReview(documentId, documentTitle);
+          
+          // Small delay to ensure documents are loaded
+          setTimeout(() => {
+            console.log('Triggering handleRequestReview');
+            handleRequestReview(documentId, documentTitle);
+          }, 100);
         } catch (error) {
           console.error('Error processing pending review request:', error);
           sessionStorage.removeItem('pendingReviewRequest');
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchDocuments = async () => {
@@ -260,8 +271,14 @@ export const DocumentsPage: React.FC = () => {
       alert('Document URL not available');
       return;
     }
-    // Open in new tab for viewing
-    window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
+    // For PDFs, use Google Docs viewer for better in-browser experience
+    if (doc.fileUrl.toLowerCase().endsWith('.pdf')) {
+      const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.fileUrl)}&embedded=true`;
+      window.open(viewerUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      // For other file types, open directly
+      window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const filteredDocuments = documents.filter(doc => {
@@ -343,58 +360,60 @@ export const DocumentsPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDocuments.map((document) => (
-            <div key={document.id} className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-start space-x-4 flex-1">
-                  <div className="bg-blue-50 rounded-lg p-3">
+            <div key={document.id} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all duration-200">
+              <div className="flex items-start justify-between mb-5">
+                <div className="flex items-start space-x-3 flex-1">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 shadow-sm">
                     {getTypeIcon(document.type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-1 truncate">{document.title}</h3>
-                    <p className="text-sm text-slate-600">{document.category}</p>
+                    <h3 className="text-base font-bold text-slate-900 mb-1.5 truncate leading-tight">{document.title}</h3>
+                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">{document.category}</p>
                   </div>
                 </div>
-                {getStatusBadge(document.status)}
+                <div className="ml-2">
+                  {getStatusBadge(document.status)}
+                </div>
               </div>
 
-              <div className="space-y-2 mb-4 text-sm text-slate-600">
-                <div className="flex justify-between">
-                  <span>Uploaded</span>
-                  <span>{new Date(document.uploadedAt).toLocaleDateString()}</span>
+              <div className="space-y-2.5 mb-5 text-sm">
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-slate-500 font-medium">Uploaded</span>
+                  <span className="text-slate-700">{new Date(document.uploadedAt).toLocaleDateString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Size</span>
-                  <span>{formatFileSize(document.size)}</span>
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-slate-500 font-medium">Size</span>
+                  <span className="text-slate-700 font-semibold">{formatFileSize(document.size)}</span>
                 </div>
                 {document.lawyerName && (
-                  <div className="flex justify-between">
-                    <span>Reviewed by</span>
-                    <span className="font-medium text-slate-900">{document.lawyerName}</span>
+                  <div className="flex justify-between items-center py-1 bg-green-50 -mx-3 px-3 rounded-lg">
+                    <span className="text-slate-500 font-medium">Reviewed by</span>
+                    <span className="font-semibold text-green-700">{document.lawyerName}</span>
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                <div className="flex space-x-2">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <div className="flex space-x-1.5">
                   <button 
                     onClick={() => handleView(document)}
-                    className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition" 
-                    title="View"
+                    className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all hover:scale-105" 
+                    title="View Document"
                   >
                     <Eye className="h-5 w-5" />
                   </button>
                   <button 
                     onClick={() => handleDownload(document)}
-                    className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition" 
+                    className="p-2.5 text-green-600 hover:bg-green-50 rounded-lg transition-all hover:scale-105" 
                     title="Download"
                   >
                     <Download className="h-5 w-5" />
                   </button>
                   <button 
                     onClick={() => handleDelete(document.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" 
+                    className="p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-105" 
                     title="Delete"
                   >
                     <Trash2 className="h-5 w-5" />
@@ -403,7 +422,7 @@ export const DocumentsPage: React.FC = () => {
                 {document.status === 'DRAFT' && (
                   <button 
                     onClick={() => handleRequestReview(document.id, document.title)}
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                    className="px-4 py-2.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-semibold"
                   >
                     Request Review
                   </button>
