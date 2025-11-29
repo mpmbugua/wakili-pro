@@ -11,7 +11,7 @@ const router = Router();
 
 // Validation schemas
 const initiatePaymentSchema = z.object({
-  documentId: z.string().uuid(),
+  documentId: z.string().min(1, 'Document ID is required'), // Accept any non-empty string (cuid or uuid)
   serviceType: z.enum(['ai_review', 'certification', 'ai_and_certification']),
   urgencyLevel: z.enum(['standard', 'urgent', 'emergency']),
   paymentMethod: z.enum(['mpesa', 'card']),
@@ -32,15 +32,24 @@ interface AuthRequest extends Request {
  */
 router.post('/initiate', authenticate, async (req: AuthRequest, res: Response) => {
   try {
+    console.log('[DocumentPayment] Received payment initiation request');
+    console.log('[DocumentPayment] Request body:', JSON.stringify(req.body, null, 2));
+    console.log('[DocumentPayment] User ID:', req.user?.id);
+    
     // Validate request
     const validatedData = initiatePaymentSchema.parse(req.body);
     const userId = req.user?.id;
 
+    console.log('[DocumentPayment] Validation passed, validated data:', validatedData);
+
     if (!userId) {
+      console.error('[DocumentPayment] No user ID found');
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
+    console.log('[DocumentPayment] Looking up document:', validatedData.documentId, 'for user:', userId);
+    
     // Verify document belongs to user
     const document = await prisma.userDocument.findFirst({
       where: {
@@ -49,8 +58,11 @@ router.post('/initiate', authenticate, async (req: AuthRequest, res: Response) =
       }
     });
 
+    console.log('[DocumentPayment] Document found:', !!document);
+
     if (!document) {
-      res.status(404).json({ error: 'Document not found' });
+      console.error('[DocumentPayment] Document not found or does not belong to user');
+      res.status(404).json({ error: 'Document not found or you do not have permission to access it' });
       return;
     }
 
@@ -102,6 +114,12 @@ router.post('/initiate', authenticate, async (req: AuthRequest, res: Response) =
         return;
       }
 
+      console.log('[DocumentPayment] Initiating M-Pesa payment:', {
+        phoneNumber: validatedData.phoneNumber,
+        amount: pricing.total,
+        paymentId: payment.id
+      });
+
       const mpesaResponse = await mpesaService.initiatePayment({
         phoneNumber: validatedData.phoneNumber,
         amount: pricing.total,
@@ -109,7 +127,11 @@ router.post('/initiate', authenticate, async (req: AuthRequest, res: Response) =
         transactionDesc: `Document review - ${validatedData.serviceType}`
       });
 
+      console.log('[DocumentPayment] M-Pesa response:', mpesaResponse);
+
       if (!mpesaResponse.success) {
+        console.error('[DocumentPayment] M-Pesa failed:', mpesaResponse.errorMessage);
+        
         await prisma.payment.update({
           where: { id: payment.id },
           data: { 
@@ -139,12 +161,15 @@ router.post('/initiate', authenticate, async (req: AuthRequest, res: Response) =
         }
       });
 
+      console.log('[DocumentPayment] Payment successful, returning response');
+
       res.status(200).json({
         success: true,
-        paymentId: payment.id,
-        paymentMethod: 'mpesa',
-        checkoutRequestId: mpesaResponse.checkoutRequestID,
-        message: 'STK Push sent to phone. Please enter M-Pesa PIN.'
+        data: {
+          paymentId: payment.id,
+          customerMessage: 'STK Push sent to phone. Please enter M-Pesa PIN.',
+          checkoutRequestId: mpesaResponse.checkoutRequestID
+        }
       });
     } else if (validatedData.paymentMethod === 'card') {
       const customerEmail = validatedData.email || req.user?.email;
@@ -207,14 +232,21 @@ router.post('/initiate', authenticate, async (req: AuthRequest, res: Response) =
       });
     }
   } catch (error: any) {
-    console.error('Payment initiation error:', error);
+    console.error('[DocumentPayment] Payment initiation error:', error);
+    console.error('[DocumentPayment] Error stack:', error.stack);
     
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Invalid request data', details: error.errors });
+      console.error('[DocumentPayment] Validation error:', JSON.stringify(error.errors, null, 2));
+      const firstError = error.errors[0];
+      const fieldName = firstError.path.join('.');
+      res.status(400).json({ 
+        error: `Invalid ${fieldName}: ${firstError.message}`,
+        details: error.errors 
+      });
       return;
     }
 
-    res.status(500).json({ error: 'Failed to initiate payment' });
+    res.status(500).json({ error: error.message || 'Failed to initiate payment' });
   }
 });
 
