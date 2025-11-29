@@ -90,13 +90,33 @@ const DocumentServicesPage: React.FC = () => {
       if (pendingReview) {
         try {
           const reviewData = JSON.parse(pendingReview);
-          setSelectedService(reviewData.selectedService);
-          setDocumentType(reviewData.documentType);
-          setDocumentCategory(reviewData.documentCategory);
-          setDocumentSource('external');
           
-          // Show a message to the user
-          alert(`Welcome back! Your document "${reviewData.fileName}" is ready to submit. Please re-upload the file to continue.`);
+          // Check if this was from an uploaded document (has documentId)
+          if (reviewData.documentId && reviewData.documentTitle) {
+            // Restore the uploaded document review
+            setFromUploadedDocument(true);
+            setDocumentType(reviewData.documentTitle);
+            setSelectedService(reviewData.selectedService || 'ai-review');
+            setDocumentSource('external');
+            
+            const mockFile = new File([''], reviewData.documentTitle, { type: 'application/pdf' });
+            setUploadedFile({
+              file: mockFile,
+              preview: reviewData.documentTitle
+            });
+            
+            // Move pendingDocumentReview back to activeDocumentReview
+            sessionStorage.setItem('activeDocumentReview', pendingReview);
+          } else {
+            // New file upload - restore form state but user needs to re-upload
+            setSelectedService(reviewData.selectedService);
+            setDocumentType(reviewData.documentType);
+            setDocumentCategory(reviewData.documentCategory);
+            setDocumentSource('external');
+            
+            // Show a message to the user
+            alert(`Welcome back! Please re-upload "${reviewData.fileName}" to continue.`);
+          }
           
           // Clear the pending review
           sessionStorage.removeItem('pendingDocumentReview');
@@ -192,14 +212,21 @@ const DocumentServicesPage: React.FC = () => {
 
     // Check authentication before proceeding
     if (!isAuthenticated) {
-      // Store pending document review details in sessionStorage
-      sessionStorage.setItem('pendingDocumentReview', JSON.stringify({
-        fileName: uploadedFile.file.name,
-        documentType,
-        documentCategory,
-        selectedService,
-        price: calculatePrice()
-      }));
+      // If coming from uploaded document, preserve the activeDocumentReview
+      const savedReview = sessionStorage.getItem('activeDocumentReview');
+      if (savedReview) {
+        // Document is already uploaded, just save that we need to continue after login
+        sessionStorage.setItem('pendingDocumentReview', savedReview);
+      } else {
+        // Store new document review details in sessionStorage
+        sessionStorage.setItem('pendingDocumentReview', JSON.stringify({
+          fileName: uploadedFile.file.name,
+          documentType,
+          documentCategory,
+          selectedService,
+          price: calculatePrice()
+        }));
+      }
       
       // Redirect to registration/login
       navigate('/register', { 
