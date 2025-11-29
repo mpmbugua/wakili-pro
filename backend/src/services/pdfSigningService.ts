@@ -1,12 +1,12 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import fs from 'fs/promises';
-import path from 'path';
+import axios from 'axios';
 import { generateQRCodeDataUrl } from './qrCodeService';
+import { uploadCertificate, uploadToCloudinary } from './fileUploadService';
 
 export interface PDFSigningOptions {
-  documentPath: string;
-  signatureImagePath?: string;
-  stampImagePath?: string;
+  documentUrl: string; // Cloudinary URL instead of local path
+  signatureImageUrl?: string; // Cloudinary URL
+  stampImageUrl?: string; // Cloudinary URL
   lawyerDetails: {
     name: string;
     licenseNumber: string;
@@ -16,6 +16,14 @@ export interface PDFSigningOptions {
   certificateId: string;
 }
 
+/**
+ * Download file from URL to buffer
+ */
+async function downloadFile(url: string): Promise<Buffer> {
+  const response = await axios.get(url, { responseType: 'arraybuffer' });
+  return Buffer.from(response.data);
+}
+
 export class PDFSigningService {
   
   /**
@@ -23,8 +31,8 @@ export class PDFSigningService {
    */
   async signDocument(options: PDFSigningOptions): Promise<string> {
     try {
-      // 1. Load original PDF
-      const pdfBytes = await fs.readFile(options.documentPath);
+      // 1. Download original PDF from Cloudinary
+      const pdfBytes = await downloadFile(options.documentUrl);
       const pdfDoc = await PDFDocument.load(pdfBytes);
       
       // 2. Get last page for signature placement
@@ -123,9 +131,9 @@ export class PDFSigningService {
       });
       
       // 7. Add digital signature (if provided)
-      if (options.signatureImagePath) {
+      if (options.signatureImageUrl) {
         try {
-          const signatureBytes = await fs.readFile(options.signatureImagePath);
+          const signatureBytes = await downloadFile(options.signatureImageUrl);
           const signatureImage = await pdfDoc.embedPng(signatureBytes);
           
           const signatureWidth = 120;
@@ -154,9 +162,9 @@ export class PDFSigningService {
       }
       
       // 8. Add official stamp (if provided)
-      if (options.stampImagePath) {
+      if (options.stampImageUrl) {
         try {
-          const stampBytes = await fs.readFile(options.stampImagePath);
+          const stampBytes = await downloadFile(options.stampImageUrl);
           const stampImage = await pdfDoc.embedPng(stampBytes);
           
           const stampSize = 80;
@@ -193,18 +201,19 @@ export class PDFSigningService {
         color: rgb(0.4, 0.4, 0.4)
       });
       
-      // 10. Save signed PDF
+      // 10. Save signed PDF to Cloudinary
       const signedPdfBytes = await pdfDoc.save();
-      const certifiedDocsDir = path.join(__dirname, '../../storage/certified-documents');
-      await fs.mkdir(certifiedDocsDir, { recursive: true });
       
       const timestamp = Date.now();
       const fileName = `certified-${options.certificateId}-${timestamp}.pdf`;
-      const outputPath = path.join(certifiedDocsDir, fileName);
       
-      await fs.writeFile(outputPath, signedPdfBytes);
+      const uploadResult = await uploadToCloudinary(
+        Buffer.from(signedPdfBytes),
+        fileName,
+        `wakili-pro/certified-documents`
+      );
       
-      return `/uploads/certified-documents/${fileName}`;
+      return uploadResult.url;
     } catch (error) {
       console.error('Error signing PDF:', error);
       throw new Error('Failed to sign document');
@@ -466,17 +475,18 @@ export class PDFSigningService {
         color: rgb(0.4, 0.4, 0.4)
       });
       
-      // 6. Save certificate PDF
+      // 6. Save certificate PDF to Cloudinary
       const certificatePdfBytes = await pdfDoc.save();
-      const certificatesDir = path.join(__dirname, '../../storage/certificates');
-      await fs.mkdir(certificatesDir, { recursive: true });
       
       const fileName = `certificate-${options.certificateId}.pdf`;
-      const outputPath = path.join(certificatesDir, fileName);
       
-      await fs.writeFile(outputPath, certificatePdfBytes);
+      const uploadResult = await uploadCertificate(
+        Buffer.from(certificatePdfBytes),
+        fileName,
+        options.certificateId
+      );
       
-      return `/uploads/certificates/${fileName}`;
+      return uploadResult.url;
     } catch (error) {
       console.error('Error generating certificate:', error);
       throw new Error('Failed to generate certificate');

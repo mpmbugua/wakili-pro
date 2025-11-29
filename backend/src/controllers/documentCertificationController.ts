@@ -4,7 +4,6 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { pdfSigningService } from '../services/pdfSigningService';
 import { generateCertificateId } from '../services/certificateIdService';
 import { generateVerificationQRCode } from '../services/qrCodeService';
-import path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -87,7 +86,7 @@ export const certifyDocument = async (req: AuthenticatedRequest, res: Response):
     // 4. Generate unique certificate ID
     const certificateId = generateCertificateId(letterhead.certificatePrefix);
 
-    // 5. Get document path
+    // 5. Get document URL from Cloudinary
     if (!documentReview.uploadedDocumentUrl) {
       res.status(400).json({
         success: false,
@@ -96,22 +95,11 @@ export const certifyDocument = async (req: AuthenticatedRequest, res: Response):
       return;
     }
 
-    const documentPath = path.join(
-      __dirname,
-      '../../storage',
-      documentReview.uploadedDocumentUrl.replace('/uploads/', '')
-    );
-
-    // 6. Sign the PDF
-    const signatureImagePath = path.join(__dirname, '../../storage', letterhead.signatureUrl.replace('/uploads/', ''));
-    const stampImagePath = letterhead.stampUrl
-      ? path.join(__dirname, '../../storage', letterhead.stampUrl.replace('/uploads/', ''))
-      : undefined;
-
+    // 6. Sign the PDF using Cloudinary URLs
     const certifiedDocumentUrl = await pdfSigningService.signDocument({
-      documentPath,
-      signatureImagePath,
-      stampImagePath,
+      documentUrl: documentReview.uploadedDocumentUrl, // Cloudinary URL
+      signatureImageUrl: letterhead.signatureUrl, // Cloudinary URL
+      stampImageUrl: letterhead.stampUrl || undefined, // Cloudinary URL
       lawyerDetails: {
         name: `${documentReview.lawyer?.firstName} ${documentReview.lawyer?.lastName}`,
         licenseNumber: letterhead.licenseNumber,

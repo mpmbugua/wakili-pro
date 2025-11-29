@@ -1,9 +1,8 @@
 import QRCode from 'qrcode';
-import fs from 'fs/promises';
-import path from 'path';
+import { uploadQRCode } from './fileUploadService';
 
 /**
- * Generate QR code for certificate verification
+ * Generate QR code for certificate verification and upload to Cloudinary
  */
 export const generateVerificationQRCode = async (
   certificateId: string,
@@ -21,17 +20,12 @@ export const generateVerificationQRCode = async (
       width: 300
     });
     
-    // Save to storage
-    const qrCodesDir = path.join(__dirname, '../../storage/qr-codes');
-    await fs.mkdir(qrCodesDir, { recursive: true });
-    
+    // Upload to Cloudinary
     const fileName = `qr-${certificateId}.png`;
-    const filePath = path.join(qrCodesDir, fileName);
+    const uploadResult = await uploadQRCode(qrCodeBuffer, fileName, certificateId);
     
-    await fs.writeFile(filePath, qrCodeBuffer);
-    
-    // Return URL path
-    return `/uploads/qr-codes/${fileName}`;
+    // Return Cloudinary URL
+    return uploadResult.url;
   } catch (error) {
     console.error('Error generating QR code:', error);
     throw new Error('Failed to generate verification QR code');
