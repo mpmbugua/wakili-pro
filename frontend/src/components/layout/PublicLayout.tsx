@@ -13,11 +13,15 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
 
   const handleLogout = async () => {
     try {
+      console.log('Logging out...');
       await logout();
-      navigate('/', { replace: true });
+      console.log('Logout successful, redirecting...');
+      // Force a hard redirect to clear all state
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
-      navigate('/', { replace: true });
+      // Force redirect anyway
+      window.location.href = '/';
     }
   };
 
