@@ -30,12 +30,14 @@ import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
 import { MyClientsPage } from './pages/MyClientsPage';
+import { NewClientPage } from './pages/NewClientPage';
 import { MyServicesPage } from './pages/MyServicesPage';
 import { BillingPage } from './pages/BillingPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { PerformancePage } from './pages/PerformancePage';
 import { PublicLawyerProfile } from './pages/PublicLawyerProfile';
 import ConsultationsPage from './pages/ConsultationsPage';
+import { NewConsultationPage } from './pages/NewConsultationPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import MessagesPage from './pages/MessagesPage';
 import DocumentsPage from './pages/DocumentsPage';
@@ -336,6 +338,22 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <ConsultationsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/consultations/new" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <NewConsultationPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/clients/new" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <NewClientPage />
                 </ProtectedRoute>
               } 
             />
