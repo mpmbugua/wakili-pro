@@ -72,9 +72,12 @@ export const askAIQuestion = async (req: AuthenticatedRequest, res: Response): P
 
     // Saving query to database removed: aIQuery model does not exist in schema.
 
-    // Add consultation recommendation for non-authenticated users
+    // Add consultation recommendation for non-authenticated users or public users (not for lawyers)
     let consultationSuggestion = null;
-    if (!isAuthenticated || aiResponse.recommendsLawyer) {
+    const userRole = (req.user as any)?.role;
+    const isLawyer = userRole === 'LAWYER';
+    
+    if ((!isAuthenticated || (aiResponse.recommendsLawyer && !isLawyer))) {
       consultationSuggestion = {
         message: "This response provides general legal information. For personalized legal advice specific to your situation, consider booking a consultation with one of our qualified lawyers.",
         benefits: [

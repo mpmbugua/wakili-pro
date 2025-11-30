@@ -44,7 +44,7 @@ interface Message {
 
 export const AIAssistant: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +54,9 @@ export const AIAssistant: React.FC = () => {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  const isLawyer = user?.role === 'LAWYER';
+  const isPublicUser = user?.role === 'PUBLIC';
 
   // AI Response handlers - using backend API
   const handleSendMessage = async () => {
@@ -381,6 +384,42 @@ export const AIAssistant: React.FC = () => {
             style={{ display: 'none' }}
           />
 
+          {/* Welcome Message - Shows when no messages */}
+          {messages.length === 0 && (
+            <div className="flex justify-center">
+              <div className="max-w-2xl bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                <h2 className="text-2xl font-bold text-slate-900 mb-3">
+                  {isLawyer ? '⚖️ Legal Research Assistant' : '👋 Welcome to Wakili Pro AI Assistant'}
+                </h2>
+                <p className="text-slate-700 mb-4">
+                  {isLawyer 
+                    ? 'Access comprehensive legal research, case law, and statutes. Get instant answers to legal questions with cited sources from Kenyan law.'
+                    : 'Get instant answers to your legal questions. Our AI assistant provides general legal information based on Kenyan law.'}
+                </p>
+                <div className="space-y-2 text-sm text-slate-600">
+                  <p className="flex items-start gap-2">
+                    <span className="text-green-600">✓</span>
+                    {isLawyer ? 'Search case law and legal precedents' : 'Ask questions in plain language'}
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="text-green-600">✓</span>
+                    {isLawyer ? 'Research specific statutes and regulations' : 'Upload documents or images for analysis'}
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="text-green-600">✓</span>
+                    {isLawyer ? 'Get instant legal citations and references' : 'Get instant responses 24/7'}
+                  </p>
+                  {!isLawyer && (
+                    <p className="flex items-start gap-2">
+                      <span className="text-blue-600">ℹ️</span>
+                      For personalized legal advice, consider <button onClick={() => navigate('/marketplace')} className="text-blue-600 underline hover:text-blue-700">booking a consultation</button>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Messages Display */}
           {messages.map((message) => (
               <div
@@ -466,8 +505,8 @@ export const AIAssistant: React.FC = () => {
                     </div>
                   )}
                   
-                  {/* Recommendations */}
-                  {message.recommendations && (
+                  {/* Recommendations - Hide for lawyers */}
+                  {message.recommendations && !isLawyer && (
                     <div className="mt-4 space-y-3">
                       {message.recommendations.map((rec, idx) => (
                         <div
