@@ -261,7 +261,12 @@ export const AdminLawyerApproval: React.FC = () => {
             {!lawyer.isVerified && (
               <div className="flex gap-2 mt-4">
                 <button
-                  onClick={() => handleApprove(lawyer.id)}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleApprove(lawyer.id);
+                  }}
                   disabled={processingId === lawyer.id}
                   className="flex-1 inline-flex justify-center items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
@@ -269,7 +274,12 @@ export const AdminLawyerApproval: React.FC = () => {
                   {processingId === lawyer.id ? 'Approving...' : 'Approve'}
                 </button>
                 <button
-                  onClick={() => handleReject(lawyer.id)}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleReject(lawyer.id);
+                  }}
                   disabled={processingId === lawyer.id}
                   className="flex-1 inline-flex justify-center items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
