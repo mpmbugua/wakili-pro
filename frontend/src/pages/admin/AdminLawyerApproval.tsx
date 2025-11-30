@@ -97,9 +97,9 @@ export const AdminLawyerApproval: React.FC = () => {
       if (response.data.success) {
         // Remove from pending list
         setPendingLawyers(prev => prev.filter(l => l.id !== lawyerId));
-        alert('✅ Lawyer approved successfully!');
-        // Refresh the list
-        fetchLawyers();
+        alert('✅ Lawyer approved successfully! Switching to Verified tab...');
+        // Switch to verified tab and refresh
+        setActiveTab('verified');
       }
     } catch (err: any) {
       console.error('Approve error:', err);

@@ -49,25 +49,28 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const navigate = useNavigate();
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(false);
+
+  const checkVerificationStatus = async () => {
+    try {
+      setChecking(true);
+      const response = await fetch('/api/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      });
+      const data = await response.json();
+      setIsVerified(data.data?.lawyerProfile?.isVerified || false);
+    } catch (error) {
+      console.error('Failed to check verification status:', error);
+    } finally {
+      setLoading(false);
+      setChecking(false);
+    }
+  };
 
   useEffect(() => {
     // Check lawyer verification status
-    const checkVerificationStatus = async () => {
-      try {
-        const response = await fetch('/api/users/profile', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        });
-        const data = await response.json();
-        setIsVerified(data.data?.lawyerProfile?.isVerified || false);
-      } catch (error) {
-        console.error('Failed to check verification status:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     checkVerificationStatus();
   }, []);
 
@@ -113,6 +116,23 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
               </li>
             </ul>
           </div>
+          <button
+            onClick={checkVerificationStatus}
+            disabled={checking}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+          >
+            {checking ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Checking Status...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-5 w-5" />
+                Refresh Verification Status
+              </>
+            )}
+          </button>
         </div>
       </div>
     );
