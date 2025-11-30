@@ -804,8 +804,6 @@ const LawyerSignatureSetup: React.FC = () => {
               {saving ? 'Saving...' : 'Save Letterhead Preference'}
             </button>
           </div>
-            </div>
-          )}
         </div>
 
         {/* Firm Details */}
