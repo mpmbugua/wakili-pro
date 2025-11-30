@@ -29,6 +29,11 @@ import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import ServiceTrackingPage from './pages/ServiceTrackingPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
+import { MyClientsPage } from './pages/MyClientsPage';
+import { MyServicesPage } from './pages/MyServicesPage';
+import { BillingPage } from './pages/BillingPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
+import { PerformancePage } from './pages/PerformancePage';
 import { PublicLawyerProfile } from './pages/PublicLawyerProfile';
 import ConsultationsPage from './pages/ConsultationsPage';
 import AppointmentsPage from './pages/AppointmentsPage';
@@ -283,6 +288,46 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <HelpPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/clients" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <MyClientsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-services" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <MyServicesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/billing" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <BillingPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/analytics" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <AnalyticsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/performance" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <PerformancePage />
                 </ProtectedRoute>
               } 
             />
