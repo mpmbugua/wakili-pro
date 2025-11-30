@@ -52,6 +52,35 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
 
+  // All useState hooks must be at the top before any returns
+  const [stats, setStats] = useState({
+    activeClients: 0,
+    consultationsThisMonth: 0,
+    revenue: 0,
+    completionRate: 0,
+    pendingConsultations: 0,
+    totalDocuments: 0,
+  });
+
+  // Tier usage state (fetched from lawyer profile)
+  const [tierUsage, setTierUsage] = useState<TierUsage>({
+    currentTier: 'FREE',
+    usage: {
+      bookings: { current: 0, limit: 2, percentage: 0 },
+      certifications: { current: 0, limit: 0, percentage: 0 },
+      services: { current: 0, limit: 1, percentage: 0 },
+      specializations: { current: 0, limit: 2 },
+    },
+    commissionRate: 0.50,
+    pricingTier: 'ENTRY',
+  });
+
+  // Modal states
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitModalType, setLimitModalType] = useState<'bookings' | 'certifications' | 'services'>('bookings');
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [showSavingsModal, setShowSavingsModal] = useState(false);
+
   const checkVerificationStatus = async () => {
     try {
       setChecking(true);
@@ -134,36 +163,8 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     );
   }
 
-  // Original dashboard for verified lawyers
+  // Original dashboard for verified lawyers - hooks already declared at top
   
-  const [stats, setStats] = useState({
-    activeClients: 0,
-    consultationsThisMonth: 0,
-    revenue: 0,
-    completionRate: 0,
-    pendingConsultations: 0,
-    totalDocuments: 0,
-  });
-
-  // Tier usage state (fetched from lawyer profile)
-  const [tierUsage, setTierUsage] = useState<TierUsage>({
-    currentTier: 'FREE',
-    usage: {
-      bookings: { current: 0, limit: 2, percentage: 0 },
-      certifications: { current: 0, limit: 0, percentage: 0 },
-      services: { current: 0, limit: 1, percentage: 0 },
-      specializations: { current: 0, limit: 2 },
-    },
-    commissionRate: 0.50,
-    pricingTier: 'ENTRY',
-  });
-
-  // Modal states
-  const [showLimitModal, setShowLimitModal] = useState(false);
-  const [limitModalType, setLimitModalType] = useState<'bookings' | 'certifications' | 'services'>('bookings');
-  const [showCertModal, setShowCertModal] = useState(false);
-  const [showSavingsModal, setShowSavingsModal] = useState(false);
-
   // Fetch real lawyer data on mount
   useEffect(() => {
     const fetchLawyerData = async () => {
