@@ -187,7 +187,6 @@ function App() {
               <Routes>
                 {/* Public Routes - No Authentication Required */}
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/ai" element={<AIAssistant />} />
                 <Route path="/lawyers" element={<LawyersBrowse />} />
                 <Route path="/services" element={<LegalServicesPage />} />
                 <Route path="/marketplace" element={<MarketplaceBrowse />} />
@@ -346,6 +345,14 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <NewConsultationPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/ai" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <AIAssistant />
                 </ProtectedRoute>
               } 
             />
