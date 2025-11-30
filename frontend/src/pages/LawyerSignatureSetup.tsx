@@ -208,6 +208,15 @@ const LawyerSignatureSetup: React.FC = () => {
     setMessage(null);
 
     try {
+      console.log('Saving details:', {
+        firmName,
+        firmAddress,
+        firmPhone,
+        firmEmail,
+        licenseNumber,
+        certificatePrefix
+      });
+
       const response = await axiosInstance.put('/lawyer/letterhead/details', {
         firmName,
         firmAddress,
@@ -217,6 +226,8 @@ const LawyerSignatureSetup: React.FC = () => {
         certificatePrefix
       });
 
+      console.log('Save details response:', response.data);
+
       if (response.data.success) {
         setMessage({ type: 'success', text: 'Details saved successfully!' });
         fetchLetterhead();
@@ -225,7 +236,12 @@ const LawyerSignatureSetup: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error saving details:', error);
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to save details' });
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || error.message || 'Failed to save details. Check console for details.' 
+      });
     } finally {
       setSaving(false);
     }
