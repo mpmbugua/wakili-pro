@@ -77,18 +77,30 @@ export const AdminLawyerApproval: React.FC = () => {
   };
 
   const handleApprove = async (lawyerId: string) => {
+    if (!confirm('Are you sure you want to approve this lawyer?')) {
+      return;
+    }
+
     try {
       setProcessingId(lawyerId);
+      console.log('Approving lawyer:', lawyerId);
+      
       const response = await axiosInstance.post(`/admin/lawyers/${lawyerId}/approve`);
+      
+      console.log('Approve response:', response.data);
       
       if (response.data.success) {
         // Remove from pending list
         setPendingLawyers(prev => prev.filter(l => l.id !== lawyerId));
-        alert('Lawyer approved successfully!');
+        alert('✅ Lawyer approved successfully!');
+        // Refresh the list
+        fetchLawyers();
       }
     } catch (err: any) {
       console.error('Approve error:', err);
-      alert(err.response?.data?.message || 'Failed to approve lawyer');
+      console.error('Error response:', err.response);
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to approve lawyer';
+      alert('❌ Error: ' + errorMessage);
     } finally {
       setProcessingId(null);
     }
@@ -97,20 +109,33 @@ export const AdminLawyerApproval: React.FC = () => {
   const handleReject = async (lawyerId: string) => {
     const reason = prompt('Enter rejection reason (optional):');
     
+    if (reason === null) {
+      // User clicked cancel
+      return;
+    }
+    
     try {
       setProcessingId(lawyerId);
+      console.log('Rejecting lawyer:', lawyerId, 'with reason:', reason);
+      
       const response = await axiosInstance.post(`/admin/lawyers/${lawyerId}/reject`, {
         reason
       });
       
+      console.log('Reject response:', response.data);
+      
       if (response.data.success) {
         // Remove from pending list
         setPendingLawyers(prev => prev.filter(l => l.id !== lawyerId));
-        alert('Lawyer application rejected');
+        alert('✅ Lawyer application rejected');
+        // Refresh the list
+        fetchLawyers();
       }
     } catch (err: any) {
       console.error('Reject error:', err);
-      alert(err.response?.data?.message || 'Failed to reject lawyer');
+      console.error('Error response:', err.response);
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to reject lawyer';
+      alert('❌ Error: ' + errorMessage);
     } finally {
       setProcessingId(null);
     }
