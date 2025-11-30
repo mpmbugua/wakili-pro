@@ -363,9 +363,9 @@ export const LawyerAIAssistant: React.FC = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Chat Container */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">{
-          {/* Hidden file inputs */}
-          <input
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+        {/* Hidden file inputs */}
+        <input
             ref={fileInputRef}
             type="file"
             accept="image/*,.pdf,.doc,.docx"
