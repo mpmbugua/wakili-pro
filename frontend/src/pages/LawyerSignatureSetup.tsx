@@ -921,12 +921,18 @@ const LawyerSignatureSetup: React.FC = () => {
               <span>Official Stamp: {letterhead?.stampUrl ? 'Configured' : 'Optional'}</span>
             </div>
             <div className="flex items-center">
-              {letterhead?.letterheadUrl ? (
+              {letterhead?.customLetterheadUrl || letterhead?.letterheadUrl ? (
                 <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
               ) : (
                 <AlertCircle className="h-4 w-4 text-amber-600 mr-2" />
               )}
-              <span>Letterhead Template: {letterhead?.letterheadUrl ? 'Configured' : 'Optional'}</span>
+              <span>
+                Letterhead: {
+                  letterhead?.useCustomLetterhead 
+                    ? (letterhead?.customLetterheadUrl ? 'Custom Template' : 'Custom (Not Uploaded)')
+                    : 'System-Generated'
+                }
+              </span>
             </div>
             <div className="flex items-center">
               {firmName && licenseNumber ? (

@@ -494,7 +494,18 @@ export const deleteLetterheadTemplate = async (req: AuthenticatedRequest, res: R
       where: { lawyerId: userId }
     });
 
-    if (!letterhead || !letterhead.customLetterheadUrl) {
+    if (!letterhead) {
+      res.status(404).json({
+        success: false,
+        message: 'No letterhead found'
+      });
+      return;
+    }
+
+    // Check for both customLetterheadUrl (new) and letterheadUrl (legacy)
+    const templateUrl = letterhead.customLetterheadUrl || letterhead.letterheadUrl;
+    
+    if (!templateUrl) {
       res.status(404).json({
         success: false,
         message: 'No letterhead template found'
@@ -503,9 +514,9 @@ export const deleteLetterheadTemplate = async (req: AuthenticatedRequest, res: R
     }
 
     // Delete from Cloudinary if it's a Cloudinary URL
-    if (letterhead.customLetterheadUrl.includes('cloudinary')) {
+    if (templateUrl.includes('cloudinary')) {
       try {
-        const urlParts = letterhead.customLetterheadUrl.split('/');
+        const urlParts = templateUrl.split('/');
         const fileNameWithExt = urlParts[urlParts.length - 1];
         const fileName = fileNameWithExt.split('.')[0];
         const folder = urlParts[urlParts.length - 2];
@@ -518,10 +529,13 @@ export const deleteLetterheadTemplate = async (req: AuthenticatedRequest, res: R
       }
     }
 
-    // Update database
+    // Update database - clear both fields to be safe
     await prisma.lawyerLetterhead.update({
       where: { lawyerId: userId },
-      data: { customLetterheadUrl: null }
+      data: { 
+        customLetterheadUrl: null,
+        letterheadUrl: letterhead.letterheadUrl?.includes('cloudinary') ? '' : letterhead.letterheadUrl // Keep non-cloudinary letterheadUrl
+      }
     });
 
     res.json({
