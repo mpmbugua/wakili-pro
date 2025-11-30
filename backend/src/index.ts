@@ -3,12 +3,24 @@ import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
 import type { Express } from 'express';
+import { createServer } from 'http';
 
 // Import routes
 import authRoutes from './routes/auth';
 
 const app: Express = express();
+const httpServer = createServer(app);
 const port = parseInt(process.env.PORT || '5000', 10);
+
+// Initialize Socket.IO
+import { initializeWebSocket } from './services/socketService';
+const io = initializeWebSocket(httpServer);
+
+// Make io available to routes via middleware
+app.use((req: any, _res, next) => {
+  req.io = io;
+  next();
+});
 
 // Basic middleware
 app.use(helmet());
@@ -329,6 +341,10 @@ app.use('/api/certification', documentCertificationRouter);
 import documentPaymentRouter from './routes/documentPayment';
 app.use('/api/document-payment', documentPaymentRouter);
 
+// Mount messages routes (Real-time messaging)
+import messagesRouter from './routes/messages';
+app.use('/api/messages', messagesRouter);
+
 // Mount article routes
 import articlesRouter from './routes/articles';
 app.use('/api/articles', articlesRouter);
@@ -381,10 +397,11 @@ setInterval(() => {
 
 // Start server - bind to 0.0.0.0 for cloud platforms
 const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
-app.listen(port, host, () => {
+httpServer.listen(port, host, () => {
   console.log(`✅ Wakili Pro Backend running on ${host}:${port}`);
   console.log(`🌍 Health check: http://${host}:${port}/health`);
   console.log(`📡 API root: http://${host}:${port}/api`);
+  console.log(`💬 WebSocket enabled for real-time messaging`);
   console.log(`🎯 Environment: ${process.env.NODE_ENV || 'development'}`);
   
   // Start scheduled jobs
