@@ -533,4 +533,59 @@ async function createDocumentReviewRequest(payment: any): Promise<void> {
   }
 }
 
+/**
+ * POST /api/document-payment/:paymentId/simulate-callback (DEV ONLY)
+ * Simulate M-Pesa callback for testing in sandbox mode
+ */
+router.post('/:paymentId/simulate-callback', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      res.status(403).json({ error: 'This endpoint is only available in development' });
+      return;
+    }
+
+    const { paymentId } = req.params;
+
+    const payment = await prisma.payment.findUnique({
+      where: { id: paymentId }
+    });
+
+    if (!payment) {
+      res.status(404).json({ error: 'Payment not found' });
+      return;
+    }
+
+    if (payment.status !== 'PENDING') {
+      res.status(400).json({ error: 'Payment is not pending' });
+      return;
+    }
+
+    // Mark payment as completed
+    await prisma.payment.update({
+      where: { id: paymentId },
+      data: {
+        status: 'PAID',
+        verifiedAt: new Date(),
+        metadata: {
+          ...(payment.metadata as any),
+          mpesaReceiptNumber: `TEST_${Date.now()}`,
+          simulatedCallback: true
+        } as any
+      }
+    });
+
+    // Create document review request
+    await createDocumentReviewRequest(payment);
+
+    res.json({
+      success: true,
+      message: 'Payment marked as completed and document review initiated',
+      data: { paymentId }
+    });
+  } catch (error: any) {
+    console.error('Simulate callback error:', error);
+    res.status(500).json({ error: error.message || 'Failed to simulate callback' });
+  }
+});
+
 export default router;
