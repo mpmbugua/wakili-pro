@@ -5,8 +5,38 @@ const prisma = new PrismaClient();
 
 const SUBSCRIPTION_FEES = {
   FREE: 0,
-  LITE: 1999, // KES per month
-  PRO: 4999,  // KES per month
+  LITE: 2999, // KES per month (updated from 1999)
+  PRO: 6999,  // KES per month (updated from 4999)
+};
+
+// Billing cycle discounts
+const BILLING_CYCLE_DISCOUNTS = {
+  monthly: 0,
+  '3months': 0.10,  // 10% discount
+  '6months': 0.15,  // 15% discount
+  yearly: 0.20      // 20% discount
+};
+
+type BillingCycle = 'monthly' | '3months' | '6months' | 'yearly';
+
+const getBillingCycleDuration = (cycle: BillingCycle): number => {
+  switch (cycle) {
+    case 'monthly': return 1;
+    case '3months': return 3;
+    case '6months': return 6;
+    case 'yearly': return 12;
+  }
+};
+
+const calculateSubscriptionAmount = (tier: LawyerTier, billingCycle: BillingCycle = 'monthly'): number => {
+  const baseFee = SUBSCRIPTION_FEES[tier];
+  if (baseFee === 0) return 0;
+  
+  const discount = BILLING_CYCLE_DISCOUNTS[billingCycle];
+  const monthlyFee = baseFee * (1 - discount);
+  const duration = getBillingCycleDuration(billingCycle);
+  
+  return Math.round(monthlyFee * duration);
 };
 
 const TIER_LIMITS = {
@@ -35,7 +65,8 @@ const TIER_LIMITS = {
  */
 export const createSubscription = async (
   lawyerId: string,
-  targetTier: LawyerTier
+  targetTier: LawyerTier,
+  billingCycle: BillingCycle = 'monthly'
 ): Promise<{ subscriptionId: string; paymentRequired: boolean; checkoutUrl?: string }> => {
   const lawyer = await prisma.lawyerProfile.findUnique({
     where: { userId: lawyerId },
@@ -58,27 +89,38 @@ export const createSubscription = async (
   const now = new Date();
   const currentPeriodStart = now;
   const currentPeriodEnd = new Date(now);
-  currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
+  const duration = getBillingCycleDuration(billingCycle);
+  currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + duration);
 
+  const totalAmount = calculateSubscriptionAmount(targetTier, billingCycle);
   const monthlyFee = SUBSCRIPTION_FEES[targetTier];
+  const discount = BILLING_CYCLE_DISCOUNTS[billingCycle];
+  const discountedMonthlyFee = Math.round(monthlyFee * (1 - discount));
 
   // Create subscription
   const subscription = await prisma.subscription.create({
     data: {
       lawyerId,
       tier: targetTier,
-      status: monthlyFee === 0 ? 'ACTIVE' : 'PENDING',
+      status: totalAmount === 0 ? 'ACTIVE' : 'PENDING',
       currentPeriodStart,
       currentPeriodEnd,
-      monthlyFee,
+      monthlyFee: discountedMonthlyFee,
       paymentMethod: 'MPESA',
       nextBillingDate: currentPeriodEnd,
       upgradesFrom: currentTier,
+      metadata: {
+        billingCycle,
+        baseFee: monthlyFee,
+        discount: discount * 100,
+        totalAmount,
+        duration
+      } as any,
     },
   });
 
   // If FREE tier, activate immediately
-  if (monthlyFee === 0) {
+  if (totalAmount === 0) {
     await activateSubscription(subscription.id);
     return { subscriptionId: subscription.id, paymentRequired: false };
   }
@@ -89,12 +131,16 @@ export const createSubscription = async (
     throw new Error('Phone number required for M-Pesa payment');
   }
 
+  const cycleName = billingCycle === 'monthly' ? '1 Month' : 
+                     billingCycle === '3months' ? '3 Months' : 
+                     billingCycle === '6months' ? '6 Months' : '12 Months';
+
   try {
     const mpesaResponse = await mpesaService.initiateSTKPush({
       phoneNumber,
-      amount: monthlyFee,
+      amount: totalAmount,
       accountReference: `SUB-${subscription.id.substring(0, 8)}`,
-      transactionDesc: `Wakili Pro ${targetTier} Subscription`,
+      transactionDesc: `Wakili Pro ${targetTier} - ${cycleName}`,
     });
 
     // Store M-Pesa request IDs in subscription metadata

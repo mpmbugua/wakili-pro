@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Crown, Shield, Check, Zap, TrendingUp } from 'lucide-react';
+import { X, Crown, Shield, Check, Zap, TrendingUp, Loader2, Phone } from 'lucide-react';
+import axiosInstance from '../../lib/axios';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -11,6 +12,11 @@ type BillingCycle = 'monthly' | '3months' | '6months' | 'yearly';
 
 export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, currentTier }) => {
   const [selectedCycle, setSelectedCycle] = useState<BillingCycle>('monthly');
+  const [selectedTier, setSelectedTier] = useState<'LITE' | 'PRO' | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState('');
+  const [showPaymentPrompt, setShowPaymentPrompt] = useState(false);
 
   if (!isOpen) return null;
 
@@ -59,6 +65,85 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, cur
     const discountedPrice = pricing[tier][cycle];
     const months = cycle === '3months' ? 3 : cycle === '6months' ? 6 : 12;
     return (monthlyPrice - discountedPrice) * months;
+  };
+
+  const handleUpgradeClick = (tier: 'LITE' | 'PRO') => {
+    setSelectedTier(tier);
+    setError('');
+  };
+
+  const handleProcessPayment = async () => {
+    if (!selectedTier) return;
+    
+    if (!phoneNumber) {
+      setError('Please enter your M-Pesa phone number');
+      return;
+    }
+
+    // Validate phone number format (254...)
+    const phoneRegex = /^254[17]\d{8}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      setError('Please enter a valid Kenyan phone number (e.g., 254712345678)');
+      return;
+    }
+
+    setIsProcessing(true);
+    setError('');
+
+    try {
+      const response = await axiosInstance.post('/subscriptions/upgrade', {
+        targetTier: selectedTier,
+        phoneNumber,
+        billingCycle: selectedCycle
+      });
+
+      if (response.data.success && response.data.paymentRequired) {
+        setShowPaymentPrompt(true);
+        // Poll for payment status
+        pollPaymentStatus(response.data.subscriptionId);
+      } else if (response.data.success) {
+        alert('Upgrade successful!');
+        window.location.reload();
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to initiate upgrade. Please try again.');
+      setIsProcessing(false);
+    }
+  };
+
+  const pollPaymentStatus = async (subscriptionId: string) => {
+    let attempts = 0;
+    const maxAttempts = 60; // Poll for 1 minute
+    
+    const poll = setInterval(async () => {
+      attempts++;
+      
+      try {
+        const response = await axiosInstance.get(`/subscriptions/payment-status/${subscriptionId}`);
+        
+        if (response.data.success && response.data.data.status === 'ACTIVE') {
+          clearInterval(poll);
+          setIsProcessing(false);
+          setShowPaymentPrompt(false);
+          alert('🎉 Upgrade successful! Your tier has been updated.');
+          window.location.reload();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(poll);
+          setIsProcessing(false);
+          setShowPaymentPrompt(false);
+          setError('Payment verification timeout. Please check your transaction status.');
+        }
+      } catch (err) {
+        console.error('Error polling payment status:', err);
+      }
+    }, 1000);
+  };
+
+  const resetPaymentForm = () => {
+    setSelectedTier(null);
+    setPhoneNumber('');
+    setError('');
+    setShowPaymentPrompt(false);
   };
 
   return (
@@ -169,10 +254,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, cur
             </div>
 
             <button
-              onClick={() => {
-                // TODO: Implement Stripe checkout
-                alert(`Upgrade to LITE (${getCycleDuration(selectedCycle)}) - KES ${getTotalPrice('LITE', selectedCycle).toLocaleString()}`);
-              }}
+              onClick={() => handleUpgradeClick('LITE')}
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
               Upgrade to LITE
@@ -257,10 +339,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, cur
             </div>
 
             <button
-              onClick={() => {
-                // TODO: Implement Stripe checkout
-                alert(`Upgrade to PRO (${getCycleDuration(selectedCycle)}) - KES ${getTotalPrice('PRO', selectedCycle).toLocaleString()}`);
-              }}
+              onClick={() => handleUpgradeClick('PRO')}
               className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all"
             >
               Upgrade to PRO
@@ -317,6 +396,109 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, cur
           </div>
         </div>
       </div>
+
+      {/* M-Pesa Payment Form Overlay */}
+      {selectedTier && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900">
+                Complete M-Pesa Payment
+              </h3>
+              <button
+                onClick={resetPaymentForm}
+                disabled={isProcessing}
+                className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Upgrading to</p>
+                    <p className="text-xl font-bold text-gray-900">{selectedTier} Tier</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600">{getCycleDuration(selectedCycle)}</p>
+                    <p className="text-xl font-bold text-gray-900">
+                      KES {getTotalPrice(selectedTier, selectedCycle).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                {selectedCycle !== 'monthly' && (
+                  <p className="text-xs text-green-700 mt-2 font-semibold">
+                    💰 You're saving KES {getSavings(selectedTier, selectedCycle).toLocaleString()}!
+                  </p>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Phone className="h-4 w-4 inline mr-1" />
+                  M-Pesa Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="254712345678"
+                  disabled={isProcessing}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter your Safaricom number (format: 254712345678)
+                </p>
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
+              {showPaymentPrompt && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 text-green-600 animate-spin" />
+                    <div>
+                      <p className="text-sm font-semibold text-green-900">
+                        M-Pesa prompt sent!
+                      </p>
+                      <p className="text-xs text-green-700 mt-1">
+                        Check your phone and enter your M-Pesa PIN to complete payment
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleProcessPayment}
+              disabled={isProcessing || !phoneNumber}
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  {showPaymentPrompt ? 'Verifying Payment...' : 'Processing...'}
+                </>
+              ) : (
+                <>
+                  Pay KES {getTotalPrice(selectedTier, selectedCycle).toLocaleString()}
+                </>
+              )}
+            </button>
+
+            <p className="text-xs text-gray-500 text-center mt-4">
+              You will receive an M-Pesa prompt on your phone. Enter your PIN to complete the payment.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

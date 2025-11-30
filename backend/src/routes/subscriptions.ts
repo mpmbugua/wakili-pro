@@ -66,7 +66,7 @@ router.get('/current', loadLawyerProfile, async (req: any, res) => {
  */
 router.post('/upgrade', loadLawyerProfile, async (req: any, res) => {
   try {
-    const { targetTier, phoneNumber } = req.body;
+    const { targetTier, phoneNumber, billingCycle = 'monthly' } = req.body;
     const { lawyerProfile } = req;
 
     if (!Object.values(LawyerTier).includes(targetTier)) {
@@ -88,7 +88,8 @@ router.post('/upgrade', loadLawyerProfile, async (req: any, res) => {
 
     const result = await subscriptionService.createSubscription(
       lawyerProfile.userId,
-      targetTier as LawyerTier
+      targetTier as LawyerTier,
+      billingCycle
     );
 
     res.json({
