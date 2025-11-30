@@ -591,4 +591,77 @@ router.post('/:paymentId/simulate-callback', authenticate, async (req: AuthReque
   }
 });
 
+/**
+ * POST /api/document-payment/:paymentId/manual-complete
+ * Manually complete payment (works in production, requires payment owner auth)
+ */
+router.post('/:paymentId/manual-complete', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { paymentId } = req.params;
+    const userId = req.user?.id;
+
+    const payment = await prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: { user: true }
+    });
+
+    if (!payment) {
+      res.status(404).json({ error: 'Payment not found' });
+      return;
+    }
+
+    // Only allow payment owner to complete
+    if (payment.userId !== userId) {
+      res.status(403).json({ error: 'Not authorized to complete this payment' });
+      return;
+    }
+
+    if (payment.status !== 'PENDING') {
+      res.status(400).json({ 
+        error: `Payment is already ${payment.status}`,
+        currentStatus: payment.status 
+      });
+      return;
+    }
+
+    console.log(`[ManualComplete] Completing payment ${paymentId} for user ${userId}`);
+
+    // Mark payment as completed
+    await prisma.payment.update({
+      where: { id: paymentId },
+      data: {
+        status: 'PAID',
+        verifiedAt: new Date(),
+        metadata: {
+          ...(payment.metadata as any),
+          mpesaReceiptNumber: `MANUAL_${Date.now()}`,
+          manualCompletion: true,
+          completedBy: userId,
+          completedAt: new Date().toISOString()
+        } as any
+      }
+    });
+
+    console.log(`[ManualComplete] Payment marked as PAID, initiating document review...`);
+
+    // Create document review request (triggers AI + lawyer assignment)
+    await createDocumentReviewRequest(payment);
+
+    console.log(`[ManualComplete] Document review workflow initiated successfully`);
+
+    res.json({
+      success: true,
+      message: 'Payment completed and document review workflow initiated',
+      data: { 
+        paymentId,
+        status: 'PAID',
+        workflowInitiated: true
+      }
+    });
+  } catch (error: any) {
+    console.error('[ManualComplete] Error:', error);
+    res.status(500).json({ error: error.message || 'Failed to complete payment' });
+  }
+});
+
 export default router;
