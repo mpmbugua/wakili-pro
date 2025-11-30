@@ -611,9 +611,10 @@ export const LawyerAIAssistant: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
 
-          {/* Input Area */}
-          <div className="border-t border-slate-200 p-2 sm:p-4 bg-slate-50">
+        {/* Input Area */}
+        <div className="border-t border-slate-200 p-2 sm:p-4 bg-slate-50">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3">
               <textarea
                 value={input}
@@ -737,7 +738,6 @@ export const LawyerAIAssistant: React.FC = () => {
                   : 'Type your question, upload documents/images, use camera, or click the microphone to speak.'}
             </p>
           </div>
-      </div>
     </div>
   );
 };
