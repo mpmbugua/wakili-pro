@@ -13,10 +13,28 @@ export const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Get token from Zustand persist storage (same as axiosInstance)
+    const authStorage = localStorage.getItem('wakili-auth-storage');
+    
+    if (authStorage) {
+      try {
+        const parsed = JSON.parse(authStorage);
+        const token = parsed.state?.accessToken;
+        
+        if (token && config.headers) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error('Error parsing auth storage:', error);
+      }
     }
+    
+    // Fallback to old token location if exists
+    const legacyToken = localStorage.getItem('token');
+    if (legacyToken && config.headers && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${legacyToken}`;
+    }
+    
     return config;
   },
   (error) => {
@@ -37,8 +55,11 @@ api.interceptors.response.use(
       const shouldSkipRedirect = skipRedirectUrls.some(path => url.includes(path));
       
       if (!shouldSkipRedirect) {
-        // Token expired or invalid
+        // Token expired or invalid - clear all auth storage
+        localStorage.removeItem('wakili-auth-storage');
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
         window.location.href = '/login';
       }
     }
