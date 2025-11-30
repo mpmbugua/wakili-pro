@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
 import { aiService } from '../services/aiService';
 
@@ -362,10 +361,9 @@ export const LawyerAIAssistant: React.FC = () => {
   };
 
   return (
-    <GlobalLayout>
-      <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-        {/* Chat Container */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
+      {/* Chat Container */}
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">{
           {/* Hidden file inputs */}
           <input
             ref={fileInputRef}
@@ -740,6 +738,6 @@ export const LawyerAIAssistant: React.FC = () => {
             </p>
           </div>
       </div>
-    </GlobalLayout>
+    </div>
   );
 };
