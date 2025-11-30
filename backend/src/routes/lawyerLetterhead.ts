@@ -4,10 +4,12 @@ import { authenticateToken } from '../middleware/auth';
 import {
   uploadSignature,
   uploadStamp,
+  uploadLetterheadTemplate,
   updateLetterheadDetails,
   getLetterhead,
   deleteSignature,
-  deleteStamp
+  deleteStamp,
+  deleteLetterheadTemplate
 } from '../controllers/lawyerLetterheadController';
 
 const router = express.Router();
@@ -26,6 +28,24 @@ const upload = multer({
       cb(null, true);
     } else {
       cb(new Error('Invalid file type. Only PNG and JPG images are allowed.'));
+    }
+  }
+});
+
+// Configure multer for letterhead template uploads (PDF or images)
+const letterheadUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit for letterheads
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept PDF and images
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF, PNG, and JPG files are allowed.'));
     }
   }
 });
@@ -96,6 +116,29 @@ router.delete(
   '/stamp',
   authenticateToken,
   deleteStamp
+);
+
+/**
+ * @route POST /api/lawyer/letterhead/template
+ * @desc Upload letterhead template (PDF or image with header/footer)
+ * @access Private (Lawyers only)
+ */
+router.post(
+  '/template',
+  authenticateToken,
+  letterheadUpload.single('letterhead'),
+  uploadLetterheadTemplate
+);
+
+/**
+ * @route DELETE /api/lawyer/letterhead/template
+ * @desc Delete letterhead template
+ * @access Private (Lawyers only)
+ */
+router.delete(
+  '/template',
+  authenticateToken,
+  deleteLetterheadTemplate
 );
 
 export default router;

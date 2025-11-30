@@ -1,7 +1,13 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { uploadSignature as uploadSignatureToCloudinary, uploadStamp as uploadStampToCloudinary, isValidImageType, deleteFromCloudinary } from '../services/fileUploadService';
+import { 
+  uploadSignature as uploadSignatureToCloudinary, 
+  uploadStamp as uploadStampToCloudinary, 
+  uploadToCloudinary,
+  isValidImageType, 
+  deleteFromCloudinary 
+} from '../services/fileUploadService';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -387,6 +393,143 @@ export const deleteStamp = async (req: AuthenticatedRequest, res: Response): Pro
     res.status(500).json({
       success: false,
       message: 'Failed to delete stamp'
+    });
+  }
+};
+
+/**
+ * Upload letterhead template (PDF or image with header/footer)
+ */
+export const uploadLetterheadTemplate = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    const file = req.file;
+
+    if (!userId || userRole !== 'LAWYER') {
+      res.status(403).json({
+        success: false,
+        message: 'Only lawyers can upload letterhead templates'
+      });
+      return;
+    }
+
+    if (!file) {
+      res.status(400).json({
+        success: false,
+        message: 'Letterhead template file is required'
+      });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid file type. Only PDF, PNG, and JPG files are allowed.'
+      });
+      return;
+    }
+
+    // Upload to Cloudinary
+    const uploadResult = await uploadToCloudinary(
+      file.buffer,
+      file.originalname,
+      `wakili-pro/letterheads/${userId}`
+    );
+
+    const letterheadUrl = uploadResult.url;
+
+    // Update or create letterhead
+    const letterhead = await prisma.lawyerLetterhead.upsert({
+      where: { lawyerId: userId },
+      update: {
+        letterheadUrl,
+        updatedAt: new Date()
+      },
+      create: {
+        lawyerId: userId,
+        letterheadUrl,
+        firmName: '',
+        licenseNumber: '',
+        certificatePrefix: 'WP'
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Letterhead template uploaded successfully',
+      data: letterhead
+    });
+  } catch (error) {
+    console.error('Upload letterhead error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload letterhead template'
+    });
+  }
+};
+
+/**
+ * Delete letterhead template
+ */
+export const deleteLetterheadTemplate = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId || userRole !== 'LAWYER') {
+      res.status(403).json({
+        success: false,
+        message: 'Only lawyers can delete letterhead templates'
+      });
+      return;
+    }
+
+    const letterhead = await prisma.lawyerLetterhead.findUnique({
+      where: { lawyerId: userId }
+    });
+
+    if (!letterhead || !letterhead.letterheadUrl) {
+      res.status(404).json({
+        success: false,
+        message: 'No letterhead template found'
+      });
+      return;
+    }
+
+    // Delete from Cloudinary if it's a Cloudinary URL
+    if (letterhead.letterheadUrl.includes('cloudinary')) {
+      try {
+        const urlParts = letterhead.letterheadUrl.split('/');
+        const fileNameWithExt = urlParts[urlParts.length - 1];
+        const fileName = fileNameWithExt.split('.')[0];
+        const folder = urlParts[urlParts.length - 2];
+        const publicId = `${folder}/${fileName}`;
+        
+        await deleteFromCloudinary(publicId);
+      } catch (error) {
+        console.error('Error deleting from Cloudinary:', error);
+        // Continue even if Cloudinary delete fails
+      }
+    }
+
+    // Update database
+    await prisma.lawyerLetterhead.update({
+      where: { lawyerId: userId },
+      data: { letterheadUrl: null }
+    });
+
+    res.json({
+      success: true,
+      message: 'Letterhead template deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete letterhead error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete letterhead template'
     });
   }
 };

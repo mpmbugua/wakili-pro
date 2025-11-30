@@ -7,6 +7,7 @@ import axiosInstance from '../lib/axios';
 interface LawyerLetterhead {
   signatureUrl?: string;
   stampUrl?: string;
+  letterheadUrl?: string;
   firmName: string;
   firmAddress?: string;
   firmPhone?: string;
@@ -36,6 +37,10 @@ const LawyerSignatureSetup: React.FC = () => {
   const [stampPreview, setStampPreview] = useState<string | null>(null);
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  
+  // Letterhead template upload state
+  const [letterheadFile, setLetterheadFile] = useState<File | null>(null);
+  const [letterheadPreview, setLetterheadPreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLetterhead();
@@ -159,6 +164,95 @@ const LawyerSignatureSetup: React.FC = () => {
     } catch (error: any) {
       console.error('Error uploading signature:', error);
       setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to upload signature' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLetterheadFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type (PDF or image)
+      const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        setMessage({ type: 'error', text: 'Please upload a PDF or image file (PNG/JPG)' });
+        return;
+      }
+
+      // Validate file size (10MB max for letterhead)
+      if (file.size > 10 * 1024 * 1024) {
+        setMessage({ type: 'error', text: 'File size must be less than 10MB' });
+        return;
+      }
+
+      setLetterheadFile(file);
+      
+      // Create preview for images
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setLetterheadPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For PDFs, just show filename
+        setLetterheadPreview('pdf');
+      }
+      
+      setMessage(null);
+    }
+  };
+
+  const handleUploadLetterhead = async () => {
+    if (!letterheadFile) {
+      setMessage({ type: 'error', text: 'Please select a letterhead template first' });
+      return;
+    }
+
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('letterhead', letterheadFile);
+
+      const response = await axiosInstance.post('/lawyer/letterhead/template', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.data.success) {
+        setMessage({ type: 'success', text: 'Letterhead template uploaded successfully!' });
+        fetchLetterhead();
+        setLetterheadFile(null);
+        setLetterheadPreview(null);
+      } else {
+        setMessage({ type: 'error', text: response.data.message || 'Failed to upload letterhead' });
+      }
+    } catch (error: any) {
+      console.error('Error uploading letterhead:', error);
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to upload letterhead template' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteLetterhead = async () => {
+    if (!confirm('Are you sure you want to delete your letterhead template?')) return;
+
+    setSaving(true);
+    try {
+      const response = await axiosInstance.delete('/lawyer/letterhead/template');
+
+      if (response.data.success) {
+        setMessage({ type: 'success', text: 'Letterhead template deleted successfully' });
+        setLetterheadPreview(null);
+        fetchLetterhead();
+      }
+    } catch (error: any) {
+      console.error('Error deleting letterhead:', error);
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to delete letterhead template' });
     } finally {
       setSaving(false);
     }
@@ -534,6 +628,111 @@ const LawyerSignatureSetup: React.FC = () => {
           </div>
         </div>
 
+        {/* Letterhead Template */}
+        <div className="mt-6 bg-white rounded-lg border border-slate-200 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <FileText className="h-5 w-5 text-purple-600" />
+            <h2 className="text-xl font-semibold text-slate-900">Letterhead Template</h2>
+          </div>
+
+          <p className="text-sm text-slate-600 mb-4">
+            Upload a blank document (PDF or image) showing your official header and footer. 
+            This will be used as a template when certifying documents.
+          </p>
+
+          {letterhead?.letterheadUrl ? (
+            <div className="space-y-4">
+              <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                {letterhead.letterheadUrl.endsWith('.pdf') ? (
+                  <div className="flex items-center space-x-3">
+                    <FileText className="h-8 w-8 text-red-600" />
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">Letterhead Template (PDF)</p>
+                      <a 
+                        href={`${import.meta.env.VITE_API_URL}${letterhead.letterheadUrl}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-600 hover:underline"
+                      >
+                        View Template
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    src={`${import.meta.env.VITE_API_URL}${letterhead.letterheadUrl}`}
+                    alt="Letterhead Template"
+                    className="max-w-full h-auto rounded"
+                  />
+                )}
+              </div>
+              <button
+                onClick={handleDeleteLetterhead}
+                disabled={saving}
+                className="w-full px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Delete Letterhead Template</span>
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {letterheadPreview && letterheadPreview !== 'pdf' && (
+                <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                  <img
+                    src={letterheadPreview}
+                    alt="Letterhead Preview"
+                    className="max-w-full h-auto rounded"
+                  />
+                </div>
+              )}
+
+              {letterheadPreview === 'pdf' && (
+                <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="h-8 w-8 text-red-600" />
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">PDF Selected</p>
+                      <p className="text-xs text-slate-600">{letterheadFile?.name}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <input
+                type="file"
+                accept="application/pdf,image/png,image/jpeg,image/jpg"
+                onChange={handleLetterheadFileSelect}
+                className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+              />
+
+              <p className="text-xs text-slate-500">
+                Accepted formats: PDF, PNG, JPG (max 10MB). Upload a blank page showing your firm's official header and footer.
+              </p>
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => {
+                    setLetterheadFile(null);
+                    setLetterheadPreview(null);
+                  }}
+                  className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 text-sm rounded-md hover:bg-slate-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUploadLetterhead}
+                  disabled={!letterheadFile || saving}
+                  className="flex-1 px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>{saving ? 'Uploading...' : 'Upload Template'}</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Firm Details */}
         <div className="mt-6 bg-white rounded-lg border border-slate-200 p-6">
           <h2 className="text-xl font-semibold text-slate-900 mb-4">Firm Details</h2>
@@ -645,6 +844,14 @@ const LawyerSignatureSetup: React.FC = () => {
                 <AlertCircle className="h-4 w-4 text-amber-600 mr-2" />
               )}
               <span>Official Stamp: {letterhead?.stampUrl ? 'Configured' : 'Optional'}</span>
+            </div>
+            <div className="flex items-center">
+              {letterhead?.letterheadUrl ? (
+                <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-amber-600 mr-2" />
+              )}
+              <span>Letterhead Template: {letterhead?.letterheadUrl ? 'Configured' : 'Optional'}</span>
             </div>
             <div className="flex items-center">
               {firmName && licenseNumber ? (
