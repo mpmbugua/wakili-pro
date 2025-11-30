@@ -611,11 +611,11 @@ export const LawyerAIAssistant: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
+      </div>
 
-        {/* Input Area */}
-        <div className="border-t border-slate-200 p-2 sm:p-4 bg-slate-50">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3">
+      {/* Input Area */}
+      <div className="border-t border-slate-200 p-2 sm:p-4 bg-slate-50">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -737,7 +737,8 @@ export const LawyerAIAssistant: React.FC = () => {
                   ? `📎 ${attachedFiles.length} file(s) attached. Type a message or click Send.`
                   : 'Type your question, upload documents/images, use camera, or click the microphone to speak.'}
             </p>
-          </div>
+        </div>
+      </div>
     </div>
   );
 };
