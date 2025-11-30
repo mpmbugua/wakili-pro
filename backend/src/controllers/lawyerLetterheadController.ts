@@ -182,10 +182,25 @@ export const updateLetterheadDetails = async (req: AuthenticatedRequest, res: Re
       certificatePrefix
     } = req.body;
 
-    if (!firmName || !licenseNumber) {
+    // License number is always required
+    if (!licenseNumber) {
       res.status(400).json({
         success: false,
-        message: 'Firm name and license number are required'
+        message: 'License number is required'
+      });
+      return;
+    }
+
+    // Get current letterhead to check if using custom letterhead
+    const currentLetterhead = await prisma.lawyerLetterhead.findUnique({
+      where: { lawyerId: userId }
+    });
+
+    // Firm name is required only for system-generated letterhead
+    if (!currentLetterhead?.useCustomLetterhead && !firmName) {
+      res.status(400).json({
+        success: false,
+        message: 'Firm name is required for system-generated letterhead'
       });
       return;
     }
@@ -194,7 +209,7 @@ export const updateLetterheadDetails = async (req: AuthenticatedRequest, res: Re
     const letterhead = await prisma.lawyerLetterhead.upsert({
       where: { lawyerId: userId },
       update: {
-        firmName,
+        firmName: firmName || currentLetterhead?.firmName || '',
         firmAddress,
         firmPhone,
         firmEmail,

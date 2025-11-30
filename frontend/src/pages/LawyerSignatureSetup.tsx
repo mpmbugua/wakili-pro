@@ -297,8 +297,15 @@ const LawyerSignatureSetup: React.FC = () => {
   };
 
   const handleSaveDetails = async () => {
-    if (!firmName || !licenseNumber) {
-      setMessage({ type: 'error', text: 'Firm name and license number are required' });
+    // License number is always required
+    if (!licenseNumber) {
+      setMessage({ type: 'error', text: 'License number is required' });
+      return;
+    }
+
+    // Firm name is required only for system-generated letterhead
+    if (!useCustomLetterhead && !firmName) {
+      setMessage({ type: 'error', text: 'Firm name is required for system-generated letterhead' });
       return;
     }
 
@@ -810,16 +817,27 @@ const LawyerSignatureSetup: React.FC = () => {
         <div className="mt-6 bg-white rounded-lg border border-slate-200 p-6">
           <h2 className="text-xl font-semibold text-slate-900 mb-4">Firm Details</h2>
           
+          {useCustomLetterhead && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> Since you're using a custom letterhead template, firm details (name, address, phone, email) are optional. 
+                However, <strong>License Number</strong> and <strong>Certificate Prefix</strong> are still required for legal compliance and certificate generation.
+              </p>
+            </div>
+          )}
+          
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-900 mb-2">
-                Firm Name <span className="text-red-600">*</span>
+                Firm Name {!useCustomLetterhead && <span className="text-red-600">*</span>}
+                {useCustomLetterhead && <span className="text-slate-500 text-xs">(Optional with custom letterhead)</span>}
               </label>
               <input
                 type="text"
                 value={firmName}
                 onChange={(e) => setFirmName(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={useCustomLetterhead ? "Already on your letterhead" : ""}
               />
             </div>
 
@@ -837,43 +855,46 @@ const LawyerSignatureSetup: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-slate-900 mb-2">
-                Firm Address
+                Firm Address {useCustomLetterhead && <span className="text-slate-500 text-xs">(Optional)</span>}
               </label>
               <input
                 type="text"
                 value={firmAddress}
                 onChange={(e) => setFirmAddress(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={useCustomLetterhead ? "Already on your letterhead" : ""}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-900 mb-2">
-                Firm Phone
+                Firm Phone {useCustomLetterhead && <span className="text-slate-500 text-xs">(Optional)</span>}
               </label>
               <input
                 type="text"
                 value={firmPhone}
                 onChange={(e) => setFirmPhone(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={useCustomLetterhead ? "Already on your letterhead" : ""}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-900 mb-2">
-                Firm Email
+                Firm Email {useCustomLetterhead && <span className="text-slate-500 text-xs">(Optional)</span>}
               </label>
               <input
                 type="email"
                 value={firmEmail}
                 onChange={(e) => setFirmEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={useCustomLetterhead ? "Already on your letterhead" : ""}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-900 mb-2">
-                Certificate Prefix
+                Certificate Prefix <span className="text-red-600">*</span>
               </label>
               <input
                 type="text"
@@ -933,12 +954,20 @@ const LawyerSignatureSetup: React.FC = () => {
               </span>
             </div>
             <div className="flex items-center">
-              {firmName && licenseNumber ? (
+              {licenseNumber && (useCustomLetterhead || firmName) ? (
                 <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
               ) : (
                 <AlertCircle className="h-4 w-4 text-amber-600 mr-2" />
               )}
-              <span>Firm Details: {firmName && licenseNumber ? 'Configured' : 'Required'}</span>
+              <span>
+                Firm Details: {
+                  licenseNumber && (useCustomLetterhead || firmName)
+                    ? 'Configured'
+                    : useCustomLetterhead 
+                      ? 'License Number Required'
+                      : 'Firm Name & License Required'
+                }
+              </span>
             </div>
           </div>
         </div>
