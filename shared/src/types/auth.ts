@@ -58,5 +58,7 @@ export interface AuthUser {
   role: 'PUBLIC' | 'LAWYER' | 'ADMIN';
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
+  profileImageUrl?: string;
   verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
 }

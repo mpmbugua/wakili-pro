@@ -7,7 +7,13 @@ export const SettingsPage: React.FC = () => {
   const { user, setUser } = useAuthStore();
   const [activeTab, setActiveTab] = useState('profile');
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Profile form state
+  const [firstName, setFirstName] = useState(user?.firstName || '');
+  const [lastName, setLastName] = useState(user?.lastName || '');
+  const [phone, setPhone] = useState(user?.phoneNumber || '');
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,6 +57,37 @@ export const SettingsPage: React.FC = () => {
       alert('Failed to upload profile photo');
     } finally {
       setUploadingPhoto(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true);
+      console.log('Saving profile:', { firstName, lastName, phone });
+
+      const response = await axiosInstance.put('/users/profile', {
+        firstName,
+        lastName,
+        phoneNumber: phone,
+      });
+
+      if (response.data.success) {
+        // Update user in store
+        if (user) {
+          setUser({
+            ...user,
+            firstName: response.data.data.firstName,
+            lastName: response.data.data.lastName,
+            phoneNumber: response.data.data.phoneNumber,
+          });
+        }
+        alert('Profile updated successfully');
+      }
+    } catch (error: any) {
+      console.error('Error saving profile:', error);
+      alert(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -141,10 +178,20 @@ export const SettingsPage: React.FC = () => {
 
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">First Name</label>
                       <input
                         type="text"
-                        defaultValue={`${user?.firstName} ${user?.lastName}`}
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Last Name</label>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -152,20 +199,29 @@ export const SettingsPage: React.FC = () => {
                       <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
                       <input
                         type="email"
-                        defaultValue={user?.email}
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={user?.email || ''}
+                        disabled
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
                       />
+                      <p className="text-xs text-slate-500 mt-1">Email cannot be changed</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
                       <input
                         type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         placeholder="+254 700 000 000"
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
-                    <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                      Save Changes
+                    <button 
+                      onClick={handleSaveProfile}
+                      disabled={saving}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      {saving && <Loader className="w-4 h-4 animate-spin" />}
+                      <span>{saving ? 'Saving...' : 'Save Changes'}</span>
                     </button>
                   </div>
                 </div>
