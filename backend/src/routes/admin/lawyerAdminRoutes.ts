@@ -4,7 +4,8 @@ import {
   getPendingLawyers,
   getVerifiedLawyers,
   approveLawyer,
-  rejectLawyer
+  rejectLawyer,
+  deleteLawyer
 } from '../../controllers/admin/lawyerAdminController';
 import { authenticateToken, authorizeRoles } from '../../middleware/auth';
 
@@ -48,5 +49,12 @@ router.post('/:lawyerId/approve', approveLawyer);
  * @access  Admin only
  */
 router.post('/:lawyerId/reject', rejectLawyer);
+
+/**
+ * @route   DELETE /api/admin/lawyers/:lawyerId
+ * @desc    Delete a lawyer and their profile
+ * @access  Admin only
+ */
+router.delete('/:lawyerId', deleteLawyer);
 
 export default router;

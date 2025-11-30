@@ -10,7 +10,8 @@ import {
   Briefcase,
   Calendar,
   Shield,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 import axiosInstance from '../../lib/axios';
 
@@ -149,6 +150,41 @@ export const AdminLawyerApproval: React.FC = () => {
     }
   };
 
+  const handleDelete = async (lawyerId: string) => {
+    console.log('🗑️ handleDelete called with lawyerId:', lawyerId);
+    
+    if (!confirm('⚠️ Are you sure you want to DELETE this lawyer?\n\nThis action cannot be undone and will:\n- Delete the lawyer profile\n- Delete the user account\n- Remove all associated data')) {
+      console.log('User cancelled deletion');
+      return;
+    }
+    
+    try {
+      setProcessingId(lawyerId);
+      console.log('Deleting lawyer:', lawyerId);
+      console.log('API endpoint:', `/admin/lawyers/${lawyerId}`);
+      
+      const response = await axiosInstance.delete(`/admin/lawyers/${lawyerId}`);
+      
+      console.log('Delete response:', response.data);
+      
+      if (response.data.success) {
+        // Remove from both lists
+        setPendingLawyers(prev => prev.filter(l => l.id !== lawyerId));
+        setVerifiedLawyers(prev => prev.filter(l => l.id !== lawyerId));
+        alert('✅ Lawyer deleted successfully');
+        // Refresh the list
+        fetchLawyers();
+      }
+    } catch (err: any) {
+      console.error('Delete error:', err);
+      console.error('Error response:', err.response);
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to delete lawyer';
+      alert('❌ Error: ' + errorMessage);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const LawyerCard: React.FC<{ lawyer: LawyerApplication }> = ({ lawyer }) => {
     const location = typeof lawyer.location === 'string' 
       ? JSON.parse(lawyer.location) 
@@ -273,7 +309,7 @@ export const AdminLawyerApproval: React.FC = () => {
             )}
 
             {/* Actions */}
-            {!lawyer.isVerified && (
+            {!lawyer.isVerified ? (
               <div className="flex gap-2 mt-4">
                 <button
                   type="button"
@@ -302,6 +338,23 @@ export const AdminLawyerApproval: React.FC = () => {
                 >
                   <XCircle className="h-4 w-4" />
                   {processingId === lawyer.id ? 'Rejecting...' : 'Reject'}
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    console.log('🗑️ Delete button clicked!', lawyer.id);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDelete(lawyer.id);
+                  }}
+                  disabled={processingId === lawyer.id}
+                  className="flex-1 inline-flex justify-center items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {processingId === lawyer.id ? 'Deleting...' : 'Delete Lawyer'}
                 </button>
               </div>
             )}

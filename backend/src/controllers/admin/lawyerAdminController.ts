@@ -266,3 +266,58 @@ export const rejectLawyer = async (req: AuthenticatedRequest, res: Response): Pr
     });
   }
 };
+
+/**
+ * Delete a lawyer and their profile
+ */
+export const deleteLawyer = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { lawyerId } = req.params;
+
+    if (!lawyerId) {
+      res.status(400).json({
+        success: false,
+        message: 'Lawyer ID is required'
+      });
+      return;
+    }
+
+    // Find the lawyer profile
+    const lawyerProfile = await prisma.lawyerProfile.findUnique({
+      where: { id: lawyerId },
+      include: { user: true }
+    });
+
+    if (!lawyerProfile) {
+      res.status(404).json({
+        success: false,
+        message: 'Lawyer profile not found'
+      });
+      return;
+    }
+
+    // Delete lawyer profile first (due to foreign key constraints)
+    await prisma.lawyerProfile.delete({
+      where: { id: lawyerId }
+    });
+
+    // Delete the user account
+    await prisma.user.delete({
+      where: { id: lawyerProfile.userId }
+    });
+
+    const response: ApiResponse<null> = {
+      success: true,
+      message: 'Lawyer and profile deleted successfully',
+      data: null
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Delete lawyer error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete lawyer'
+    });
+  }
+};
