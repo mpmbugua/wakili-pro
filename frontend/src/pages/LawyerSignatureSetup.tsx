@@ -347,7 +347,10 @@ const LawyerSignatureSetup: React.FC = () => {
                 {/* Tab Selection */}
                 <div className="flex border-b border-slate-200 mb-4">
                   <button
-                    onClick={() => setSignaturePreview(null)}
+                    onClick={() => {
+                      setSignaturePreview(null);
+                      setSignatureFile(null);
+                    }}
                     className={`px-4 py-2 text-sm font-medium ${
                       !signaturePreview
                         ? 'border-b-2 border-blue-600 text-blue-600'
@@ -357,7 +360,10 @@ const LawyerSignatureSetup: React.FC = () => {
                     Draw Signature
                   </button>
                   <button
-                    onClick={() => signatureCanvasRef.current?.clear()}
+                    onClick={() => {
+                      signatureCanvasRef.current?.clear();
+                      setSignaturePreview('placeholder');
+                    }}
                     className={`px-4 py-2 text-sm font-medium ml-4 ${
                       signaturePreview
                         ? 'border-b-2 border-blue-600 text-blue-600'
@@ -405,13 +411,15 @@ const LawyerSignatureSetup: React.FC = () => {
                 {/* Image Upload Option */}
                 {signaturePreview && (
                   <>
-                    <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
-                      <img
-                        src={signaturePreview}
-                        alt="Signature Preview"
-                        className="max-w-full h-auto"
-                      />
-                    </div>
+                    {signaturePreview !== 'placeholder' && (
+                      <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                        <img
+                          src={signaturePreview}
+                          alt="Signature Preview"
+                          className="max-w-full h-auto"
+                        />
+                      </div>
+                    )}
 
                     <input
                       type="file"
