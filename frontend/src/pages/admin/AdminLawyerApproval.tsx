@@ -77,13 +77,17 @@ export const AdminLawyerApproval: React.FC = () => {
   };
 
   const handleApprove = async (lawyerId: string) => {
+    console.log('🚀 handleApprove called with lawyerId:', lawyerId);
+    
     if (!confirm('Are you sure you want to approve this lawyer?')) {
+      console.log('User cancelled approval');
       return;
     }
 
     try {
       setProcessingId(lawyerId);
       console.log('Approving lawyer:', lawyerId);
+      console.log('API endpoint:', `/admin/lawyers/${lawyerId}/approve`);
       
       const response = await axiosInstance.post(`/admin/lawyers/${lawyerId}/approve`);
       
@@ -107,16 +111,20 @@ export const AdminLawyerApproval: React.FC = () => {
   };
 
   const handleReject = async (lawyerId: string) => {
+    console.log('🚀 handleReject called with lawyerId:', lawyerId);
+    
     const reason = prompt('Enter rejection reason (optional):');
     
     if (reason === null) {
       // User clicked cancel
+      console.log('User cancelled rejection');
       return;
     }
     
     try {
       setProcessingId(lawyerId);
       console.log('Rejecting lawyer:', lawyerId, 'with reason:', reason);
+      console.log('API endpoint:', `/admin/lawyers/${lawyerId}/reject`);
       
       const response = await axiosInstance.post(`/admin/lawyers/${lawyerId}/reject`, {
         reason
@@ -145,6 +153,13 @@ export const AdminLawyerApproval: React.FC = () => {
     const location = typeof lawyer.location === 'string' 
       ? JSON.parse(lawyer.location) 
       : lawyer.location;
+
+    console.log('Rendering LawyerCard:', {
+      id: lawyer.id,
+      name: `${lawyer.user.firstName} ${lawyer.user.lastName}`,
+      isVerified: lawyer.isVerified,
+      showButtons: !lawyer.isVerified
+    });
 
     return (
       <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
@@ -263,6 +278,7 @@ export const AdminLawyerApproval: React.FC = () => {
                 <button
                   type="button"
                   onClick={(e) => {
+                    console.log('✅ Approve button clicked!', lawyer.id);
                     e.preventDefault();
                     e.stopPropagation();
                     handleApprove(lawyer.id);
@@ -276,6 +292,7 @@ export const AdminLawyerApproval: React.FC = () => {
                 <button
                   type="button"
                   onClick={(e) => {
+                    console.log('❌ Reject button clicked!', lawyer.id);
                     e.preventDefault();
                     e.stopPropagation();
                     handleReject(lawyer.id);
