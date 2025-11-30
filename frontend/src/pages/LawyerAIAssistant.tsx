@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
 import { aiService } from '../services/aiService';
 
@@ -41,7 +42,7 @@ interface Message {
   }>;
 }
 
-export const AIAssistant: React.FC = () => {
+export const LawyerAIAssistant: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -53,6 +54,9 @@ export const AIAssistant: React.FC = () => {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  const isLawyer = user?.role === 'LAWYER';
+  const isPublicUser = user?.role === 'PUBLIC';
 
   // AI Response handlers - using backend API
   const handleSendMessage = async () => {
@@ -358,9 +362,10 @@ export const AIAssistant: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      {/* Chat Container */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+    <GlobalLayout>
+      <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+        {/* Chat Container */}
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
           {/* Hidden file inputs */}
           <input
             ref={fileInputRef}
@@ -384,27 +389,27 @@ export const AIAssistant: React.FC = () => {
             <div className="flex justify-center">
               <div className="max-w-2xl bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                 <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                  👋 Welcome to Wakili Pro AI Assistant
+                  ⚖️ Legal Research Assistant
                 </h2>
                 <p className="text-slate-700 mb-4">
-                  Get instant answers to your legal questions. Our AI assistant provides general legal information based on Kenyan law.
+                  Access comprehensive legal research, case law, and statutes. Get instant answers to legal questions with cited sources from Kenyan law.
                 </p>
                 <div className="space-y-2 text-sm text-slate-600">
                   <p className="flex items-start gap-2">
                     <span className="text-green-600">✓</span>
-                    Ask questions in plain language
+                    Search case law and legal precedents
                   </p>
                   <p className="flex items-start gap-2">
                     <span className="text-green-600">✓</span>
-                    Upload documents or images for analysis
+                    Research specific statutes and regulations
                   </p>
                   <p className="flex items-start gap-2">
                     <span className="text-green-600">✓</span>
-                    Get instant responses 24/7
+                    Get instant legal citations and references
                   </p>
                   <p className="flex items-start gap-2">
-                    <span className="text-blue-600">ℹ️</span>
-                    For personalized legal advice, consider <button onClick={() => navigate('/marketplace')} className="text-blue-600 underline hover:text-blue-700">booking a consultation</button>
+                    <span className="text-blue-600">💼</span>
+                    Professional legal research tool for practitioners
                   </p>
                 </div>
               </div>
@@ -496,8 +501,8 @@ export const AIAssistant: React.FC = () => {
                     </div>
                   )}
                   
-                  {/* Recommendations */}
-                  {message.recommendations && (
+                  {/* Recommendations - Hidden for lawyers */}
+                  {false && message.recommendations && (
                     <div className="mt-4 space-y-3">
                       {message.recommendations.map((rec, idx) => (
                         <div
@@ -735,5 +740,6 @@ export const AIAssistant: React.FC = () => {
             </p>
           </div>
       </div>
+    </GlobalLayout>
   );
 };
