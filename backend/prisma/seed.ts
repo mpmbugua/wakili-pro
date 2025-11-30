@@ -7,20 +7,51 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seeding...');
 
-  // Create admin user
+  // Create Super Admin user
+  const superAdminEmail = 'superadmin@wakilipro.com';
+  const superAdminPassword = 'SuperAdmin@123'; // Change this in production!
+
+  const existingSuperAdmin = await prisma.user.findUnique({
+    where: { email: superAdminEmail }
+  });
+
+  if (!existingSuperAdmin) {
+    const hashedPassword = await bcrypt.hash(superAdminPassword, 10);
+
+    const superAdmin = await prisma.user.create({
+      data: {
+        email: superAdminEmail,
+        password: hashedPassword,
+        firstName: 'Super',
+        lastName: 'Admin',
+        role: 'SUPER_ADMIN',
+        emailVerified: true,
+        phoneNumber: '+254700000001',
+        verificationStatus: 'APPROVED'
+      }
+    });
+
+    console.log('✅ Super Admin user created successfully!');
+    console.log('');
+    console.log('📧 Email:', superAdminEmail);
+    console.log('🔑 Password:', superAdminPassword);
+    console.log('👤 Role:', superAdmin.role);
+    console.log('');
+  } else {
+    console.log('✅ Super Admin user already exists:', superAdminEmail);
+  }
+
+  // Create Admin user
   const adminEmail = 'admin@wakilipro.com';
   const adminPassword = 'Admin@123'; // Change this in production!
 
-  // Check if admin already exists
   const existingAdmin = await prisma.user.findUnique({
     where: { email: adminEmail }
   });
 
   if (!existingAdmin) {
-    // Hash password
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-    // Create admin user
     const admin = await prisma.user.create({
       data: {
         email: adminEmail,
@@ -40,7 +71,7 @@ async function main() {
     console.log('🔑 Password:', adminPassword);
     console.log('👤 Role:', admin.role);
     console.log('');
-    console.log('⚠️  IMPORTANT: Change the password after first login!');
+    console.log('⚠️  IMPORTANT: Change the passwords after first login!');
   } else {
     console.log('✅ Admin user already exists:', adminEmail);
   }
@@ -99,25 +130,22 @@ async function main() {
           role: 'LAWYER',
           emailVerified: true,
           verificationStatus: 'APPROVED',
-          lawyerProfile: {
-            create: {
-              providerId: '', // Will be set to the user's ID after creation
-              licenseNumber: lawyerData.licenseNumber,
-              yearOfAdmission: lawyerData.yearOfAdmission,
-              specializations: [lawyerData.specialty],
-              location: lawyerData.location,
-              isVerified: true,
-              rating: 4.8,
-              reviewCount: 0,
-            }
-          }
         }
       });
 
-      // Update providerId to match userId
-      await prisma.lawyerProfile.update({
-        where: { userId: lawyer.id },
-        data: { providerId: lawyer.id }
+      // Create lawyer profile separately with correct providerId
+      await prisma.lawyerProfile.create({
+        data: {
+          userId: lawyer.id,
+          providerId: lawyer.id,
+          licenseNumber: lawyerData.licenseNumber,
+          yearOfAdmission: lawyerData.yearOfAdmission,
+          specializations: [lawyerData.specialty],
+          location: lawyerData.location,
+          isVerified: true,
+          rating: 4.8,
+          reviewCount: 0,
+        }
       });
 
       console.log(`✅ Created lawyer: ${lawyer.firstName} ${lawyer.lastName} (${lawyer.id})`);

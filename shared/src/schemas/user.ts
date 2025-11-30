@@ -26,7 +26,7 @@ export const LawyerOnboardingSchema = z.object({
     city: z.string().min(2, 'City is required'),
     county: z.string().min(2, 'County is required'),
   }),
-  bio: z.string().min(100, 'Bio must be at least 100 characters').max(1000),
+  bio: z.string().max(1000, 'Bio cannot exceed 1000 characters'),
   yearsOfExperience: z.number().min(0, 'Years of experience cannot be negative').max(60),
   profileImageUrl: z.string().url('Invalid profile image URL').optional(),
   linkedInProfile: z.string().url('Invalid LinkedIn URL').optional().or(z.literal('')),
@@ -65,7 +65,7 @@ export const UpdateUserProfileSchema = z.object({
 });
 
 export const LawyerProfileUpdateSchema = z.object({
-  bio: z.string().min(100, 'Bio must be at least 100 characters').max(1000).optional(),
+  bio: z.string().max(1000, 'Bio cannot exceed 1000 characters').optional(),
   yearsOfExperience: z.number().min(0).max(60).optional(),
   profileImageUrl: z.string().url('Invalid profile image URL').optional(),
   specializations: z.array(
