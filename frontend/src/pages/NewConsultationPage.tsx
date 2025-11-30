@@ -33,21 +33,21 @@ export const NewConsultationPage: React.FC = () => {
             <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={() => setConsultationType('video')}
-                className={\p-4 border-2 rounded-lg transition \\}
+                className={`p-4 border-2 rounded-lg transition ${consultationType === 'video' ? 'border-blue-600 bg-blue-50' : 'border-gray-300'}`}
               >
                 <Video className="h-6 w-6 mx-auto mb-2 text-blue-600" />
                 <span className="text-sm font-medium">Video Call</span>
               </button>
               <button
                 onClick={() => setConsultationType('phone')}
-                className={\p-4 border-2 rounded-lg transition \\}
+                className={`p-4 border-2 rounded-lg transition ${consultationType === 'phone' ? 'border-green-600 bg-green-50' : 'border-gray-300'}`}
               >
                 <Phone className="h-6 w-6 mx-auto mb-2 text-green-600" />
                 <span className="text-sm font-medium">Phone Call</span>
               </button>
               <button
                 onClick={() => setConsultationType('in-person')}
-                className={\p-4 border-2 rounded-lg transition \\}
+                className={`p-4 border-2 rounded-lg transition ${consultationType === 'in-person' ? 'border-purple-600 bg-purple-50' : 'border-gray-300'}`}
               >
                 <User className="h-6 w-6 mx-auto mb-2 text-purple-600" />
                 <span className="text-sm font-medium">In Person</span>
