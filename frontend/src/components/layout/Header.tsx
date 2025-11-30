@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Bell, Search, User, LogOut, Settings } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
@@ -13,6 +13,22 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = true }) => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -81,10 +97,11 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
               </div>
             </div>
             
-            <div className="relative group">
+            <div className="relative group" ref={profileMenuRef}>
               <Button
                 variant="ghost" 
                 size="sm"
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 className="flex items-center space-x-2 rounded-full"
               >
                 <div className="h-8 w-8 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 flex items-center justify-center">
@@ -93,32 +110,39 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
               </Button>
 
               {/* Dropdown Menu */}
-              <div className="absolute right-0 top-full mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="bg-white rounded-xl border border-gray-200 shadow-lg py-1">
-                  <Link
-                    to="/profile"
-                    className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <User className="h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                  <Link
-                    to="/settings"
-                    className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <Settings className="h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                  <hr className="my-1" />
-                  <button
-                    onClick={handleLogout}
-                    className="flex w-full items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>Sign out</span>
-                  </button>
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 z-50">
+                  <div className="bg-white rounded-xl border border-gray-200 shadow-lg py-1">
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <User className="h-4 w-4" />
+                      <span>My Profile</span>
+                    </Link>
+                    <Link
+                      to="/settings"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span>Settings</span>
+                    </Link>
+                    <hr className="my-1" />
+                    <button
+                      onClick={() => {
+                        setIsProfileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="flex w-full items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
