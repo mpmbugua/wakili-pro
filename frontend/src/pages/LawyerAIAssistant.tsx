@@ -738,6 +738,5 @@ export const LawyerAIAssistant: React.FC = () => {
             </p>
           </div>
       </div>
-    </div>
   );
 };
