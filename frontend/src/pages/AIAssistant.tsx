@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { aiService } from '../services/aiService';
@@ -53,6 +53,14 @@ export const AIAssistant: React.FC = () => {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  // Redirect lawyers to their professional AI Assistant
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'LAWYER') {
+      console.log('Redirecting lawyer to professional AI Assistant');
+      navigate('/lawyer/ai', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   // AI Response handlers - using backend API
   const handleSendMessage = async () => {
