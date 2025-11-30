@@ -9,6 +9,7 @@ import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
 import { TierLimitModal, CertificationBlockedModal, CommissionSavingsModal } from '../modals';
 import type { AuthUser } from '@wakili-pro/shared/src/types/auth';
+import axiosInstance from '../../lib/axios';
 
 interface LawyerDashboardProps {
   user: AuthUser;
@@ -54,13 +55,8 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const checkVerificationStatus = async () => {
     try {
       setChecking(true);
-      const response = await fetch('/api/users/profile', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      });
-      const data = await response.json();
-      setIsVerified(data.data?.lawyerProfile?.isVerified || false);
+      const response = await axiosInstance.get('/users/profile');
+      setIsVerified(response.data?.data?.lawyerProfile?.isVerified || false);
     } catch (error) {
       console.error('Failed to check verification status:', error);
     } finally {
