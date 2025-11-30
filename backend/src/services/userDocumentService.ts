@@ -83,6 +83,9 @@ export const getUserDocuments = async (userId: string, filters?: {
   search?: string;
 }) => {
   try {
+    console.log('[UserDocumentService] Getting documents for userId:', userId);
+    console.log('[UserDocumentService] Filters:', filters);
+
     const where: any = {
       userId,
       deletedAt: null, // Only get non-deleted documents
@@ -102,6 +105,8 @@ export const getUserDocuments = async (userId: string, filters?: {
         { category: { contains: filters.search, mode: 'insensitive' } },
       ];
     }
+
+    console.log('[UserDocumentService] Query where clause:', JSON.stringify(where));
 
     const documents = await prisma.userDocument.findMany({
       where,
@@ -131,12 +136,15 @@ export const getUserDocuments = async (userId: string, filters?: {
       },
     });
 
+    console.log('[UserDocumentService] Found', documents.length, 'documents');
+
     return {
       success: true,
       data: documents,
     };
   } catch (error) {
-    console.error('Get user documents error:', error);
+    console.error('[UserDocumentService] Get user documents error:', error);
+    console.error('[UserDocumentService] Error details:', error instanceof Error ? error.message : String(error));
     throw new Error('Failed to retrieve documents');
   }
 };

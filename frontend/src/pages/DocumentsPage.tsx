@@ -76,6 +76,16 @@ export const DocumentsPage: React.FC = () => {
     try {
       setLoading(true);
       console.log('[DocumentsPage] Fetching documents...');
+      
+      // Check if user is authenticated
+      const authStorage = localStorage.getItem('wakili-auth-storage');
+      if (!authStorage) {
+        console.error('[DocumentsPage] No auth storage found');
+        alert('Please log in to view your documents.');
+        navigate('/');
+        return;
+      }
+
       const response = await axiosInstance.get('/user-documents');
       
       console.log('[DocumentsPage] Documents response:', response.data);
@@ -90,9 +100,12 @@ export const DocumentsPage: React.FC = () => {
     } catch (error: any) {
       console.error('[DocumentsPage] Error fetching documents:', error);
       console.error('[DocumentsPage] Error response:', error.response?.data);
+      console.error('[DocumentsPage] Error status:', error.response?.status);
       
-      // Show error to user
-      alert('Failed to load documents. Using offline mode.');
+      // Don't show alert on 401 (axios will handle redirect)
+      if (error.response?.status !== 401) {
+        alert(`Failed to load documents: ${error.response?.data?.message || error.message}`);
+      }
       
       // Set empty array instead of mock data to avoid UUID issues
       setDocuments([]);

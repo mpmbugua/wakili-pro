@@ -87,13 +87,15 @@ export const getDocuments = async (req: AuthenticatedRequest, res: Response) => 
   try {
     const userId = req.user?.id;
     if (!userId) {
+      console.error('[UserDocuments] No userId in request');
       return res.status(401).json({
         success: false,
-        message: 'Unauthorized',
+        message: 'Unauthorized - No user ID',
       });
     }
 
     console.log('[UserDocuments] Getting documents for user:', userId);
+    console.log('[UserDocuments] Query params:', req.query);
 
     const { status, type, search } = req.query;
 
@@ -110,10 +112,12 @@ export const getDocuments = async (req: AuthenticatedRequest, res: Response) => 
 
     res.status(200).json(result);
   } catch (error: any) {
-    console.error('Get documents controller error:', error);
+    console.error('[UserDocuments] Get documents error:', error);
+    console.error('[UserDocuments] Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to retrieve documents',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 };
