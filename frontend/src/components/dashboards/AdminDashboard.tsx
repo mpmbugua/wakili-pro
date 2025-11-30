@@ -164,7 +164,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
             variant="outline"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/admin/lawyers/${item.id}`);
+              navigate('/admin/lawyers');
             }}
           >
             <Eye className="h-3 w-3 mr-1" />
@@ -173,9 +173,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
           <Button 
             size="sm" 
             variant="primary"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation();
-              // Handle approve
+              if (confirm('Are you sure you want to approve this lawyer?')) {
+                try {
+                  const response = await axiosInstance.post(`/admin/lawyers/${item.id}/approve`);
+                  if (response.data.success) {
+                    alert('✅ Lawyer approved successfully!');
+                    // Refresh data
+                    fetchPendingLawyers();
+                  }
+                } catch (error: any) {
+                  alert('❌ Error: ' + (error.response?.data?.message || 'Failed to approve lawyer'));
+                }
+              }
             }}
           >
             <CheckCircle className="h-3 w-3 mr-1" />
@@ -184,9 +195,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
           <Button 
             size="sm" 
             variant="outline"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation();
-              // Handle reject
+              const reason = prompt('Enter rejection reason (optional):');
+              if (reason !== null) {
+                try {
+                  const response = await axiosInstance.post(`/admin/lawyers/${item.id}/reject`, { reason });
+                  if (response.data.success) {
+                    alert('✅ Lawyer rejected successfully!');
+                    // Refresh data
+                    fetchPendingLawyers();
+                  }
+                } catch (error: any) {
+                  alert('❌ Error: ' + (error.response?.data?.message || 'Failed to reject lawyer'));
+                }
+              }
             }}
           >
             <XCircle className="h-3 w-3 mr-1" />
