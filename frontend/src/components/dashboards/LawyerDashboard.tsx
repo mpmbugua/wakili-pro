@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, MessageSquare, FileText, Video, Clock, Plus, ArrowRight,
   Users, DollarSign, TrendingUp, CheckCircle, AlertCircle, BarChart3, User,
-  Crown, Shield, Zap, Award, X, Lock, Briefcase
+  Crown, Shield, Zap, Award, X, Lock, Briefcase, Wallet, ArrowDownCircle
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
 import { TierLimitModal, CertificationBlockedModal, CommissionSavingsModal, UpgradeModal } from '../modals';
 import type { AuthUser } from '@wakili-pro/shared/src/types/auth';
 import axiosInstance from '../../lib/axios';
+import { walletService } from '../../services/walletService';
 
 interface LawyerDashboardProps {
   user: AuthUser;
@@ -60,6 +61,14 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     completionRate: 0,
     pendingConsultations: 0,
     totalDocuments: 0,
+  });
+
+  // Wallet state
+  const [walletBalance, setWalletBalance] = useState({
+    balance: 0,
+    pendingBalance: 0,
+    availableBalance: 0,
+    loading: true,
   });
 
   // Tier usage state (fetched from lawyer profile)
@@ -157,9 +166,25 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         console.error('Failed to fetch lawyer profile:', error);
       }
     };
+
+    const fetchWalletBalance = async () => {
+      try {
+        const wallet = await walletService.getBalance();
+        setWalletBalance({
+          balance: wallet.balance || 0,
+          pendingBalance: wallet.pendingBalance || 0,
+          availableBalance: wallet.availableBalance || 0,
+          loading: false,
+        });
+      } catch (error) {
+        console.error('Failed to fetch wallet balance:', error);
+        setWalletBalance(prev => ({ ...prev, loading: false }));
+      }
+    };
     
     if (isVerified) {
       fetchLawyerData();
+      fetchWalletBalance();
     }
   }, [isVerified]);
 
@@ -757,6 +782,41 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
 
       {/* Performance Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Wallet Balance Card */}
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">My Wallet</h3>
+            <Wallet className="h-5 w-5" />
+          </div>
+          {walletBalance.loading ? (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <p className="text-emerald-100 text-sm">Available Balance</p>
+                <p className="text-2xl font-bold">KES {walletBalance.availableBalance.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-emerald-100 text-sm">Pending (Escrow)</p>
+                <p className="text-xl font-semibold">KES {walletBalance.pendingBalance.toLocaleString()}</p>
+              </div>
+              <div className="pt-3 border-t border-emerald-400">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="w-full bg-white text-emerald-600 hover:bg-emerald-50 border-0"
+                  onClick={() => navigate('/lawyer/wallet')}
+                >
+                  <ArrowDownCircle className="h-4 w-4 mr-2" />
+                  Withdraw Funds
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">This Month</h3>
@@ -848,7 +908,11 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
       {/* Quick Actions */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <Button variant="outline" className="justify-start" onClick={() => navigate('/lawyer/wallet')}>
+            <Wallet className="h-4 w-4 mr-2" />
+            My Wallet
+          </Button>
           <Button variant="outline" className="justify-start" onClick={() => navigate('/consultations/new')}>
             <Plus className="h-4 w-4 mr-2" />
             New Consultation
