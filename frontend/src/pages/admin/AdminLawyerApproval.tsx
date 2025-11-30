@@ -186,9 +186,22 @@ export const AdminLawyerApproval: React.FC = () => {
   };
 
   const LawyerCard: React.FC<{ lawyer: LawyerApplication }> = ({ lawyer }) => {
-    const location = typeof lawyer.location === 'string' 
-      ? JSON.parse(lawyer.location) 
-      : lawyer.location;
+    // Parse location safely - it might be a string or already an object
+    let location: any = lawyer.location;
+    if (typeof lawyer.location === 'string') {
+      try {
+        // Only parse if it looks like JSON (starts with { or [)
+        if (lawyer.location.trim().startsWith('{') || lawyer.location.trim().startsWith('[')) {
+          location = JSON.parse(lawyer.location);
+        } else {
+          // It's just a plain string like "Nairobi"
+          location = { county: lawyer.location };
+        }
+      } catch (e) {
+        // If parsing fails, treat it as a simple location string
+        location = { county: lawyer.location };
+      }
+    }
 
     console.log('Rendering LawyerCard:', {
       id: lawyer.id,
