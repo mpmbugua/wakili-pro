@@ -117,8 +117,9 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
           const specializationsCount = profile.specializations?.length || 0;
           
           // Set tier limits based on actual tier
+          // FREE tier: "Platform Sampler" - 2 uses per service to experience all features
           const tierLimits = {
-            FREE: { bookings: 2, certifications: 0, services: 1, specializations: 2, commission: 0.50 },
+            FREE: { bookings: 2, certifications: 2, services: 2, specializations: 2, commission: 0.50 },
             LITE: { bookings: 10, certifications: 5, services: 5, specializations: 3, commission: 0.30 },
             PRO: { bookings: 999, certifications: 999, services: 999, specializations: 10, commission: 0.15 }
           };
@@ -416,8 +417,180 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         </div>
       )}
 
-      {/* Usage Meters - Show current tier limits */}
-      {tierUsage.currentTier !== 'PRO' && (
+      {/* Platform Experience Tracker - FREE tier shows all services */}
+      {tierUsage.currentTier === 'FREE' && (
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border-2 border-blue-200 p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Zap className="h-5 w-5 text-blue-600" />
+                Platform Sampler - Experience All Features
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">Try 2 of each service type to explore Wakili Pro</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* Consultations */}
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Video className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-900">Consultations</span>
+                </div>
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  tierUsage.usage.bookings.current >= 2 ? 'bg-red-100 text-red-700' : 
+                  tierUsage.usage.bookings.current >= 1 ? 'bg-amber-100 text-amber-700' :
+                  'bg-green-100 text-green-700'
+                }`}>
+                  {tierUsage.usage.bookings.current}/2 used
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                <div
+                  className={`h-2.5 rounded-full transition-all ${
+                    tierUsage.usage.bookings.current >= 2 ? 'bg-red-600' : 'bg-blue-600'
+                  }`}
+                  style={{ width: `${(tierUsage.usage.bookings.current / 2) * 100}%` }}
+                />
+              </div>
+              {tierUsage.usage.bookings.current === 0 && (
+                <p className="text-xs text-gray-500">✨ Try video/phone consultations</p>
+              )}
+              {tierUsage.usage.bookings.current === 1 && (
+                <p className="text-xs text-amber-600">🔥 1 free consultation left!</p>
+              )}
+              {tierUsage.usage.bookings.current >= 2 && (
+                <p className="text-xs text-red-600">🔒 Upgrade for unlimited consultations</p>
+              )}
+            </div>
+
+            {/* Certifications */}
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-purple-600" />
+                  <span className="text-sm font-medium text-gray-900">Certifications</span>
+                </div>
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  tierUsage.usage.certifications.current >= 2 ? 'bg-red-100 text-red-700' : 
+                  tierUsage.usage.certifications.current >= 1 ? 'bg-amber-100 text-amber-700' :
+                  'bg-green-100 text-green-700'
+                }`}>
+                  {tierUsage.usage.certifications.current}/2 used
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                <div
+                  className={`h-2.5 rounded-full transition-all ${
+                    tierUsage.usage.certifications.current >= 2 ? 'bg-red-600' : 'bg-purple-600'
+                  }`}
+                  style={{ width: `${(tierUsage.usage.certifications.current / 2) * 100}%` }}
+                />
+              </div>
+              {tierUsage.usage.certifications.current === 0 && (
+                <p className="text-xs text-gray-500">✨ Review & certify documents</p>
+              )}
+              {tierUsage.usage.certifications.current === 1 && (
+                <p className="text-xs text-amber-600">🔥 1 free certification left!</p>
+              )}
+              {tierUsage.usage.certifications.current >= 2 && (
+                <p className="text-xs text-red-600">🔒 Upgrade for unlimited certifications</p>
+              )}
+            </div>
+
+            {/* Services */}
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="h-4 w-4 text-green-600" />
+                  <span className="text-sm font-medium text-gray-900">Service Types</span>
+                </div>
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  tierUsage.usage.services.current >= 2 ? 'bg-red-100 text-red-700' : 
+                  tierUsage.usage.services.current >= 1 ? 'bg-amber-100 text-amber-700' :
+                  'bg-green-100 text-green-700'
+                }`}>
+                  {tierUsage.usage.services.current}/2 used
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                <div
+                  className={`h-2.5 rounded-full transition-all ${
+                    tierUsage.usage.services.current >= 2 ? 'bg-red-600' : 'bg-green-600'
+                  }`}
+                  style={{ width: `${(tierUsage.usage.services.current / 2) * 100}%` }}
+                />
+              </div>
+              {tierUsage.usage.services.current === 0 && (
+                <p className="text-xs text-gray-500">✨ Offer multiple service types</p>
+              )}
+              {tierUsage.usage.services.current === 1 && (
+                <p className="text-xs text-amber-600">🔥 1 free service slot left!</p>
+              )}
+              {tierUsage.usage.services.current >= 2 && (
+                <p className="text-xs text-red-600">🔒 Upgrade for more services</p>
+              )}
+            </div>
+
+            {/* Specializations */}
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Award className="h-4 w-4 text-indigo-600" />
+                  <span className="text-sm font-medium text-gray-900">Specializations</span>
+                </div>
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  tierUsage.usage.specializations.current >= 2 ? 'bg-red-100 text-red-700' : 
+                  tierUsage.usage.specializations.current >= 1 ? 'bg-amber-100 text-amber-700' :
+                  'bg-green-100 text-green-700'
+                }`}>
+                  {tierUsage.usage.specializations.current}/2 used
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                <div
+                  className={`h-2.5 rounded-full transition-all ${
+                    tierUsage.usage.specializations.current >= 2 ? 'bg-red-600' : 'bg-indigo-600'
+                  }`}
+                  style={{ width: `${(tierUsage.usage.specializations.current / 2) * 100}%` }}
+                />
+              </div>
+              {tierUsage.usage.specializations.current === 0 && (
+                <p className="text-xs text-gray-500">✨ Add your expertise areas</p>
+              )}
+              {tierUsage.usage.specializations.current === 1 && (
+                <p className="text-xs text-amber-600">🔥 1 free specialization left!</p>
+              )}
+              {tierUsage.usage.specializations.current >= 2 && (
+                <p className="text-xs text-red-600">🔒 Upgrade for more specializations</p>
+              )}
+            </div>
+          </div>
+
+          {/* Upgrade CTA */}
+          {(tierUsage.usage.bookings.current + tierUsage.usage.certifications.current + 
+            tierUsage.usage.services.current + tierUsage.usage.specializations.current) >= 4 && (
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-4 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-sm mb-1">🎉 You've explored the platform!</p>
+                  <p className="text-xs text-blue-100">Upgrade to LITE or PRO for unlimited access to all features</p>
+                </div>
+                <button
+                  onClick={() => navigate('/subscriptions')}
+                  className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors whitespace-nowrap"
+                >
+                  Upgrade Now
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Usage Meters - Show current tier limits for LITE/PRO */}
+      {tierUsage.currentTier !== 'PRO' && tierUsage.currentTier !== 'FREE' && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Monthly Usage</h3>

@@ -31,8 +31,8 @@ export const assignLawyerToDocumentReview = async (reviewId: string): Promise<vo
     }
 
     // Find available lawyers sorted by:
-    // 1. Active certification status
-    // 2. Specialization match (if available)
+    // 1. Verified status (isVerified: true)
+    // 2. Tier limits (FREE: 2 per service, LITE: 5, PRO: unlimited)
     // 3. Workload (fewest active reviews)
     // 4. Average rating
     const lawyers = await prisma.user.findMany({
@@ -40,7 +40,7 @@ export const assignLawyerToDocumentReview = async (reviewId: string): Promise<vo
         role: 'LAWYER',
         isActive: true,
         lawyerProfile: {
-          certificationStatus: 'ACTIVE'
+          isVerified: true
         }
       },
       include: {
@@ -52,6 +52,11 @@ export const assignLawyerToDocumentReview = async (reviewId: string): Promise<vo
                 status: {
                   in: ['pending_lawyer_assignment', 'assigned', 'in_progress']
                 }
+              }
+            },
+            completedReviews: {
+              where: {
+                status: 'completed'
               }
             }
           }
@@ -68,20 +73,64 @@ export const assignLawyerToDocumentReview = async (reviewId: string): Promise<vo
 
     if (lawyers.length === 0) {
       console.error('[LawyerAssignment] No available lawyers found');
-      throw new Error('No certified lawyers available');
+      throw new Error('No verified lawyers available');
+    }
+
+    // Filter lawyers based on tier limits (strict 2-per-service for FREE tier)
+    const eligibleLawyers = lawyers.filter(lawyer => {
+      const tier = lawyer.lawyerProfile?.tier || 'FREE';
+      const activeWorkload = lawyer._count.assignedReviews;
+      const completedCount = lawyer._count.completedReviews;
+      
+      // Tier limits - FREE tier can only do 2 certifications total
+      const tierLimits = {
+        FREE: { certifications: 2 },
+        LITE: { certifications: 5 },
+        PRO: { certifications: 999 }
+      };
+      
+      const limit = tierLimits[tier as keyof typeof tierLimits]?.certifications || 2;
+      
+      // For FREE tier: strict limit - only 2 certifications total (active + completed)
+      if (tier === 'FREE') {
+        const totalCertifications = activeWorkload + completedCount;
+        if (totalCertifications >= limit) {
+          console.log(`[LawyerAssignment] FREE lawyer ${lawyer.firstName} at limit: ${totalCertifications}/${limit} certifications used`);
+          return false;
+        }
+      }
+      
+      // For LITE/PRO: check active workload only
+      if (activeWorkload >= limit) {
+        console.log(`[LawyerAssignment] Lawyer ${lawyer.firstName} at capacity: ${activeWorkload}/${limit} (${tier})`);
+        return false;
+      }
+      
+      return true;
+    });
+
+    if (eligibleLawyers.length === 0) {
+      console.error('[LawyerAssignment] No eligible lawyers within tier limits');
+      throw new Error('All lawyers are at capacity. Our team has been notified to onboard more lawyers.');
     }
 
     // Sort by workload (fewest active reviews)
-    const sortedLawyers = lawyers.sort((a, b) => {
+    const sortedLawyers = eligibleLawyers.sort((a, b) => {
       return a._count.assignedReviews - b._count.assignedReviews;
     });
 
     const assignedLawyer = sortedLawyers[0];
+    const tier = assignedLawyer.lawyerProfile?.tier || 'FREE';
+    const totalCerts = assignedLawyer._count.assignedReviews + assignedLawyer._count.completedReviews;
 
     console.log('[LawyerAssignment] Assigning lawyer:', {
       lawyerId: assignedLawyer.id,
       lawyerName: `${assignedLawyer.firstName} ${assignedLawyer.lastName}`,
-      currentWorkload: assignedLawyer._count.assignedReviews
+      tier,
+      activeWorkload: assignedLawyer._count.assignedReviews,
+      completedReviews: assignedLawyer._count.completedReviews,
+      totalCertifications: totalCerts,
+      remainingSlots: tier === 'FREE' ? (2 - totalCerts) : 'unlimited'
     });
 
     // Update document review with assigned lawyer
