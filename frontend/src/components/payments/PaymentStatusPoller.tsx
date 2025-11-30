@@ -33,9 +33,9 @@ export const PaymentStatusPoller: React.FC<PaymentStatusPollerProps> = ({
         console.log('[PaymentStatusPoller] Status response:', response.data);
         
         if (response.data.success) {
-          const payment = response.data.data;
+          const payment = response.data.data || response.data;
           
-          if (payment.status === 'COMPLETED') {
+          if (payment.status === 'PAID' || payment.status === 'COMPLETED') {
             console.log('[PaymentStatusPoller] Payment completed!');
             setStatus('success');
             onSuccess(payment);

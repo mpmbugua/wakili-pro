@@ -428,13 +428,16 @@ router.get('/:paymentId/status', authenticate, async (req: AuthRequest, res: Res
 
     const metadata = payment.metadata as any;
     res.status(200).json({
-      paymentId: payment.id,
-      status: payment.status,
-      amount: payment.amount / 100, // Convert back from cents
-      currency: metadata?.currency || 'USD',
-      paymentMethod: payment.method,
-      verifiedAt: payment.verifiedAt,
-      documentReview
+      success: true,
+      data: {
+        paymentId: payment.id,
+        status: payment.status,
+        amount: payment.amount / 100, // Convert back from cents
+        currency: metadata?.currency || 'KES',
+        paymentMethod: payment.method,
+        verifiedAt: payment.verifiedAt,
+        documentReview
+      }
     });
   } catch (error: any) {
     console.error('Payment status check error:', error);
