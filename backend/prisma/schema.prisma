@@ -897,6 +897,10 @@ model LawyerLetterhead {
   signatureUrl      String? // Digital signature image
   certificatePrefix String  @default("WP") // Prefix for certificate IDs (e.g., "WP", "LSK")
   
+  // Letterhead preference
+  useCustomLetterhead Boolean @default(false) // If true, use uploaded template; if false, use system-generated
+  customLetterheadUrl String? // Custom uploaded letterhead template (PDF/image)
+  
   // Scanned Letterhead Fields
   scannedLetterheadUrl  String?  // Original uploaded letterhead file (PDF/PNG/JPG)
   letterheadTemplateUrl String?  // Processed PDF template ready for merging

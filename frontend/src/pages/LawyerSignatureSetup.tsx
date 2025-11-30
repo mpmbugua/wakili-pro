@@ -8,6 +8,8 @@ interface LawyerLetterhead {
   signatureUrl?: string;
   stampUrl?: string;
   letterheadUrl?: string;
+  useCustomLetterhead?: boolean;
+  customLetterheadUrl?: string;
   firmName: string;
   firmAddress?: string;
   firmPhone?: string;
@@ -41,6 +43,7 @@ const LawyerSignatureSetup: React.FC = () => {
   // Letterhead template upload state
   const [letterheadFile, setLetterheadFile] = useState<File | null>(null);
   const [letterheadPreview, setLetterheadPreview] = useState<string | null>(null);
+  const [useCustomLetterhead, setUseCustomLetterhead] = useState<boolean>(false);
 
   useEffect(() => {
     fetchLetterhead();
@@ -58,6 +61,7 @@ const LawyerSignatureSetup: React.FC = () => {
         setFirmEmail(response.data.data.firmEmail || '');
         setLicenseNumber(response.data.data.licenseNumber || '');
         setCertificatePrefix(response.data.data.certificatePrefix || 'WP');
+        setUseCustomLetterhead(response.data.data.useCustomLetterhead || false);
         if (response.data.data.stampUrl) {
           setStampPreview(response.data.data.stampUrl);
         }
@@ -636,99 +640,170 @@ const LawyerSignatureSetup: React.FC = () => {
           </div>
 
           <p className="text-sm text-slate-600 mb-4">
-            Upload a blank document (PDF or image) showing your official header and footer. 
-            This will be used as a template when certifying documents.
+            Choose how you want your certified documents to appear.
           </p>
 
-          {letterhead?.letterheadUrl ? (
-            <div className="space-y-4">
-              <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
-                {letterhead.letterheadUrl.endsWith('.pdf') ? (
-                  <div className="flex items-center space-x-3">
-                    <FileText className="h-8 w-8 text-red-600" />
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">Letterhead Template (PDF)</p>
-                      <a 
-                        href={`${import.meta.env.VITE_API_URL}${letterhead.letterheadUrl}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:underline"
-                      >
-                        View Template
-                      </a>
-                    </div>
-                  </div>
-                ) : (
-                  <img
-                    src={`${import.meta.env.VITE_API_URL}${letterhead.letterheadUrl}`}
-                    alt="Letterhead Template"
-                    className="max-w-full h-auto rounded"
-                  />
-                )}
-              </div>
-              <button
-                onClick={handleDeleteLetterhead}
-                disabled={saving}
-                className="w-full px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Delete Letterhead Template</span>
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {letterheadPreview && letterheadPreview !== 'pdf' && (
-                <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
-                  <img
-                    src={letterheadPreview}
-                    alt="Letterhead Preview"
-                    className="max-w-full h-auto rounded"
-                  />
-                </div>
-              )}
-
-              {letterheadPreview === 'pdf' && (
-                <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
-                  <div className="flex items-center space-x-3">
-                    <FileText className="h-8 w-8 text-red-600" />
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">PDF Selected</p>
-                      <p className="text-xs text-slate-600">{letterheadFile?.name}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
+          {/* Letterhead Type Selection */}
+          <div className="mb-6 space-y-3">
+            <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
+              style={{ borderColor: !useCustomLetterhead ? '#3b82f6' : '#e2e8f0' }}>
               <input
-                type="file"
-                accept="application/pdf,image/png,image/jpeg,image/jpg"
-                onChange={handleLetterheadFileSelect}
-                className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                type="radio"
+                name="letterheadType"
+                checked={!useCustomLetterhead}
+                onChange={() => setUseCustomLetterhead(false)}
+                className="w-4 h-4 text-blue-600"
               />
-
-              <p className="text-xs text-slate-500">
-                Accepted formats: PDF, PNG, JPG (max 10MB). Upload a blank page showing your firm's official header and footer.
-              </p>
-
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => {
-                    setLetterheadFile(null);
-                    setLetterheadPreview(null);
-                  }}
-                  className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 text-sm rounded-md hover:bg-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUploadLetterhead}
-                  disabled={!letterheadFile || saving}
-                  className="flex-1 px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  <span>{saving ? 'Uploading...' : 'Upload Template'}</span>
-                </button>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-slate-900">System-Generated Letterhead</p>
+                <p className="text-xs text-slate-600">
+                  Automatically generated professional letterhead using your firm details, signature, and stamp.
+                </p>
               </div>
+            </label>
+
+            <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
+              style={{ borderColor: useCustomLetterhead ? '#3b82f6' : '#e2e8f0' }}>
+              <input
+                type="radio"
+                name="letterheadType"
+                checked={useCustomLetterhead}
+                onChange={() => setUseCustomLetterhead(true)}
+                className="w-4 h-4 text-blue-600"
+              />
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-slate-900">Custom Letterhead Template</p>
+                <p className="text-xs text-slate-600">
+                  Upload your own letterhead template (PDF or image) with your firm's official header and footer.
+                </p>
+              </div>
+            </label>
+          </div>
+
+          {/* Custom Letterhead Upload Section (only shown when custom is selected) */}
+          {useCustomLetterhead && (
+            <div className="space-y-4 border-t pt-4">
+              {letterhead?.customLetterheadUrl ? (
+                <div className="space-y-4">
+                  <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                    {letterhead.customLetterheadUrl.endsWith('.pdf') ? (
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-8 w-8 text-red-600" />
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">Custom Letterhead Template (PDF)</p>
+                          <a 
+                            href={`${import.meta.env.VITE_API_URL}${letterhead.customLetterheadUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            View Template
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}${letterhead.customLetterheadUrl}`}
+                        alt="Custom Letterhead Template"
+                        className="max-w-full h-auto rounded"
+                      />
+                    )}
+                  </div>
+                  <button
+                    onClick={handleDeleteLetterhead}
+                    disabled={saving}
+                    className="w-full px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span>Delete Custom Template</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {letterheadPreview && letterheadPreview !== 'pdf' && (
+                    <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                      <img
+                        src={letterheadPreview}
+                        alt="Letterhead Preview"
+                        className="max-w-full h-auto rounded"
+                      />
+                    </div>
+                  )}
+
+                  {letterheadPreview === 'pdf' && (
+                    <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-8 w-8 text-red-600" />
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">PDF Selected</p>
+                          <p className="text-xs text-slate-600">{letterheadFile?.name}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <input
+                    type="file"
+                    accept="application/pdf,image/png,image/jpeg,image/jpg"
+                    onChange={handleLetterheadFileSelect}
+                    className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                  />
+
+                  <p className="text-xs text-slate-500">
+                    Accepted formats: PDF, PNG, JPG (max 10MB). Upload a blank page showing your firm's official header and footer.
+                  </p>
+
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        setLetterheadFile(null);
+                        setLetterheadPreview(null);
+                      }}
+                      className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 text-sm rounded-md hover:bg-slate-300"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUploadLetterhead}
+                      disabled={!letterheadFile || saving}
+                      className="flex-1 px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      <span>{saving ? 'Uploading...' : 'Upload Template'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Save Preference Button */}
+          <div className="mt-4 pt-4 border-t">
+            <button
+              onClick={async () => {
+                setSaving(true);
+                setMessage(null);
+                try {
+                  const response = await axiosInstance.put('/lawyer/letterhead/preference', {
+                    useCustomLetterhead
+                  });
+                  if (response.data.success) {
+                    setMessage({ type: 'success', text: 'Letterhead preference saved!' });
+                    fetchLetterhead();
+                  }
+                } catch (error: any) {
+                  console.error('Error saving preference:', error);
+                  setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to save preference' });
+                } finally {
+                  setSaving(false);
+                }
+              }}
+              disabled={saving}
+              className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save Letterhead Preference'}
+            </button>
+          </div>
             </div>
           )}
         </div>

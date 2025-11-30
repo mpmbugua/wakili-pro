@@ -439,18 +439,21 @@ export const uploadLetterheadTemplate = async (req: AuthenticatedRequest, res: R
       `wakili-pro/letterheads/${userId}`
     );
 
-    const letterheadUrl = uploadResult.url;
+    const customLetterheadUrl = uploadResult.url;
 
     // Update or create letterhead
     const letterhead = await prisma.lawyerLetterhead.upsert({
       where: { lawyerId: userId },
       update: {
-        letterheadUrl,
+        customLetterheadUrl,
+        useCustomLetterhead: true,
         updatedAt: new Date()
       },
       create: {
         lawyerId: userId,
-        letterheadUrl,
+        letterheadUrl: '', // Placeholder for backward compatibility
+        customLetterheadUrl,
+        useCustomLetterhead: true,
         firmName: '',
         licenseNumber: '',
         certificatePrefix: 'WP'
@@ -491,7 +494,7 @@ export const deleteLetterheadTemplate = async (req: AuthenticatedRequest, res: R
       where: { lawyerId: userId }
     });
 
-    if (!letterhead || !letterhead.letterheadUrl) {
+    if (!letterhead || !letterhead.customLetterheadUrl) {
       res.status(404).json({
         success: false,
         message: 'No letterhead template found'
@@ -500,9 +503,9 @@ export const deleteLetterheadTemplate = async (req: AuthenticatedRequest, res: R
     }
 
     // Delete from Cloudinary if it's a Cloudinary URL
-    if (letterhead.letterheadUrl.includes('cloudinary')) {
+    if (letterhead.customLetterheadUrl.includes('cloudinary')) {
       try {
-        const urlParts = letterhead.letterheadUrl.split('/');
+        const urlParts = letterhead.customLetterheadUrl.split('/');
         const fileNameWithExt = urlParts[urlParts.length - 1];
         const fileName = fileNameWithExt.split('.')[0];
         const folder = urlParts[urlParts.length - 2];
@@ -518,7 +521,7 @@ export const deleteLetterheadTemplate = async (req: AuthenticatedRequest, res: R
     // Update database
     await prisma.lawyerLetterhead.update({
       where: { lawyerId: userId },
-      data: { letterheadUrl: null }
+      data: { customLetterheadUrl: null }
     });
 
     res.json({
@@ -530,6 +533,63 @@ export const deleteLetterheadTemplate = async (req: AuthenticatedRequest, res: R
     res.status(500).json({
       success: false,
       message: 'Failed to delete letterhead template'
+    });
+  }
+};
+
+/**
+ * Update letterhead preference (system-generated vs custom)
+ */
+export const updateLetterheadPreference = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    if (!userId || userRole !== 'LAWYER') {
+      res.status(403).json({
+        success: false,
+        message: 'Only lawyers can update letterhead preference'
+      });
+      return;
+    }
+
+    const { useCustomLetterhead } = req.body;
+
+    if (typeof useCustomLetterhead !== 'boolean') {
+      res.status(400).json({
+        success: false,
+        message: 'useCustomLetterhead must be a boolean value'
+      });
+      return;
+    }
+
+    // Update preference
+    const letterhead = await prisma.lawyerLetterhead.upsert({
+      where: { lawyerId: userId },
+      update: {
+        useCustomLetterhead,
+        updatedAt: new Date()
+      },
+      create: {
+        lawyerId: userId,
+        letterheadUrl: '', // Placeholder
+        useCustomLetterhead,
+        firmName: '',
+        licenseNumber: '',
+        certificatePrefix: 'WP'
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Letterhead preference updated successfully',
+      data: letterhead
+    });
+  } catch (error) {
+    console.error('Update letterhead preference error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update letterhead preference'
     });
   }
 };

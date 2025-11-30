@@ -6,6 +6,7 @@ import {
   uploadStamp,
   uploadLetterheadTemplate,
   updateLetterheadDetails,
+  updateLetterheadPreference,
   getLetterhead,
   deleteSignature,
   deleteStamp,
@@ -83,6 +84,17 @@ router.put(
   '/details',
   authenticateToken,
   updateLetterheadDetails
+);
+
+/**
+ * @route PUT /api/lawyer/letterhead/preference
+ * @desc Update letterhead preference (system-generated vs custom)
+ * @access Private (Lawyers only)
+ */
+router.put(
+  '/preference',
+  authenticateToken,
+  updateLetterheadPreference
 );
 
 /**
