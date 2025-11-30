@@ -31,9 +31,16 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Don't redirect on wallet/profile API errors - they might just not exist yet
+      const url = error.config?.url || '';
+      const skipRedirectUrls = ['/wallet/', '/lawyers/profile', '/users/profile'];
+      const shouldSkipRedirect = skipRedirectUrls.some(path => url.includes(path));
+      
+      if (!shouldSkipRedirect) {
+        // Token expired or invalid
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

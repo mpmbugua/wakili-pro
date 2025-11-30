@@ -176,16 +176,30 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
           availableBalance: wallet.availableBalance || 0,
           loading: false,
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch wallet balance:', error);
-        setWalletBalance(prev => ({ ...prev, loading: false }));
+        // Don't crash on wallet errors - just show zero balance
+        // This prevents infinite redirect loops if wallet doesn't exist yet
+        if (error.response?.status === 404 || error.response?.status === 401) {
+          console.log('Wallet not found or unauthorized - showing zero balance');
+        }
+        setWalletBalance({
+          balance: 0,
+          pendingBalance: 0,
+          availableBalance: 0,
+          loading: false,
+        });
       }
     };
     
     if (isVerified) {
       fetchLawyerData();
       fetchWalletBalance();
+    } else {
+      // Set loading to false if not verified
+      setWalletBalance(prev => ({ ...prev, loading: false }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVerified]);
 
   if (loading) {
