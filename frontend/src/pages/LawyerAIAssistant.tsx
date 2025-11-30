@@ -737,7 +737,6 @@ export const LawyerAIAssistant: React.FC = () => {
                   : 'Type your question, upload documents/images, use camera, or click the microphone to speak.'}
             </p>
           </div>
-        </div>
       </div>
     </div>
   );
