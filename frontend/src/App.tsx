@@ -182,7 +182,17 @@ function App() {
             element={<PublicLawyerProfile />} 
           />
 
-          {/* All other routes wrapped in AppShell */}
+          {/* Lawyer AI Assistant - Protected with GlobalLayout, no AppShell */}
+          <Route 
+            path="/lawyer/ai" 
+            element={
+              <ProtectedRoute hydrated={hydrated}>
+                <LawyerAIAssistant />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* All public routes wrapped in AppShell */}
           <Route path="*" element={
             <AppShell>
               <Routes>
@@ -347,14 +357,6 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <NewConsultationPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/lawyer/ai" 
-              element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <LawyerAIAssistant />
                 </ProtectedRoute>
               } 
             />
