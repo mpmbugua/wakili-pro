@@ -150,11 +150,16 @@ export const LawyerProfileSettings: React.FC = () => {
   };
 
   const handleSaveProfile = async () => {
+    console.log('[LawyerSettings] Save button clicked');
+    console.log('[LawyerSettings] Current profile:', profile);
+    
     setSaving(true);
     setError(null);
     setSuccess(null);
 
     try {
+      console.log('[LawyerSettings] Sending PUT request to /lawyers/profile');
+      
       const response = await axiosInstance.put('/lawyers/profile', {
         bio: profile.bio,
         yearsOfExperience: profile.yearsOfExperience,
@@ -162,15 +167,20 @@ export const LawyerProfileSettings: React.FC = () => {
         profileImageUrl: profile.profileImageUrl,
       });
 
+      console.log('[LawyerSettings] Response:', response.data);
+
       if (response.data.success) {
         setSuccess('Profile updated successfully!');
         setTimeout(() => setSuccess(null), 3000);
+        console.log('[LawyerSettings] Profile saved successfully');
       }
     } catch (err: any) {
-      console.error('Error saving profile:', err);
-      setError(err.response?.data?.message || 'Failed to update profile');
+      console.error('[LawyerSettings] Error saving profile:', err);
+      console.error('[LawyerSettings] Error response:', err.response?.data);
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to update profile');
     } finally {
       setSaving(false);
+      console.log('[LawyerSettings] Save operation completed');
     }
   };
 
