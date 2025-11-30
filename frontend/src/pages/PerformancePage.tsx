@@ -1,6 +1,5 @@
 ﻿import React, { useState } from 'react';
 import { Award, Star, TrendingUp, MessageSquare, ThumbsUp, Clock, Target, Trophy } from 'lucide-react';
-import { GlobalLayout } from '@/components/layout/GlobalLayout';
 
 interface Review {
   id: string;
@@ -80,10 +79,9 @@ export const PerformancePage: React.FC = () => {
   };
 
   return (
-    <GlobalLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
           <h1 className="text-2xl font-bold text-gray-900">Performance & Reviews</h1>
           <p className="text-sm text-gray-600 mt-1">Track your ratings, reviews, and professional achievements</p>
         </div>
@@ -231,6 +229,5 @@ export const PerformancePage: React.FC = () => {
           </div>
         </div>
       </div>
-    </GlobalLayout>
   );
 };

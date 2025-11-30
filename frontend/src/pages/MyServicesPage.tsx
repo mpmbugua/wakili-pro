@@ -1,6 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Briefcase, Plus, Package, Edit2, Trash2, Eye, DollarSign, Clock, Users, TrendingUp, ToggleLeft, ToggleRight } from 'lucide-react';
-import { GlobalLayout } from '@/components/layout/GlobalLayout';
 import axiosInstance from '@/services/axiosConfig';
 
 interface Service {
@@ -119,8 +118,7 @@ export const MyServicesPage: React.FC = () => {
   };
 
   return (
-    <GlobalLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -287,6 +285,5 @@ export const MyServicesPage: React.FC = () => {
           ))}
         </div>
       </div>
-    </GlobalLayout>
   );
 };

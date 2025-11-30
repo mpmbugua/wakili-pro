@@ -1,6 +1,5 @@
 ﻿import React, { useState } from 'react';
 import { TrendingUp, BarChart3, Users, DollarSign, FileText, Clock, ArrowUp, ArrowDown, Calendar } from 'lucide-react';
-import { GlobalLayout } from '@/components/layout/GlobalLayout';
 
 export const AnalyticsPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
@@ -43,10 +42,9 @@ export const AnalyticsPage: React.FC = () => {
   };
 
   return (
-    <GlobalLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Analytics & Insights</h1>
             <p className="text-sm text-gray-600 mt-1">Track your practice performance and growth</p>
@@ -219,6 +217,5 @@ export const AnalyticsPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </GlobalLayout>
   );
 };

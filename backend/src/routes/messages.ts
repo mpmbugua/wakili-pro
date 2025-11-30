@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { authenticateJWT } from '../middleware/auth';
+import { authenticateToken } from '../middleware/auth';
 import {
   getConversations,
   getOrCreateConversation,
@@ -44,21 +44,21 @@ const attachmentUpload = multer({
  * Get all conversations for authenticated user
  * GET /api/messages/conversations
  */
-router.get('/conversations', authenticateJWT, getConversations);
+router.get('/conversations', authenticateToken, getConversations);
 
 /**
  * Get or create conversation with another user
  * POST /api/messages/conversations
  * Body: { otherUserId: string }
  */
-router.post('/conversations', authenticateJWT, getOrCreateConversation);
+router.post('/conversations', authenticateToken, getOrCreateConversation);
 
 /**
  * Get messages in a conversation
  * GET /api/messages/:conversationId
  * Query params: limit (default 50), before (ISO date for pagination)
  */
-router.get('/:conversationId', authenticateJWT, getMessages);
+router.get('/:conversationId', authenticateToken, getMessages);
 
 /**
  * Send a message in a conversation
@@ -68,7 +68,7 @@ router.get('/:conversationId', authenticateJWT, getMessages);
  */
 router.post(
   '/:conversationId',
-  authenticateJWT,
+  authenticateToken,
   attachmentUpload.array('attachments', 5),
   sendMessage
 );
@@ -77,12 +77,12 @@ router.post(
  * Mark messages as read in a conversation
  * PUT /api/messages/:conversationId/read
  */
-router.put('/:conversationId/read', authenticateJWT, markAsRead);
+router.put('/:conversationId/read', authenticateToken, markAsRead);
 
 /**
  * Delete a message
  * DELETE /api/messages/:messageId
  */
-router.delete('/:messageId', authenticateJWT, deleteMessage);
+router.delete('/:messageId', authenticateToken, deleteMessage);
 
 export default router;

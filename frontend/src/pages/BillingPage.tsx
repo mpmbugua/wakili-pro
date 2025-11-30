@@ -1,6 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { CreditCard, Receipt, Download, Filter, Calendar, TrendingUp, DollarSign, CheckCircle, Clock, XCircle, Eye } from 'lucide-react';
-import { GlobalLayout } from '@/components/layout/GlobalLayout';
 
 interface Transaction {
   id: string;
@@ -131,8 +130,7 @@ export const BillingPage: React.FC = () => {
   };
 
   return (
-    <GlobalLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Billing & Invoices</h1>
@@ -331,6 +329,5 @@ export const BillingPage: React.FC = () => {
           )}
         </div>
       </div>
-    </GlobalLayout>
   );
 };
