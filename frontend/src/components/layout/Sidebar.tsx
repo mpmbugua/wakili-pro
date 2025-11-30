@@ -17,7 +17,8 @@ import {
   Briefcase,
   Book,
   Award,
-  TrendingUp
+  TrendingUp,
+  Stamp
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { Button } from '../ui/Button';
@@ -51,6 +52,7 @@ const lawyerNavigation: NavItem[] = [
   { name: 'Billing', href: '/billing', icon: CreditCard },
   { name: 'Analytics', href: '/analytics', icon: TrendingUp },
   { name: 'Performance', href: '/performance', icon: Award },
+  { name: 'Signature & Stamp', href: '/lawyer/signature-setup', icon: FileText },
 ];
 
 const adminNavigation: NavItem[] = [
