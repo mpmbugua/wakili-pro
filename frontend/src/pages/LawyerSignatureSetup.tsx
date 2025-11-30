@@ -34,6 +34,8 @@ const LawyerSignatureSetup: React.FC = () => {
   // Signature/stamp upload state
   const [stampFile, setStampFile] = useState<File | null>(null);
   const [stampPreview, setStampPreview] = useState<string | null>(null);
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLetterhead();
@@ -112,6 +114,53 @@ const LawyerSignatureSetup: React.FC = () => {
       }
       setStampFile(file);
       setStampPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSignatureFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ type: 'error', text: 'File size must be less than 5MB' });
+        return;
+      }
+      setSignatureFile(file);
+      setSignaturePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleUploadSignatureFile = async () => {
+    if (!signatureFile) {
+      setMessage({ type: 'error', text: 'Please select a signature image first' });
+      return;
+    }
+
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('signature', signatureFile);
+
+      const response = await axiosInstance.post('/lawyer/letterhead/signature', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.data.success) {
+        setMessage({ type: 'success', text: 'Signature uploaded successfully!' });
+        fetchLetterhead();
+        setSignatureFile(null);
+        setSignaturePreview(null);
+      } else {
+        setMessage({ type: 'error', text: response.data.message || 'Failed to upload signature' });
+      }
+    } catch (error: any) {
+      console.error('Error uploading signature:', error);
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to upload signature' });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -292,37 +341,110 @@ const LawyerSignatureSetup: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-slate-600 mb-4">
-                  Draw your signature below. This will be used to digitally sign certified documents.
+                  Draw your signature or upload a signature image (PNG/JPG with white background, max 5MB).
                 </p>
 
-                <div className="border-2 border-slate-300 rounded-lg bg-white">
-                  {/* @ts-ignore - react-signature-canvas has React 18 compatibility issues */}
-                  <SignatureCanvas
-                    ref={signatureCanvasRef}
-                    canvasProps={{
-                      className: 'w-full h-48',
-                      style: { touchAction: 'none' }
-                    }}
-                    backgroundColor="#ffffff"
-                  />
-                </div>
-
-                <div className="flex space-x-2">
+                {/* Tab Selection */}
+                <div className="flex border-b border-slate-200 mb-4">
+                  <button
+                    onClick={() => setSignaturePreview(null)}
+                    className={`px-4 py-2 text-sm font-medium ${
+                      !signaturePreview
+                        ? 'border-b-2 border-blue-600 text-blue-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Draw Signature
+                  </button>
                   <button
                     onClick={() => signatureCanvasRef.current?.clear()}
-                    className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 text-sm rounded-md hover:bg-slate-300"
+                    className={`px-4 py-2 text-sm font-medium ml-4 ${
+                      signaturePreview
+                        ? 'border-b-2 border-blue-600 text-blue-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
                   >
-                    Clear
-                  </button>
-                  <button
-                    onClick={handleSaveSignature}
-                    disabled={saving}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2"
-                  >
-                    <Save className="h-4 w-4" />
-                    <span>{saving ? 'Saving...' : 'Save Signature'}</span>
+                    Upload Image
                   </button>
                 </div>
+
+                {/* Canvas Drawing Option */}
+                {!signaturePreview && (
+                  <>
+                    <div className="border-2 border-slate-300 rounded-lg bg-white">
+                      {/* @ts-ignore - react-signature-canvas has React 18 compatibility issues */}
+                      <SignatureCanvas
+                        ref={signatureCanvasRef}
+                        canvasProps={{
+                          className: 'w-full h-48',
+                          style: { touchAction: 'none' }
+                        }}
+                        backgroundColor="#ffffff"
+                      />
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => signatureCanvasRef.current?.clear()}
+                        className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 text-sm rounded-md hover:bg-slate-300"
+                      >
+                        Clear
+                      </button>
+                      <button
+                        onClick={handleSaveSignature}
+                        disabled={saving}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+                      >
+                        <Save className="h-4 w-4" />
+                        <span>{saving ? 'Saving...' : 'Save Signature'}</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {/* Image Upload Option */}
+                {signaturePreview && (
+                  <>
+                    <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                      <img
+                        src={signaturePreview}
+                        alt="Signature Preview"
+                        className="max-w-full h-auto"
+                      />
+                    </div>
+
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg"
+                      onChange={handleSignatureFileSelect}
+                      className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+
+                    <p className="text-xs text-slate-500">
+                      Tip: Use a white background for best results. The signature should be clear and professional.
+                    </p>
+
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          setSignatureFile(null);
+                          setSignaturePreview(null);
+                        }}
+                        className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 text-sm rounded-md hover:bg-slate-300"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleUploadSignatureFile}
+                        disabled={!signatureFile || saving}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+                      >
+                        <Upload className="h-4 w-4" />
+                        <span>{saving ? 'Uploading...' : 'Upload Signature'}</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>

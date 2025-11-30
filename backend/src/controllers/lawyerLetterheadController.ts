@@ -2,6 +2,8 @@ import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { uploadSignature as uploadSignatureToCloudinary, uploadStamp as uploadStampToCloudinary, isValidImageType, deleteFromCloudinary } from '../services/fileUploadService';
+import path from 'path';
+import fs from 'fs/promises';
 
 const prisma = new PrismaClient();
 
@@ -289,12 +291,21 @@ export const deleteSignature = async (req: AuthenticatedRequest, res: Response):
       return;
     }
 
-    // Delete file
-    const filePath = path.join(__dirname, '../../storage', letterhead.signatureUrl.replace('/uploads/', ''));
-    try {
-      await fs.unlink(filePath);
-    } catch (error) {
-      console.error('Error deleting signature file:', error);
+    // Delete from Cloudinary if it's a Cloudinary URL
+    if (letterhead.signatureUrl.includes('cloudinary')) {
+      try {
+        // Extract public_id from Cloudinary URL
+        const urlParts = letterhead.signatureUrl.split('/');
+        const fileNameWithExt = urlParts[urlParts.length - 1];
+        const fileName = fileNameWithExt.split('.')[0];
+        const folder = urlParts[urlParts.length - 2];
+        const publicId = `${folder}/${fileName}`;
+        
+        await deleteFromCloudinary(publicId);
+      } catch (error) {
+        console.error('Error deleting from Cloudinary:', error);
+        // Continue even if Cloudinary delete fails
+      }
     }
 
     // Update database
@@ -344,12 +355,21 @@ export const deleteStamp = async (req: AuthenticatedRequest, res: Response): Pro
       return;
     }
 
-    // Delete file
-    const filePath = path.join(__dirname, '../../storage', letterhead.stampUrl.replace('/uploads/', ''));
-    try {
-      await fs.unlink(filePath);
-    } catch (error) {
-      console.error('Error deleting stamp file:', error);
+    // Delete from Cloudinary if it's a Cloudinary URL
+    if (letterhead.stampUrl.includes('cloudinary')) {
+      try {
+        // Extract public_id from Cloudinary URL
+        const urlParts = letterhead.stampUrl.split('/');
+        const fileNameWithExt = urlParts[urlParts.length - 1];
+        const fileName = fileNameWithExt.split('.')[0];
+        const folder = urlParts[urlParts.length - 2];
+        const publicId = `${folder}/${fileName}`;
+        
+        await deleteFromCloudinary(publicId);
+      } catch (error) {
+        console.error('Error deleting from Cloudinary:', error);
+        // Continue even if Cloudinary delete fails
+      }
     }
 
     // Update database
