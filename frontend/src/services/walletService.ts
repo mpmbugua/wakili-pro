@@ -11,7 +11,8 @@ export const walletService = {
   // Get wallet balance
   async getBalance(): Promise<LawyerWallet> {
     const response = await api.get('/wallet/balance');
-    return response.data;
+    // API returns { success, data, message }, extract the data
+    return response.data.data || response.data;
   },
 
   // Create withdrawal request
@@ -19,38 +20,38 @@ export const walletService = {
     data: CreateWithdrawalRequestData
   ): Promise<WithdrawalRequest> {
     const response = await api.post('/wallet/withdraw', data);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   // Get all withdrawal requests for the logged-in lawyer
   async getWithdrawals(status?: string): Promise<WithdrawalRequest[]> {
     const params = status ? { status } : {};
     const response = await api.get('/wallet/withdrawals', { params });
-    return response.data;
+    return response.data.data || response.data;
   },
 
   // Get specific withdrawal request
   async getWithdrawalById(id: string): Promise<WithdrawalRequest> {
     const response = await api.get(`/wallet/withdrawals/${id}`);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   // Cancel withdrawal request
   async cancelWithdrawal(id: string): Promise<WithdrawalRequest> {
     const response = await api.delete(`/wallet/withdrawals/${id}`);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   // Get withdrawal statistics
   async getStats(): Promise<WithdrawalStats> {
     const response = await api.get('/wallet/stats');
-    return response.data;
+    return response.data.data || response.data;
   },
 
   // Admin: Get pending withdrawals
   async getPendingWithdrawals(): Promise<WithdrawalRequest[]> {
     const response = await api.get('/wallet/admin/pending');
-    return response.data;
+    return response.data.data || response.data;
   },
 
   // Admin: Process withdrawal (approve/reject)
@@ -59,7 +60,7 @@ export const walletService = {
     data: ProcessWithdrawalData
   ): Promise<WithdrawalRequest> {
     const response = await api.post(`/wallet/admin/process/${id}`, data);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   // Admin: Complete withdrawal
@@ -70,6 +71,6 @@ export const walletService = {
     const response = await api.post(`/wallet/admin/complete/${id}`, {
       transactionId,
     });
-    return response.data;
+    return response.data.data || response.data;
   },
 };

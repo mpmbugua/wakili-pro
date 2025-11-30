@@ -170,10 +170,17 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     const fetchWalletBalance = async () => {
       try {
         const wallet = await walletService.getBalance();
+        console.log('Wallet data received:', wallet);
+        
+        // Ensure we have valid numbers
+        const balance = typeof wallet?.balance === 'number' ? wallet.balance : 0;
+        const pendingBalance = typeof wallet?.pendingBalance === 'number' ? wallet.pendingBalance : 0;
+        const availableBalance = typeof wallet?.availableBalance === 'number' ? wallet.availableBalance : 0;
+        
         setWalletBalance({
-          balance: wallet.balance || 0,
-          pendingBalance: wallet.pendingBalance || 0,
-          availableBalance: wallet.availableBalance || 0,
+          balance,
+          pendingBalance,
+          availableBalance,
           loading: false,
         });
       } catch (error: any) {
