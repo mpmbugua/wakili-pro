@@ -99,6 +99,54 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     checkVerificationStatus();
   }, []);
 
+  // Fetch real lawyer data on mount
+  useEffect(() => {
+    const fetchLawyerData = async () => {
+      try {
+        const response = await fetch('/api/lawyers/profile', {
+          headers: { 
+            Authorization: `Bearer ${localStorage.getItem('wakili-auth-storage') ? JSON.parse(localStorage.getItem('wakili-auth-storage')!).state?.accessToken : ''}`
+          }
+        });
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          // Update tier usage based on actual lawyer profile
+          const profile = data.data;
+          const tier = profile.tier || 'FREE';
+          const specializationsCount = profile.specializations?.length || 0;
+          
+          // Set tier limits based on actual tier
+          const tierLimits = {
+            FREE: { bookings: 2, certifications: 0, services: 1, specializations: 2, commission: 0.50 },
+            LITE: { bookings: 10, certifications: 5, services: 5, specializations: 3, commission: 0.30 },
+            PRO: { bookings: 999, certifications: 999, services: 999, specializations: 10, commission: 0.15 }
+          };
+          
+          const limits = tierLimits[tier as keyof typeof tierLimits] || tierLimits.FREE;
+          
+          setTierUsage({
+            currentTier: tier as 'FREE' | 'LITE' | 'PRO',
+            usage: {
+              bookings: { current: 0, limit: limits.bookings, percentage: 0 },
+              certifications: { current: 0, limit: limits.certifications, percentage: 0 },
+              services: { current: 0, limit: limits.services, percentage: 0 },
+              specializations: { current: specializationsCount, limit: limits.specializations },
+            },
+            commissionRate: limits.commission,
+            pricingTier: tier === 'FREE' ? 'ENTRY' : tier === 'LITE' ? 'STANDARD' : 'PREMIUM'
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch lawyer profile:', error);
+      }
+    };
+    
+    if (isVerified) {
+      fetchLawyerData();
+    }
+  }, [isVerified]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -163,53 +211,9 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     );
   }
 
-  // Original dashboard for verified lawyers - hooks already declared at top
+  // Original dashboard for verified lawyers - all hooks already at top
   
-  // Fetch real lawyer data on mount
-  useEffect(() => {
-    const fetchLawyerData = async () => {
-      try {
-        const response = await fetch('/api/lawyers/profile', {
-          headers: { 
-            Authorization: `Bearer ${localStorage.getItem('wakili-auth-storage') ? JSON.parse(localStorage.getItem('wakili-auth-storage')!).state?.accessToken : ''}`
-          }
-        });
-        const data = await response.json();
-        
-        if (data.success && data.data) {
-          // Update tier usage based on actual lawyer profile
-          const profile = data.data;
-          const tier = profile.tier || 'FREE';
-          const specializationsCount = profile.specializations?.length || 0;
-          
-          // Set tier limits based on actual tier
-          const tierLimits = {
-            FREE: { bookings: 2, certifications: 0, services: 1, specializations: 2, commission: 0.50 },
-            LITE: { bookings: 10, certifications: 5, services: 5, specializations: 3, commission: 0.30 },
-            PRO: { bookings: 999, certifications: 999, services: 999, specializations: 10, commission: 0.15 }
-          };
-          
-          const limits = tierLimits[tier as keyof typeof tierLimits] || tierLimits.FREE;
-          
-          setTierUsage({
-            currentTier: tier as 'FREE' | 'LITE' | 'PRO',
-            usage: {
-              bookings: { current: 0, limit: limits.bookings, percentage: 0 },
-              certifications: { current: 0, limit: limits.certifications, percentage: 0 },
-              services: { current: 0, limit: limits.services, percentage: 0 },
-              specializations: { current: specializationsCount, limit: limits.specializations },
-            },
-            commissionRate: limits.commission,
-            pricingTier: tier === 'FREE' ? 'ENTRY' : tier === 'LITE' ? 'STANDARD' : 'PREMIUM',
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch lawyer data:', error);
-      }
-    };
-
-    fetchLawyerData();
-  }, []);
+  // Rest of component logic below (no more hooks after this point)
 
   const handleUpgrade = () => {
     navigate('/subscriptions');
