@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, MessageSquare, FileText, Video, Clock, Plus, ArrowRight,
   Users, DollarSign, TrendingUp, CheckCircle, AlertCircle, BarChart3, User,
-  Crown, Shield, Zap, Award, X, Lock
+  Crown, Shield, Zap, Award, X, Lock, Briefcase
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
-import { TierLimitModal, CertificationBlockedModal, CommissionSavingsModal } from '../modals';
+import { TierLimitModal, CertificationBlockedModal, CommissionSavingsModal, UpgradeModal } from '../modals';
 import type { AuthUser } from '@wakili-pro/shared/src/types/auth';
 import axiosInstance from '../../lib/axios';
 
@@ -80,6 +80,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const [limitModalType, setLimitModalType] = useState<'bookings' | 'certifications' | 'services'>('bookings');
   const [showCertModal, setShowCertModal] = useState(false);
   const [showSavingsModal, setShowSavingsModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const checkVerificationStatus = async () => {
     try {
@@ -333,6 +334,13 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         onUpgrade={handleUpgrade}
       />
 
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        currentTier={tierUsage.currentTier}
+      />
+
       {/* Page Header with Tier Badge */}
       <PageHeader
         title={
@@ -578,7 +586,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
                   <p className="text-xs text-blue-100">Upgrade to LITE or PRO for unlimited access to all features</p>
                 </div>
                 <button
-                  onClick={() => navigate('/subscriptions')}
+                  onClick={() => setShowUpgradeModal(true)}
                   className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors whitespace-nowrap"
                 >
                   Upgrade Now
