@@ -167,6 +167,7 @@ export const HelpPage: React.FC = () => {
             <div className="flex items-center space-x-3 mb-4">
               <BookOpen className="h-8 w-8 text-blue-600" />
               <h3 className="text-xl font-semibold text-slate-900">User Guide</h3>
+            </div>
             <p className="text-slate-700 mb-4">
               Learn how to make the most of Wakili Pro with our comprehensive user guide
             </p>
@@ -175,12 +176,14 @@ export const HelpPage: React.FC = () => {
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               View Guide
-            </button>ide
             </button>
           </div>
 
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6">
             <div className="flex items-center space-x-3 mb-4">
+              <FileText className="h-8 w-8 text-purple-600" />
+              <h3 className="text-xl font-semibold text-slate-900">Legal Resources</h3>
+            </div>
             <p className="text-slate-700 mb-4">
               Access helpful legal resources, guides, and information
             </p>
@@ -190,13 +193,10 @@ export const HelpPage: React.FC = () => {
             >
               Browse Resources
             </button>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-              Browse Resources
-            </button>
           </div>
         </div>
 
-        {/* Contact Form */}
+        {/* AI Chatbot */}
         <div className="bg-white rounded-lg border border-slate-200 p-6 mt-8">
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Still Need Help?</h2>
           <p className="text-slate-600 mb-6">Chat with our AI assistant for instant answers to your questions</p>
