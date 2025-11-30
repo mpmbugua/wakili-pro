@@ -85,10 +85,24 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const checkVerificationStatus = async () => {
     try {
       setChecking(true);
+      console.log('[LawyerDashboard] Checking verification status...');
       const response = await axiosInstance.get('/users/profile');
-      setIsVerified(response.data?.data?.lawyerProfile?.isVerified || false);
+      console.log('[LawyerDashboard] Profile response:', response.data);
+      
+      const profileData = response.data?.data;
+      const lawyerProfile = profileData?.lawyerProfile;
+      
+      console.log('[LawyerDashboard] Lawyer profile:', lawyerProfile);
+      console.log('[LawyerDashboard] isVerified:', lawyerProfile?.isVerified);
+      console.log('[LawyerDashboard] User verificationStatus:', profileData?.verificationStatus);
+      
+      // Check both lawyerProfile.isVerified and user.verificationStatus
+      const verified = lawyerProfile?.isVerified === true || profileData?.verificationStatus === 'VERIFIED';
+      
+      console.log('[LawyerDashboard] Final verified status:', verified);
+      setIsVerified(verified);
     } catch (error) {
-      console.error('Failed to check verification status:', error);
+      console.error('[LawyerDashboard] Failed to check verification status:', error);
     } finally {
       setLoading(false);
       setChecking(false);
@@ -165,49 +179,58 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Clock className="h-8 w-8 text-amber-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Verification Pending</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Profile Setup Required</h2>
           <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-            Thank you for submitting your lawyer profile! Our admin team is currently reviewing your credentials.
-            You'll receive an email notification once your profile is approved (usually within 24-48 hours).
+            To access your lawyer dashboard, please complete your professional profile setup. 
+            Once submitted, our admin team will review and verify your credentials within 24-48 hours.
           </p>
           <div className="bg-white rounded-lg p-6 mb-6 text-left max-w-md mx-auto">
-            <h3 className="font-semibold text-gray-900 mb-3">What happens next?</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">Next Steps:</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start">
-                <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span>Admin reviews your license number and credentials</span>
+                <CheckCircle className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
+                <span>Complete your professional profile with license details</span>
+              </li>
+              <li className="flex items-start">
+                <Clock className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0 mt-0.5" />
+                <span>Admin reviews your credentials (24-48 hours)</span>
               </li>
               <li className="flex items-start">
                 <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span>Verification typically completed within 24-48 hours</span>
+                <span>Email notification when approved</span>
               </li>
               <li className="flex items-start">
                 <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span>You'll receive an email when approved</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span>Once approved, you can start accepting clients</span>
+                <span>Start accepting clients and earning</span>
               </li>
             </ul>
           </div>
-          <button
-            onClick={checkVerificationStatus}
-            disabled={checking}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
-          >
-            {checking ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Checking Status...
-              </>
-            ) : (
-              <>
-                <CheckCircle className="h-5 w-5" />
-                Refresh Verification Status
-              </>
-            )}
-          </button>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => navigate('/lawyer-onboarding')}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+            >
+              <User className="h-5 w-5" />
+              Complete Profile Setup
+            </button>
+            <button
+              onClick={checkVerificationStatus}
+              disabled={checking}
+              className="px-6 py-3 bg-white border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+            >
+              {checking ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  Checking...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-5 w-5" />
+                  Refresh Status
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     );
