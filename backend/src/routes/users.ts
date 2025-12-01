@@ -5,7 +5,8 @@ import {
   updateProfile, 
   lawyerOnboarding, 
   deleteAccount,
-  updateNotificationPreferences
+  updateNotificationPreferences,
+  updatePrivacySettings
 } from '../controllers/userController';
 import { uploadPhoto } from '../controllers/photoUploadController';
 import { authenticateToken, authorizeRoles } from '../middleware/auth';
@@ -48,6 +49,14 @@ router.put('/profile', authenticateToken, updateProfile);
  * @body    { email?, sms?, push?, consultationReminders? }
  */
 router.put('/notification-preferences', authenticateToken, updateNotificationPreferences);
+
+/**
+ * @route   PUT /api/users/privacy-settings
+ * @desc    Update privacy settings
+ * @access  Private
+ * @body    { profileVisibility?, showActivityStatus?, dataAnalytics? }
+ */
+router.put('/privacy-settings', authenticateToken, updatePrivacySettings);
 
 /**
  * @route   POST /api/users/upload-photo

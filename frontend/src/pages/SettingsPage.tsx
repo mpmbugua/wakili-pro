@@ -25,9 +25,17 @@ export const SettingsPage: React.FC = () => {
   });
   const [savingNotifications, setSavingNotifications] = useState(false);
 
-  // Load notification preferences from user profile
+  // Privacy settings state
+  const [privacySettings, setPrivacySettings] = useState({
+    profileVisibility: true,
+    showActivityStatus: true,
+    dataAnalytics: true,
+  });
+  const [savingPrivacy, setSavingPrivacy] = useState(false);
+
+  // Load notification preferences and privacy settings from user profile
   useEffect(() => {
-    const loadNotificationPreferences = async () => {
+    const loadPreferences = async () => {
       try {
         const response = await axiosInstance.get('/users/profile');
         const profile = response.data?.data?.profile;
@@ -39,13 +47,19 @@ export const SettingsPage: React.FC = () => {
             push: profile.pushNotifications ?? true,
             consultationReminders: profile.consultationReminders ?? true,
           });
+          
+          setPrivacySettings({
+            profileVisibility: profile.profileVisibility ?? true,
+            showActivityStatus: profile.showActivityStatus ?? true,
+            dataAnalytics: profile.dataAnalytics ?? true,
+          });
         }
       } catch (error) {
-        console.error('Error loading notification preferences:', error);
+        console.error('Error loading preferences:', error);
       }
     };
 
-    loadNotificationPreferences();
+    loadPreferences();
   }, []);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,6 +132,34 @@ export const SettingsPage: React.FC = () => {
       alert(error.response?.data?.message || 'Failed to update notification preference');
     } finally {
       setSavingNotifications(false);
+    }
+  };
+
+  const handlePrivacyToggle = async (key: keyof typeof privacySettings) => {
+    try {
+      const newValue = !privacySettings[key];
+      
+      // Optimistically update UI
+      setPrivacySettings(prev => ({ ...prev, [key]: newValue }));
+      setSavingPrivacy(true);
+
+      // Save to backend
+      const response = await axiosInstance.put('/users/privacy-settings', {
+        [key]: newValue,
+      });
+
+      if (!response.data.success) {
+        // Revert on failure
+        setPrivacySettings(prev => ({ ...prev, [key]: !newValue }));
+        alert('Failed to update privacy setting');
+      }
+    } catch (error: any) {
+      console.error('Error updating privacy setting:', error);
+      // Revert on error
+      setPrivacySettings(prev => ({ ...prev, [key]: !privacySettings[key] }));
+      alert(error.response?.data?.message || 'Failed to update privacy setting');
+    } finally {
+      setSavingPrivacy(false);
     }
   };
 
@@ -377,22 +419,36 @@ export const SettingsPage: React.FC = () => {
                     </div>
                     <div className="space-y-4">
                       {[
-                        { label: 'Profile visibility', description: 'Make your profile visible to other users' },
-                        { label: 'Show activity status', description: 'Let others see when you\'re online' },
-                        { label: 'Data analytics', description: 'Allow us to use your data to improve our services' },
+                        { key: 'profileVisibility' as const, label: 'Profile visibility', description: 'Make your profile visible to other users' },
+                        { key: 'showActivityStatus' as const, label: 'Show activity status', description: 'Let others see when you\'re online' },
+                        { key: 'dataAnalytics' as const, label: 'Data analytics', description: 'Allow us to use your data to improve our services' },
                       ].map((item) => (
-                        <div key={item.label} className="flex items-center justify-between py-3 border-b border-slate-200">
+                        <div key={item.key} className="flex items-center justify-between py-3 border-b border-slate-200">
                           <div>
                             <p className="font-medium text-slate-900">{item.label}</p>
                             <p className="text-sm text-slate-600">{item.description}</p>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" defaultChecked />
-                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            <input 
+                              type="checkbox" 
+                              className="sr-only peer" 
+                              checked={privacySettings[item.key]}
+                              onChange={() => handlePrivacyToggle(item.key)}
+                              disabled={savingPrivacy}
+                            />
+                            <div className={`w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 ${
+                              savingPrivacy ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}></div>
                           </label>
                         </div>
                       ))}
                     </div>
+                    {savingPrivacy && (
+                      <p className="text-sm text-slate-500 mt-2 flex items-center gap-2">
+                        <Loader className="w-4 h-4 animate-spin" />
+                        Saving privacy settings...
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

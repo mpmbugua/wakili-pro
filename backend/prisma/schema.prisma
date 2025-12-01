@@ -235,6 +235,11 @@ model UserProfile {
   pushNotifications            Boolean @default(true)
   consultationReminders        Boolean @default(true)
   
+  // Privacy settings
+  profileVisibility            Boolean @default(true)
+  showActivityStatus           Boolean @default(true)
+  dataAnalytics                Boolean @default(true)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

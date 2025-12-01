@@ -38,6 +38,9 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
             smsNotifications: true,
             pushNotifications: true,
             consultationReminders: true,
+            profileVisibility: true,
+            showActivityStatus: true,
+            dataAnalytics: true,
           }
         },
         lawyerProfile: {
@@ -404,6 +407,60 @@ export const updateNotificationPreferences = async (
     res.status(500).json({
       success: false,
       message: 'Internal server error while updating notification preferences'
+    });
+  }
+};
+
+export const updatePrivacySettings = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+      return;
+    }
+
+    const { profileVisibility, showActivityStatus, dataAnalytics } = req.body;
+
+    // Build update data object
+    const updateData: any = {};
+    if (profileVisibility !== undefined) updateData.profileVisibility = profileVisibility;
+    if (showActivityStatus !== undefined) updateData.showActivityStatus = showActivityStatus;
+    if (dataAnalytics !== undefined) updateData.dataAnalytics = dataAnalytics;
+
+    // Update or create user profile with privacy settings
+    const profile = await prisma.userProfile.upsert({
+      where: { userId },
+      update: updateData,
+      create: {
+        userId,
+        ...updateData,
+      },
+      select: {
+        profileVisibility: true,
+        showActivityStatus: true,
+        dataAnalytics: true,
+      }
+    });
+
+    const response: ApiResponse<typeof profile> = {
+      success: true,
+      message: 'Privacy settings updated successfully',
+      data: profile
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Update privacy settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while updating privacy settings'
     });
   }
 };
