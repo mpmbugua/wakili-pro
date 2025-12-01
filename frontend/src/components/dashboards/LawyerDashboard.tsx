@@ -171,11 +171,17 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
       try {
         const wallet = await walletService.getBalance();
         console.log('Wallet data received:', wallet);
+        console.log('Wallet type:', typeof wallet);
+        console.log('Wallet keys:', wallet ? Object.keys(wallet) : 'null');
+        console.log('Balance value:', wallet?.balance);
+        console.log('Balance type:', typeof wallet?.balance);
         
         // Ensure we have valid numbers
         const balance = typeof wallet?.balance === 'number' ? wallet.balance : 0;
         const pendingBalance = typeof wallet?.pendingBalance === 'number' ? wallet.pendingBalance : 0;
         const availableBalance = typeof wallet?.availableBalance === 'number' ? wallet.availableBalance : 0;
+        
+        console.log('Final values:', { balance, pendingBalance, availableBalance });
         
         setWalletBalance({
           balance,
