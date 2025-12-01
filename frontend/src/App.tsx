@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuthStore } from './store/authStore';
 import { AppShell } from './components/layout/AppShell';
+import { GlobalLayout } from './components/layout/GlobalLayout';
 import { LandingPage } from './pages/LandingPage';
 import { AIAssistant } from './pages/AIAssistant';
 import { LawyerAIAssistant } from './pages/LawyerAIAssistant';
@@ -171,34 +172,49 @@ function App() {
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Router>
         <Routes>
-          {/* Admin Login Route - Standalone without AppShell */}
+          {/* Admin Login Route - Standalone */}
           <Route 
             path="/admin/login" 
             element={<AdminLoginPage />} 
           />
 
-          {/* Public Lawyer Profile - Standalone without AppShell */}
+          {/* Public Lawyer Profile - Standalone */}
           <Route 
             path="/lawyers/:lawyerId" 
             element={<PublicLawyerProfile />} 
           />
 
-          {/* All public routes wrapped in AppShell */}
+          {/* Public Routes - Wrapped in GlobalLayout */}
+          <Route path="/" element={<GlobalLayout><LandingPage /></GlobalLayout>} />
+          <Route path="/ai" element={<GlobalLayout><AIAssistant /></GlobalLayout>} />
+          <Route path="/lawyers" element={<GlobalLayout><LawyersBrowse /></GlobalLayout>} />
+          <Route path="/services" element={<GlobalLayout><LegalServicesPage /></GlobalLayout>} />
+          <Route path="/marketplace" element={<GlobalLayout><MarketplaceBrowse /></GlobalLayout>} />
+          <Route path="/resources" element={<GlobalLayout><ResourcesPage /></GlobalLayout>} />
+          <Route path="/resources/article/:id" element={<GlobalLayout><ArticleDetailPage /></GlobalLayout>} />
+          <Route path="/document-services" element={<GlobalLayout><DocumentServicesPage /></GlobalLayout>} />
+          <Route path="/service-request" element={<GlobalLayout><ServiceRequestPage /></GlobalLayout>} />
+          <Route path="/booking/:lawyerId" element={<GlobalLayout><BookingPage /></GlobalLayout>} />
+          <Route path="/payment-callback" element={<GlobalLayout><PaymentCallbackPage /></GlobalLayout>} />
+          <Route path="/verify/:certificateId" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />
+          <Route path="/verify" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />
+          
+          {/* Auth Routes - GlobalLayout */}
+          <Route 
+            path="/login" 
+            element={isAuthenticated ? <Navigate to="/dashboard" /> : <GlobalLayout><Login /></GlobalLayout>} 
+          />
+          <Route 
+            path="/register" 
+            element={isAuthenticated ? <Navigate to="/dashboard" /> : <GlobalLayout><Register /></GlobalLayout>} 
+          />
+
+          {/* Protected Routes - Wrapped in AppShell */}
           <Route path="*" element={
             <AppShell>
               <Routes>
-                {/* Public Routes - No Authentication Required */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/ai" element={<AIAssistant />} />
-                <Route path="/lawyers" element={<LawyersBrowse />} />
-                <Route path="/services" element={<LegalServicesPage />} />
-                <Route path="/marketplace" element={<MarketplaceBrowse />} />
-                <Route path="/resources" element={<ResourcesPage />} />
-                <Route path="/resources/article/:id" element={<ArticleDetailPage />} />
-                <Route path="/document-services" element={<DocumentServicesPage />} />
-                <Route path="/service-request" element={<ServiceRequestPage />} />
             
-            {/* Lawyer Quote Submission (Protected) */}
+            {/* Service Request Quote Routes (Protected) */}
             <Route 
               path="/service-requests/:id/quote" 
               element={
@@ -207,8 +223,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            
-            {/* Quote Comparison (Protected) */}
             <Route 
               path="/service-requests/:id/quotes" 
               element={
@@ -217,8 +231,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            
-            {/* Service Tracking (Protected) */}
             <Route 
               path="/service-requests/:id/track" 
               element={
@@ -227,26 +239,8 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            
-            <Route path="/booking/:lawyerId" element={<BookingPage />} />
-            {/* Payment routes removed - all payments now handled via ServiceSelectionModal with PaymentStatusPoller */}
-            <Route path="/payment-callback" element={<PaymentCallbackPage />} />
-            
-            {/* Public Certificate Verification */}
-            <Route path="/verify/:certificateId" element={<VerifyCertificate />} />
-            <Route path="/verify" element={<VerifyCertificate />} />
-            
-            {/* Auth Routes */}
-            <Route 
-              path="/login" 
-              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} 
-            />
-            <Route 
-              path="/register" 
-              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Register />} 
-            />
 
-            {/* Protected Routes - Authentication Required */}
+            {/* Protected Dashboard Routes */}
             <Route 
               path="/dashboard" 
               element={
