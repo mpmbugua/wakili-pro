@@ -29,6 +29,9 @@
 - Search for similar patterns in codebase
 - Preserve existing authentication/role logic
 - Validate TypeScript compilation after changes
+- **NEVER** leave orphaned code blocks (e.g., `try/catch` without function wrapper)
+- **ALWAYS** verify `async/await` is inside async functions
+- Test builds locally before pushing to production
 
 ## Project Overview
 Wakili Pro is a modern full-stack TypeScript application built with agile development practices. This monorepo follows a clean architecture with React frontend, Node.js backend, and shared utilities.
@@ -211,7 +214,7 @@ All payments use the **SAME endpoint** with different parameters:
 4. **Lawyer Certification** → `reviewId` + reviewType='CERTIFICATION' (KES 2,000)
 5. **AI + Certification** → `reviewId` + reviewType='AI_PLUS_CERTIFICATION' (KES 2,200)
 6. **Service Request Commitment** → `serviceRequestId` (KES 500 - get 3 lawyer quotes)
-7. **Service Request Payment** → `serviceRequestId` (agreed fee after selecting lawyer - 15% platform commission)
+7. **Service Request Payment** → `serviceRequestId` + `quoteId` (30% upfront: 20% platform commission, 10% lawyer escrow)
 8. **Lawyer Subscription LITE** → `subscriptionId` (KES 2,999)
 9. **Lawyer Subscription PRO** → `subscriptionId` (KES 4,999)
 
@@ -219,6 +222,7 @@ All payments use the **SAME endpoint** with different parameters:
 - **ALL prices in Kenyan Shillings (KES)** - NEVER use USD ($)
 - **ALL document reviews/certifications delivered within 2 hours**
 - **NO urgency levels** - standard delivery for all services
+- **Service request 30% split**: Client pays 30% upfront (20% platform, 10% lawyer escrow), 70% balance later
 
 #### Payment Request Format
 ```typescript
@@ -233,6 +237,7 @@ All payments use the **SAME endpoint** with different parameters:
   purchaseId?: string,       // For marketplace documents
   reviewId?: string,         // For document reviews/certifications
   serviceRequestId?: string, // For service request commitment/payment
+  quoteId?: string,          // Required when serviceRequestId is for 30% payment
   subscriptionId?: string    // For lawyer subscriptions
 }
 ```
@@ -734,8 +739,46 @@ When adding a NEW payment feature:
 - ❌ Duplicate STK Push logic
 - ❌ Add new callback URLs
 - ❌ Create payment-specific controllers
+- ❌ Leave orphaned code blocks outside functions
+- ❌ Use `await` outside async functions
 
 ## Development Rules
+
+### Code Quality Checks
+1. **BEFORE editing ANY file:**
+   - Read the FULL file to understand context
+   - Search for similar patterns in codebase
+   - Check imports at top of file (especially `axiosInstance` from `../services/api`)
+2. **AFTER editing ANY file:**
+   - Verify no orphaned code blocks (dangling `try/catch`, loose statements)
+   - Check all `await` statements are inside `async` functions
+   - Confirm TypeScript compiles without errors
+   - Test build locally if possible (`npm run build`)
+
+### Common Anti-Patterns to AVOID
+```typescript
+// ❌ WRONG: Orphaned async code outside function
+  try {
+    const data = await someApi();
+  } catch (error) {
+    console.error(error);
+  }
+
+// ✅ CORRECT: Inside async function
+const handleSubmit = async () => {
+  try {
+    const data = await someApi();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// ❌ WRONG: Dynamic import with await outside async context
+const axiosInstance = (await import('../lib/axios')).default;
+
+// ✅ CORRECT: Static import at top of file
+import axiosInstance from '../services/api';
+```
 
 ### UI Feature Protection
 1. **NEVER** delete buttons or cards without explicit user request
