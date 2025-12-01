@@ -33,6 +33,11 @@ export const SettingsPage: React.FC = () => {
   });
   const [savingPrivacy, setSavingPrivacy] = useState(false);
 
+  // Language & Region settings state
+  const [language, setLanguage] = useState<'en' | 'sw'>('en');
+  const [timezone, setTimezone] = useState('Africa/Nairobi');
+  const [savingLanguage, setSavingLanguage] = useState(false);
+
   // Load notification preferences and privacy settings from user profile
   useEffect(() => {
     const loadPreferences = async () => {
@@ -53,6 +58,9 @@ export const SettingsPage: React.FC = () => {
             showActivityStatus: profile.showActivityStatus ?? true,
             dataAnalytics: profile.dataAnalytics ?? true,
           });
+          
+          setLanguage(profile.language ?? 'en');
+          setTimezone(profile.timezone ?? 'Africa/Nairobi');
         }
       } catch (error) {
         console.error('Error loading preferences:', error);
@@ -459,20 +467,38 @@ export const SettingsPage: React.FC = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Language</label>
-                      <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option>English</option>
-                        <option>Swahili</option>
+                      <select 
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value as 'en' | 'sw')}
+                      >
+                        <option value="en">English</option>
+                        <option value="sw">Swahili (Kiswahili)</option>
                       </select>
+                      <p className="text-xs text-slate-500 mt-1">Select your preferred language for the interface</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Timezone</label>
-                      <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option>East Africa Time (EAT)</option>
-                        <option>UTC</option>
+                      <select 
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={timezone}
+                        onChange={(e) => setTimezone(e.target.value)}
+                      >
+                        <option value="Africa/Nairobi">East Africa Time (EAT) - UTC+3</option>
+                        <option value="UTC">Coordinated Universal Time (UTC)</option>
+                        <option value="Africa/Lagos">West Africa Time (WAT) - UTC+1</option>
+                        <option value="Africa/Cairo">Egypt Time (EET) - UTC+2</option>
+                        <option value="Africa/Johannesburg">South Africa Time (SAST) - UTC+2</option>
                       </select>
+                      <p className="text-xs text-slate-500 mt-1">Used for scheduling and timestamps</p>
                     </div>
-                    <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                      Save Changes
+                    <button 
+                      onClick={handleSaveLanguageSettings}
+                      disabled={savingLanguage}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      {savingLanguage && <Loader className="w-4 h-4 animate-spin" />}
+                      <span>{savingLanguage ? 'Saving...' : 'Save Changes'}</span>
                     </button>
                   </div>
                 </div>

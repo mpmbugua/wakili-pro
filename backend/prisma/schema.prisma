@@ -240,6 +240,10 @@ model UserProfile {
   showActivityStatus           Boolean @default(true)
   dataAnalytics                Boolean @default(true)
   
+  // Language & Region
+  language                     String  @default("en")
+  timezone                     String  @default("Africa/Nairobi")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

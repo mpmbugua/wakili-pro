@@ -5,4 +5,6 @@ ADD COLUMN "pushNotifications" BOOLEAN NOT NULL DEFAULT true,
 ADD COLUMN "consultationReminders" BOOLEAN NOT NULL DEFAULT true,
 ADD COLUMN "profileVisibility" BOOLEAN NOT NULL DEFAULT true,
 ADD COLUMN "showActivityStatus" BOOLEAN NOT NULL DEFAULT true,
-ADD COLUMN "dataAnalytics" BOOLEAN NOT NULL DEFAULT true;
+ADD COLUMN "dataAnalytics" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN "language" TEXT NOT NULL DEFAULT 'en',
+ADD COLUMN "timezone" TEXT NOT NULL DEFAULT 'Africa/Nairobi';

@@ -41,6 +41,8 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
             profileVisibility: true,
             showActivityStatus: true,
             dataAnalytics: true,
+            language: true,
+            timezone: true,
           }
         },
         lawyerProfile: {
@@ -461,6 +463,67 @@ export const updatePrivacySettings = async (
     res.status(500).json({
       success: false,
       message: 'Internal server error while updating privacy settings'
+    });
+  }
+};
+
+export const updateLanguageSettings = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+      return;
+    }
+
+    const { language, timezone } = req.body;
+
+    // Validate language (only 'en' or 'sw' allowed)
+    if (language && !['en', 'sw'].includes(language)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid language. Only "en" (English) and "sw" (Swahili) are supported.'
+      });
+      return;
+    }
+
+    // Build update data object
+    const updateData: any = {};
+    if (language !== undefined) updateData.language = language;
+    if (timezone !== undefined) updateData.timezone = timezone;
+
+    // Update or create user profile with language settings
+    const profile = await prisma.userProfile.upsert({
+      where: { userId },
+      update: updateData,
+      create: {
+        userId,
+        ...updateData,
+      },
+      select: {
+        language: true,
+        timezone: true,
+      }
+    });
+
+    const response: ApiResponse<typeof profile> = {
+      success: true,
+      message: 'Language settings updated successfully',
+      data: profile
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Update language settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while updating language settings'
     });
   }
 };

@@ -6,7 +6,8 @@ import {
   lawyerOnboarding, 
   deleteAccount,
   updateNotificationPreferences,
-  updatePrivacySettings
+  updatePrivacySettings,
+  updateLanguageSettings
 } from '../controllers/userController';
 import { uploadPhoto } from '../controllers/photoUploadController';
 import { authenticateToken, authorizeRoles } from '../middleware/auth';
@@ -57,6 +58,14 @@ router.put('/notification-preferences', authenticateToken, updateNotificationPre
  * @body    { profileVisibility?, showActivityStatus?, dataAnalytics? }
  */
 router.put('/privacy-settings', authenticateToken, updatePrivacySettings);
+
+/**
+ * @route   PUT /api/users/language-settings
+ * @desc    Update language and timezone settings
+ * @access  Private
+ * @body    { language?, timezone? }
+ */
+router.put('/language-settings', authenticateToken, updateLanguageSettings);
 
 /**
  * @route   POST /api/users/upload-photo
