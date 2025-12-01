@@ -79,10 +79,37 @@ export const BookingPage: React.FC = () => {
       console.log('Booking response:', response.data);
 
       if (response.data.success) {
-        // Show success message - consultation payment integration coming soon
         const booking = response.data.data;
-        alert(`Consultation booked successfully!\n\nLawyer: ${lawyerName}\nDate: ${formData.date}\nTime: ${formData.time}\nFee: KES ${lawyerRate}\n\nPayment link will be sent to you via email/SMS.`);
-        navigate('/dashboard');
+        
+        // Get phone number for M-Pesa payment
+        const phoneNumber = prompt('Enter your M-Pesa phone number (format: 254XXXXXXXXX):');
+        
+        if (!phoneNumber) {
+          alert('Phone number is required for payment');
+          setLoading(false);
+          return;
+        }
+
+        // Initiate M-Pesa payment
+        console.log('[BookingPage] Initiating M-Pesa payment:', {
+          bookingId: booking.id,
+          amount: lawyerRate,
+          phoneNumber
+        });
+
+        const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+          phoneNumber: phoneNumber,
+          amount: lawyerRate,
+          bookingId: booking.id,
+          paymentType: 'CONSULTATION'
+        });
+
+        if (paymentResponse.data.success) {
+          alert(`Consultation booked successfully!\n\nM-Pesa payment request sent to ${phoneNumber}\n\nPlease complete the payment on your phone.`);
+          navigate('/consultations');
+        } else {
+          alert(paymentResponse.data.message || 'Failed to initiate payment');
+        }
       }
     } catch (err: any) {
       console.error('Booking error:', err);

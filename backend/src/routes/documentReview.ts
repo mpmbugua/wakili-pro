@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
+import { PrismaClient } from '@prisma/client';
 import { authenticateToken } from '../middleware/auth';
 import {
   requestMarketplaceAIReview,
@@ -11,6 +12,7 @@ import {
 } from '../controllers/documentReviewController';
 
 const router = express.Router();
+const prisma = new PrismaClient();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -43,6 +45,86 @@ const upload = multer({
     } else {
       cb(new Error('Invalid file type. Only PDF, DOC, DOCX, TXT, and RTF files are allowed.'));
     }
+  }
+});
+
+/**
+ * @route POST /api/document-review/create
+ * @desc Create document review record (for uploaded user documents)
+ * @access Private
+ */
+router.post('/create', authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    const { documentId, reviewType, urgencyLevel } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    if (!documentId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Document ID is required'
+      });
+    }
+
+    // Verify the document belongs to the user
+    const document = await prisma.userDocument.findFirst({
+      where: {
+        id: documentId,
+        userId
+      }
+    });
+
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: 'Document not found or does not belong to you'
+      });
+    }
+
+    // Determine pricing based on review type
+    const pricing: { [key: string]: number } = {
+      'AI_ONLY': 500,
+      'CERTIFICATION': 2000,
+      'AI_PLUS_CERTIFICATION': 2200
+    };
+
+    const amount = pricing[reviewType] || 500;
+
+    // Create document review record
+    const review = await prisma.documentReview.create({
+      data: {
+        userId,
+        documentSource: 'USER_UPLOAD',
+        userDocumentId: documentId,
+        uploadedDocumentUrl: document.filePath,
+        reviewType: reviewType || 'AI_ONLY',
+        status: 'PENDING_PAYMENT',
+        urgencyLevel: urgencyLevel || 'STANDARD'
+      }
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        reviewId: review.id,
+        amount,
+        reviewType: review.reviewType,
+        urgencyLevel: review.urgencyLevel
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Error creating document review:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create document review'
+    });
   }
 });
 

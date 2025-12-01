@@ -238,7 +238,32 @@ export const DocumentsPage: React.FC = () => {
     setShowServiceModal(false);
 
     try {
-      // Get phone number for M-Pesa payment
+      // Step 1: Create document review record first
+      console.log('[DocumentsPage] Creating document review:', {
+        documentId: selectedDocument.id,
+        reviewType: selection.serviceType,
+        urgencyLevel: selection.urgencyLevel
+      });
+
+      const createResponse = await axiosInstance.post('/document-review/create', {
+        documentId: selectedDocument.id,
+        reviewType: selection.serviceType,
+        urgencyLevel: selection.urgencyLevel
+      });
+
+      if (!createResponse.data.success) {
+        alert(createResponse.data.message || 'Failed to create document review');
+        return;
+      }
+
+      const { reviewId, amount } = createResponse.data.data;
+
+      console.log('[DocumentsPage] Document review created:', {
+        reviewId,
+        amount
+      });
+
+      // Step 2: Get phone number for M-Pesa payment
       const phoneNumber = await getPhoneNumber();
       
       if (!phoneNumber) {
@@ -246,42 +271,17 @@ export const DocumentsPage: React.FC = () => {
         return;
       }
 
-      // Convert frontend service types to backend format
-      const backendServiceType = selection.serviceType === 'AI_ONLY'
-        ? 'ai_review'
-        : selection.serviceType === 'CERTIFICATION'
-        ? 'certification'
-        : 'ai_and_certification';
-
-      // Convert urgency levels to backend format
-      const backendUrgency = selection.urgencyLevel.toLowerCase();
-
-      console.log('[DocumentsPage] Selected document:', {
-        id: selectedDocument.id,
-        idType: typeof selectedDocument.id,
-        title: selectedDocument.title
-      });
-      
       console.log('[DocumentsPage] Initiating M-Pesa payment:', {
-        documentId: selectedDocument.id,
-        serviceType: backendServiceType,
-        urgencyLevel: backendUrgency,
+        reviewId,
         phoneNumber,
-        amount: selection.totalPrice
+        amount
       });
 
-      // Validate documentId exists and is a non-empty string
-      if (!selectedDocument.id || typeof selectedDocument.id !== 'string' || selectedDocument.id.trim() === '') {
-        console.error('[DocumentsPage] Invalid document ID:', selectedDocument.id);
-        alert(`Invalid document ID. Please try uploading the document again.`);
-        return;
-      }
-
-      // Initiate M-Pesa payment using unified endpoint
+      // Step 3: Initiate M-Pesa payment using unified endpoint
       const response = await axiosInstance.post('/payments/mpesa/initiate', {
         phoneNumber: phoneNumber,
-        amount: selection.totalPrice,
-        reviewId: selectedDocument.id,
+        amount: amount,
+        reviewId: reviewId,
         paymentType: 'DOCUMENT_REVIEW'
       });
 
@@ -308,12 +308,11 @@ export const DocumentsPage: React.FC = () => {
         alert(errorMsg);
       }
     } catch (error: any) {
-      console.error('[DocumentsPage] Error initiating payment:', error);
+      console.error('[DocumentsPage] Error:', error);
       console.error('[DocumentsPage] Error response data:', error.response?.data);
       console.error('[DocumentsPage] Error response status:', error.response?.status);
-      console.error('[DocumentsPage] Full error object:', JSON.stringify(error.response?.data, null, 2));
       
-      const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Failed to initiate payment. Please try again.';
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Failed to initiate payment. Please try again.';
       alert(errorMsg);
     }
   };

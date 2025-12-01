@@ -214,29 +214,43 @@ export const ServiceRequestPage: React.FC = () => {
       return;
     }
 
-    // Check if commitment fee is paid - navigate to payment page instead of modal
+    // Check if commitment fee is paid - initiate M-Pesa payment first
     if (!formData.commitmentFeePaid) {
-      // Store service request data in sessionStorage
+      // Store service request data temporarily
       sessionStorage.setItem('pendingServiceRequest', JSON.stringify({
         formData,
         feeEstimate
       }));
+
+      // Get phone number for M-Pesa payment
+      const phoneNumber = prompt('Enter your M-Pesa phone number for KES 500 commitment fee (format: 254XXXXXXXXX):');
       
-      // Show success message - payment integration coming soon
-      alert(`Service request submitted!\nCommitment Fee: KES 500\n\nPayment integration for service requests will be available soon.\nWe will contact you to proceed with your request.`);
-      navigate('/dashboard');
-      /*navigate('/payment/service-request', {
-        state: {
-          serviceType: 'service-request-commitment',
-          price: 500,
-          description: 'Service Request Commitment Fee',
-          serviceDetails: {
-            serviceType: formData.serviceType,
-            category: formData.category,
-            estimatedFee: feeEstimate?.estimatedFee
-          }
+      if (!phoneNumber) {
+        alert('Phone number is required for commitment fee payment');
+        return;
+      }
+
+      try {
+        // Initiate M-Pesa payment for commitment fee (standalone payment without booking/review/purchase ID)
+        const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+          phoneNumber: phoneNumber,
+          amount: 500,
+          paymentType: 'SERVICE_REQUEST_COMMITMENT'
+        });
+
+        if (paymentResponse.data.success) {
+          const { paymentId } = paymentResponse.data.data;
+          alert(`Service request commitment fee initiated!\n\nM-Pesa payment request sent to ${phoneNumber}\n\nPlease complete the payment on your phone.\n\nAfter payment, return here to submit your service request.`);
+          // Store payment ID for verification
+          sessionStorage.setItem('serviceRequestPaymentId', paymentId);
+          navigate('/dashboard');
+        } else {
+          alert(paymentResponse.data.message || 'Failed to initiate payment');
         }
-      });*/
+      } catch (error: any) {
+        console.error('Service request payment error:', error);
+        alert(error.response?.data?.message || 'Failed to initiate payment');
+      }
       return;
     }
 

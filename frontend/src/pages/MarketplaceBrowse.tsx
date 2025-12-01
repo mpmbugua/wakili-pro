@@ -689,7 +689,7 @@ export const MarketplaceBrowse: React.FC = () => {
       const doc = sampleDocuments.find(d => d.id === docId);
       if (doc) {
         try {
-          // Create purchase record in backend first (to get reviewId for payment)
+          // Create purchase record in backend first
           const response = await axiosInstance.post('/documents/marketplace/purchase', {
             templateId: doc.id,
             documentTitle: doc.title,
@@ -697,18 +697,36 @@ export const MarketplaceBrowse: React.FC = () => {
           });
 
           if (response.data.success) {
-            // Navigate to payment page with purchase details
             const purchaseId = response.data.data.id;
-            navigate(`/payment/document/${purchaseId}`, {
-              state: {
-                amount: doc.price,
-                description: doc.title,
-                type: 'marketplace_document',
-                purchaseId: purchaseId, // Use purchaseId for marketplace purchases
-                documentId: doc.id,
-                paymentType: 'MARKETPLACE_PURCHASE'
-              }
+            
+            // Get phone number for M-Pesa payment
+            const phoneNumber = prompt('Enter your M-Pesa phone number (format: 254XXXXXXXXX):');
+            
+            if (!phoneNumber) {
+              alert('Phone number is required for payment');
+              return;
+            }
+
+            // Initiate M-Pesa payment using unified endpoint
+            console.log('[MarketplaceBrowse] Initiating M-Pesa payment:', {
+              purchaseId,
+              amount: doc.price,
+              phoneNumber
             });
+
+            const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+              phoneNumber: phoneNumber,
+              amount: doc.price,
+              purchaseId: purchaseId,
+              paymentType: 'MARKETPLACE_PURCHASE'
+            });
+
+            if (paymentResponse.data.success) {
+              alert(`Purchase initiated!\n\nM-Pesa payment request sent to ${phoneNumber}\n\nPlease complete the payment on your phone.\n\nDocument: ${doc.title}\nAmount: KES ${doc.price}`);
+              navigate('/marketplace');
+            } else {
+              alert(paymentResponse.data.message || 'Failed to initiate payment');
+            }
           } else {
             alert(response.data.message || 'Failed to initiate purchase');
           }

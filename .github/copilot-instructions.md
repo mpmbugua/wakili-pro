@@ -253,19 +253,22 @@ All payments use the **SAME endpoint** with different parameters:
 
 ### Frontend Payment Pattern
 ```typescript
-// Step 1: Create resource (booking, subscription, etc.)
+// CRITICAL: Always CREATE resource FIRST, then PAY
+// This is the TWO-STEP pattern for ALL payments
+
+// STEP 1: Create resource and get ID + amount
 const createResponse = await axiosInstance.post('/api/resource/create', data);
 const { resourceId, amount } = createResponse.data.data;
 
-// Step 2: Initiate M-Pesa payment (UNIFIED ENDPOINT)
+// STEP 2: Initiate M-Pesa payment with resource ID
 const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
   phoneNumber: '254712345678',
   amount: amount,
-  [resourceType + 'Id']: resourceId, // bookingId, purchaseId, etc.
+  [resourceType + 'Id']: resourceId, // bookingId, purchaseId, reviewId, subscriptionId
   paymentType: 'RESOURCE_TYPE'
 });
 
-// Step 3: Poll for payment status
+// STEP 3: Poll for payment status (optional)
 const { paymentId } = paymentResponse.data.data;
 const pollInterval = setInterval(async () => {
   const status = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
@@ -276,19 +279,100 @@ const pollInterval = setInterval(async () => {
 }, 3000);
 ```
 
+### Payment Flow Examples
+
+**1. Document Review Payment**
+```typescript
+// Step 1: Create review record
+const review = await axiosInstance.post('/document-review/create', {
+  documentId: '...',
+  reviewType: 'AI_ONLY', // or 'CERTIFICATION', 'AI_PLUS_CERTIFICATION'
+  urgencyLevel: 'STANDARD'
+});
+const { reviewId, amount } = review.data.data;
+
+// Step 2: Pay with M-Pesa
+await axiosInstance.post('/payments/mpesa/initiate', {
+  phoneNumber: '254...',
+  amount,
+  reviewId,
+  paymentType: 'DOCUMENT_REVIEW'
+});
+```
+
+**2. Consultation Booking Payment**
+```typescript
+// Step 1: Create booking
+const booking = await axiosInstance.post('/consultations/book', {
+  lawyerId: '...',
+  date: '...',
+  time: '...'
+});
+const { id: bookingId } = booking.data.data;
+
+// Step 2: Pay with M-Pesa
+await axiosInstance.post('/payments/mpesa/initiate', {
+  phoneNumber: '254...',
+  amount: lawyerRate,
+  bookingId,
+  paymentType: 'CONSULTATION'
+});
+```
+
+**3. Marketplace Purchase Payment**
+```typescript
+// Step 1: Create purchase record
+const purchase = await axiosInstance.post('/documents/marketplace/purchase', {
+  templateId: '...',
+  documentTitle: '...',
+  price: 1000
+});
+const { id: purchaseId } = purchase.data.data;
+
+// Step 2: Pay with M-Pesa
+await axiosInstance.post('/payments/mpesa/initiate', {
+  phoneNumber: '254...',
+  amount: price,
+  purchaseId,
+  paymentType: 'MARKETPLACE_PURCHASE'
+});
+```
+
+**4. Subscription Payment**
+```typescript
+// Step 1: Create subscription
+const subscription = await axiosInstance.post('/subscriptions/create', {
+  tier: 'PRO',
+  billingCycle: 'MONTHLY'
+});
+const { subscriptionId, amount } = subscription.data.data;
+
+// Step 2: Pay with M-Pesa
+await axiosInstance.post('/payments/mpesa/initiate', {
+  phoneNumber: '254...',
+  amount,
+  subscriptionId,
+  paymentType: 'SUBSCRIPTION'
+});
+```
+
 ### 🚫 DO NOT:
 - Create new M-Pesa payment endpoints
 - Duplicate payment initiation logic
 - Use different callback URLs per service
 - Implement separate STK Push logic
 - Create service-specific payment controllers
+- **Pay before creating the resource** (always create first!)
+- Navigate to old `/payment/:id` pages (use M-Pesa directly)
 
 ### ✅ DO:
 - Always use `/api/payments/mpesa/initiate`
-- Add new payment types by extending mpesaController
+- **Create resource FIRST** (booking, review, purchase, subscription)
+- Get resourceId and amount from creation response
 - Use correct parameter (bookingId, purchaseId, reviewId, subscriptionId)
 - Poll unified status endpoint
 - Let callback handler update resource status
+- Prompt user for phone number before payment
 
 ### Files to Reference
 - **Controller**: `backend/src/controllers/mpesaController.ts`
