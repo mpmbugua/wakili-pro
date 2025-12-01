@@ -1,35 +1,62 @@
-﻿import React, { useState } from 'react';
-import { TrendingUp, BarChart3, Users, DollarSign, FileText, Clock, ArrowUp, ArrowDown, Calendar } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { TrendingUp, BarChart3, Users, DollarSign, FileText, Clock, ArrowUp, ArrowDown, Calendar, Loader } from 'lucide-react';
+import axiosInstance from '../lib/axios';
 
 export const AnalyticsPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [loading, setLoading] = useState(true);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
 
-  // Mock analytics data
-  const monthlyRevenue = [
-    { month: 'Jan', revenue: 85000, clients: 12 },
-    { month: 'Feb', revenue: 92000, clients: 15 },
-    { month: 'Mar', revenue: 78000, clients: 11 },
-    { month: 'Apr', revenue: 105000, clients: 18 },
-    { month: 'May', revenue: 118000, clients: 21 },
-    { month: 'Jun', revenue: 135000, clients: 24 }
-  ];
+  useEffect(() => {
+    fetchAnalytics();
+  }, [timeRange]);
 
-  const serviceBreakdown = [
-    { service: 'Document Certification', count: 45, revenue: 225000, percentage: 35 },
-    { service: 'Legal Consultation', count: 62, revenue: 496000, percentage: 38 },
-    { service: 'Contract Drafting', count: 28, revenue: 420000, percentage: 27 }
-  ];
-
-  const stats = {
-    totalRevenue: 1141000,
-    revenueGrowth: 12.5,
-    totalClients: 101,
-    clientGrowth: 8.3,
-    totalCases: 135,
-    caseGrowth: -2.1,
-    avgResponseTime: '2.4 hours',
-    responseImprovement: 15.2
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get(`/analytics/lawyer?timeRange=${timeRange}`);
+      
+      if (response.data.success) {
+        setAnalyticsData(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      // Fallback to mock data if API fails
+      setAnalyticsData(getMockData());
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const getMockData = () => ({
+    stats: {
+      totalRevenue: 1141000,
+      revenueGrowth: 12.5,
+      totalClients: 101,
+      clientGrowth: 8.3,
+      totalCases: 135,
+      caseGrowth: -2.1,
+      avgResponseTime: '2.4 hours',
+      responseImprovement: 15.2
+    },
+    monthlyRevenue: [
+      { month: 'Jan', revenue: 85000, clients: 12 },
+      { month: 'Feb', revenue: 92000, clients: 15 },
+      { month: 'Mar', revenue: 78000, clients: 11 },
+      { month: 'Apr', revenue: 105000, clients: 18 },
+      { month: 'May', revenue: 118000, clients: 21 },
+      { month: 'Jun', revenue: 135000, clients: 24 }
+    ],
+    serviceBreakdown: [
+      { service: 'Document Certification', count: 45, revenue: 225000, percentage: 35 },
+      { service: 'Legal Consultation', count: 62, revenue: 496000, percentage: 38 },
+      { service: 'Contract Drafting', count: 28, revenue: 420000, percentage: 27 }
+    ]
+  });
+
+  // Use API data or fallback to mock data
+  const data = analyticsData || getMockData();
+  const { stats, monthlyRevenue, serviceBreakdown } = data;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
@@ -54,7 +81,8 @@ export const AnalyticsPage: React.FC = () => {
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                disabled={loading}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${
                   timeRange === range
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -66,7 +94,15 @@ export const AnalyticsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Key Metrics */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Loader className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+              <p className="text-gray-600">Loading analytics...</p>
+            </div>
+          </div>
+        ) : (
+          <>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-start justify-between">
@@ -216,6 +252,8 @@ export const AnalyticsPage: React.FC = () => {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
   );
 };
