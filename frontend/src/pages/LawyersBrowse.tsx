@@ -304,8 +304,9 @@ export const LawyersBrowse: React.FC = () => {
           (lawyer as any).specializations?.includes(spec) || lawyer.specialty === selectedSpecialty
         );
       
-      // Check location filter
-      const locationMatch = selectedLocation === 'All Locations' || lawyer.location === selectedLocation;
+      // Check location filter - case insensitive and trimmed comparison
+      const locationMatch = selectedLocation === 'All Locations' || 
+        lawyer.location?.trim().toLowerCase() === selectedLocation.trim().toLowerCase();
       
       return specialtyMatch && locationMatch;
     })
