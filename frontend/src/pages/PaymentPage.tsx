@@ -147,80 +147,148 @@ export const PaymentPage: React.FC = () => {
           // For document payments, use the document-payment/initiate endpoint
           const documentDetails = bookingDetails as DocumentPaymentDetails;
           
-          // Convert frontend service type to backend format
-          const backendServiceType = documentDetails.serviceType === 'ai-review' 
-            ? 'ai_review' 
-            : documentDetails.serviceType === 'certification'
-            ? 'certification'
-            : 'ai_and_certification';
-          
-          const paymentData = {
-            documentId: (documentDetails as any).documentId || reviewId || '', // documentId from navigation state
-            serviceType: backendServiceType,
-            urgencyLevel: 'standard', // Default to standard
-            paymentMethod: 'mpesa',
-            phoneNumber: mpesaDetails.phoneNumber,
-          };
+          // Check if this is a marketplace purchase
+          if (documentDetails.serviceType === 'marketplace-purchase' || (location.state as any)?.type === 'marketplace_document') {
+            // Marketplace document payment
+            const marketplaceData = {
+              purchaseId: (location.state as any)?.purchaseId,
+              phoneNumber: mpesaDetails.phoneNumber,
+            };
 
-          console.log('[PaymentPage] Initiating M-Pesa payment for document:', paymentData);
-          const mpesaResponse = await axiosInstance.post('/document-payment/initiate', paymentData);
+            console.log('[PaymentPage] Initiating M-Pesa payment for marketplace document:', marketplaceData);
+            const mpesaResponse = await axiosInstance.post('/marketplace-payment/initiate', marketplaceData);
 
-          console.log('[PaymentPage] M-Pesa response:', mpesaResponse.data);
-          
-          if (!mpesaResponse.data.success) {
-            throw new Error(mpesaResponse.data.message || 'Failed to initiate M-Pesa payment');
-          }
+            console.log('[PaymentPage] M-Pesa response:', mpesaResponse.data);
+            
+            if (!mpesaResponse.data.success) {
+              throw new Error(mpesaResponse.data.message || 'Failed to initiate M-Pesa payment');
+            }
 
-          const { paymentId, customerMessage } = mpesaResponse.data.data;
+            const { paymentId, customerMessage } = mpesaResponse.data.data;
 
-          // Show M-Pesa prompt message
-          setError(null);
-          alert(customerMessage || `Please check your phone (${mpesaDetails.phoneNumber}) and enter your M-Pesa PIN to complete the payment.`);
+            // Show M-Pesa prompt message
+            setError(null);
+            alert(customerMessage || `Please check your phone (${mpesaDetails.phoneNumber}) and enter your M-Pesa PIN to complete the payment.`);
 
-          // Poll for payment status every 3 seconds (max 60 seconds)
-          let attempts = 0;
-          const maxAttempts = 20;
-          const pollInterval = 3000;
+            // Poll for payment status every 3 seconds (max 60 seconds)
+            let attempts = 0;
+            const maxAttempts = 20;
+            const pollInterval = 3000;
 
-          const checkStatus = async (): Promise<boolean> => {
-            try {
-              const statusResponse = await axiosInstance.get(`/document-payment/${paymentId}/status`);
+            const checkStatus = async (): Promise<boolean> => {
+              try {
+                const statusResponse = await axiosInstance.get(`/marketplace-payment/${paymentId}/status`);
+                
+                if (statusResponse.data.success) {
+                  const { status } = statusResponse.data.data;
+                
+                  if (status === 'COMPLETED') {
+                    setPaymentSuccess(true);
+                    setTimeout(() => {
+                      navigate('/documents');
+                    }, 3000);
+                    return true;
+                  } else if (status === 'FAILED') {
+                    throw new Error('Payment failed or was cancelled');
+                  }
+                }
+                return false;
+              } catch (err) {
+                console.error('Status check error:', err);
+                return false;
+              }
+            };
+
+            // Start polling
+            const pollPaymentStatus = setInterval(async () => {
+              attempts++;
+              const completed = await checkStatus();
               
-              if (statusResponse.data.success) {
-                const { status } = statusResponse.data.data;
-              
-                if (status === 'COMPLETED') {
-                  setPaymentSuccess(true);
-                  setTimeout(() => {
-                    navigate('/dashboard');
-                  }, 3000);
-                  return true;
-                } else if (status === 'FAILED') {
-                  throw new Error('Payment failed or was cancelled');
+              if (completed || attempts >= maxAttempts) {
+                clearInterval(pollPaymentStatus);
+                setLoading(false);
+                
+                if (!completed && attempts >= maxAttempts) {
+                  setError('Payment verification timed out. Please check your payment history or contact support.');
                 }
               }
-              return false;
-            } catch (err) {
-              console.error('Status check error:', err);
-              return false;
-            }
-          };
+            }, pollInterval);
 
-          // Start polling
-          const pollPaymentStatus = setInterval(async () => {
-            attempts++;
-            const completed = await checkStatus();
+          } else {
+            // Regular document review/certification payment
+            const backendServiceType = documentDetails.serviceType === 'ai-review' 
+              ? 'ai_review' 
+              : documentDetails.serviceType === 'certification'
+              ? 'certification'
+              : 'ai_and_certification';
             
-            if (completed || attempts >= maxAttempts) {
-              clearInterval(pollPaymentStatus);
-              setLoading(false);
-              
-              if (!completed && attempts >= maxAttempts) {
-                setError('Payment verification timed out. Please check your payment history or contact support.');
-              }
-            }
-          }, pollInterval);
+            const paymentData = {
+              documentId: (documentDetails as any).documentId || reviewId || '', // documentId from navigation state
+              serviceType: backendServiceType,
+              urgencyLevel: 'standard', // Default to standard
+              paymentMethod: 'mpesa',
+              phoneNumber: mpesaDetails.phoneNumber,
+            };
 
+            console.log('[PaymentPage] Initiating M-Pesa payment for document:', paymentData);
+            const mpesaResponse = await axiosInstance.post('/document-payment/initiate', paymentData);
+
+            console.log('[PaymentPage] M-Pesa response:', mpesaResponse.data);
+            
+            if (!mpesaResponse.data.success) {
+              throw new Error(mpesaResponse.data.message || 'Failed to initiate M-Pesa payment');
+            }
+
+            const { paymentId, customerMessage } = mpesaResponse.data.data;
+
+            // Show M-Pesa prompt message
+            setError(null);
+            alert(customerMessage || `Please check your phone (${mpesaDetails.phoneNumber}) and enter your M-Pesa PIN to complete the payment.`);
+
+            // Poll for payment status every 3 seconds (max 60 seconds)
+            let attempts = 0;
+            const maxAttempts = 20;
+            const pollInterval = 3000;
+
+            const checkStatus = async (): Promise<boolean> => {
+              try {
+                const statusResponse = await axiosInstance.get(`/document-payment/${paymentId}/status`);
+                
+                if (statusResponse.data.success) {
+                  const { status } = statusResponse.data.data;
+                
+                  if (status === 'COMPLETED') {
+                    setPaymentSuccess(true);
+                    setTimeout(() => {
+                      navigate('/dashboard');
+                    }, 3000);
+                    return true;
+                  } else if (status === 'FAILED') {
+                    throw new Error('Payment failed or was cancelled');
+                  }
+                }
+                return false;
+              } catch (err) {
+                console.error('Status check error:', err);
+                return false;
+              }
+            };
+
+            // Start polling
+            const pollPaymentStatus = setInterval(async () => {
+              attempts++;
+              const completed = await checkStatus();
+              
+              if (completed || attempts >= maxAttempts) {
+                clearInterval(pollPaymentStatus);
+                setLoading(false);
+                
+                if (!completed && attempts >= maxAttempts) {
+                  setError('Payment verification timed out. Please check your payment history or contact support.');
+                }
+              }
+            }, pollInterval);
+          }
         } else {
           // For booking payments (consultation), use old endpoint
           throw new Error('Consultation payments not yet implemented with new endpoint');

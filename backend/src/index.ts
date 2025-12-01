@@ -261,6 +261,10 @@ app.use('/api/payments', paymentsRouter);
 import documentMarketplaceRouter from './routes/documentMarketplace';
 app.use('/api/documents', documentMarketplaceRouter);
 
+// Mount marketplace payment router
+import marketplacePaymentRouter from './routes/marketplacePaymentRoutes';
+app.use('/api/marketplace-payment', marketplacePaymentRouter);
+
 // Mount user documents router
 import userDocumentsRouter from './routes/userDocuments';
 app.use('/api/user-documents', userDocumentsRouter);
