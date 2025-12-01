@@ -872,7 +872,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
                 variant="outline" 
                 size="sm"
                 className="w-full bg-white text-blue-600 hover:bg-blue-50 border-0"
-                onClick={() => navigate('/consultations')}
+                onClick={() => navigate('/lawyer/consultations')}
               >
                 View All
               </Button>
@@ -900,7 +900,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
                 variant="outline" 
                 size="sm"
                 className="w-full bg-white text-purple-600 hover:bg-purple-50 border-0"
-                onClick={() => navigate('/documents')}
+                onClick={() => navigate('/document-reviews')}
               >
                 Manage Files
               </Button>
@@ -928,7 +928,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
                 variant="outline" 
                 size="sm"
                 className="w-full bg-white text-amber-600 hover:bg-amber-50 border-0"
-                onClick={() => navigate('/services')}
+                onClick={() => navigate('/lawyer/service-requests')}
               >
                 View Services
               </Button>
