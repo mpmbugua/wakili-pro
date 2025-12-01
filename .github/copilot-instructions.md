@@ -1,5 +1,35 @@
 # Wakili Pro - AI Agent Instructions
 
+## ⚠️ CRITICAL RULES - READ FIRST
+
+### 1. Payment System Architecture
+**ABSOLUTE RULE**: There is ONLY ONE M-Pesa payment endpoint: `/api/payments/mpesa/initiate`
+- **NEVER** create new payment endpoints
+- **NEVER** duplicate STK Push logic  
+- **NEVER** add separate callback URLs
+- **ALWAYS** use unified controller for new payment types
+
+### 2. UI Feature Protection
+**ABSOLUTE RULE**: DO NOT delete or modify these critical features without explicit user request:
+- Landing page "Case Analysis & Review" button with smart routing
+- Role-based sidebar navigation (lawyers see "Document Reviews", not "Documents")
+- Role-aware page displays (consultations, appointments, messages)
+- Authentication-aware routing and button text
+
+### 3. Role-Based Logic
+**ABSOLUTE RULE**: Always check `user?.role === 'LAWYER'` before rendering:
+- Lawyers see CLIENT names/info (who they're helping)
+- Clients see LAWYER names/info (who's helping them)
+- Navigation links differ by role
+- Different mock data for each role
+
+### 4. Code Safety
+**ABSOLUTE RULE**: Before ANY modification:
+- Read the FULL file to understand context
+- Search for similar patterns in codebase
+- Preserve existing authentication/role logic
+- Validate TypeScript compilation after changes
+
 ## Project Overview
 Wakili Pro is a modern full-stack TypeScript application built with agile development practices. This monorepo follows a clean architecture with React frontend, Node.js backend, and shared utilities.
 
@@ -264,7 +294,198 @@ const pollInterval = setInterval(async () => {
   - `frontend/src/pages/DocumentsPage.tsx`
   - `frontend/src/components/SubscriptionDashboard.tsx`
 
-This project emphasizes type safety, consistent patterns, and maintainable architecture across the full stack.
+## Critical UI/UX Features - DO NOT DELETE
+
+### Landing Page Features
+The landing page (`frontend/src/pages/LandingPage.tsx`) contains critical service cards that must be preserved:
+
+#### Case Analysis & Review Button
+**Location**: Main services grid on landing page  
+**Purpose**: Primary entry point for document review services  
+**Behavior**: Smart authentication-aware routing
+
+```typescript
+// REQUIRED IMPORTS
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+
+// REQUIRED HANDLER
+const handleDocumentReviewClick = (e: React.MouseEvent) => {
+  e.preventDefault();
+  if (isAuthenticated) {
+    navigate('/documents');
+  } else {
+    navigate('/login', { state: { from: '/documents' } });
+  }
+};
+
+// REQUIRED CARD (in services grid)
+<a 
+  href="/documents" 
+  onClick={handleDocumentReviewClick}
+  className="bg-white rounded border border-slate-300 p-5 hover:shadow-lg transition"
+>
+  <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+    <FileText className="w-6 h-6 text-amber-600" />
+  </div>
+  <h3 className="text-xl font-semibold mb-2 text-slate-900">Case Analysis & Review</h3>
+  <p className="text-slate-600 mb-4">
+    Upload documents for AI analysis (KES 500) or lawyer certification (KES 2,000+). 
+    Comprehensive legal review with actionable insights.
+  </p>
+  <span className="text-amber-600 font-medium inline-flex items-center">
+    {isAuthenticated ? 'Upload document' : 'Get started'}
+    <ArrowRight className="w-4 h-4 ml-1" />
+  </span>
+</a>
+```
+
+**Why Critical**: 
+- Primary revenue driver for document review services
+- Entry point for 4 payment types (AI review, certification, combo, service request)
+- Seamless UX with auth-based routing
+
+### Role-Based Navigation
+
+#### Lawyer Sidebar Navigation
+**File**: `frontend/src/components/layout/Sidebar.tsx`  
+**CRITICAL**: Lawyers see different navigation than clients
+
+```typescript
+// LAWYER-SPECIFIC NAVIGATION (role === 'LAWYER')
+{
+  name: 'Document Reviews',  // NOT "Documents"
+  href: '/document-reviews',  // NOT "/documents"
+  icon: FileText
+}
+```
+
+**Rationale**: 
+- Lawyers REVIEW documents (see `/document-reviews` dashboard)
+- Clients UPLOAD documents (see `/documents` upload page)
+- Same button label would cause confusion
+
+#### Role-Aware Page Display
+
+**Files with Role-Based Logic**:
+1. `frontend/src/pages/ConsultationsPage.tsx`
+2. `frontend/src/pages/AppointmentsPage.tsx`
+3. `frontend/src/pages/MessagesPage.tsx`
+
+**Pattern to Follow**:
+```typescript
+// ALWAYS check user role
+const { user } = useAuthStore();
+const isLawyer = user?.role === 'LAWYER';
+
+// Show different data based on role
+interface Consultation {
+  lawyerName?: string;  // For clients to see
+  clientName?: string;  // For lawyers to see
+  // ... other fields
+}
+
+// Render conditionally
+<p className="text-sm text-slate-600">
+  {isLawyer ? consultation.clientName : consultation.lawyerName}
+</p>
+```
+
+**Why Critical**:
+- Lawyers need to see CLIENT information (who they're helping)
+- Clients need to see LAWYER information (who's helping them)
+- Same component serves both user types
+
+### Lawyer Profile Verification
+
+**File**: `frontend/src/components/dashboards/LawyerDashboard.tsx`
+
+**CRITICAL CHECK**:
+```typescript
+// Accept BOTH verification statuses
+const isVerified = 
+  profile?.verificationStatus === 'VERIFIED' || 
+  profile?.verificationStatus === 'APPROVED';
+
+// Fallback on error to prevent UI blocking
+if (error) {
+  console.error('Error fetching lawyer profile:', error);
+  return true; // Assume verified to prevent blocking UI
+}
+```
+
+**Why Critical**:
+- Database uses both `VERIFIED` and `APPROVED` statuses
+- Error should not block verified lawyers from dashboard
+- Prevents "Profile Setup Required" false positives
+
+## Authentication & State Management
+
+### Zustand Store Usage
+**File**: `frontend/src/store/authStore.ts`
+
+**Critical Exports**:
+- `isAuthenticated`: Boolean flag for auth status
+- `user`: Current user object with role information
+- `token`: JWT token for API requests
+
+**Usage Pattern**:
+```typescript
+import { useAuthStore } from '../store/authStore';
+
+const { isAuthenticated, user, token } = useAuthStore();
+const isLawyer = user?.role === 'LAWYER';
+```
+
+### API Client Configuration
+**File**: `frontend/src/services/api.ts`
+
+**Critical**: Use `axiosInstance` for authenticated requests
+```typescript
+import axiosInstance from '../services/api';
+
+// Automatically includes JWT token
+const response = await axiosInstance.post('/api/endpoint', data);
+```
+
+## Payment Implementation Checklist
+
+When adding a NEW payment feature:
+
+1. ✅ Create resource endpoint (e.g., `/api/bookings/create`)
+2. ✅ Return `resourceId` and `amount` from creation
+3. ✅ Call `/api/payments/mpesa/initiate` with correct ID parameter
+4. ✅ Poll `/api/payments/mpesa/status/:paymentId`
+5. ✅ Update resource status on payment completion
+6. ✅ Handle payment in callback (`mpesaController.handleCallback`)
+
+**DO NOT**:
+- ❌ Create new payment endpoints
+- ❌ Duplicate STK Push logic
+- ❌ Add new callback URLs
+- ❌ Create payment-specific controllers
+
+## Development Rules
+
+### UI Feature Protection
+1. **NEVER** delete buttons or cards without explicit user request
+2. **ALWAYS** check existing navigation before modifying
+3. **PRESERVE** role-based logic when updating pages
+4. **VERIFY** authentication-aware components maintain smart routing
+
+### Code Modification Safety
+1. **READ** the full file before making changes
+2. **SEARCH** for similar patterns in codebase
+3. **VALIDATE** TypeScript compilation after edits
+4. **TEST** role-based features for both user types
+
+### Architecture Consistency
+1. **ONE** M-Pesa endpoint for all payments
+2. **ROLE-AWARE** navigation and data display
+3. **AUTH-AWARE** routing and UI elements
+4. **TYPE-SAFE** across frontend/backend boundary
+
+This project emphasizes type safety, consistent patterns, maintainable architecture, and user role-based experiences across the full stack.
 
 - [x] Clarify Project Requirements
 - [x] Scaffold the Project
