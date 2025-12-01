@@ -4,6 +4,7 @@ import { mpesaService } from '../services/mpesaDarajaService';
 import { logger } from '../utils/logger';
 import { sendPaymentConfirmationEmail } from '../services/emailTemplates';
 import { sendSMS } from '../services/smsService';
+import { processDocumentGeneration } from '../services/documentGenerationService';
 
 interface AuthRequest extends Request {
   user?: {
@@ -350,12 +351,63 @@ export const mpesaCallback = async (req: Request, res: Response) => {
           sendSMS(user.phoneNumber, smsMessage).catch(err => logger.error('[Payment] SMS notification error:', err));
         }
       } else if (metadata?.resourceType === 'PURCHASE' && metadata?.purchaseId) {
-        // Update document purchase status
-        await prisma.documentPurchase.update({
+        // Get purchase details with document info
+        const purchase = await prisma.documentPurchase.findUnique({
           where: { id: metadata.purchaseId },
-          data: { status: 'COMPLETED' },
+          include: {
+            document: true,
+            user: true,
+          },
         });
-        logger.info('Document purchase completed:', { purchaseId: metadata.purchaseId });
+
+        if (purchase) {
+          // Generate document PDF after successful payment
+          try {
+            logger.info('[Purchase] Triggering document generation:', { purchaseId: metadata.purchaseId });
+            await processDocumentGeneration(
+              metadata.purchaseId,
+              purchase.documentId,
+              purchase.document?.title || purchase.description || 'Legal Document',
+              {} // User input can be passed here if needed
+            );
+            logger.info('[Purchase] Document generated successfully');
+          } catch (genError) {
+            logger.error('[Purchase] Document generation error:', genError);
+            // Continue with notifications even if generation fails
+          }
+
+          // Update document purchase status
+          await prisma.documentPurchase.update({
+            where: { id: metadata.purchaseId },
+            data: { status: 'COMPLETED' },
+          });
+          logger.info('Document purchase completed:', { purchaseId: metadata.purchaseId });
+
+          // Send payment confirmation email
+          if (purchase.user?.email) {
+            const userName = `${purchase.user.firstName} ${purchase.user.lastName}`;
+            const documentTitle = purchase.document?.title || purchase.description || 'Legal Document';
+            
+            sendPaymentConfirmationEmail(
+              purchase.user.email,
+              userName,
+              {
+                bookingId: metadata.purchaseId,
+                amount: payment.amount,
+                transactionId: callbackResult.transactionId || payment.id,
+                paymentMethod: 'M-Pesa'
+              }
+            ).catch(err => logger.error('[Purchase] Email notification error:', err));
+          }
+
+          // Send SMS notification with download link
+          if (purchase.user?.phoneNumber) {
+            const documentTitle = purchase.document?.title || 'document';
+            const downloadUrl = `${process.env.FRONTEND_URL}/documents`;
+            const smsMessage = `Wakili Pro: "${documentTitle}" purchase confirmed! KES ${payment.amount.toLocaleString()}. Download now: ${downloadUrl} Ref: ${callbackResult.transactionId}`;
+            sendSMS(purchase.user.phoneNumber, smsMessage).catch(err => logger.error('[Purchase] SMS notification error:', err));
+          }
+        }
       } else if (metadata?.resourceType === 'REVIEW' && metadata?.reviewId) {
         // Update document review status
         const docReview = await prisma.documentReview.findUnique({
