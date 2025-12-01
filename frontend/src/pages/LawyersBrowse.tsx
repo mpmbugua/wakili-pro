@@ -9,6 +9,7 @@ interface Lawyer {
   userId: string; // The actual user ID to send to backend
   name: string;
   specialty: string;
+  specializations?: string[]; // All specializations from backend
   location: string;
   rating: number;
   reviewCount: number;
@@ -27,6 +28,7 @@ const sampleLawyers: Lawyer[] = [
     userId: 'sample-1', // Placeholder - real lawyers will have actual userIds
     name: 'Jane Wanjiru',
     specialty: 'Employment Law',
+    specializations: ['EMPLOYMENT', 'Employment Law'],
     location: 'Nairobi',
     rating: 4.9,
     reviewCount: 127,
@@ -42,6 +44,7 @@ const sampleLawyers: Lawyer[] = [
     userId: 'sample-2',
     name: 'David Kamau',
     specialty: 'Property & Land Law',
+    specializations: ['PROPERTY', 'Property Law', 'Property & Land Law'],
     location: 'Nairobi',
     rating: 4.8,
     reviewCount: 95,
@@ -57,6 +60,7 @@ const sampleLawyers: Lawyer[] = [
     userId: 'sample-3',
     name: 'Sarah Ochieng',
     specialty: 'Family Law',
+    specializations: ['FAMILY', 'Family Law'],
     location: 'Mombasa',
     rating: 5.0,
     reviewCount: 84,
@@ -72,6 +76,7 @@ const sampleLawyers: Lawyer[] = [
     userId: 'sample-4',
     name: 'Michael Kipchoge',
     specialty: 'Criminal Defense',
+    specializations: ['CRIMINAL', 'Criminal Law', 'Criminal Defense'],
     location: 'Kisumu',
     rating: 4.7,
     reviewCount: 156,
@@ -87,6 +92,7 @@ const sampleLawyers: Lawyer[] = [
     userId: 'sample-5',
     name: 'Grace Nyambura',
     specialty: 'Corporate Law',
+    specializations: ['CORPORATE', 'Corporate Law'],
     location: 'Nairobi',
     rating: 4.9,
     reviewCount: 68,
@@ -102,6 +108,7 @@ const sampleLawyers: Lawyer[] = [
     userId: 'sample-6',
     name: 'James Mutua',
     specialty: 'Immigration Law',
+    specializations: ['IMMIGRATION', 'Immigration Law'],
     location: 'Nairobi',
     rating: 4.6,
     reviewCount: 42,
@@ -113,6 +120,17 @@ const sampleLawyers: Lawyer[] = [
     availability: 'Available'
   }
 ];
+
+// Specialization mapping (must match backend LawyerProfile.specializations array values)
+const SPECIALIZATION_MAP: { [key: string]: string[] } = {
+  'All Specialties': [],
+  'Employment Law': ['EMPLOYMENT', 'Employment Law'],
+  'Property & Land Law': ['PROPERTY', 'Property Law', 'Property & Land Law'],
+  'Family Law': ['FAMILY', 'Family Law'],
+  'Criminal Defense': ['CRIMINAL', 'Criminal Law', 'Criminal Defense'],
+  'Corporate Law': ['CORPORATE', 'Corporate Law'],
+  'Immigration Law': ['IMMIGRATION', 'Immigration Law']
+};
 
 const specialties = ['All Specialties', 'Employment Law', 'Property & Land Law', 'Family Law', 'Criminal Defense', 'Corporate Law', 'Immigration Law'];
 const locations = [
@@ -224,24 +242,42 @@ export const LawyersBrowse: React.FC = () => {
     const fetchLawyers = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get('/lawyers');
+        // Fetch all verified lawyers (limit increased to get more results)
+        const response = await axiosInstance.get('/lawyers?limit=100');
         if (response.data.success && response.data.data?.lawyers) {
           // Map backend response to our Lawyer interface
-          const backendLawyers = response.data.data.lawyers.map((lawyer: any) => ({
-            id: lawyer.id,
-            userId: lawyer.user?.id || lawyer.userId, // Important: use user.id from backend for booking
-            name: `${lawyer.user?.firstName || ''} ${lawyer.user?.lastName || ''}`.trim() || 'Lawyer',
-            specialty: lawyer.specializations?.[0] || 'General Practice',
-            location: lawyer.location || 'Nairobi',
-            rating: lawyer.rating || lawyer.averageRating || 4.5,
-            reviewCount: lawyer.reviewCount || lawyer.totalReviews || 0,
-            yearsExperience: lawyer.yearsOfExperience || 5,
-            hourlyRate: lawyer.hourlyRate || 3500,
-            imageUrl: lawyer.profileImageUrl || `https://ui-avatars.com/api/?name=${lawyer.user?.firstName}+${lawyer.user?.lastName}&background=3b82f6&color=fff&size=200`,
-            bio: lawyer.bio || 'Experienced legal professional',
-            languages: ['English', 'Swahili'],
-            availability: lawyer.isAvailable ? 'Available' : 'Busy'
-          }));
+          const backendLawyers = response.data.data.lawyers.map((lawyer: any) => {
+            // Helper function to convert specialization ID to display name
+            const getSpecialtyDisplayName = (spec: string) => {
+              const mapping: { [key: string]: string } = {
+                'EMPLOYMENT': 'Employment Law',
+                'PROPERTY': 'Property & Land Law',
+                'FAMILY': 'Family Law',
+                'CRIMINAL': 'Criminal Defense',
+                'CORPORATE': 'Corporate Law',
+                'IMMIGRATION': 'Immigration Law',
+                'IP': 'Intellectual Property'
+              };
+              return mapping[spec] || spec;
+            };
+            
+            return {
+              id: lawyer.id,
+              userId: lawyer.user?.id || lawyer.userId, // Important: use user.id from backend for booking
+              name: `${lawyer.user?.firstName || ''} ${lawyer.user?.lastName || ''}`.trim() || 'Lawyer',
+              specialty: lawyer.specializations?.[0] ? getSpecialtyDisplayName(lawyer.specializations[0]) : 'General Practice',
+              specializations: lawyer.specializations || [], // Keep all specializations for filtering
+              location: lawyer.location || 'Nairobi',
+              rating: lawyer.rating || lawyer.averageRating || 4.5,
+              reviewCount: lawyer.reviewCount || lawyer.totalReviews || 0,
+              yearsExperience: lawyer.yearsOfExperience || 5,
+              hourlyRate: lawyer.hourlyRate || 3500,
+              imageUrl: lawyer.profileImageUrl || `https://ui-avatars.com/api/?name=${lawyer.user?.firstName}+${lawyer.user?.lastName}&background=3b82f6&color=fff&size=200`,
+              bio: lawyer.bio || 'Experienced legal professional',
+              languages: ['English', 'Swahili'],
+              availability: lawyer.isAvailable ? 'Available' : 'Busy'
+            };
+          });
           
           // Use real lawyers if available, otherwise fall back to sample data
           if (backendLawyers.length > 0) {
@@ -261,10 +297,18 @@ export const LawyersBrowse: React.FC = () => {
 
   // Filter and sort lawyers
   const filteredLawyers = lawyers
-    .filter(lawyer => 
-      (selectedSpecialty === 'All Specialties' || lawyer.specialty === selectedSpecialty) &&
-      (selectedLocation === 'All Locations' || lawyer.location === selectedLocation)
-    )
+    .filter(lawyer => {
+      // Check specialty filter
+      const specialtyMatch = selectedSpecialty === 'All Specialties' || 
+        SPECIALIZATION_MAP[selectedSpecialty]?.some(spec => 
+          (lawyer as any).specializations?.includes(spec) || lawyer.specialty === selectedSpecialty
+        );
+      
+      // Check location filter
+      const locationMatch = selectedLocation === 'All Locations' || lawyer.location === selectedLocation;
+      
+      return specialtyMatch && locationMatch;
+    })
     .sort((a, b) => {
       if (sortBy === 'rating') return b.rating - a.rating;
       if (sortBy === 'price') return a.hourlyRate - b.hourlyRate;
