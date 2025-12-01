@@ -5,7 +5,8 @@ import axiosInstance from '../lib/axios';
 
 interface Consultation {
   id: string;
-  lawyerName: string;
+  lawyerName?: string;
+  clientName?: string;
   lawyerImage?: string;
   specialty: string;
   scheduledAt: string;
@@ -20,6 +21,7 @@ export const ConsultationsPage: React.FC = () => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+  const isLawyer = user?.role === 'LAWYER';
 
   useEffect(() => {
     fetchConsultations();
@@ -32,27 +34,52 @@ export const ConsultationsPage: React.FC = () => {
       // const response = await axiosInstance.get('/consultations');
       // setConsultations(response.data.data);
       
-      // Mock data for now
-      setConsultations([
-        {
-          id: '1',
-          lawyerName: 'Sarah Mwangi',
-          specialty: 'Corporate Law',
-          scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-          duration: 60,
-          status: 'SCHEDULED',
-          consultationFee: 3500,
-        },
-        {
-          id: '2',
-          lawyerName: 'John Kamau',
-          specialty: 'Family Law',
-          scheduledAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          duration: 45,
-          status: 'COMPLETED',
-          consultationFee: 3000,
-        },
-      ]);
+      // Mock data - different for lawyers vs clients
+      if (user?.role === 'LAWYER') {
+        // Lawyers see their client consultations
+        setConsultations([
+          {
+            id: '1',
+            clientName: 'James Omondi',
+            specialty: 'Corporate Law',
+            scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 60,
+            status: 'SCHEDULED',
+            consultationFee: 3500,
+          },
+          {
+            id: '2',
+            clientName: 'Mary Wambui',
+            specialty: 'Family Law',
+            scheduledAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 45,
+            status: 'COMPLETED',
+            consultationFee: 3000,
+          },
+        ]);
+      } else {
+        // Clients see their consultations with lawyers
+        setConsultations([
+          {
+            id: '1',
+            lawyerName: 'Sarah Mwangi',
+            specialty: 'Corporate Law',
+            scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 60,
+            status: 'SCHEDULED',
+            consultationFee: 3500,
+          },
+          {
+            id: '2',
+            lawyerName: 'John Kamau',
+            specialty: 'Family Law',
+            scheduledAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 45,
+            status: 'COMPLETED',
+            consultationFee: 3000,
+          },
+        ]);
+      }
     } catch (error) {
       console.error('Error fetching consultations:', error);
     } finally {
@@ -100,8 +127,10 @@ export const ConsultationsPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">My Consultations</h1>
-        <p className="text-slate-600 mt-2">Manage your video consultations with lawyers</p>
+        <h1 className="text-3xl font-bold text-slate-900">{isLawyer ? 'Client Consultations' : 'My Consultations'}</h1>
+        <p className="text-slate-600 mt-2">
+          {isLawyer ? 'Manage consultations with your clients' : 'Manage your video consultations with lawyers'}
+        </p>
       </div>
 
       {/* Filters */}
@@ -161,7 +190,9 @@ export const ConsultationsPage: React.FC = () => {
                     <User className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900">{consultation.lawyerName}</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      {isLawyer ? consultation.clientName : consultation.lawyerName}
+                    </h3>
                     <p className="text-sm text-slate-600">{consultation.specialty}</p>
                   </div>
                 </div>

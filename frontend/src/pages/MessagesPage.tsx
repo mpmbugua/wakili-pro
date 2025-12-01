@@ -12,9 +12,12 @@ interface Message {
 
 interface Conversation {
   id: string;
-  lawyerId: string;
-  lawyerName: string;
+  lawyerId?: string;
+  clientId?: string;
+  lawyerName?: string;
+  clientName?: string;
   lawyerImage?: string;
+  clientImage?: string;
   specialty: string;
   lastMessage: string;
   lastMessageTime: string;
@@ -29,6 +32,7 @@ export const MessagesPage: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const isLawyer = user?.role === 'LAWYER';
 
   useEffect(() => {
     fetchConversations();
@@ -41,44 +45,70 @@ export const MessagesPage: React.FC = () => {
       // const response = await axiosInstance.get('/messages/conversations');
       // setConversations(response.data.data);
       
-      // Mock data
-      const mockConversations: Conversation[] = [
-        {
-          id: '1',
-          lawyerId: 'lawyer1',
-          lawyerName: 'Sarah Mwangi',
-          specialty: 'Corporate Law',
-          lastMessage: 'I have reviewed your contract and have some suggestions.',
-          lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          unreadCount: 2,
-          messages: [
-            {
-              id: 'm1',
-              senderId: user?.id || 'user',
-              content: 'Hello, I need help with my employment contract.',
-              timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-              read: true,
-            },
-            {
-              id: 'm2',
-              senderId: 'lawyer1',
-              content: 'Hello! I\'d be happy to help. Please send me the contract.',
-              timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-              read: true,
-            },
-            {
-              id: 'm3',
-              senderId: user?.id || 'user',
-              content: 'Thank you! I\'ve attached the document.',
-              timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-              read: true,
-            },
-            {
-              id: 'm4',
-              senderId: 'lawyer1',
-              content: 'I have reviewed your contract and have some suggestions.',
-              timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-              read: false,
+      // Mock data - different for lawyers vs clients
+      let mockConversations: Conversation[];
+      
+      if (user?.role === 'LAWYER') {
+        // Lawyers see conversations with clients
+        mockConversations = [
+          {
+            id: '1',
+            clientId: 'client1',
+            clientName: 'James Omondi',
+            specialty: 'Corporate Law',
+            lastMessage: 'Thank you for your help with my contract!',
+            lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            unreadCount: 1,
+            messages: [
+              {
+                id: 'm1',
+                senderId: 'client1',
+                content: 'Hello, I need help with my employment contract.',
+                timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+                read: true,
+              },
+              {
+                id: 'm2',
+                senderId: user?.id || 'lawyer',
+                content: 'Hello! I\'d be happy to help. Please send me the contract.',
+                timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+                read: true,
+              },
+            ],
+          },
+        ];
+      } else {
+        // Clients see conversations with lawyers
+        mockConversations = [
+          {
+            id: '1',
+            lawyerId: 'lawyer1',
+            lawyerName: 'Sarah Mwangi',
+            specialty: 'Corporate Law',
+            lastMessage: 'I have reviewed your contract and have some suggestions.',
+            lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            unreadCount: 2,
+            messages: [
+              {
+                id: 'm1',
+                senderId: user?.id || 'user',
+                content: 'Hello, I need help with my employment contract.',
+                timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+                read: true,
+              },
+              {
+                id: 'm2',
+                senderId: 'lawyer1',
+                content: 'Hello! I\'d be happy to help. Please send me the contract.',
+                timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+                read: true,
+              },
+            ],
+          },
+        ];
+      }
+      
+      setConversations(mockConversations);
             },
           ],
         },
@@ -162,8 +192,9 @@ export const MessagesPage: React.FC = () => {
   };
 
   const filteredConversations = conversations.filter(conv =>
-    conv.lawyerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    conv.specialty.toLowerCase().includes(searchQuery.toLowerCase())
+    (conv.lawyerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     conv.clientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     conv.specialty.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   if (loading) {
@@ -213,7 +244,9 @@ export const MessagesPage: React.FC = () => {
                 </div>
                 <div className="flex-1 min-w-0 text-left">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-slate-900 truncate">{conversation.lawyerName}</h3>
+                    <h3 className="font-semibold text-slate-900 truncate">
+                      {isLawyer ? conversation.clientName : conversation.lawyerName}
+                    </h3>
                     <span className="text-xs text-slate-500">{formatTime(conversation.lastMessageTime)}</span>
                   </div>
                   <p className="text-xs text-slate-600 mb-1">{conversation.specialty}</p>
@@ -240,7 +273,9 @@ export const MessagesPage: React.FC = () => {
                 <User className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900">{selectedConversation.lawyerName}</h3>
+                <h3 className="font-semibold text-slate-900">
+                  {isLawyer ? selectedConversation.clientName : selectedConversation.lawyerName}
+                </h3>
                 <p className="text-xs text-slate-600">{selectedConversation.specialty}</p>
               </div>
             </div>

@@ -4,7 +4,8 @@ import { useAuthStore } from '../store/authStore';
 
 interface Appointment {
   id: string;
-  lawyerName: string;
+  lawyerName?: string;
+  clientName?: string;
   lawyerImage?: string;
   specialty: string;
   scheduledAt: string;
@@ -20,6 +21,7 @@ export const AppointmentsPage: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+  const isLawyer = user?.role === 'LAWYER';
 
   useEffect(() => {
     fetchAppointments();
@@ -32,31 +34,60 @@ export const AppointmentsPage: React.FC = () => {
       // const response = await axiosInstance.get('/appointments');
       // setAppointments(response.data.data);
       
-      // Mock data for now
-      setAppointments([
-        {
-          id: '1',
-          lawyerName: 'David Ochieng',
-          specialty: 'Real Estate Law',
-          scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-          duration: 90,
-          location: 'Nairobi CBD, Kenya Re Towers',
-          status: 'CONFIRMED',
-          appointmentType: 'IN_PERSON',
-          fee: 5000,
-        },
-        {
-          id: '2',
-          lawyerName: 'Grace Wanjiru',
-          specialty: 'Employment Law',
-          scheduledAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          duration: 60,
-          location: 'Phone Consultation',
-          status: 'COMPLETED',
-          appointmentType: 'PHONE',
-          fee: 2500,
-        },
-      ]);
+      // Mock data - different for lawyers vs clients
+      if (user?.role === 'LAWYER') {
+        // Lawyers see their client appointments
+        setAppointments([
+          {
+            id: '1',
+            clientName: 'Peter Maina',
+            specialty: 'Real Estate Law',
+            scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 90,
+            location: 'Your Office - Nairobi CBD',
+            status: 'CONFIRMED',
+            appointmentType: 'IN_PERSON',
+            fee: 5000,
+          },
+          {
+            id: '2',
+            clientName: 'Susan Wanjiku',
+            specialty: 'Employment Law',
+            scheduledAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 60,
+            location: 'Phone Consultation',
+            status: 'COMPLETED',
+            appointmentType: 'PHONE',
+            fee: 2500,
+          },
+        ]);
+      } else {
+        // Clients see their appointments with lawyers
+        setAppointments([
+          {
+            id: '1',
+            lawyerName: 'David Ochieng',
+            specialty: 'Real Estate Law',
+            scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 90,
+            location: 'Nairobi CBD, Kenya Re Towers',
+            status: 'CONFIRMED',
+            appointmentType: 'IN_PERSON',
+            fee: 5000,
+          },
+          {
+            id: '2',
+            lawyerName: 'Grace Wanjiru',
+            specialty: 'Employment Law',
+            scheduledAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 60,
+            location: 'Phone Consultation',
+            status: 'COMPLETED',
+            appointmentType: 'PHONE',
+            fee: 2500,
+          },
+        ]);
+      }
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {
@@ -117,8 +148,10 @@ export const AppointmentsPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">My Appointments</h1>
-        <p className="text-slate-600 mt-2">View and manage your scheduled appointments</p>
+        <h1 className="text-3xl font-bold text-slate-900">{isLawyer ? 'Client Appointments' : 'My Appointments'}</h1>
+        <p className="text-slate-600 mt-2">
+          {isLawyer ? 'Manage appointments with your clients' : 'View and manage your scheduled appointments'}
+        </p>
       </div>
 
       {/* Filters */}
@@ -178,7 +211,9 @@ export const AppointmentsPage: React.FC = () => {
                     <User className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900">{appointment.lawyerName}</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      {isLawyer ? appointment.clientName : appointment.lawyerName}
+                    </h3>
                     <p className="text-sm text-slate-600">{appointment.specialty}</p>
                   </div>
                 </div>
