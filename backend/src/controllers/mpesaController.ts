@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { prisma } from '../utils/database';
 import { mpesaService } from '../services/mpesaDarajaService';
 import { logger } from '../utils/logger';
+import { sendPaymentConfirmationEmail } from '../services/emailTemplates';
+import { sendSMS } from '../services/smsService';
 
 interface AuthRequest extends Request {
   user?: {
@@ -326,6 +328,27 @@ export const mpesaCallback = async (req: Request, res: Response) => {
           data: { status: 'CONFIRMED' },
         });
         logger.info('Booking confirmed:', { bookingId: payment.bookingId });
+
+        // Send payment confirmation notification
+        const user = await prisma.user.findUnique({
+          where: { id: payment.userId },
+        });
+        if (user?.email) {
+          sendPaymentConfirmationEmail(
+            user.email,
+            `${user.firstName} ${user.lastName}`,
+            {
+              bookingId: payment.bookingId,
+              amount: payment.amount,
+              transactionId: callbackResult.transactionId || payment.id,
+              paymentMethod: 'M-Pesa'
+            }
+          ).catch(err => logger.error('[Payment] Email notification error:', err));
+        }
+        if (user?.phoneNumber) {
+          const smsMessage = `Wakili Pro: Payment of KES ${payment.amount.toLocaleString()} received. Booking confirmed. Ref: ${callbackResult.transactionId}`;
+          sendSMS(user.phoneNumber, smsMessage).catch(err => logger.error('[Payment] SMS notification error:', err));
+        }
       } else if (metadata?.resourceType === 'PURCHASE' && metadata?.purchaseId) {
         // Update document purchase status
         await prisma.documentPurchase.update({
@@ -337,6 +360,7 @@ export const mpesaCallback = async (req: Request, res: Response) => {
         // Update document review status
         const docReview = await prisma.documentReview.findUnique({
           where: { id: metadata.reviewId },
+          include: { user: true },
         });
         if (docReview) {
           await prisma.documentReview.update({
@@ -344,6 +368,26 @@ export const mpesaCallback = async (req: Request, res: Response) => {
             data: { status: 'PAYMENT_VERIFIED' },
           });
           logger.info('Document review payment verified:', { reviewId: metadata.reviewId });
+
+          // Send payment confirmation
+          if (docReview.user?.email) {
+            sendPaymentConfirmationEmail(
+              docReview.user.email,
+              `${docReview.user.firstName} ${docReview.user.lastName}`,
+              {
+                bookingId: metadata.reviewId,
+                amount: payment.amount,
+                transactionId: callbackResult.transactionId || payment.id,
+                paymentMethod: 'M-Pesa'
+              }
+            ).catch(err => logger.error('[Review] Email notification error:', err));
+          }
+          if (docReview.user?.phoneNumber) {
+            const reviewType = docReview.reviewType === 'AI_ONLY' ? 'AI Review' : 
+                              docReview.reviewType === 'CERTIFICATION' ? 'Lawyer Certification' : 'AI + Certification';
+            const smsMessage = `Wakili Pro: ${reviewType} payment confirmed! Processing will begin shortly. Delivery within 2 hours. Ref: ${callbackResult.transactionId}`;
+            sendSMS(docReview.user.phoneNumber, smsMessage).catch(err => logger.error('[Review] SMS notification error:', err));
+          }
         }
       } else if (metadata?.resourceType === 'SUBSCRIPTION' && metadata?.subscriptionId) {
         // Update subscription status and activate tier
@@ -357,6 +401,65 @@ export const mpesaCallback = async (req: Request, res: Response) => {
           await prisma.subscription.update({
             where: { id: metadata.subscriptionId },
             data: { 
+              status: 'ACTIVE',
+              activatedAt: new Date(),
+            },
+          });
+
+          // Update lawyer tier
+          await prisma.lawyerProfile.update({
+            where: { id: subscription.lawyerId },
+            data: { 
+              tier: subscription.tier,
+              subscriptionStatus: 'ACTIVE',
+            },
+          });
+
+          logger.info('Subscription activated:', { 
+            subscriptionId: metadata.subscriptionId,
+            tier: subscription.tier,
+            lawyerId: subscription.lawyerId 
+          });
+
+      } else if (metadata?.resourceType === 'SERVICE_REQUEST_COMMITMENT' && metadata?.serviceRequestId) {
+        // Update service request commitment fee status
+        const serviceRequest = await prisma.serviceRequest.update({
+          where: { id: metadata.serviceRequestId },
+          data: { 
+            commitmentFeePaid: true,
+            status: 'PENDING', // Waiting for lawyer quotes
+          },
+          include: { user: true },
+        });
+        logger.info('Service request commitment fee paid:', { serviceRequestId: metadata.serviceRequestId });
+
+        // Send commitment fee confirmation
+        if (serviceRequest.user?.email) {
+          sendPaymentConfirmationEmail(
+            serviceRequest.user.email,
+            `${serviceRequest.user.firstName} ${serviceRequest.user.lastName}`,
+            {
+              bookingId: metadata.serviceRequestId,
+              amount: payment.amount,
+              transactionId: callbackResult.transactionId || payment.id,
+              paymentMethod: 'M-Pesa'
+            }
+          ).catch(err => logger.error('[ServiceRequest] Email notification error:', err));
+        }
+        if (serviceRequest.phoneNumber) {
+          const smsMessage = `Wakili Pro: Service request submitted! Expect 3 quotes within 24-48 hours. Category: ${serviceRequest.serviceCategory}. Ref: ${callbackResult.transactionId}`;
+          sendSMS(serviceRequest.phoneNumber, smsMessage).catch(err => logger.error('[ServiceRequest] SMS notification error:', err));
+        }
+      } else if (metadata?.resourceType === 'SERVICE_REQUEST_PAYMENT' && metadata?.serviceRequestId && metadata?.quoteId) {
+            ).catch(err => logger.error('[Subscription] Email notification error:', err));
+          }
+          if (subscription.lawyer?.phoneNumber) {
+            const tierName = subscription.tier === 'LITE' ? 'LITE (KES 2,999)' : 'PRO (KES 4,999)';
+            const smsMessage = `Wakili Pro: ${tierName} subscription activated! Enjoy premium features. Ref: ${callbackResult.transactionId}`;
+            sendSMS(subscription.lawyer.phoneNumber, smsMessage).catch(err => logger.error('[Subscription] SMS notification error:', err));
+          }
+        }
+      } else if (metadata?.resourceType === 'SERVICE_REQUEST_COMMITMENT' && metadata?.serviceRequestId) {
               status: 'ACTIVE',
               activatedAt: new Date(),
             },
@@ -451,21 +554,84 @@ export const mpesaCallback = async (req: Request, res: Response) => {
                 balance: lawyerEscrow,
                 availableBalance: lawyerEscrow,
                 currency: 'KES',
-              },
-            });
+          // Send 30% payment confirmation to client
+          const client = await prisma.user.findUnique({
+            where: { id: serviceRequest.userId },
+          });
+          if (client?.email) {
+            sendPaymentConfirmationEmail(
+              client.email,
+              `${client.firstName} ${client.lastName}`,
+              {
+                bookingId: metadata.serviceRequestId,
+                amount: payment.amount,
+                transactionId: callbackResult.transactionId || payment.id,
+                paymentMethod: 'M-Pesa'
+              }
+            ).catch(err => logger.error('[ServiceRequestPayment] Client email notification error:', err));
+          }
+          if (serviceRequest.phoneNumber) {
+            const smsMessage = `Wakili Pro: 30% payment (KES ${paidAmount.toLocaleString()}) received! Lawyer ${quote.lawyer.firstName} is ready to start your case. Check Messages inbox. Ref: ${callbackResult.transactionId}`;
+            sendSMS(serviceRequest.phoneNumber, smsMessage).catch(err => logger.error('[ServiceRequestPayment] Client SMS notification error:', err));
           }
 
-          // Create conversation thread between client and lawyer
-          const existingConversation = await prisma.conversation.findFirst({
-            where: {
-              participants: {
-                every: {
-                  userId: {
-                    in: [serviceRequest.userId, quote.lawyerId]
-                  }
-                }
+          // Send notification to lawyer about client payment & escrow credit
+          if (quote.lawyer?.email) {
+            const lawyerName = `${quote.lawyer.firstName} ${quote.lawyer.lastName}`;
+            const clientName = client ? `${client.firstName} ${client.lastName}` : 'Client';
+            const emailSubject = `New Case Started - KES ${lawyerEscrow.toLocaleString()} Escrow Credited`;
+            const emailBody = `
+              <h2>Client Selected Your Quote!</h2>
+              <p>Dear ${lawyerName},</p>
+              <p>Good news! <strong>${clientName}</strong> has paid 30% upfront and selected your quote for their ${serviceRequest.serviceCategory} case.</p>
+              <h3>Payment Breakdown:</h3>
+              <ul>
+                <li><strong>Total Quote:</strong> KES ${quotedAmount.toLocaleString()}</li>
+                <li><strong>Client Paid (30%):</strong> KES ${paidAmount.toLocaleString()}</li>
+                <li><strong>Your Escrow (10%):</strong> KES ${lawyerEscrow.toLocaleString()} ✅</li>
+                <li><strong>Platform Commission (20%):</strong> KES ${platformCommission.toLocaleString()}</li>
+                <li><strong>Balance (70%):</strong> KES ${(quotedAmount - paidAmount).toLocaleString()} (to be paid later)</li>
+              </ul>
+              <p><strong>Next Steps:</strong></p>
+              <ol>
+                <li>Check your Messages inbox - client is waiting to discuss details</li>
+                <li>Confirm timeline: ${quote.proposedTimeline}</li>
+                <li>Begin case work using the 10% escrow</li>
+                <li>Update client on progress regularly</li>
+              </ol>
+              <p>Your wallet has been credited KES ${lawyerEscrow.toLocaleString()} to start the case.</p>
+            `;
+            sendPaymentConfirmationEmail(
+              quote.lawyer.email,
+              lawyerName,
+              {
+                bookingId: metadata.quoteId,
+                amount: lawyerEscrow,
+                transactionId: callbackResult.transactionId || payment.id,
+                paymentMethod: 'M-Pesa Escrow'
               }
-            }
+            ).catch(err => logger.error('[ServiceRequestPayment] Lawyer email notification error:', err));
+          }
+          if (quote.lawyer?.phoneNumber) {
+            const smsMessage = `Wakili Pro: Client selected your quote! KES ${lawyerEscrow.toLocaleString()} escrow credited to wallet. Check Messages to start case. Ref: ${callbackResult.transactionId}`;
+            sendSMS(quote.lawyer.phoneNumber, smsMessage).catch(err => logger.error('[ServiceRequestPayment] Lawyer SMS notification error:', err));
+          }
+
+          logger.info('Service request payment processed:', { 
+            serviceRequestId: metadata.serviceRequestId,
+            quoteId: metadata.quoteId,
+            quotedAmount,
+            paidAmount,
+            platformCommission,
+            lawyerEscrow,
+          });
+        }
+      }
+
+      logger.info('Payment completed successfully:', {
+        paymentId: payment.id,
+        transactionId: callbackResult.transactionId,
+      });   }
           });
 
           if (!existingConversation) {
