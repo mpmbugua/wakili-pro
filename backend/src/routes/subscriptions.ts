@@ -6,6 +6,56 @@ import { LawyerTier } from '@prisma/client';
 const router = express.Router();
 
 /**
+ * POST /api/subscriptions/create
+ * Create subscription record (without payment)
+ */
+router.post('/create', loadLawyerProfile, async (req: any, res) => {
+  try {
+    const { targetTier, billingCycle = 'monthly' } = req.body;
+    const { lawyerProfile } = req;
+
+    if (!Object.values(LawyerTier).includes(targetTier)) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Invalid tier' 
+      });
+    }
+
+    // Create subscription record (PENDING status)
+    const result = await subscriptionService.createSubscription(
+      lawyerProfile.userId,
+      targetTier as LawyerTier,
+      billingCycle
+    );
+
+    // Calculate amount for payment
+    const SUBSCRIPTION_FEES = {
+      FREE: 0,
+      LITE: 1999,
+      PRO: 4999,
+    };
+
+    const amount = SUBSCRIPTION_FEES[targetTier as keyof typeof SUBSCRIPTION_FEES] || 0;
+
+    res.json({
+      success: true,
+      data: {
+        subscriptionId: result.subscriptionId,
+        amount,
+        tier: targetTier,
+        billingCycle,
+      },
+      message: 'Subscription created. Please complete payment.',
+    });
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
+/**
  * GET /api/subscriptions/tiers
  * Get tier comparison data
  */

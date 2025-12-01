@@ -261,10 +261,6 @@ app.use('/api/payments', paymentsRouter);
 import documentMarketplaceRouter from './routes/documentMarketplace';
 app.use('/api/documents', documentMarketplaceRouter);
 
-// Mount marketplace payment router
-import marketplacePaymentRouter from './routes/marketplacePaymentRoutes';
-app.use('/api/marketplace-payment', marketplacePaymentRouter);
-
 // Mount user documents router
 import userDocumentsRouter from './routes/userDocuments';
 app.use('/api/user-documents', userDocumentsRouter);
@@ -340,10 +336,6 @@ app.use('/api/lawyer/letterhead', lawyerLetterheadRouter);
 // Mount document certification routes
 import documentCertificationRouter from './routes/documentCertification';
 app.use('/api/certification', documentCertificationRouter);
-
-// Mount document payment routes (for document review payments)
-import documentPaymentRouter from './routes/documentPayment';
-app.use('/api/document-payment', documentPaymentRouter);
 
 // Mount messages routes (Real-time messaging)
 import messagesRouter from './routes/messages';

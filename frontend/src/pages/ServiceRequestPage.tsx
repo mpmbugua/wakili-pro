@@ -153,10 +153,11 @@ export const ServiceRequestPage: React.FC = () => {
       // Import axiosInstance at the top if not already imported
       const axiosInstance = (await import('../lib/axios')).default;
       
-      // Call M-Pesa STK Push API with proper auth
-      const response = await axiosInstance.post('/document-payment/initiate', {
-        amount: 500,
+      // Call M-Pesa STK Push API using unified endpoint
+      const response = await axiosInstance.post('/payments/mpesa/initiate', {
         phoneNumber: paymentPhone,
+        amount: 500,
+        reviewId: 'service-request-' + Date.now(),
         paymentType: 'SERVICE_REQUEST_COMMITMENT'
       });
 
@@ -167,7 +168,7 @@ export const ServiceRequestPage: React.FC = () => {
         
         // Poll for payment status
         const checkPayment = setInterval(async () => {
-          const statusResponse = await axiosInstance.get(`/document-payment/${paymentId}/status`);
+          const statusResponse = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
           const statusData = statusResponse.data;
 
           if (statusData.success && statusData.data.status === 'COMPLETED') {

@@ -141,97 +141,29 @@ export const PaymentPage: React.FC = () => {
 
     try {
       if (paymentMethod === 'mpesa') {
-        // M-Pesa Daraja API payment flow - use document-payment endpoint for consistency
+        // M-Pesa Daraja API payment flow - unified endpoint for all payment types
         
-        if (isDocumentPayment) {
-          // For document payments, use the document-payment/initiate endpoint
-          const documentDetails = bookingDetails as DocumentPaymentDetails;
-          
-          // Check if this is a marketplace purchase
-          if (documentDetails.serviceType === 'marketplace-purchase' || (location.state as any)?.type === 'marketplace_document' || purchaseId) {
-            // Marketplace document payment
-            const marketplaceData = {
-              purchaseId: purchaseId || (location.state as any)?.purchaseId,
-              phoneNumber: mpesaDetails.phoneNumber,
-            };
-
-            console.log('[PaymentPage] Initiating M-Pesa payment for marketplace document:', marketplaceData);
-            const mpesaResponse = await axiosInstance.post('/marketplace-payment/initiate', marketplaceData);
-
-            console.log('[PaymentPage] M-Pesa response:', mpesaResponse.data);
-            
-            if (!mpesaResponse.data.success) {
-              throw new Error(mpesaResponse.data.message || 'Failed to initiate M-Pesa payment');
-            }
-
-            const { paymentId, customerMessage } = mpesaResponse.data.data;
-
-            // Show M-Pesa prompt message
-            setError(null);
-            alert(customerMessage || `Please check your phone (${mpesaDetails.phoneNumber}) and enter your M-Pesa PIN to complete the payment.`);
-
-            // Poll for payment status every 3 seconds (max 60 seconds)
-            let attempts = 0;
-            const maxAttempts = 20;
-            const pollInterval = 3000;
-
-            const checkStatus = async (): Promise<boolean> => {
-              try {
-                const statusResponse = await axiosInstance.get(`/marketplace-payment/${paymentId}/status`);
-                
-                if (statusResponse.data.success) {
-                  const { status } = statusResponse.data.data;
-                
-                  if (status === 'COMPLETED') {
-                    setPaymentSuccess(true);
-                    setTimeout(() => {
-                      navigate('/documents');
-                    }, 3000);
-                    return true;
-                  } else if (status === 'FAILED') {
-                    throw new Error('Payment failed or was cancelled');
-                  }
-                }
-                return false;
-              } catch (err) {
-                console.error('Status check error:', err);
-                return false;
-              }
-            };
-
-            // Start polling
-            const pollPaymentStatus = setInterval(async () => {
-              attempts++;
-              const completed = await checkStatus();
-              
-              if (completed || attempts >= maxAttempts) {
-                clearInterval(pollPaymentStatus);
-                setLoading(false);
-                
-                if (!completed && attempts >= maxAttempts) {
-                  setError('Payment verification timed out. Please check your payment history or contact support.');
-                }
-              }
-            }, pollInterval);
-
           } else {
-            // Regular document review/certification payment
-            const backendServiceType = documentDetails.serviceType === 'ai-review' 
-              ? 'ai_review' 
-              : documentDetails.serviceType === 'certification'
-              ? 'certification'
-              : 'ai_and_certification';
+            // Use unified M-Pesa payment endpoint with correct parameter
+            const isMarketplacePurchase = purchaseId || (bookingDetails as any)?.paymentType === 'MARKETPLACE_PURCHASE';
+            const actualId = purchaseId || reviewId || (bookingDetails as any)?.purchaseId || (bookingDetails as any)?.reviewId || '';
+            const paymentType = (bookingDetails as any)?.paymentType || 'DOCUMENT_REVIEW';
             
-            const paymentData = {
-              documentId: (documentDetails as any).documentId || reviewId || '', // documentId from navigation state
-              serviceType: backendServiceType,
-              urgencyLevel: 'standard', // Default to standard
-              paymentMethod: 'mpesa',
+            const paymentData: any = {
               phoneNumber: mpesaDetails.phoneNumber,
+              amount: getPrice(),
+              paymentType: paymentType
             };
 
-            console.log('[PaymentPage] Initiating M-Pesa payment for document:', paymentData);
-            const mpesaResponse = await axiosInstance.post('/document-payment/initiate', paymentData);
+            // Use purchaseId for marketplace, reviewId for document reviews
+            if (isMarketplacePurchase) {
+              paymentData.purchaseId = actualId;
+            } else {
+              paymentData.reviewId = actualId;
+            }
+
+            console.log('[PaymentPage] Initiating unified M-Pesa payment:', paymentData);
+            const mpesaResponse = await axiosInstance.post('/payments/mpesa/initiate', paymentData);
 
             console.log('[PaymentPage] M-Pesa response:', mpesaResponse.data);
             
@@ -252,7 +184,7 @@ export const PaymentPage: React.FC = () => {
 
             const checkStatus = async (): Promise<boolean> => {
               try {
-                const statusResponse = await axiosInstance.get(`/document-payment/${paymentId}/status`);
+                const statusResponse = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
                 
                 if (statusResponse.data.success) {
                   const { status } = statusResponse.data.data;

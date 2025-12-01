@@ -277,13 +277,12 @@ export const DocumentsPage: React.FC = () => {
         return;
       }
 
-      // Initiate M-Pesa payment
-      const response = await axiosInstance.post('/document-payment/initiate', {
-        documentId: selectedDocument.id,
-        serviceType: backendServiceType,
-        urgencyLevel: backendUrgency,
-        paymentMethod: 'mpesa',
-        phoneNumber: phoneNumber
+      // Initiate M-Pesa payment using unified endpoint
+      const response = await axiosInstance.post('/payments/mpesa/initiate', {
+        phoneNumber: phoneNumber,
+        amount: selection.totalPrice,
+        reviewId: selectedDocument.id,
+        paymentType: 'DOCUMENT_REVIEW'
       });
 
       console.log('[DocumentsPage] M-Pesa initiation response:', response.data);

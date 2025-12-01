@@ -15,7 +15,7 @@ function getAxiosErrorMessage(e: unknown): string | undefined {
 import { Toaster, toast } from 'react-hot-toast';
 import { SubscriptionPlans, SubscriptionPlan, SubscriptionStatus } from './SubscriptionPlans';
 import { SubscriptionHistory, SubscriptionHistoryItem } from './SubscriptionHistory';
-import axios from 'axios';
+import axiosInstance from '../lib/axios';
 
 export const SubscriptionDashboard: React.FC = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -32,14 +32,11 @@ export const SubscriptionDashboard: React.FC = () => {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
 
-  // Simulate userId for mock API
-  const userId = 'mock-user';
-
   const fetchPlans = async () => {
     setLoadingPlans(true);
     setError(null);
     try {
-      const res = await axios.get('/api/lawyer-subscriptions/subscriptions/plans');
+      const res = await axiosInstance.get('/subscriptions/tiers');
       setPlans(res.data.plans || []);
     } catch (e) {
       setError('Failed to load plans');
@@ -52,8 +49,8 @@ export const SubscriptionDashboard: React.FC = () => {
     setLoadingStatus(true);
     setError(null);
     try {
-      const res = await axios.get('/api/lawyer-subscriptions/subscriptions/status', { params: { userId } });
-      setStatus(res.data.subscription || null);
+      const res = await axiosInstance.get('/subscriptions/current');
+      setStatus(res.data || null);
     } catch (e) {
       setError('Failed to load subscription status');
     } finally {
@@ -64,7 +61,7 @@ export const SubscriptionDashboard: React.FC = () => {
   const fetchHistory = async () => {
     setLoadingHistory(true);
     try {
-      const res = await axios.get('/api/lawyer-subscriptions/subscriptions/history', { params: { userId } });
+      const res = await axiosInstance.get('/subscriptions/history');
       setHistory(res.data.history || []);
     } catch {
       setHistory([]);
@@ -86,7 +83,7 @@ export const SubscriptionDashboard: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        await axios.post('/api/subscriptions/upgrade', { userId, targetTier: plan });
+        await axiosInstance.post('/subscriptions/upgrade', { targetTier: plan });
         toast.success('Subscription activated!');
         await fetchStatus();
       } catch (e: unknown) {
@@ -113,32 +110,45 @@ export const SubscriptionDashboard: React.FC = () => {
     setError(null);
 
     try {
-      // Initiate subscription upgrade with M-Pesa
-      const response = await axios.post('/api/subscriptions/upgrade', {
-        userId,
+      // First, create the subscription to get subscriptionId
+      const createResponse = await axiosInstance.post('/subscriptions/create', {
         targetTier: selectedPlan,
-        phoneNumber,
+        billingCycle: 'monthly',
       });
 
-      if (response.data.success) {
-        const { subscriptionId: subId, checkoutRequestID } = response.data;
-        setSubscriptionId(subId);
+      if (!createResponse.data.success) {
+        throw new Error(createResponse.data.message || 'Failed to create subscription');
+      }
 
-        toast.success(response.data.message || 'Check your phone for M-Pesa prompt');
+      const { subscriptionId: subId, amount } = createResponse.data.data;
+      setSubscriptionId(subId);
 
-        // Poll for payment status
+      // Initiate M-Pesa payment using unified endpoint
+      const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+        phoneNumber,
+        amount,
+        subscriptionId: subId,
+        paymentType: `SUBSCRIPTION_${selectedPlan}`,
+      });
+
+      if (paymentResponse.data.success) {
+        const { paymentId, customerMessage } = paymentResponse.data.data;
+
+        toast.success(customerMessage || 'Check your phone for M-Pesa prompt');
+
+        // Poll for payment status using unified endpoint
         let attempts = 0;
         const maxAttempts = 20;
         const pollInterval = setInterval(async () => {
           attempts++;
 
           try {
-            const statusResponse = await axios.get(`/api/subscriptions/payment-status/${subId}`);
+            const statusResponse = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
             
             if (statusResponse.data.success) {
-              const { status: subStatus } = statusResponse.data.data;
+              const { status: paymentStatus } = statusResponse.data.data;
               
-              if (subStatus === 'ACTIVE') {
+              if (paymentStatus === 'COMPLETED') {
                 clearInterval(pollInterval);
                 setPaymentProcessing(false);
                 setShowPaymentModal(false);
@@ -146,7 +156,7 @@ export const SubscriptionDashboard: React.FC = () => {
                 setSelectedPlan(null);
                 toast.success('Subscription activated successfully!');
                 await fetchStatus();
-              } else if (subStatus === 'FAILED') {
+              } else if (paymentStatus === 'FAILED') {
                 clearInterval(pollInterval);
                 setPaymentProcessing(false);
                 toast.error('Payment failed. Please try again.');
@@ -175,7 +185,7 @@ export const SubscriptionDashboard: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post('/api/lawyer-subscriptions/subscriptions/cancel', { userId });
+      await axiosInstance.post('/subscriptions/cancel');
       toast.success('Subscription cancelled.');
       await fetchStatus();
     } catch (e: unknown) {
@@ -190,7 +200,7 @@ export const SubscriptionDashboard: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post('/api/lawyer-subscriptions/subscriptions/renew', { userId, plan });
+      await axiosInstance.post('/subscriptions/renew', { plan });
       toast.success('Subscription renewed!');
       await fetchStatus();
     } catch (e: unknown) {

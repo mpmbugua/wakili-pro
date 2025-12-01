@@ -689,7 +689,7 @@ export const MarketplaceBrowse: React.FC = () => {
       const doc = sampleDocuments.find(d => d.id === docId);
       if (doc) {
         try {
-          // Create purchase record in backend first
+          // Create purchase record in backend first (to get reviewId for payment)
           const response = await axiosInstance.post('/documents/marketplace/purchase', {
             templateId: doc.id,
             documentTitle: doc.title,
@@ -704,8 +704,9 @@ export const MarketplaceBrowse: React.FC = () => {
                 amount: doc.price,
                 description: doc.title,
                 type: 'marketplace_document',
-                purchaseId,
-                documentId: doc.id
+                purchaseId: purchaseId, // Use purchaseId for marketplace purchases
+                documentId: doc.id,
+                paymentType: 'MARKETPLACE_PURCHASE'
               }
             });
           } else {

@@ -40,7 +40,7 @@ export const PaymentCallbackPage: React.FC = () => {
         }
 
         // Verify payment status via backend
-        const response = await axiosInstance.get(`/document-payment/${paymentId}/status`);
+        const response = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
 
         if (response.data.success) {
           const payment = response.data.data;

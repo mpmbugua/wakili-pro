@@ -28,7 +28,7 @@ export const PaymentStatusPoller: React.FC<PaymentStatusPollerProps> = ({
     const checkPaymentStatus = async () => {
       try {
         console.log('[PaymentStatusPoller] Checking payment status, attempt:', attempts + 1);
-        const response = await axiosInstance.get(`/document-payment/${paymentId}/status`);
+        const response = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
         
         console.log('[PaymentStatusPoller] Status response:', response.data);
         

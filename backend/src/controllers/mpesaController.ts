@@ -17,7 +17,7 @@ interface AuthRequest extends Request {
  */
 export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
   try {
-    const { phoneNumber, amount, bookingId, reviewId, paymentType } = req.body;
+    const { phoneNumber, amount, bookingId, reviewId, purchaseId, subscriptionId, paymentType } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -53,13 +53,15 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Validate booking or review exists
+    // Validate booking, review, purchase, or subscription exists
     let targetId: string;
     let accountReference: string;
     let transactionDesc: string;
     let actualBookingId: string | undefined;
+    let resourceType: 'BOOKING' | 'REVIEW' | 'PURCHASE' | 'SUBSCRIPTION';
 
     if (bookingId) {
+      // Consultation or service booking payment
       const booking = await prisma.serviceBooking.findUnique({
         where: { id: bookingId },
       });
@@ -80,21 +82,88 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
 
       targetId = bookingId;
       actualBookingId = bookingId;
+      resourceType = 'BOOKING';
       accountReference = `BOOKING-${bookingId.substring(0, 8)}`;
       transactionDesc = 'Legal Consultation Payment';
+    } else if (purchaseId) {
+      // Marketplace document purchase payment
+      const purchase = await prisma.documentPurchase.findUnique({
+        where: { id: purchaseId },
+      });
+
+      if (!purchase) {
+        return res.status(404).json({
+          success: false,
+          message: 'Purchase not found',
+        });
+      }
+
+      if (purchase.userId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to pay for this purchase',
+        });
+      }
+
+      targetId = purchaseId;
+      actualBookingId = null;
+      resourceType = 'PURCHASE';
+      accountReference = `PURCHASE-${purchaseId.substring(0, 8)}`;
+      transactionDesc = 'Legal Document Purchase';
     } else if (reviewId) {
-      // For document reviews, payment doesn't require a booking
-      // The Payment model has optional bookingId field
+      // Document review/certification payment
+      const review = await prisma.documentReview.findUnique({
+        where: { id: reviewId },
+      });
+
+      if (!review) {
+        return res.status(404).json({
+          success: false,
+          message: 'Document review not found',
+        });
+      }
+
+      if (review.userId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to pay for this review',
+        });
+      }
+
       targetId = reviewId;
-      actualBookingId = null; // Payment can exist without a booking
+      actualBookingId = null;
+      resourceType = 'REVIEW';
       accountReference = `REVIEW-${reviewId.substring(0, 8)}`;
-      transactionDesc = paymentType === 'MARKETPLACE_PURCHASE' 
-        ? 'Legal Document Purchase'
-        : 'Document Review Payment';
+      transactionDesc = 'Document Review Payment';
+    } else if (subscriptionId) {
+      // Lawyer subscription payment
+      const subscription = await prisma.subscription.findUnique({
+        where: { id: subscriptionId },
+      });
+
+      if (!subscription) {
+        return res.status(404).json({
+          success: false,
+          message: 'Subscription not found',
+        });
+      }
+
+      if (subscription.lawyerId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to pay for this subscription',
+        });
+      }
+
+      targetId = subscriptionId;
+      actualBookingId = null;
+      resourceType = 'SUBSCRIPTION';
+      accountReference = `SUB-${subscriptionId.substring(0, 8)}`;
+      transactionDesc = `Wakili Pro ${subscription.tier} Subscription`;
     } else {
       return res.status(400).json({
         success: false,
-        message: 'Either bookingId or reviewId is required',
+        message: 'Either bookingId, purchaseId, reviewId, or subscriptionId is required',
       });
     }
 
@@ -112,9 +181,11 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
         metadata: {
           phoneNumber,
           accountReference,
-          paymentType, // Store the specific payment type in metadata
-          isDocumentPayment: !!reviewId,
-          actualReviewId: reviewId,
+          resourceType, // 'BOOKING', 'PURCHASE', 'REVIEW', or 'SUBSCRIPTION'
+          paymentType, // Optional: for additional categorization
+          purchaseId: purchaseId || null,
+          reviewId: reviewId || null,
+          subscriptionId: subscriptionId || null,
         },
       },
     });
@@ -214,29 +285,62 @@ export const mpesaCallback = async (req: Request, res: Response) => {
 
       // Update booking status if it's a booking payment
       const metadata = payment.metadata as any;
-      if (payment.bookingId && !metadata?.isDocumentPayment) {
+      if (metadata?.resourceType === 'BOOKING' && payment.bookingId) {
         await prisma.serviceBooking.update({
           where: { id: payment.bookingId },
           data: { status: 'CONFIRMED' },
         });
-      } else if (metadata?.isDocumentPayment && metadata?.actualReviewId) {
-        // Update document review/purchase status
-        if (metadata.paymentType === 'MARKETPLACE_PURCHASE') {
-          await prisma.documentPurchase.update({
-            where: { id: metadata.actualReviewId },
-            data: { status: 'COMPLETED' },
+        logger.info('Booking confirmed:', { bookingId: payment.bookingId });
+      } else if (metadata?.resourceType === 'PURCHASE' && metadata?.purchaseId) {
+        // Update document purchase status
+        await prisma.documentPurchase.update({
+          where: { id: metadata.purchaseId },
+          data: { status: 'COMPLETED' },
+        });
+        logger.info('Document purchase completed:', { purchaseId: metadata.purchaseId });
+      } else if (metadata?.resourceType === 'REVIEW' && metadata?.reviewId) {
+        // Update document review status
+        const docReview = await prisma.documentReview.findUnique({
+          where: { id: metadata.reviewId },
+        });
+        if (docReview) {
+          await prisma.documentReview.update({
+            where: { id: metadata.reviewId },
+            data: { status: 'PAYMENT_VERIFIED' },
           });
-        } else {
-          // Update DocumentReview status if needed
-          const docReview = await prisma.documentReview.findUnique({
-            where: { id: metadata.actualReviewId },
+          logger.info('Document review payment verified:', { reviewId: metadata.reviewId });
+        }
+      } else if (metadata?.resourceType === 'SUBSCRIPTION' && metadata?.subscriptionId) {
+        // Update subscription status and activate tier
+        const subscription = await prisma.subscription.findUnique({
+          where: { id: metadata.subscriptionId },
+          include: { lawyer: true },
+        });
+        
+        if (subscription) {
+          // Update subscription to ACTIVE
+          await prisma.subscription.update({
+            where: { id: metadata.subscriptionId },
+            data: { 
+              status: 'ACTIVE',
+              activatedAt: new Date(),
+            },
           });
-          if (docReview) {
-            await prisma.documentReview.update({
-              where: { id: metadata.actualReviewId },
-              data: { status: 'PAYMENT_VERIFIED' },
-            });
-          }
+
+          // Update lawyer tier
+          await prisma.lawyerProfile.update({
+            where: { id: subscription.lawyerId },
+            data: { 
+              tier: subscription.tier,
+              subscriptionStatus: 'ACTIVE',
+            },
+          });
+
+          logger.info('Subscription activated:', { 
+            subscriptionId: metadata.subscriptionId,
+            tier: subscription.tier,
+            lawyerId: subscription.lawyerId 
+          });
         }
       }
 
