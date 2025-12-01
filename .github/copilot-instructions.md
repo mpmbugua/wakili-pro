@@ -207,12 +207,17 @@ All payments use the **SAME endpoint** with different parameters:
 
 1. **Legal Consultations** → `bookingId`
 2. **Marketplace Documents** → `purchaseId`
-3. **AI Document Review** → `reviewId` + reviewType='AI_ONLY'
-4. **Lawyer Certification** → `reviewId` + reviewType='CERTIFICATION'
-5. **AI + Certification** → `reviewId` + reviewType='AI_PLUS_CERTIFICATION'
+3. **AI Document Review** → `reviewId` + reviewType='AI_ONLY' (KES 500)
+4. **Lawyer Certification** → `reviewId` + reviewType='CERTIFICATION' (KES 2,000)
+5. **AI + Certification** → `reviewId` + reviewType='AI_PLUS_CERTIFICATION' (KES 2,200)
 6. **Service Request Fee** → `reviewId` (commitment fee)
 7. **Lawyer Subscription LITE** → `subscriptionId` (KES 2,999)
 8. **Lawyer Subscription PRO** → `subscriptionId` (KES 4,999)
+
+**CRITICAL PRICING & DELIVERY**:
+- **ALL prices in Kenyan Shillings (KES)** - NEVER use USD ($)
+- **ALL document reviews/certifications delivered within 2 hours**
+- **NO urgency levels** - standard delivery for all services
 
 #### Payment Request Format
 ```typescript
@@ -293,6 +298,52 @@ const pollInterval = setInterval(async () => {
   - `frontend/src/pages/PaymentPage.tsx`
   - `frontend/src/pages/DocumentsPage.tsx`
   - `frontend/src/components/SubscriptionDashboard.tsx`
+  - `frontend/src/components/documents/ServiceSelectionModal.tsx` (document review pricing)
+
+### Document Review Service Selection
+
+**File**: `frontend/src/components/documents/ServiceSelectionModal.tsx`
+
+**CRITICAL SPECIFICATIONS**:
+- **2-step flow ONLY**: Service Selection → Review (NO urgency step)
+- **All prices in KES**: AI Review (500), Certification (2,000), Combo (2,200)
+- **All delivery times**: "Within 2 hours" for ALL services
+- **Payment button**: "Proceed to M-Pesa Payment" (not generic "Proceed to Payment")
+- **Uses unified M-Pesa endpoint**: `/api/payments/mpesa/initiate`
+
+```typescript
+// REQUIRED SERVICE TIERS (KES PRICING)
+const serviceTiers: ServiceTier[] = [
+  {
+    id: 'AI_ONLY',
+    name: 'AI Review Only',
+    price: 500,  // KES, not USD
+    estimatedTime: 'Within 2 hours'
+  },
+  {
+    id: 'CERTIFICATION',
+    name: 'Lawyer Certification',
+    price: 2000,
+    estimatedTime: 'Within 2 hours',
+    recommended: true
+  },
+  {
+    id: 'AI_PLUS_CERTIFICATION',
+    name: 'AI + Certification',
+    price: 2200,
+    estimatedTime: 'Within 2 hours'
+  }
+];
+
+// NO URGENCY LEVELS - Removed completely
+// Always return urgencyLevel: 'STANDARD' in onConfirm callback
+```
+
+**Why Critical**:
+- Urgency multipliers were removed per business requirements
+- All services guaranteed 2-hour delivery
+- Currency must be KES for Kenya market
+- Prevents price confusion with USD conversion
 
 ## Critical UI/UX Features - DO NOT DELETE
 

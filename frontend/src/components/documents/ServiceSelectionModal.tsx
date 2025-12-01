@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle, Clock, Zap, AlertCircle } from 'lucide-react';
+import { X, CheckCircle, Clock } from 'lucide-react';
 
 interface ServiceTier {
   id: 'AI_ONLY' | 'CERTIFICATION' | 'AI_PLUS_CERTIFICATION';
@@ -9,14 +9,6 @@ interface ServiceTier {
   features: string[];
   estimatedTime: string;
   recommended?: boolean;
-}
-
-interface UrgencyLevel {
-  id: 'STANDARD' | 'URGENT' | 'EMERGENCY';
-  name: string;
-  multiplier: number;
-  timeReduction: string;
-  icon: React.ReactNode;
 }
 
 interface ServiceSelectionModalProps {
@@ -40,87 +32,62 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
 }) => {
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<ServiceTier | null>(null);
-  const [selectedUrgency, setSelectedUrgency] = useState<UrgencyLevel | null>(null);
 
   const serviceTiers: ServiceTier[] = [
     {
       id: 'AI_ONLY',
       name: 'AI Review Only',
       description: 'Automated analysis of your document for potential issues',
-      price: 5,
+      price: 500,
       features: [
         'AI-powered document analysis',
         'Issue detection and recommendations',
         'Grammar and formatting check',
-        'Delivered in 2-4 hours'
+        'Delivered within 2 hours'
       ],
-      estimatedTime: '2-4 hours'
+      estimatedTime: 'Within 2 hours'
     },
     {
       id: 'CERTIFICATION',
       name: 'Lawyer Certification',
       description: 'Professional certification with lawyer signature and official stamp',
-      price: 15,
+      price: 2000,
       features: [
         'Licensed lawyer review',
         'Digital signature and stamp',
         'Certificate of Authenticity',
         'QR code verification',
-        'Official letterhead'
+        'Official letterhead',
+        'Delivered within 2 hours'
       ],
-      estimatedTime: '24-48 hours',
+      estimatedTime: 'Within 2 hours',
       recommended: true
     },
     {
       id: 'AI_PLUS_CERTIFICATION',
       name: 'AI + Certification',
       description: 'Complete package: AI analysis followed by lawyer certification',
-      price: 18,
+      price: 2200,
       features: [
         'All AI Review features',
         'All Certification features',
         'Pre-review issue detection',
         'Faster lawyer processing',
-        'Best value package'
+        'Best value package',
+        'Delivered within 2 hours'
       ],
-      estimatedTime: '24-48 hours'
-    }
-  ];
-
-  const urgencyLevels: UrgencyLevel[] = [
-    {
-      id: 'STANDARD',
-      name: 'Standard',
-      multiplier: 1.0,
-      timeReduction: 'Normal processing time',
-      icon: <Clock className="h-5 w-5" />
-    },
-    {
-      id: 'URGENT',
-      name: 'Urgent',
-      multiplier: 1.5,
-      timeReduction: '50% faster',
-      icon: <Zap className="h-5 w-5 text-orange-600" />
-    },
-    {
-      id: 'EMERGENCY',
-      name: 'Emergency',
-      multiplier: 2.0,
-      timeReduction: '2x faster',
-      icon: <AlertCircle className="h-5 w-5 text-red-600" />
+      estimatedTime: 'Within 2 hours'
     }
   ];
 
   const calculateTotal = () => {
-    if (!selectedService || !selectedUrgency) return 0;
-    return selectedService.price * selectedUrgency.multiplier;
+    if (!selectedService) return 0;
+    return selectedService.price;
   };
 
   const handleNext = () => {
     if (step === 1 && selectedService) {
       setStep(2);
-    } else if (step === 2 && selectedUrgency) {
-      setStep(3);
     }
   };
 
@@ -129,10 +96,10 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
   };
 
   const handleConfirm = () => {
-    if (selectedService && selectedUrgency) {
+    if (selectedService) {
       onConfirm({
         serviceType: selectedService.id,
-        urgencyLevel: selectedUrgency.id,
+        urgencyLevel: 'STANDARD',
         totalPrice: calculateTotal()
       });
     }
@@ -160,7 +127,7 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
         {/* Progress Steps */}
         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
           <div className="flex items-center justify-between max-w-md mx-auto">
-            {[1, 2, 3].map((num) => (
+            {[1, 2].map((num) => (
               <React.Fragment key={num}>
                 <div className="flex flex-col items-center">
                   <div
@@ -173,10 +140,10 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
                     {num}
                   </div>
                   <span className="text-xs mt-2 text-slate-600">
-                    {num === 1 ? 'Service' : num === 2 ? 'Urgency' : 'Review'}
+                    {num === 1 ? 'Service' : 'Review'}
                   </span>
                 </div>
-                {num < 3 && (
+                {num < 2 && (
                   <div
                     className={`flex-1 h-1 mx-2 rounded transition-all ${
                       step > num ? 'bg-blue-600' : 'bg-slate-200'
@@ -221,7 +188,7 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
                     </div>
                     <div className="text-right ml-4">
                       <div className="text-3xl font-bold text-blue-600">
-                        ${service.price}
+                        KES {service.price.toLocaleString()}
                       </div>
                       <div className="text-xs text-slate-500 flex items-center gap-1 mt-1">
                         <Clock className="h-3 w-3" />
@@ -243,58 +210,8 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
             </div>
           )}
 
-          {/* Step 2: Select Urgency */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">
-                Select Processing Speed
-              </h3>
-              {urgencyLevels.map((urgency) => (
-                <button
-                  key={urgency.id}
-                  onClick={() => setSelectedUrgency(urgency)}
-                  className={`w-full text-left p-6 rounded-xl border-2 transition-all ${
-                    selectedUrgency?.id === urgency.id
-                      ? 'border-blue-600 bg-blue-50 shadow-lg'
-                      : 'border-slate-200 hover:border-blue-300 hover:shadow-md'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-lg ${
-                        urgency.id === 'STANDARD' ? 'bg-blue-100' :
-                        urgency.id === 'URGENT' ? 'bg-orange-100' :
-                        'bg-red-100'
-                      }`}>
-                        {urgency.icon}
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-bold text-slate-900">
-                          {urgency.name}
-                        </h4>
-                        <p className="text-sm text-slate-600">{urgency.timeReduction}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {urgency.multiplier > 1 && (
-                        <div className="text-2xl font-bold text-orange-600">
-                          +{((urgency.multiplier - 1) * 100).toFixed(0)}%
-                        </div>
-                      )}
-                      {urgency.multiplier === 1 && (
-                        <div className="text-2xl font-bold text-green-600">
-                          Free
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Step 3: Review & Confirm */}
-          {step === 3 && selectedService && selectedUrgency && (
+          {/* Step 2: Review & Confirm */}
+          {step === 2 && selectedService && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">
                 Review Your Selection
@@ -307,26 +224,15 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
                     <div className="font-semibold text-slate-900">{selectedService.name}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-slate-600 mb-1">Base Price</div>
-                    <div className="font-semibold text-slate-900">${selectedService.price.toFixed(2)}</div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-start border-t border-slate-200 pt-4">
-                  <div>
-                    <div className="text-sm text-slate-600 mb-1">Processing Speed</div>
-                    <div className="font-semibold text-slate-900">{selectedUrgency.name}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-slate-600 mb-1">Multiplier</div>
-                    <div className="font-semibold text-slate-900">×{selectedUrgency.multiplier}</div>
+                    <div className="text-sm text-slate-600 mb-1">Price</div>
+                    <div className="font-semibold text-slate-900">KES {selectedService.price.toLocaleString()}</div>
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center border-t-2 border-slate-300 pt-4">
                   <div className="text-lg font-bold text-slate-900">Total Amount</div>
                   <div className="text-3xl font-bold text-blue-600">
-                    ${calculateTotal().toFixed(2)}
+                    KES {calculateTotal().toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -340,7 +246,6 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
                     </div>
                     <div className="text-sm text-blue-700">
                       {selectedService.estimatedTime}
-                      {selectedUrgency.multiplier > 1 && ` (${selectedUrgency.timeReduction})`}
                     </div>
                   </div>
                 </div>
@@ -359,25 +264,22 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
           </button>
 
           <div className="flex items-center gap-3">
-            {step < 3 && (
+            {step < 2 && (
               <button
                 onClick={handleNext}
-                disabled={
-                  (step === 1 && !selectedService) ||
-                  (step === 2 && !selectedUrgency)
-                }
+                disabled={step === 1 && !selectedService}
                 className="px-8 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium shadow-lg"
               >
                 Continue
               </button>
             )}
 
-            {step === 3 && (
+            {step === 2 && (
               <button
                 onClick={handleConfirm}
                 className="px-8 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition font-medium shadow-lg"
               >
-                Proceed to Payment
+                Proceed to M-Pesa Payment
               </button>
             )}
           </div>
