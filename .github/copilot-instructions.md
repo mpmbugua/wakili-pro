@@ -569,6 +569,339 @@ needsCustody: boolean
 - Transparent 20%/10% split model builds trust
 - Remaining 70% balance gives flexibility for milestone-based payments
 
+### Complete Service Delivery Flow - End to End
+
+**CRITICAL**: This is the complete implementation flow from service request to lawyer-client connection.
+
+#### Phase 1: Service Request Submission (Client Side)
+**Page**: `frontend/src/pages/ServiceRequestPage.tsx`
+
+1. **Client submits service request**:
+   - Fills service details (category, title, description, timeline)
+   - Provides context fields (property location, company type, debt type, etc.)
+   - **NO monetary value fields** - lawyers will quote
+   - Provides contact info (phone, email)
+
+2. **Commitment fee payment (KES 500)**:
+   ```typescript
+   // Prompt for M-Pesa phone number
+   const phoneNumber = prompt('Enter M-Pesa phone number (254XXXXXXXXX)');
+   
+   // Step 1: Initiate M-Pesa payment
+   const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+     phoneNumber,
+     amount: 500,
+     paymentType: 'SERVICE_REQUEST_COMMITMENT'
+   });
+   
+   const { paymentId } = paymentResponse.data.data;
+   
+   // Step 2: Create service request with payment ID
+   const requestData = {
+     ...formData,
+     commitmentFeeTxId: paymentId,
+     commitmentFeeAmount: 500
+   };
+   
+   await axiosInstance.post('/service-requests', requestData);
+   ```
+
+3. **Backend processing** (`backend/src/controllers/serviceRequestController.ts`):
+   - Creates service request with status: `PENDING`
+   - Matches ALL verified lawyers (by specialization only, NO tier filtering)
+   - Sends notifications to matched lawyers via email/SMS
+   - Returns success message: "You will receive 3 quotes within 24-48 hours"
+
+#### Phase 2: Lawyer Quote Submission (Lawyer Side)
+**Page**: `frontend/src/pages/LawyerQuoteSubmissionPage.tsx`
+
+1. **Lawyer views service requests**:
+   - Navigate to `/lawyer/service-requests`
+   - See list of service requests matching their specializations
+   - Click to view full request details
+
+2. **Submit quote (FREE - no connection fees)**:
+   ```typescript
+   const quoteData = {
+     proposedFee: Number,        // Lawyer's quoted fee (KES)
+     proposedTimeline: string,   // e.g., "2-3 weeks"
+     approach: string,           // How they'll handle the case
+     offersMilestones: boolean,  // Optional payment stages
+     milestones: [               // If offersMilestones = true
+       {
+         stage: string,          // "Initial Review"
+         percentage: number,     // 25
+         description: string     // "What will be delivered"
+       }
+     ]
+   };
+   
+   await axiosInstance.post(`/service-requests/${id}/quotes`, quoteData);
+   ```
+
+3. **UI features**:
+   - Shows case details (service type, description, context fields)
+   - **Real-time 30% calculator**: "Client pays 30% upfront: KES X (You receive 10% = KES Y to start case)"
+   - Milestone builder with validation (must total 100%)
+   - FREE submission banner: "Submit your best proposal. If selected, client pays 30% upfront"
+
+#### Phase 3: Quote Comparison & Selection (Client Side)
+**Page**: `frontend/src/pages/QuoteComparisonPage.tsx`
+
+1. **Client compares quotes**:
+   - Navigate to `/service-requests/${id}/quotes`
+   - See up to 3 quotes side-by-side
+   - View lawyer profiles (rating, experience, specializations)
+   - Sort by price, rating, or timeline
+
+2. **Select lawyer & pay 30% upfront**:
+   ```typescript
+   const handleSelectLawyer = async (quoteId: string) => {
+     const upfrontAmount = Math.round(selectedQuote.proposedFee * 0.3);
+     
+     // Confirmation dialog shows payment breakdown
+     const confirmMessage = `Pay 30% upfront via M-Pesa?\n\n` +
+       `Total Quote: KES ${selectedQuote.proposedFee.toLocaleString()}\n` +
+       `30% Payment: KES ${upfrontAmount.toLocaleString()}\n\n` +
+       `Split:\n` +
+       `• Platform (20%): KES ${platformCommission.toLocaleString()}\n` +
+       `• Lawyer Escrow (10%): KES ${lawyerEscrow.toLocaleString()}\n\n` +
+       `Remaining 70% paid as case progresses.`;
+     
+     if (!confirm(confirmMessage)) return;
+     
+     // Prompt for M-Pesa phone
+     const phoneNumber = prompt('Enter M-Pesa phone number (254XXXXXXXXX)');
+     
+     // Initiate 30% payment
+     const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+       phoneNumber,
+       amount: upfrontAmount,
+       serviceRequestId: id,
+       quoteId,
+       paymentType: 'SERVICE_REQUEST_PAYMENT'
+     });
+     
+     // Poll for payment status every 3 seconds
+     const pollInterval = setInterval(async () => {
+       const status = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
+       if (status.data.data.status === 'COMPLETED') {
+         clearInterval(pollInterval);
+         // Show success screen
+       }
+     }, 3000);
+   };
+   ```
+
+3. **UI features**:
+   - Blue info box: "30% Upfront Payment: KES X,XXX"
+   - Payment breakdown: "Platform: 20% • Lawyer Escrow: 10% • Balance: 70%"
+   - Button: "Pay 30% & Select Lawyer"
+   - During payment: "Processing M-Pesa Payment..."
+
+#### Phase 4: Payment Processing & Auto-Connection (Backend)
+**File**: `backend/src/controllers/mpesaController.ts` (callback handler)
+
+1. **M-Pesa callback receives payment confirmation**:
+   ```typescript
+   if (metadata?.resourceType === 'SERVICE_REQUEST_PAYMENT') {
+     const paidAmount = payment.amount; // 30% of quoted amount
+     
+     // Calculate splits
+     const platformCommission = Math.round(paidAmount * 0.6667); // 20% of total
+     const lawyerEscrow = Math.round(paidAmount * 0.3333);       // 10% of total
+     
+     // Update service request status
+     await prisma.serviceRequest.update({
+       where: { id: metadata.serviceRequestId },
+       data: { 
+         status: 'IN_PROGRESS',
+         selectedLawyerId: quote.lawyerId
+       }
+     });
+     
+     // Mark quote as selected
+     await prisma.lawyerQuote.update({
+       where: { id: metadata.quoteId },
+       data: { isSelected: true }
+     });
+     
+     // Credit lawyer escrow to wallet
+     await prisma.lawyerWallet.update({
+       where: { id: quote.lawyer.lawyerProfile.wallet.id },
+       data: { 
+         balance: currentBalance + lawyerEscrow,
+         availableBalance: currentBalance + lawyerEscrow
+       }
+     });
+     
+     // 🔥 AUTO-CREATE CONVERSATION THREAD
+     const existingConversation = await prisma.conversation.findFirst({
+       where: {
+         participants: {
+           every: { userId: { in: [serviceRequest.userId, quote.lawyerId] } }
+         }
+       }
+     });
+     
+     if (!existingConversation) {
+       await prisma.conversation.create({
+         data: {
+           participants: {
+             create: [
+               { userId: serviceRequest.userId },
+               { userId: quote.lawyerId }
+             ]
+           },
+           messages: {
+             create: {
+               senderId: quote.lawyerId,
+               content: `Hello! Thank you for selecting my quote. I'm ready to start working on your ${serviceRequest.serviceCategory} case. The estimated timeline is ${quote.proposedTimeline}. Feel free to ask any questions!`,
+               isRead: false
+             }
+           }
+         }
+       });
+     }
+   }
+   ```
+
+2. **What happens automatically**:
+   - Service request status → `IN_PROGRESS`
+   - Quote marked as selected
+   - Platform earns 20% commission (66.67% of 30%)
+   - Lawyer receives 10% escrow (33.33% of 30%) in wallet
+   - **Conversation thread created between client and lawyer**
+   - **Welcome message sent from lawyer to client**
+
+#### Phase 5: Success & Connection (Client Side)
+**Page**: `frontend/src/pages/QuoteComparisonPage.tsx` (success screen)
+
+1. **Success screen displays**:
+   ```typescript
+   if (selectedLawyer) {
+     return (
+       <div className="success-screen">
+         <CheckCircle />
+         <h1>Lawyer Selected!</h1>
+         
+         {/* Lawyer contact info */}
+         <div className="lawyer-contact">
+           <p>Name: {selectedLawyer.name}</p>
+           <p>Phone: {selectedLawyer.phone}</p>
+           <p>Email: {selectedLawyer.email}</p>
+         </div>
+         
+         {/* Next steps */}
+         <div className="next-steps">
+           <ol>
+             <li>Check your Messages inbox - the lawyer has sent you a message</li>
+             <li>Discuss case details and timeline</li>
+             <li>Lawyer proceeds with your case</li>
+             <li>Pay remaining 70% balance as case progresses</li>
+           </ol>
+         </div>
+         
+         {/* Action buttons */}
+         <button onClick={() => navigate('/messages')}>
+           Open Messages
+         </button>
+         <button onClick={() => navigate('/dashboard')}>
+           Back to Dashboard
+         </button>
+       </div>
+     );
+   }
+   ```
+
+2. **User can now**:
+   - Click "Open Messages" to chat with lawyer
+   - View conversation thread in Messages inbox
+   - See lawyer's welcome message
+   - Communicate directly about case details
+
+#### Phase 6: Ongoing Communication (Both Sides)
+**Page**: `frontend/src/pages/MessagesPage.tsx`
+
+1. **Client view**:
+   - Navigate to `/messages`
+   - See conversation with selected lawyer
+   - Read lawyer's welcome message
+   - Send/receive messages in real-time
+
+2. **Lawyer view**:
+   - Navigate to `/messages`
+   - See conversation with client
+   - Discuss case details, timelines, deliverables
+   - Update client on progress
+
+3. **Messages are linked to**:
+   - Service request ID (for context)
+   - Quote ID (for fee reference)
+   - Payment records (for tracking)
+
+#### Navigation Routes Summary
+
+**Client Routes**:
+- `/service-request` - Submit new service request
+- `/service-requests/${id}/quotes` - Compare lawyer quotes
+- `/messages` - Chat with selected lawyer
+- `/dashboard` - View active cases
+
+**Lawyer Routes**:
+- `/lawyer/service-requests` - View available service requests
+- `/service-requests/${id}/quote` - Submit quote for request
+- `/document-reviews` - Document certification dashboard
+- `/lawyer/consultations` - Consultation bookings
+- `/messages` - Chat with clients
+- `/lawyer/wallet` - View escrow balance & withdraw funds
+- `/lawyer/dashboard` - Overview of active cases
+
+**Critical Navigation Links** (Lawyer Dashboard):
+- **Consultations Card** → `/lawyer/consultations`
+- **Documents Card** → `/document-reviews` 
+- **Services Card** → `/lawyer/service-requests`
+- **Wallet Card** → `/lawyer/wallet`
+
+#### Payment Flow Checklist
+
+When implementing service request payments:
+
+1. ✅ Create service request FIRST (returns `serviceRequestId`)
+2. ✅ Pay KES 500 commitment fee via M-Pesa
+3. ✅ Lawyers submit quotes (FREE, no connection fees)
+4. ✅ Client selects quote (returns `quoteId`)
+5. ✅ Calculate 30% of quoted amount
+6. ✅ Pay 30% via M-Pesa with `serviceRequestId` + `quoteId`
+7. ✅ M-Pesa callback automatically:
+   - Updates service request status to `IN_PROGRESS`
+   - Marks quote as selected
+   - Credits 10% escrow to lawyer wallet
+   - **Creates conversation thread**
+   - **Sends welcome message**
+8. ✅ Direct user to Messages inbox
+9. ✅ Lawyer and client communicate via messaging system
+
+#### Files Reference Map
+
+**Service Request Flow**:
+- `frontend/src/pages/ServiceRequestPage.tsx` - Client submission
+- `backend/src/controllers/serviceRequestController.ts` - Create request, match lawyers
+- `frontend/src/pages/LawyerQuoteSubmissionPage.tsx` - Lawyer quote submission
+- `backend/src/controllers/serviceRequestController.ts` - Handle quote submission
+- `frontend/src/pages/QuoteComparisonPage.tsx` - Client quote comparison & payment
+- `backend/src/controllers/mpesaController.ts` - Payment processing & conversation creation
+- `frontend/src/pages/MessagesPage.tsx` - Client-lawyer communication
+- `backend/src/controllers/chatController.ts` - Message handling
+
+**Key Backend Models** (Prisma):
+- `ServiceRequest` - Service request details
+- `LawyerQuote` - Lawyer proposals
+- `Payment` - M-Pesa payment records
+- `LawyerWallet` - Lawyer escrow balances
+- `Conversation` - Message threads
+- `Message` - Individual messages
+
 ## Critical UI/UX Features - DO NOT DELETE
 
 ### Landing Page Features
