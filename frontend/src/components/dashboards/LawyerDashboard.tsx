@@ -50,6 +50,7 @@ interface Client {
 export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const navigate = useNavigate();
   const [isVerified, setIsVerified] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
 
@@ -105,9 +106,14 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
       console.log('[LawyerDashboard] isVerified:', lawyerProfile?.isVerified);
       console.log('[LawyerDashboard] User verificationStatus:', profileData?.verificationStatus);
       
+      // Check if lawyer profile exists
+      const profileExists = !!lawyerProfile;
+      setHasProfile(profileExists);
+      
       // Check both lawyerProfile.isVerified and user.verificationStatus
       const verified = lawyerProfile?.isVerified === true || profileData?.verificationStatus === 'VERIFIED';
       
+      console.log('[LawyerDashboard] Profile exists:', profileExists);
       console.log('[LawyerDashboard] Final verified status:', verified);
       setIsVerified(verified);
     } catch (error) {
@@ -225,47 +231,87 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
 
   // Show pending verification message for unverified lawyers
   if (!isVerified) {
+    // No profile exists - show complete profile setup
+    if (!hasProfile) {
+      return (
+        <div className="max-w-4xl mx-auto px-4 py-16">
+          <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-8 text-center">
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Clock className="h-8 w-8 text-amber-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Profile Setup Required</h2>
+            <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
+              To access your lawyer dashboard, please complete your professional profile setup. 
+              Once submitted, our admin team will review and verify your credentials within 24-48 hours.
+            </p>
+            <div className="bg-white rounded-lg p-6 mb-6 text-left max-w-md mx-auto">
+              <h3 className="font-semibold text-gray-900 mb-3">Next Steps:</h3>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Complete your professional profile with license details</span>
+                </li>
+                <li className="flex items-start">
+                  <Clock className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Admin reviews your credentials (24-48 hours)</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Email notification when approved</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Start accepting clients and earning</span>
+                </li>
+              </ul>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => navigate('/lawyer/onboarding')}
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 inline-flex items-center gap-3 font-semibold text-lg"
+              >
+                <User className="h-6 w-6" />
+                Complete Profile Setup
+                <ArrowRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Profile exists but not verified - show pending verification
     return (
       <div className="max-w-4xl mx-auto px-4 py-16">
-        <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-8 text-center">
-          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Clock className="h-8 w-8 text-amber-600" />
+        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-8 text-center">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Clock className="h-8 w-8 text-blue-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Profile Setup Required</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Verification Pending</h2>
           <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-            To access your lawyer dashboard, please complete your professional profile setup. 
-            Once submitted, our admin team will review and verify your credentials within 24-48 hours.
+            Thank you for completing your profile! Our admin team is currently reviewing your credentials. 
+            You'll receive an email notification once your profile is verified (typically within 24-48 hours).
           </p>
           <div className="bg-white rounded-lg p-6 mb-6 text-left max-w-md mx-auto">
-            <h3 className="font-semibold text-gray-900 mb-3">Next Steps:</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">What's Next:</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start">
-                <CheckCircle className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span>Complete your professional profile with license details</span>
+                <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                <span>Profile submitted successfully</span>
               </li>
               <li className="flex items-start">
                 <Clock className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span>Admin reviews your credentials (24-48 hours)</span>
+                <span>Admin review in progress (24-48 hours)</span>
+              </li>
+              <li className="flex items-start">
+                <AlertCircle className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
+                <span>Email notification upon approval</span>
               </li>
               <li className="flex items-start">
                 <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span>Email notification when approved</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span>Start accepting clients and earning</span>
+                <span>Access to full dashboard features</span>
               </li>
             </ul>
-          </div>
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => navigate('/lawyer/onboarding')}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 inline-flex items-center gap-3 font-semibold text-lg"
-            >
-              <User className="h-6 w-6" />
-              Complete Profile Setup
-              <ArrowRight className="h-5 w-5" />
-            </button>
           </div>
           <div className="mt-4">
             <button
