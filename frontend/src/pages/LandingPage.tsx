@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 import { WakiliLogo } from '../components/ui/WakiliLogo';
 import { 
   MessageSquare,
@@ -25,6 +26,18 @@ import {
 import { getFeaturedExamples } from '../data/servicePackageExamples';
 
 export const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+
+  const handleDocumentReviewClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isAuthenticated) {
+      navigate('/documents');
+    } else {
+      navigate('/login', { state: { from: '/documents' } });
+    }
+  };
+
   return (
     <>
           {/* Hero Section with Services */}
@@ -89,21 +102,25 @@ export const LandingPage: React.FC = () => {
                   </span>
                 </Link>
 
-                {/* Document Review */}
-                <Link to="/document-services" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
+                {/* Document Review - Case Analysis */}
+                <a 
+                  href="/documents" 
+                  onClick={handleDocumentReviewClick}
+                  className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block"
+                >
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
                       <FileText className="h-5 w-5 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900">Document Review</h3>
+                    <h3 className="text-base font-semibold text-slate-900">Case Analysis & Review</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
-                    AI review (KES 500) or lawyer certification (from KES 3,000). 24-hour turnaround.
+                    Upload documents for AI analysis (KES 500) or lawyer certification (from KES 2,000). 24-hour turnaround.
                   </p>
                   <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
-                    Get started <ArrowRight className="ml-1 h-3 w-3" />
+                    {isAuthenticated ? 'Upload document' : 'Get started'} <ArrowRight className="ml-1 h-3 w-3" />
                   </span>
-                </Link>
+                </a>
 
                 {/* Legal Service Packages */}
                 <Link to="/services" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
