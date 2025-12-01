@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { User, Bell, Lock, Globe, CreditCard, Shield, Camera, Loader } from 'lucide-react';
 import axiosInstance from '../lib/axios';
@@ -15,6 +15,38 @@ export const SettingsPage: React.FC = () => {
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phoneNumber || '');
+
+  // Notification preferences state
+  const [notifications, setNotifications] = useState({
+    email: true,
+    sms: true,
+    push: true,
+    consultationReminders: true,
+  });
+  const [savingNotifications, setSavingNotifications] = useState(false);
+
+  // Load notification preferences from user profile
+  useEffect(() => {
+    const loadNotificationPreferences = async () => {
+      try {
+        const response = await axiosInstance.get('/users/profile');
+        const profile = response.data?.data?.profile;
+        
+        if (profile) {
+          setNotifications({
+            email: profile.emailNotifications ?? true,
+            sms: profile.smsNotifications ?? true,
+            push: profile.pushNotifications ?? true,
+            consultationReminders: profile.consultationReminders ?? true,
+          });
+        }
+      } catch (error) {
+        console.error('Error loading notification preferences:', error);
+      }
+    };
+
+    loadNotificationPreferences();
+  }, []);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -58,6 +90,34 @@ export const SettingsPage: React.FC = () => {
       alert('Failed to upload profile photo');
     } finally {
       setUploadingPhoto(false);
+    }
+  };
+
+  const handleNotificationToggle = async (key: keyof typeof notifications) => {
+    try {
+      const newValue = !notifications[key];
+      
+      // Optimistically update UI
+      setNotifications(prev => ({ ...prev, [key]: newValue }));
+      setSavingNotifications(true);
+
+      // Save to backend
+      const response = await axiosInstance.put('/users/notification-preferences', {
+        [key]: newValue,
+      });
+
+      if (!response.data.success) {
+        // Revert on failure
+        setNotifications(prev => ({ ...prev, [key]: !newValue }));
+        alert('Failed to update notification preference');
+      }
+    } catch (error: any) {
+      console.error('Error updating notification:', error);
+      // Revert on error
+      setNotifications(prev => ({ ...prev, [key]: !notifications[key] }));
+      alert(error.response?.data?.message || 'Failed to update notification preference');
+    } finally {
+      setSavingNotifications(false);
     }
   };
 
@@ -235,23 +295,37 @@ export const SettingsPage: React.FC = () => {
                   <h2 className="text-xl font-semibold text-slate-900 mb-6">Notification Preferences</h2>
                   <div className="space-y-4">
                     {[
-                      { label: 'Email notifications', description: 'Receive email updates about your account' },
-                      { label: 'SMS notifications', description: 'Get SMS alerts for important updates' },
-                      { label: 'Push notifications', description: 'Receive push notifications on your device' },
-                      { label: 'Consultation reminders', description: 'Get reminders before scheduled consultations' },
+                      { key: 'email' as const, label: 'Email notifications', description: 'Receive email updates about your account' },
+                      { key: 'sms' as const, label: 'SMS notifications', description: 'Get SMS alerts for important updates' },
+                      { key: 'push' as const, label: 'Push notifications', description: 'Receive push notifications on your device' },
+                      { key: 'consultationReminders' as const, label: 'Consultation reminders', description: 'Get reminders before scheduled consultations' },
                     ].map((item) => (
-                      <div key={item.label} className="flex items-center justify-between py-3 border-b border-slate-200">
+                      <div key={item.key} className="flex items-center justify-between py-3 border-b border-slate-200">
                         <div>
                           <p className="font-medium text-slate-900">{item.label}</p>
                           <p className="text-sm text-slate-600">{item.description}</p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" className="sr-only peer" defaultChecked />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={notifications[item.key]}
+                            onChange={() => handleNotificationToggle(item.key)}
+                            disabled={savingNotifications}
+                          />
+                          <div className={`w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 ${
+                            savingNotifications ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}></div>
                         </label>
                       </div>
                     ))}
                   </div>
+                  {savingNotifications && (
+                    <p className="text-sm text-slate-500 mt-2 flex items-center gap-2">
+                      <Loader className="w-4 h-4 animate-spin" />
+                      Saving preferences...
+                    </p>
+                  )}
                 </div>
               )}
 

@@ -32,6 +32,14 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
         verificationStatus: true,
         createdAt: true,
         updatedAt: true,
+        profile: {
+          select: {
+            emailNotifications: true,
+            smsNotifications: true,
+            pushNotifications: true,
+            consultationReminders: true,
+          }
+        },
         lawyerProfile: {
           select: {
             id: true,
@@ -340,6 +348,62 @@ export const deleteAccount = async (req: AuthenticatedRequest, res: Response): P
     res.status(500).json({
       success: false,
       message: 'Internal server error during account deletion'
+    });
+  }
+};
+
+export const updateNotificationPreferences = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+      return;
+    }
+
+    const { email, sms, push, consultationReminders } = req.body;
+
+    // Map frontend keys to database field names
+    const updateData: any = {};
+    if (email !== undefined) updateData.emailNotifications = email;
+    if (sms !== undefined) updateData.smsNotifications = sms;
+    if (push !== undefined) updateData.pushNotifications = push;
+    if (consultationReminders !== undefined) updateData.consultationReminders = consultationReminders;
+
+    // Update or create user profile with notification preferences
+    const profile = await prisma.userProfile.upsert({
+      where: { userId },
+      update: updateData,
+      create: {
+        userId,
+        ...updateData,
+      },
+      select: {
+        emailNotifications: true,
+        smsNotifications: true,
+        pushNotifications: true,
+        consultationReminders: true,
+      }
+    });
+
+    const response: ApiResponse<typeof profile> = {
+      success: true,
+      message: 'Notification preferences updated successfully',
+      data: profile
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Update notification preferences error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while updating notification preferences'
     });
   }
 };

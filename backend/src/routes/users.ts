@@ -4,7 +4,8 @@ import {
   getProfile, 
   updateProfile, 
   lawyerOnboarding, 
-  deleteAccount
+  deleteAccount,
+  updateNotificationPreferences
 } from '../controllers/userController';
 import { uploadPhoto } from '../controllers/photoUploadController';
 import { authenticateToken, authorizeRoles } from '../middleware/auth';
@@ -39,6 +40,14 @@ router.get('/profile', authenticateToken, getProfile);
  * @body    { firstName?, lastName?, phoneNumber?, dateOfBirth?, profilePicture? }
  */
 router.put('/profile', authenticateToken, updateProfile);
+
+/**
+ * @route   PUT /api/users/notification-preferences
+ * @desc    Update notification preferences
+ * @access  Private
+ * @body    { email?, sms?, push?, consultationReminders? }
+ */
+router.put('/notification-preferences', authenticateToken, updateNotificationPreferences);
 
 /**
  * @route   POST /api/users/upload-photo
