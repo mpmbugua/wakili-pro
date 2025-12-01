@@ -259,7 +259,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
           </div>
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => navigate('/lawyer-onboarding')}
+              onClick={() => navigate('/lawyer/onboarding')}
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 inline-flex items-center gap-3 font-semibold text-lg"
             >
               <User className="h-6 w-6" />
