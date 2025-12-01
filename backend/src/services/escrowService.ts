@@ -359,17 +359,17 @@ export class EscrowService {
 
     if (!wallet) {
       return {
-        pendingBalance: '0.00',
-        availableBalance: '0.00',
-        totalBalance: '0.00',
+        balance: 0,
+        pendingBalance: 0,
+        availableBalance: 0,
         pendingTransactions: [],
       };
     }
 
     return {
-      pendingBalance: wallet.pendingBalance.toString(),
-      availableBalance: wallet.availableBalance.toString(),
-      totalBalance: wallet.balance.toString(),
+      balance: parseFloat(wallet.balance.toString()),
+      pendingBalance: parseFloat(wallet.pendingBalance.toString()),
+      availableBalance: parseFloat(wallet.availableBalance.toString()),
       pendingTransactions: wallet.transactions,
     };
   }
