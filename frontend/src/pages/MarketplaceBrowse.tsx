@@ -158,6 +158,21 @@ const sampleDocuments: Document[] = [
     previewAvailable: true
   },
   {
+    id: '9a',
+    title: 'Car Hire Agreement',
+    category: 'Transport',
+    description: 'Vehicle rental agreement for car hire businesses. Covers daily/weekly/monthly rentals, insurance, damage liability, and deposit terms.',
+    price: 750,
+    downloads: 856,
+    rating: 4.7,
+    reviewCount: 189,
+    pages: 6,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-11',
+    features: ['Insurance clauses', 'Damage assessment', 'Fuel policy', 'Mileage limits', 'Late return fees', 'Security deposit'],
+    previewAvailable: true
+  },
+  {
     id: '10',
     title: 'Power of Attorney',
     category: 'Legal',
@@ -998,6 +1013,67 @@ export const MarketplaceBrowse: React.FC = () => {
                       </>
                     )}
                     
+                    {/* Transport - Car Hire Agreement */}
+                    {previewDocument.title.includes('Car Hire') && (
+                      <>
+                        <p><strong>CAR HIRE AGREEMENT</strong></p>
+                        <p>This Agreement is made on _____ day of _________, 20___</p>
+                        <p><strong>BETWEEN:</strong></p>
+                        <p className="pl-4">Car Hire Company: _________________________ ("Owner")</p>
+                        <p className="pl-4">Address: _________________________</p>
+                        <p className="pl-4">Hirer: _________________________ ("Hirer")</p>
+                        <p className="pl-4">ID/Passport No: _________________________</p>
+                        <p className="pl-4">Driving License No: _________________________</p>
+                        <p className="mt-4"><strong>1. VEHICLE DETAILS</strong></p>
+                        <p className="pl-4">Make/Model: _________________________</p>
+                        <p className="pl-4">Registration Number: _________________________</p>
+                        <p className="pl-4">Year of Manufacture: _________________________</p>
+                        <p className="pl-4">Color: _________________________</p>
+                        <p className="pl-4">Condition at handover: ☐ Excellent ☐ Good ☐ Fair</p>
+                        <p className="mt-4"><strong>2. RENTAL PERIOD AND CHARGES</strong></p>
+                        <p className="pl-4">Pick-up Date/Time: _________________________</p>
+                        <p className="pl-4">Return Date/Time: _________________________</p>
+                        <p className="pl-4">Daily Rate: KES _________</p>
+                        <p className="pl-4">Weekly Rate: KES _________</p>
+                        <p className="pl-4">Monthly Rate: KES _________</p>
+                        <p className="pl-4">Total Rental: KES _________________________</p>
+                        <p className="mt-4"><strong>3. SECURITY DEPOSIT</strong></p>
+                        <p className="pl-4">Security Deposit: KES _________________________</p>
+                        <p className="pl-4">Refundable upon satisfactory return of vehicle</p>
+                        <p className="mt-4"><strong>4. INSURANCE COVERAGE</strong></p>
+                        <p className="pl-4">☐ Comprehensive Insurance Included</p>
+                        <p className="pl-4">☐ Third Party Only</p>
+                        <p className="pl-4">Excess Amount: KES _________________________</p>
+                        <p className="pl-4">Insurance Certificate No: _________________________</p>
+                        <p className="mt-4"><strong>5. MILEAGE AND FUEL</strong></p>
+                        <p className="pl-4">Mileage Limit: _________ km per day</p>
+                        <p className="pl-4">Excess Mileage Charge: KES _____ per km</p>
+                        <p className="pl-4">Fuel Policy: ☐ Full-to-Full ☐ Pre-paid ☐ Pay as you use</p>
+                        <p className="pl-4">Current Fuel Level: _________________________</p>
+                        <p className="mt-4"><strong>6. PERMITTED USE</strong></p>
+                        <p className="pl-4">6.1 Vehicle to be used within Kenya only</p>
+                        <p className="pl-4">6.2 Only licensed drivers permitted</p>
+                        <p className="pl-4">6.3 No off-road driving or racing</p>
+                        <p className="pl-4">6.4 No subletting or unauthorized use</p>
+                        <p className="mt-4"><strong>7. HIRER'S RESPONSIBILITIES</strong></p>
+                        <p className="pl-4">7.1 Maintain vehicle in good condition</p>
+                        <p className="pl-4">7.2 Report accidents/damage immediately</p>
+                        <p className="pl-4">7.3 Pay all traffic fines incurred</p>
+                        <p className="pl-4">7.4 Lock vehicle when unattended</p>
+                        <p className="mt-4"><strong>8. DAMAGE AND LIABILITY</strong></p>
+                        <p className="pl-4">Hirer liable for: Accidents, theft, damage beyond normal wear</p>
+                        <p className="pl-4">Repair costs deductible from security deposit</p>
+                        <p className="mt-4"><strong>9. LATE RETURN CHARGES</strong></p>
+                        <p className="pl-4">Late fee: KES _____ per hour after grace period</p>
+                        <p className="pl-4">Grace period: _____ minutes</p>
+                        <p className="mt-4"><strong>10. TERMINATION</strong></p>
+                        <p className="pl-4">Owner may repossess if: Payment default, misuse, damage</p>
+                        <p className="mt-4 text-slate-500 italic text-xs">
+                          [Includes: Pre-inspection checklist, Damage assessment form, Police report procedures, NTSA compliance, Road-worthy certificate]
+                        </p>
+                      </>
+                    )}
+                    
                     {/* Generic fallback - only if no other match */}
                     {!previewDocument.title.includes('Employment') && 
                      !previewDocument.title.includes('Freelance') &&
@@ -1011,7 +1087,8 @@ export const MarketplaceBrowse: React.FC = () => {
                      !previewDocument.title.includes('Custody') &&
                      !previewDocument.title.includes('Partnership') &&
                      !previewDocument.title.includes('NDA') &&
-                     !previewDocument.title.includes('Non-Disclosure') && (
+                     !previewDocument.title.includes('Non-Disclosure') &&
+                     !previewDocument.title.includes('Car Hire') && (
                       <>
                         <p><strong>THIS AGREEMENT</strong> is made on the _____ day of _________, 20___</p>
                         <p><strong>BETWEEN:</strong></p>
