@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
 import { WakiliLogo } from '../components/ui/WakiliLogo';
 import { 
   MessageSquare,
@@ -27,7 +26,7 @@ import { getFeaturedExamples } from '../data/servicePackageExamples';
 
 export const LandingPage: React.FC = () => {
   return (
-    <GlobalLayout>
+    <>
           {/* Hero Section with Services */}
           <section id="services" className="py-8 bg-white border-b border-slate-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -541,6 +540,6 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
-    </GlobalLayout>
+    </>
   );
 };

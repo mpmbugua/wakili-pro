@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
 import axiosInstance from '../lib/axios';
 
@@ -721,7 +720,7 @@ export const MarketplaceBrowse: React.FC = () => {
   };
 
   return (
-    <GlobalLayout>
+    <>
       {/* Search and Filters */}
       <div className="bg-white border-b border-blue-200 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1439,6 +1438,6 @@ export const MarketplaceBrowse: React.FC = () => {
           </div>
         </div>
       )}
-    </GlobalLayout>
+    </>
   );
 };

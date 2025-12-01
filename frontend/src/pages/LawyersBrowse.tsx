@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
 import { useAuthStore } from '../store/authStore';
 import axiosInstance from '../lib/axios';
 
@@ -342,7 +341,7 @@ export const LawyersBrowse: React.FC = () => {
   };
 
   return (
-    <GlobalLayout>
+    <>
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -546,6 +545,6 @@ export const LawyersBrowse: React.FC = () => {
           </div>
         </div>
       )}
-    </GlobalLayout>
+    </>
   );
 };

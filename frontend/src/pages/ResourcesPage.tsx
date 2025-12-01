@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
 import { Book, FileText, Video, HelpCircle, ArrowRight } from 'lucide-react';
 import axiosInstance from '../lib/axios';
 
@@ -76,7 +75,7 @@ export const ResourcesPage: React.FC = () => {
   ];
 
   return (
-    <GlobalLayout>
+    <>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
         <div className="max-w-6xl mx-auto text-center px-4 sm:px-6">
@@ -190,6 +189,6 @@ export const ResourcesPage: React.FC = () => {
           </div>
         </div>
       </section>
-    </GlobalLayout>
+    </>
   );
 };

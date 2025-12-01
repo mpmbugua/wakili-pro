@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
 import { 
   Clock, DollarSign, ChevronDown, CheckCircle,
   Home, Briefcase, Heart, Users, Copyright, Gavel, FileText, TrendingUp
@@ -44,7 +43,7 @@ export const LegalServicesPage: React.FC = () => {
   });
 
   return (
-    <GlobalLayout>
+    <>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -260,7 +259,7 @@ export const LegalServicesPage: React.FC = () => {
           </div>
         </div>
       </section>
-    </GlobalLayout>
+    </>
   );
 };
 
