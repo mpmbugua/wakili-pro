@@ -109,29 +109,6 @@ export const MessagesPage: React.FC = () => {
       }
       
       setConversations(mockConversations);
-            },
-          ],
-        },
-        {
-          id: '2',
-          lawyerId: 'lawyer2',
-          lawyerName: 'John Kamau',
-          specialty: 'Family Law',
-          lastMessage: 'The documents are ready for your review.',
-          lastMessageTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          unreadCount: 0,
-          messages: [
-            {
-              id: 'm5',
-              senderId: 'lawyer2',
-              content: 'The documents are ready for your review.',
-              timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-              read: true,
-            },
-          ],
-        },
-      ];
-      setConversations(mockConversations);
       if (mockConversations.length > 0) {
         setSelectedConversation(mockConversations[0]);
       }
