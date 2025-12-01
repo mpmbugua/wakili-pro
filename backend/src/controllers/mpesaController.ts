@@ -17,7 +17,7 @@ interface AuthRequest extends Request {
  */
 export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
   try {
-    const { phoneNumber, amount, bookingId, reviewId, purchaseId, subscriptionId, paymentType } = req.body;
+    const { phoneNumber, amount, bookingId, reviewId, purchaseId, subscriptionId, serviceRequestId, quoteId, paymentType } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -53,12 +53,12 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Validate booking, review, purchase, or subscription exists
+    // Validate booking, review, purchase, subscription, or service request exists
     let targetId: string;
     let accountReference: string;
     let transactionDesc: string;
     let actualBookingId: string | undefined;
-    let resourceType: 'BOOKING' | 'REVIEW' | 'PURCHASE' | 'SUBSCRIPTION';
+    let resourceType: 'BOOKING' | 'REVIEW' | 'PURCHASE' | 'SUBSCRIPTION' | 'SERVICE_REQUEST_COMMITMENT' | 'SERVICE_REQUEST_PAYMENT';
 
     if (bookingId) {
       // Consultation or service booking payment
@@ -160,10 +160,43 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
       resourceType = 'SUBSCRIPTION';
       accountReference = `SUB-${subscriptionId.substring(0, 8)}`;
       transactionDesc = `Wakili Pro ${subscription.tier} Subscription`;
+    } else if (serviceRequestId) {
+      // Service request payment (commitment fee or agreed fee)
+      const serviceRequest = await prisma.serviceRequest.findUnique({
+        where: { id: serviceRequestId },
+      });
+
+      if (!serviceRequest) {
+        return res.status(404).json({
+          success: false,
+          message: 'Service request not found',
+        });
+      }
+
+      if (serviceRequest.userId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to pay for this service request',
+        });
+      }
+
+      targetId = serviceRequestId;
+      actualBookingId = null;
+      
+      // Determine if this is commitment fee or agreed fee payment
+      if (amount === 500 || paymentType === 'SERVICE_REQUEST_COMMITMENT') {
+        resourceType = 'SERVICE_REQUEST_COMMITMENT';
+        accountReference = `SRCOM-${serviceRequestId.substring(0, 8)}`;
+        transactionDesc = 'Service Request Commitment Fee';
+      } else {
+        resourceType = 'SERVICE_REQUEST_PAYMENT';
+        accountReference = `SRPAY-${serviceRequestId.substring(0, 8)}`;
+        transactionDesc = 'Service Request Payment';
+      }
     } else {
       return res.status(400).json({
         success: false,
-        message: 'Either bookingId, purchaseId, reviewId, or subscriptionId is required',
+        message: 'Either bookingId, purchaseId, reviewId, subscriptionId, or serviceRequestId is required',
       });
     }
 
@@ -181,11 +214,13 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
         metadata: {
           phoneNumber,
           accountReference,
-          resourceType, // 'BOOKING', 'PURCHASE', 'REVIEW', or 'SUBSCRIPTION'
+          resourceType, // 'BOOKING', 'PURCHASE', 'REVIEW', 'SUBSCRIPTION', 'SERVICE_REQUEST_COMMITMENT', or 'SERVICE_REQUEST_PAYMENT'
           paymentType, // Optional: for additional categorization
           purchaseId: purchaseId || null,
           reviewId: reviewId || null,
           subscriptionId: subscriptionId || null,
+          serviceRequestId: serviceRequestId || null,
+          quoteId: quoteId || null,
         },
       },
     });
@@ -340,6 +375,93 @@ export const mpesaCallback = async (req: Request, res: Response) => {
             subscriptionId: metadata.subscriptionId,
             tier: subscription.tier,
             lawyerId: subscription.lawyerId 
+          });
+        }
+      } else if (metadata?.resourceType === 'SERVICE_REQUEST_COMMITMENT' && metadata?.serviceRequestId) {
+        // Update service request commitment fee status
+        await prisma.serviceRequest.update({
+          where: { id: metadata.serviceRequestId },
+          data: { 
+            commitmentFeePaid: true,
+            status: 'PENDING', // Waiting for lawyer quotes
+          },
+        });
+        logger.info('Service request commitment fee paid:', { serviceRequestId: metadata.serviceRequestId });
+      } else if (metadata?.resourceType === 'SERVICE_REQUEST_PAYMENT' && metadata?.serviceRequestId && metadata?.quoteId) {
+        // Handle 30% upfront payment with 20% platform commission and 10% lawyer escrow
+        const serviceRequest = await prisma.serviceRequest.findUnique({
+          where: { id: metadata.serviceRequestId },
+        });
+
+        const quote = await prisma.lawyerQuote.findUnique({
+          where: { id: metadata.quoteId },
+          include: { 
+            lawyer: { 
+              include: { 
+                lawyerProfile: {
+                  include: {
+                    wallet: true
+                  }
+                } 
+              } 
+            } 
+          },
+        });
+
+        if (serviceRequest && quote) {
+          const paidAmount = payment.amount; // This should be 30% of quoted amount
+          const quotedAmount = quote.proposedFee;
+          
+          // Calculate splits from the 30% payment
+          const platformCommission = Math.round(paidAmount * 0.6667); // 20% of total quote (66.67% of 30%)
+          const lawyerEscrow = Math.round(paidAmount * 0.3333); // 10% of total quote (33.33% of 30%)
+          
+          // Update service request status
+          await prisma.serviceRequest.update({
+            where: { id: metadata.serviceRequestId },
+            data: { 
+              status: 'IN_PROGRESS',
+              selectedLawyerId: quote.lawyerId,
+            },
+          });
+
+          // Update quote status
+          await prisma.lawyerQuote.update({
+            where: { id: metadata.quoteId },
+            data: { isSelected: true },
+          });
+
+          // Credit lawyer escrow (10% to start case) to their wallet
+          if (quote.lawyer.lawyerProfile?.wallet) {
+            const currentBalance = quote.lawyer.lawyerProfile.wallet.balance;
+            const newBalance = Number(currentBalance) + lawyerEscrow;
+            
+            await prisma.lawyerWallet.update({
+              where: { id: quote.lawyer.lawyerProfile.wallet.id },
+              data: { 
+                balance: newBalance,
+                availableBalance: newBalance,
+              },
+            });
+          } else if (quote.lawyer.lawyerProfile) {
+            // Create wallet if it doesn't exist
+            await prisma.lawyerWallet.create({
+              data: {
+                lawyerId: quote.lawyer.lawyerProfile.id,
+                balance: lawyerEscrow,
+                availableBalance: lawyerEscrow,
+                currency: 'KES',
+              },
+            });
+          }
+
+          logger.info('Service request payment processed:', { 
+            serviceRequestId: metadata.serviceRequestId,
+            quoteId: metadata.quoteId,
+            quotedAmount,
+            paidAmount,
+            platformCommission,
+            lawyerEscrow,
           });
         }
       }

@@ -202,7 +202,7 @@ import { UserSchema } from '@shared/schemas';
 // Service: backend/src/services/mpesaDarajaService.ts
 ```
 
-#### Supported Payment Types (8 Services)
+#### Supported Payment Types (9 Services)
 All payments use the **SAME endpoint** with different parameters:
 
 1. **Legal Consultations** → `bookingId`
@@ -210,9 +210,10 @@ All payments use the **SAME endpoint** with different parameters:
 3. **AI Document Review** → `reviewId` + reviewType='AI_ONLY' (KES 500)
 4. **Lawyer Certification** → `reviewId` + reviewType='CERTIFICATION' (KES 2,000)
 5. **AI + Certification** → `reviewId` + reviewType='AI_PLUS_CERTIFICATION' (KES 2,200)
-6. **Service Request Fee** → `reviewId` (commitment fee)
-7. **Lawyer Subscription LITE** → `subscriptionId` (KES 2,999)
-8. **Lawyer Subscription PRO** → `subscriptionId` (KES 4,999)
+6. **Service Request Commitment** → `serviceRequestId` (KES 500 - get 3 lawyer quotes)
+7. **Service Request Payment** → `serviceRequestId` (agreed fee after selecting lawyer - 15% platform commission)
+8. **Lawyer Subscription LITE** → `subscriptionId` (KES 2,999)
+9. **Lawyer Subscription PRO** → `subscriptionId` (KES 4,999)
 
 **CRITICAL PRICING & DELIVERY**:
 - **ALL prices in Kenyan Shillings (KES)** - NEVER use USD ($)
@@ -231,6 +232,7 @@ All payments use the **SAME endpoint** with different parameters:
   bookingId?: string,        // For consultations
   purchaseId?: string,       // For marketplace documents
   reviewId?: string,         // For document reviews/certifications
+  serviceRequestId?: string, // For service request commitment/payment
   subscriptionId?: string    // For lawyer subscriptions
 }
 ```
@@ -428,6 +430,139 @@ const serviceTiers: ServiceTier[] = [
 - All services guaranteed 2-hour delivery
 - Currency must be KES for Kenya market
 - Prevents price confusion with USD conversion
+
+### Service Request Commission Model
+
+**File**: `frontend/src/pages/ServiceRequestPage.tsx`
+
+**CRITICAL BUSINESS MODEL**:
+- **NO fee estimation** - Platform does NOT calculate or suggest fees
+- **Lawyers quote directly** - Based on case details provided by user
+- **Commission-based revenue** - Platform earns 20% commission from 30% upfront payment
+- **Three-tier payment split**:
+  1. User pays KES 500 commitment fee upfront (to get 3 quotes)
+  2. User pays 30% of quoted amount after selecting lawyer
+  3. From 30% payment: Platform takes 20% commission, Lawyer receives 10% escrow to start case
+  4. Remaining 70% balance handled between user and lawyer (offline or through system)
+
+**Payment Flow**:
+```typescript
+// STEP 1: User pays KES 500 commitment fee
+const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+  phoneNumber: '254...',
+  amount: 500,
+  paymentType: 'SERVICE_REQUEST_COMMITMENT'
+});
+
+// STEP 2: Create service request with payment ID
+const requestData = {
+  ...formData, // Context fields only (no monetary values)
+  commitmentFeeTxId: paymentId,
+  commitmentFeeAmount: 500
+};
+const requestResponse = await axiosInstance.post('/service-requests', requestData);
+
+// STEP 3: Wait 24-48 hours for 3 lawyer quotes
+
+// STEP 4: User selects preferred lawyer and pays 30% upfront
+const quotedAmount = selectedQuote.amount;
+const upfrontAmount = Math.round(quotedAmount * 0.30); // 30% of quoted fee
+
+const agreedFeePayment = await axiosInstance.post('/payments/mpesa/initiate', {
+  phoneNumber: '254...',
+  amount: upfrontAmount, // 30% of quoted amount
+  serviceRequestId: requestId,
+  quoteId: selectedQuoteId,
+  paymentType: 'SERVICE_REQUEST_PAYMENT'
+});
+// Backend automatically splits 30% payment:
+// - Platform: 20% commission (66.67% of 30%)
+// - Lawyer escrow: 10% to start case (33.33% of 30%)
+// - Balance 70%: User pays lawyer directly or through system later
+```
+
+**Form Fields - Context Only (NO Monetary Fields)**:
+```typescript
+// Property Law
+propertyLocation: string
+titleType: string
+hasDisputes: boolean
+
+// Corporate Law
+companyType: string
+numberOfEmployees: number
+industry: string
+
+// Debt Recovery
+debtType: string
+debtAge: string
+hasContract: boolean
+
+// Business Registration
+businessType: string
+numberOfDirectors: number
+hasNameReserved: boolean
+
+// Estate Planning
+numberOfBeneficiaries: number
+hasInternationalAssets: boolean
+hasBusiness: boolean
+
+// Employment Law
+includesNonCompete: boolean
+
+// Family Law
+hasProperty: boolean
+needsCustody: boolean
+```
+
+**Backend Changes**:
+```typescript
+// backend/src/controllers/serviceRequestController.ts
+
+// REMOVED:
+// - calculateServiceFee import
+// - estimatedFee field
+// - tier calculation
+// - LawyerTier filtering
+
+// ADDED:
+// - Match ALL verified lawyers (filter by specialization only)
+// - Lawyers self-select based on their expertise
+// - No fee estimation in service request creation
+// - Commitment fee validation only
+```
+
+**DO NOT**:
+- ❌ Calculate or estimate fees for users
+- ❌ Add monetary value fields (transactionValue, dealValue, claimAmount, complexity)
+- ❌ Filter lawyers by tier (all verified lawyers can quote)
+- ❌ Display estimated fees in UI
+- ❌ Import or use `serviceFeeCalculator.ts` utility
+
+**DO**:
+- ✅ Collect case context only (location, type, has disputes, etc.)
+- ✅ Charge KES 500 commitment fee upfront
+- ✅ Allow lawyers to quote their own fees
+- ✅ Calculate 30% upfront from quoted amount
+- ✅ Split 30% payment: 20% platform commission, 10% lawyer escrow
+- ✅ Display "How It Works" info box explaining payment model
+- ✅ Alert user they'll receive "3 quotes within 24-48 hours"
+- ✅ Show clear breakdown: "Pay 30% now, 70% balance later"
+
+**Files to Reference**:
+- **Frontend**: `frontend/src/pages/ServiceRequestPage.tsx` (commission model UI)
+- **Backend**: `backend/src/controllers/serviceRequestController.ts` (no fee calc)
+- **Deprecated**: `frontend/src/utils/serviceFeeCalculator.ts` (DO NOT USE)
+
+**Why Critical**:
+- Platform revenue depends on commission (20% of 30% upfront), not connection fees
+- Lawyers get immediate 10% escrow to start case work (from 30% payment)
+- Users pay only 30% upfront, reducing financial risk for long cases
+- Lawyers have flexibility to price based on their expertise
+- Users get competitive quotes instead of platform estimates
+- Transparent 20%/10% split model builds trust
+- Remaining 70% balance gives flexibility for milestone-based payments
 
 ## Critical UI/UX Features - DO NOT DELETE
 

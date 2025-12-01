@@ -1,34 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
+  FileText, 
   DollarSign, 
   Clock, 
-  FileText, 
   CheckCircle, 
   AlertCircle,
-  Phone,
-  Mail,
-  User,
-  TrendingUp,
+  ArrowLeft,
   Plus,
   Trash2,
   Info
 } from 'lucide-react';
 import { GlobalLayout } from '../components/layout/GlobalLayout';
+import axiosInstance from '../lib/axios';
 
 interface ServiceRequest {
   id: string;
   serviceCategory: string;
   serviceTitle: string;
   description: string;
-  estimatedFee: number;
-  tier: string;
   urgency: string;
+  phoneNumber: string;
+  email: string;
+  preferredTimeline: string;
+  additionalNotes?: string;
   createdAt: string;
+  status: string;
   user: {
     firstName: string;
     lastName: string;
   };
+  // Context fields
+  propertyLocation?: string;
+  titleType?: string;
+  hasDisputes?: boolean;
+  companyType?: string;
+  numberOfEmployees?: number;
+  industry?: string;
+  debtType?: string;
+  debtAge?: string;
+  hasContract?: boolean;
+  businessType?: string;
+  numberOfDirectors?: number;
+  hasNameReserved?: boolean;
+  needsTaxRegistration?: boolean;
+  numberOfBeneficiaries?: number;
+  hasInternationalAssets?: boolean;
+  hasBusiness?: boolean;
+  includesNonCompete?: boolean;
+  hasProperty?: boolean;
+  needsCustody?: boolean;
 }
 
 interface Milestone {
@@ -38,44 +59,22 @@ interface Milestone {
 }
 
 export default function LawyerQuoteSubmissionPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string}>();
   const navigate = useNavigate();
 
-  // Service request data
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  // Connection fee payment state
-  const [connectionFeePaid, setConnectionFeePaid] = useState(false);
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
-  const [mpesaPhone, setMpesaPhone] = useState('');
-
-  // Quote form state
-  const [proposedFee, setProposedFee] = useState('');
-  const [proposedTimeline, setProposedTimeline] = useState('');
-  const [approach, setApproach] = useState('');
-  const [offersMilestones, setOffersMilestones] = useState(false);
-  const [milestones, setMilestones] = useState<Milestone[]>([
-    { stage: 'Initial consultation & documentation', percentage: 30, description: '' },
-    { stage: 'Process execution', percentage: 40, description: '' },
-    { stage: 'Completion & handover', percentage: 30, description: '' }
-  ]);
-
-  // Submission state
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  // Client contact (revealed after payment)
-  const [clientContact, setClientContact] = useState<{
-    name: string;
-    phone: string;
-    email: string;
-  } | null>(null);
-
-  const connectionFee = serviceRequest?.tier === 'tier2' ? 5000 : 2000;
-  const tierLabel = serviceRequest?.tier === 'tier2' ? 'Premium (PRO only)' : 'Standard';
+  const [formData, setFormData] = useState({
+    proposedFee: '',
+    proposedTimeline: '',
+    approach: '',
+    offersMilestones: false,
+    milestones: [] as Milestone[]
+  });
 
   useEffect(() => {
     fetchServiceRequest();
@@ -83,150 +82,83 @@ export default function LawyerQuoteSubmissionPage() {
 
   const fetchServiceRequest = async () => {
     try {
-      const response = await fetch(`/api/service-requests/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch service request');
-      }
-
-      const data = await response.json();
-      setServiceRequest(data.serviceRequest);
-
-      // Check if lawyer already paid connection fee
-      if (data.connectionFeePaid) {
-        setConnectionFeePaid(true);
-        setClientContact(data.clientContact);
-      }
+      const response = await axiosInstance.get(`/service-requests/${id}`);
+      setServiceRequest(response.data.data || response.data);
+      setLoading(false);
     } catch (err: any) {
-      setError(err.message || 'Failed to load service request');
-    } finally {
+      setError(err.response?.data?.error || 'Failed to load service request');
       setLoading(false);
     }
   };
 
-  const handlePayConnectionFee = async () => {
-    if (paymentMethod === 'mpesa' && !mpesaPhone) {
-      alert('Please enter your M-Pesa phone number');
-      return;
-    }
-
-    setPaymentProcessing(true);
-    setError('');
-
-    try {
-      // Initiate payment based on method
-      const paymentEndpoint = paymentMethod === 'mpesa' 
-        ? '/api/payments/mpesa/stk-push'
-        : '/api/payments/flutter/card';
-
-      const paymentResponse = await fetch(paymentEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          amount: connectionFee,
-          phoneNumber: mpesaPhone,
-          description: `Connection fee for ${serviceRequest?.serviceCategory}`,
-          serviceRequestId: id
-        })
-      });
-
-      if (!paymentResponse.ok) {
-        throw new Error('Payment initiation failed');
-      }
-
-      const paymentData = await paymentResponse.json();
-
-      // For M-Pesa, show STK push message
-      if (paymentMethod === 'mpesa') {
-        alert('Please check your phone for the M-Pesa payment prompt');
-        
-        // Poll for payment confirmation (simplified - in production use webhooks)
-        setTimeout(() => {
-          setConnectionFeePaid(true);
-          fetchServiceRequest(); // Refresh to get client contact
-        }, 5000);
-      } else {
-        // For card payment, redirect to Flutter payment page
-        window.location.href = paymentData.paymentUrl;
-      }
-    } catch (err: any) {
-      setError(err.message || 'Payment failed. Please try again.');
-    } finally {
-      setPaymentProcessing(false);
-    }
-  };
-
   const addMilestone = () => {
-    setMilestones([...milestones, { stage: '', percentage: 0, description: '' }]);
-  };
-
-  const removeMilestone = (index: number) => {
-    setMilestones(milestones.filter((_, i) => i !== index));
+    setFormData(prev => ({
+      ...prev,
+      milestones: [...prev.milestones, { stage: '', percentage: 0, description: '' }]
+    }));
   };
 
   const updateMilestone = (index: number, field: keyof Milestone, value: string | number) => {
-    const updated = [...milestones];
-    updated[index] = { ...updated[index], [field]: value };
-    setMilestones(updated);
+    setFormData(prev => ({
+      ...prev,
+      milestones: prev.milestones.map((m, i) => 
+        i === index ? { ...m, [field]: value } : m
+      )
+    }));
   };
 
-  const totalMilestonePercentage = milestones.reduce((sum, m) => sum + (Number(m.percentage) || 0), 0);
+  const removeMilestone = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      milestones: prev.milestones.filter((_, i) => i !== index)
+    }));
+  };
 
-  const handleSubmitQuote = async (e: React.FormEvent) => {
+  const validateMilestones = () => {
+    if (!formData.offersMilestones) return true;
+    
+    const totalPercentage = formData.milestones.reduce((sum, m) => sum + (Number(m.percentage) || 0), 0);
+    if (Math.abs(totalPercentage - 100) > 0.01) {
+      setError('Milestone percentages must add up to 100%');
+      return false;
+    }
+
+    const hasEmptyFields = formData.milestones.some(m => !m.stage || !m.percentage);
+    if (hasEmptyFields) {
+      setError('All milestone fields are required');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
 
-    if (!connectionFeePaid) {
-      alert('Please pay the connection fee first');
-      return;
-    }
-
-    if (!proposedFee || !proposedTimeline || !approach) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    if (offersMilestones && totalMilestonePercentage !== 100) {
-      alert('Milestone percentages must total 100%');
-      return;
-    }
+    if (!validateMilestones()) return;
 
     setSubmitting(true);
-    setSubmitError('');
 
     try {
-      const response = await fetch(`/api/service-requests/${id}/quote`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          proposedFee: Number(proposedFee),
-          proposedTimeline,
-          approach,
-          offersMilestones,
-          milestones: offersMilestones ? milestones : null,
-          connectionFeePaid: true,
-          connectionFeeAmount: connectionFee
-        })
-      });
+      const payload = {
+        proposedFee: Number(formData.proposedFee),
+        proposedTimeline: formData.proposedTimeline,
+        approach: formData.approach,
+        offersMilestones: formData.offersMilestones,
+        milestones: formData.offersMilestones ? formData.milestones : null
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit quote');
-      }
+      await axiosInstance.post(`/service-requests/${id}/quotes`, payload);
 
-      alert('Quote submitted successfully! The client will review and contact you if selected.');
-      navigate('/lawyer/dashboard');
+      setSuccess('Quote submitted successfully! The client will review your proposal.');
+      
+      setTimeout(() => {
+        navigate('/lawyer/service-requests');
+      }, 2000);
     } catch (err: any) {
-      setSubmitError(err.message || 'Failed to submit quote');
+      setError(err.response?.data?.error || 'Failed to submit quote');
     } finally {
       setSubmitting(false);
     }
@@ -235,29 +167,24 @@ export default function LawyerQuoteSubmissionPage() {
   if (loading) {
     return (
       <GlobalLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading service request...</p>
+            <p className="text-slate-600">Loading service request...</p>
           </div>
         </div>
       </GlobalLayout>
     );
   }
 
-  if (error) {
+  if (!serviceRequest) {
     return (
       <GlobalLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-            <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-            <p className="text-red-800 text-center">{error}</p>
-            <button
-              onClick={() => navigate('/lawyer/dashboard')}
-              className="mt-4 w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700"
-            >
-              Back to Dashboard
-            </button>
+        <div className="max-w-2xl mx-auto px-4 py-12">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">Request Not Found</h2>
+            <p className="text-slate-600">The service request could not be found or you don't have access to it.</p>
           </div>
         </div>
       </GlobalLayout>
@@ -266,348 +193,314 @@ export default function LawyerQuoteSubmissionPage() {
 
   return (
     <GlobalLayout>
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          
-          {/* Header */}
-          <div className="mb-6">
-            <button
-              onClick={() => navigate('/lawyer/dashboard')}
-              className="text-blue-600 hover:text-blue-700 mb-4"
-            >
-              ← Back to Dashboard
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">Submit Your Quote</h1>
-            <p className="text-gray-600 mt-2">Review the service request and submit your best proposal</p>
-          </div>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Header */}
+        <button
+          onClick={() => navigate('/lawyer/service-requests')}
+          className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Service Requests
+        </button>
 
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Submit Quote</h1>
+          <p className="text-slate-600">
+            Provide your proposed fee, timeline, and approach for this case
+          </p>
+        </div>
+
+        {/* Success Message */}
+        {success && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-start">
+            <CheckCircle className="h-5 w-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-green-800 font-medium">{success}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start">
+            <AlertCircle className="h-5 w-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-800 font-medium">{error}</p>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Service Request Details */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">{serviceRequest?.serviceTitle}</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Posted by {serviceRequest?.user.firstName} {serviceRequest?.user.lastName} • {new Date(serviceRequest?.createdAt || '').toLocaleDateString()}
-                </p>
-              </div>
-              {serviceRequest?.urgency === 'urgent' && (
-                <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
-                  🚨 URGENT
-                </span>
-              )}
-            </div>
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 sticky top-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Case Details</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Service</p>
+                  <p className="font-medium text-slate-900">{serviceRequest.serviceTitle}</p>
+                  <p className="text-sm text-slate-600">{serviceRequest.serviceCategory}</p>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-blue-600 font-medium">Category</p>
-                <p className="text-lg font-semibold text-gray-900">{serviceRequest?.serviceCategory}</p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm text-green-600 font-medium">Estimated Fees</p>
-                <p className="text-lg font-semibold text-gray-900">KES {serviceRequest?.estimatedFee.toLocaleString()}</p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <p className="text-sm text-purple-600 font-medium">Service Tier</p>
-                <p className="text-lg font-semibold text-gray-900">{tierLabel}</p>
-              </div>
-            </div>
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Description</p>
+                  <p className="text-sm text-slate-700">{serviceRequest.description}</p>
+                </div>
 
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Description:</p>
-              <p className="text-gray-600 leading-relaxed">{serviceRequest?.description}</p>
+                {serviceRequest.additionalNotes && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Additional Notes</p>
+                    <p className="text-sm text-slate-700">{serviceRequest.additionalNotes}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Client Timeline</p>
+                  <p className="text-sm text-slate-700">{serviceRequest.preferredTimeline || serviceRequest.urgency}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Submitted</p>
+                  <p className="text-sm text-slate-700">
+                    {new Date(serviceRequest.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+
+                {/* Context Fields */}
+                {serviceRequest.propertyLocation && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Property Location</p>
+                    <p className="text-sm text-slate-700">{serviceRequest.propertyLocation}</p>
+                  </div>
+                )}
+
+                {serviceRequest.companyType && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Company Type</p>
+                    <p className="text-sm text-slate-700">{serviceRequest.companyType}</p>
+                  </div>
+                )}
+
+                {serviceRequest.debtType && (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Debt Type</p>
+                    <p className="text-sm text-slate-700">{serviceRequest.debtType}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Connection Fee Section */}
-          {!connectionFeePaid && (
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-6 mb-6">
-              <div className="flex items-start gap-4">
-                <Info className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Connection Fee Required</h3>
-                  <p className="text-gray-700 mb-4">
-                    To access client contact details and submit your quote, pay a one-time connection fee of 
-                    <span className="font-bold text-orange-600"> KES {connectionFee.toLocaleString()}</span>.
-                    This covers platform matching and support services.
-                  </p>
-
-                  <div className="bg-white rounded-lg p-4 mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Payment Method</label>
-                    <div className="flex gap-4 mb-4">
-                      <button
-                        onClick={() => setPaymentMethod('mpesa')}
-                        className={`flex-1 py-3 px-4 rounded-lg border-2 font-medium transition-colors ${
-                          paymentMethod === 'mpesa'
-                            ? 'border-green-600 bg-green-50 text-green-700'
-                            : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                        }`}
-                      >
-                        📱 M-Pesa
-                      </button>
-                      <button
-                        onClick={() => setPaymentMethod('card')}
-                        className={`flex-1 py-3 px-4 rounded-lg border-2 font-medium transition-colors ${
-                          paymentMethod === 'card'
-                            ? 'border-blue-600 bg-blue-50 text-blue-700'
-                            : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                        }`}
-                      >
-                        💳 Card
-                      </button>
-                    </div>
-
-                    {paymentMethod === 'mpesa' && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          M-Pesa Phone Number
-                        </label>
-                        <input
-                          type="tel"
-                          value={mpesaPhone}
-                          onChange={(e) => setMpesaPhone(e.target.value)}
-                          placeholder="254712345678"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handlePayConnectionFee}
-                    disabled={paymentProcessing}
-                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {paymentProcessing ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <DollarSign className="w-5 h-5" />
-                        Pay KES {connectionFee.toLocaleString()} to Continue
-                      </>
-                    )}
-                  </button>
+          {/* Quote Form */}
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 space-y-6">
+              {/* Info Box */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start">
+                <Info className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-medium mb-1">Quote Submission is FREE</p>
+                  <p>Submit your best proposal. If selected, client pays 30% upfront (you receive 10% escrow to start, platform takes 20% commission).</p>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Client Contact (After Payment) */}
-          {connectionFeePaid && clientContact && (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 mb-6">
-              <div className="flex items-start gap-4">
-                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Client Contact Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                      <User className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-xs text-gray-500">Name</p>
-                        <p className="font-medium text-gray-900">{clientContact.name}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                      <Phone className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-xs text-gray-500">Phone</p>
-                        <p className="font-medium text-gray-900">{clientContact.phone}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                      <Mail className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-xs text-gray-500">Email</p>
-                        <p className="font-medium text-gray-900">{clientContact.email}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Quote Submission Form */}
-          {connectionFeePaid && (
-            <form onSubmit={handleSubmitQuote} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Your Quote Details</h3>
 
               {/* Proposed Fee */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <DollarSign className="w-4 h-4 inline mr-1" />
-                  Proposed Fee (KES) *
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Proposed Total Fee (KES) <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  value={proposedFee}
-                  onChange={(e) => setProposedFee(e.target.value)}
-                  placeholder="Enter your fee (e.g., 150000)"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  System estimate: KES {serviceRequest?.estimatedFee.toLocaleString()} (you can quote differently)
-                </p>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <input
+                    type="number"
+                    required
+                    min="1000"
+                    step="100"
+                    value={formData.proposedFee}
+                    onChange={(e) => setFormData(prev => ({ ...prev, proposedFee: e.target.value }))}
+                    placeholder="e.g., 50000"
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                {formData.proposedFee && (
+                  <p className="text-xs text-slate-600 mt-1">
+                    Client pays 30% upfront: <strong>KES {(Number(formData.proposedFee) * 0.3).toLocaleString()}</strong>
+                    {' '}(You receive 10% = KES {(Number(formData.proposedFee) * 0.1).toLocaleString()} to start case)
+                  </p>
+                )}
               </div>
 
               {/* Timeline */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Clock className="w-4 h-4 inline mr-1" />
-                  Proposed Timeline *
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Proposed Timeline <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={proposedTimeline}
-                  onChange={(e) => setProposedTimeline(e.target.value)}
-                  placeholder="e.g., 2-3 weeks, 1 month, 45 days"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <input
+                    type="text"
+                    required
+                    value={formData.proposedTimeline}
+                    onChange={(e) => setFormData(prev => ({ ...prev, proposedTimeline: e.target.value }))}
+                    placeholder="e.g., 2-3 weeks, 1 month, 6 weeks"
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
               </div>
 
               {/* Approach */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <FileText className="w-4 h-4 inline mr-1" />
-                  Your Approach *
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Your Approach <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  value={approach}
-                  onChange={(e) => setApproach(e.target.value)}
-                  placeholder="Describe your approach to handling this case, relevant experience, and why you're the best fit..."
-                  rows={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
+                  rows={6}
+                  value={formData.approach}
+                  onChange={(e) => setFormData(prev => ({ ...prev, approach: e.target.value }))}
+                  placeholder="Explain how you will handle this case, your strategy, and what makes you the best choice..."
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
-              {/* Milestone Payments */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={offersMilestones}
-                      onChange={(e) => setOffersMilestones(e.target.checked)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm font-medium text-gray-700">
-                      <TrendingUp className="w-4 h-4 inline mr-1" />
-                      Offer Milestone-Based Payments
-                    </span>
-                  </label>
-                </div>
+              {/* Milestones Toggle */}
+              <div className="flex items-start">
+                <input
+                  type="checkbox"
+                  id="offersMilestones"
+                  checked={formData.offersMilestones}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    offersMilestones: e.target.checked,
+                    milestones: e.target.checked ? prev.milestones : []
+                  }))}
+                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                />
+                <label htmlFor="offersMilestones" className="ml-3">
+                  <p className="text-sm font-medium text-slate-700">Offer milestone-based payments</p>
+                  <p className="text-xs text-slate-500">Break down the case into stages with specific deliverables</p>
+                </label>
+              </div>
 
-                {offersMilestones && (
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600 mb-4">
-                      Break down your fee into payment milestones (must total 100%)
+              {/* Milestones */}
+              {formData.offersMilestones && (
+                <div className="border border-slate-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-medium text-slate-900">Case Milestones</h3>
+                    <button
+                      type="button"
+                      onClick={addMilestone}
+                      className="flex items-center text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Milestone
+                    </button>
+                  </div>
+
+                  {formData.milestones.length === 0 && (
+                    <p className="text-sm text-slate-500 text-center py-4">
+                      No milestones added yet. Click "Add Milestone" to start.
                     </p>
-                    
-                    {milestones.map((milestone, index) => (
-                      <div key={index} className="bg-white rounded-lg p-4 mb-3 border border-gray-200">
-                        <div className="flex items-start justify-between mb-3">
-                          <p className="text-sm font-medium text-gray-700">Milestone {index + 1}</p>
-                          {milestones.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeMilestone(index)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                  )}
+
+                  <div className="space-y-4">
+                    {formData.milestones.map((milestone, index) => (
+                      <div key={index} className="bg-slate-50 rounded-lg p-4 relative">
+                        <button
+                          type="button"
+                          onClick={() => removeMilestone(index)}
+                          className="absolute top-2 right-2 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+
+                        <div className="grid grid-cols-2 gap-4 mb-3">
                           <div>
-                            <label className="block text-xs text-gray-600 mb-1">Stage Name</label>
+                            <label className="block text-xs font-medium text-slate-700 mb-1">
+                              Stage {index + 1}
+                            </label>
                             <input
                               type="text"
                               value={milestone.stage}
                               onChange={(e) => updateMilestone(index, 'stage', e.target.value)}
-                              placeholder="e.g., Initial deposit"
-                              className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                              placeholder="e.g., Initial Review"
+                              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs text-gray-600 mb-1">Percentage (%)</label>
+                            <label className="block text-xs font-medium text-slate-700 mb-1">
+                              Payment %
+                            </label>
                             <input
                               type="number"
+                              min="1"
+                              max="100"
+                              step="1"
                               value={milestone.percentage}
                               onChange={(e) => updateMilestone(index, 'percentage', Number(e.target.value))}
-                              placeholder="30"
-                              min="0"
-                              max="100"
-                              className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                              placeholder="25"
+                              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
                         </div>
-                        
                         <div>
-                          <label className="block text-xs text-gray-600 mb-1">Description (optional)</label>
-                          <input
-                            type="text"
+                          <label className="block text-xs font-medium text-slate-700 mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            rows={2}
                             value={milestone.description}
                             onChange={(e) => updateMilestone(index, 'description', e.target.value)}
-                            placeholder="What's included in this payment"
-                            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                            placeholder="What will be delivered at this stage?"
+                            className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                       </div>
                     ))}
-
-                    <div className="flex items-center justify-between mt-4">
-                      <button
-                        type="button"
-                        onClick={addMilestone}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add Milestone
-                      </button>
-                      <div className={`text-sm font-medium ${totalMilestonePercentage === 100 ? 'text-green-600' : 'text-red-600'}`}>
-                        Total: {totalMilestonePercentage}%
-                        {totalMilestonePercentage === 100 ? ' ✓' : ' (must be 100%)'}
-                      </div>
-                    </div>
                   </div>
-                )}
-              </div>
 
-              {/* Error Message */}
-              {submitError && (
-                <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-red-800 text-sm">{submitError}</p>
+                  {formData.milestones.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-slate-200">
+                      <p className="text-sm text-slate-700">
+                        Total: <strong>{formData.milestones.reduce((sum, m) => sum + (Number(m.percentage) || 0), 0)}%</strong>
+                        {formData.milestones.reduce((sum, m) => sum + (Number(m.percentage) || 0), 0) !== 100 && (
+                          <span className="text-red-600 ml-2">(Must equal 100%)</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Submitting Quote...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-5 h-5" />
-                    Submit Quote
-                  </>
-                )}
-              </button>
+              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => navigate('/lawyer/service-requests')}
+                  className="px-6 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center"
+                >
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Submit Quote
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
-          )}
-
+          </div>
         </div>
       </div>
     </GlobalLayout>

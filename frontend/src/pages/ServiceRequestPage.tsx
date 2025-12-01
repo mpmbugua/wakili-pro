@@ -7,13 +7,12 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  DollarSign,
   Phone,
   Mail,
   Info,
   Shield
 } from 'lucide-react';
-import { calculateServiceFee, getServiceFields, ServiceFeeEstimate } from '../utils/serviceFeeCalculator';
+import axiosInstance from '../services/api';
 
 interface ServiceRequestForm {
   serviceTitle: string;
@@ -28,25 +27,17 @@ interface ServiceRequestForm {
   phoneNumber: string;
   email: string;
   
-  // Dynamic service-specific fields
-  transactionValue?: number;
-  dealValue?: number;
-  claimAmount?: number;
-  businessType?: string;
-  complexity?: string;
-  serviceType?: string;
+  // Dynamic service-specific fields (for context only, not fee calculation)
   propertyLocation?: string;
   titleType?: string;
   hasDisputes?: boolean;
-  hasMortgage?: boolean;
   companyType?: string;
   numberOfEmployees?: number;
   industry?: string;
-  hasLiabilities?: boolean;
   debtType?: string;
   debtAge?: string;
   hasContract?: boolean;
-  hasCollateral?: boolean;
+  businessType?: string;
   numberOfDirectors?: number;
   hasNameReserved?: boolean;
   needsTaxRegistration?: boolean;
@@ -56,11 +47,6 @@ interface ServiceRequestForm {
   includesNonCompete?: boolean;
   hasProperty?: boolean;
   needsCustody?: boolean;
-  
-  // Payment tracking
-  commitmentFeePaid: boolean;
-  commitmentFeeAmount?: number;
-  commitmentFeeTxId?: string;
 }
 
 export const ServiceRequestPage: React.FC = () => {
@@ -77,53 +63,14 @@ export const ServiceRequestPage: React.FC = () => {
     additionalNotes: '',
     documents: [],
     phoneNumber: '',
-    email: '',
-    commitmentFeePaid: false
+    email: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>('');
-  const [feeEstimate, setFeeEstimate] = useState<ServiceFeeEstimate | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentPhone, setPaymentPhone] = useState('');
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  // Check if returning from payment page
-  useEffect(() => {
-    const pendingServiceRequest = sessionStorage.getItem('pendingServiceRequest');
-    const paymentSuccess = location.state?.paymentSuccess;
-    
-    if (pendingServiceRequest && paymentSuccess) {
-      try {
-        const { formData: savedFormData, feeEstimate: savedFeeEstimate } = JSON.parse(pendingServiceRequest);
-        setFormData({
-          ...savedFormData,
-          commitmentFeePaid: true,
-          commitmentFeeAmount: 500
-        });
-        setFeeEstimate(savedFeeEstimate);
-        sessionStorage.removeItem('pendingServiceRequest');
-      } catch (error) {
-        console.error('Failed to restore service request data:', error);
-      }
-    }
-  }, [location]);
-
-  // Calculate fee estimate whenever relevant fields change
-  useEffect(() => {
-    if (formData.serviceCategory) {
-      const estimate = calculateServiceFee(formData.serviceCategory, formData);
-      setFeeEstimate(estimate);
-    }
-  }, [
-    formData.serviceCategory,
-    formData.transactionValue,
-    formData.dealValue,
-    formData.claimAmount,
-    formData.businessType,
-    formData.complexity,
-    formData.serviceType
-  ]);
+  // Remove fee calculation - lawyers will quote directly
+  // No need to check for pending service request from payment
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -142,13 +89,47 @@ export const ServiceRequestPage: React.FC = () => {
     }));
   };
 
-  const handleCommitmentFeePayment = async () => {
-    if (!paymentPhone || paymentPhone.length < 10) {
-      alert('Please enter a valid phone number');
-      return;
-    }
+  const getServiceFields = (serviceCategory: string) => {
+    // Simplified fields - just context questions, no monetary values
+    const fieldMappings: Record<string, any> = {
+      'Property Transfer': [
+        { name: 'propertyLocation', label: 'Property location', type: 'text', required: true },
+        { name: 'titleType', label: 'Title type', type: 'select', options: ['Freehold', 'Leasehold', 'Sectional Title'], required: true },
+        { name: 'hasDisputes', label: 'Are there any disputes or caveats?', type: 'boolean', required: false }
+      ],
+      'Business Acquisition': [
+        { name: 'companyType', label: 'Company type', type: 'select', options: ['Private Limited', 'LLC', 'Partnership', 'Sole Proprietor'], required: true },
+        { name: 'numberOfEmployees', label: 'Number of employees', type: 'number', required: false },
+        { name: 'industry', label: 'Industry/sector', type: 'text', required: true }
+      ],
+      'Debt Collection': [
+        { name: 'debtType', label: 'Type of debt', type: 'select', options: ['Commercial', 'Personal Loan', 'Unpaid Services', 'Rent Arrears'], required: true },
+        { name: 'debtAge', label: 'How old is this debt?', type: 'select', options: ['Less than 6 months', '6-12 months', '1-2 years', 'Over 2 years'], required: true },
+        { name: 'hasContract', label: 'Do you have a written contract?', type: 'boolean', required: false }
+      ],
+      'Business Registration': [
+        { name: 'businessType', label: 'Business type', type: 'select', options: ['Sole Proprietor', 'Partnership', 'Limited Company', 'NGO'], required: true },
+        { name: 'numberOfDirectors', label: 'Number of directors/partners', type: 'number', required: false },
+        { name: 'hasNameReserved', label: 'Have you reserved the business name?', type: 'boolean', required: false },
+        { name: 'needsTaxRegistration', label: 'Need KRA PIN registration?', type: 'boolean', required: false }
+      ],
+      'Will Drafting': [
+        { name: 'numberOfBeneficiaries', label: 'Number of beneficiaries', type: 'number', required: false },
+        { name: 'hasInternationalAssets', label: 'Assets outside Kenya?', type: 'boolean', required: false },
+        { name: 'hasBusiness', label: 'Include business succession?', type: 'boolean', required: false }
+      ],
+      'Employment Contract': [
+        { name: 'numberOfEmployees', label: 'Number of employees', type: 'number', required: false },
+        { name: 'includesNonCompete', label: 'Include non-compete clause?', type: 'boolean', required: false }
+      ],
+      'Divorce/Family Law': [
+        { name: 'hasProperty', label: 'Property to be divided?', type: 'boolean', required: false },
+        { name: 'needsCustody', label: 'Child custody arrangement needed?', type: 'boolean', required: false }
+      ]
+    };
 
-    setIsProcessingPayment(true);
+    return fieldMappings[serviceCategory] || [];
+  };
     try {
       // Import axiosInstance at the top if not already imported
       const axiosInstance = (await import('../lib/axios')).default;
@@ -208,99 +189,62 @@ export const ServiceRequestPage: React.FC = () => {
     e.preventDefault();
     setSubmitError('');
 
+    // Validate required fields
+    if (!formData.serviceCategory || !formData.serviceTitle || !formData.description) {
+      setSubmitError('Please fill in all required fields');
+      return;
+    }
+
     // Validate contact info
     if (!formData.phoneNumber || !formData.email) {
       setSubmitError('Phone number and email are required');
       return;
     }
 
-    // Check if commitment fee is paid - initiate M-Pesa payment first
-    if (!formData.commitmentFeePaid) {
-      // Store service request data temporarily
-      sessionStorage.setItem('pendingServiceRequest', JSON.stringify({
-        formData,
-        feeEstimate
-      }));
-
-      // Get phone number for M-Pesa payment
-      const phoneNumber = prompt('Enter your M-Pesa phone number for KES 500 commitment fee (format: 254XXXXXXXXX):');
-      
-      if (!phoneNumber) {
-        alert('Phone number is required for commitment fee payment');
-        return;
-      }
-
-      try {
-        // Initiate M-Pesa payment for commitment fee (standalone payment without booking/review/purchase ID)
-        const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
-          phoneNumber: phoneNumber,
-          amount: 500,
-          paymentType: 'SERVICE_REQUEST_COMMITMENT'
-        });
-
-        if (paymentResponse.data.success) {
-          const { paymentId } = paymentResponse.data.data;
-          alert(`Service request commitment fee initiated!\n\nM-Pesa payment request sent to ${phoneNumber}\n\nPlease complete the payment on your phone.\n\nAfter payment, return here to submit your service request.`);
-          // Store payment ID for verification
-          sessionStorage.setItem('serviceRequestPaymentId', paymentId);
-          navigate('/dashboard');
-        } else {
-          alert(paymentResponse.data.message || 'Failed to initiate payment');
-        }
-      } catch (error: any) {
-        console.error('Service request payment error:', error);
-        alert(error.response?.data?.message || 'Failed to initiate payment');
-      }
+    // Get phone number for M-Pesa commitment fee payment
+    const phoneNumber = prompt('Enter your M-Pesa phone number for KES 500 commitment fee (format: 254XXXXXXXXX):');
+    
+    if (!phoneNumber) {
+      alert('Phone number is required for commitment fee payment');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const requestFormData = new FormData();
-      
-      // Append all form fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key !== 'documents' && value !== undefined && value !== '') {
-          requestFormData.append(key, String(value));
-        }
+      // Step 1: Initiate M-Pesa payment for commitment fee
+      console.log('[ServiceRequest] Initiating commitment fee payment...');
+      const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+        phoneNumber: phoneNumber,
+        amount: 500,
+        paymentType: 'SERVICE_REQUEST_COMMITMENT'
       });
 
-      // Append fee estimate
-      if (feeEstimate) {
-        requestFormData.append('estimatedFee', String(feeEstimate.estimatedFee));
-        requestFormData.append('tier', feeEstimate.tier);
-        requestFormData.append('connectionFee', String(feeEstimate.connectionFee));
+      if (!paymentResponse.data.success) {
+        throw new Error(paymentResponse.data.message || 'Failed to initiate payment');
       }
 
-      // Append documents
-      formData.documents.forEach((doc) => {
-        requestFormData.append('documents', doc);
-      });
+      const { paymentId } = paymentResponse.data.data;
 
-      const response = await fetch('/api/service-requests', {
-        method: 'POST',
-        body: requestFormData,
-        credentials: 'include'
-      });
+      // Step 2: Create service request with payment ID
+      console.log('[ServiceRequest] Creating service request...');
+      const requestData = {
+        ...formData,
+        commitmentFeeTxId: paymentId,
+        commitmentFeeAmount: 500
+      };
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to submit request');
+      const createResponse = await axiosInstance.post('/service-requests', requestData);
+
+      if (createResponse.data.success) {
+        alert(`Service request submitted!\n\nM-Pesa payment request for KES 500 commitment fee sent to ${phoneNumber}\n\nPlease complete the payment on your phone.\n\nYou will receive 3 quotes from qualified lawyers within 24-48 hours.`);
+        navigate('/dashboard');
+      } else {
+        throw new Error(createResponse.data.message || 'Failed to create service request');
       }
-
-      const result = await response.json();
-      
-      // Navigate to dashboard with success message
-      navigate('/dashboard', {
-        state: {
-          message: 'Service request submitted successfully! You will receive lawyer quotes within 24 hours.',
-          requestId: result.id
-        }
-      });
     } catch (error: any) {
       console.error('Submit error:', error);
-      setSubmitError(error.message || 'Failed to submit request. Please try again.');
+      setSubmitError(error.response?.data?.message || error.message || 'Failed to submit request. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -430,35 +374,25 @@ export const ServiceRequestPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Fee Estimate Card */}
-          {feeEstimate && (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6 mb-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <DollarSign className="h-5 w-5 text-green-600" />
-                    <h3 className="text-lg font-semibold text-slate-900">Estimated Legal Fees</h3>
-                  </div>
-                  <p className="text-3xl font-bold text-green-600 mb-2">
-                    KES {feeEstimate.estimatedFee.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-slate-600 mb-3">{feeEstimate.calculation}</p>
-                  <div className="flex items-center space-x-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      feeEstimate.tier === 'tier2'
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {feeEstimate.tier === 'tier2' ? 'High-Value Service' : 'Standard Service'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-2">
-                    Eligible for: {feeEstimate.eligibleTiers.join(' & ')} tier lawyers
-                  </p>
-                </div>
+          {/* How It Works Info */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <div className="flex items-start space-x-3">
+              <Info className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">How It Works</h3>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-slate-700">
+                  <li>Pay KES 500 commitment fee to submit your request</li>
+                  <li>Receive up to 3 quotes from qualified lawyers within 24-48 hours</li>
+                  <li>Select your preferred lawyer based on their quote and profile</li>
+                  <li><strong>Pay 30% upfront</strong> of quoted amount (platform takes 20% commission, lawyer gets 10% escrow to start case)</li>
+                  <li>Lawyer proceeds with your case - <strong>remaining 70% balance</strong> payable as case progresses</li>
+                </ol>
+                <p className="text-xs text-slate-600 mt-3">
+                  <strong>Note:</strong> The commitment fee is non-refundable. The 30% upfront payment splits: 20% platform fee, 10% to lawyer's escrow to begin work.
+                </p>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 space-y-6">

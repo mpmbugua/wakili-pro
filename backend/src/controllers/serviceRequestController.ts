@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient, LawyerTier } from '@prisma/client';
-import { calculateServiceFee } from '../utils/serviceFeeCalculator';
+import { PrismaClient } from '@prisma/client';
 import { notifyMatchedLawyers } from '../services/lawyerNotificationService';
 
 const prisma = new PrismaClient();
@@ -29,54 +28,77 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
       serviceCategory,
       serviceTitle,
       description,
-      estimatedBudget,
       urgency,
       phoneNumber,
       email,
-      transactionValue,
-      dealValue,
-      claimAmount,
+      preferredTimeline,
+      additionalNotes,
+      // Context fields (no monetary values)
+      propertyLocation,
+      titleType,
+      hasDisputes,
+      companyType,
+      numberOfEmployees,
+      industry,
+      debtType,
+      debtAge,
+      hasContract,
       businessType,
-      complexity,
-      commitmentFeePaid,
+      numberOfDirectors,
+      hasNameReserved,
+      needsTaxRegistration,
+      numberOfBeneficiaries,
+      hasInternationalAssets,
+      hasBusiness,
+      includesNonCompete,
+      hasProperty,
+      needsCustody,
       commitmentFeeTxId
     } = req.body;
 
-    // Calculate estimated fee using shared utility
-    const feeCalculation = calculateServiceFee(serviceCategory, {
-      transactionValue,
-      dealValue,
-      claimAmount,
-      businessType,
-      complexity
-    });
-
-    // Validate commitment fee payment
-    if (!commitmentFeePaid || !commitmentFeeTxId) {
+    // Validate commitment fee payment ID
+    if (!commitmentFeeTxId) {
       return res.status(400).json({ 
         error: 'Commitment fee payment required',
         commitmentFeeAmount: 500
       });
     }
 
+    // Create service request without fee estimates
+    // Lawyers will provide quotes based on case details
     const serviceRequest = await prisma.serviceRequest.create({
       data: {
         userId,
         serviceCategory,
         serviceTitle,
         description,
-        estimatedBudget,
-        estimatedFee: feeCalculation.estimatedFee,
-        tier: feeCalculation.tier,
         urgency,
         phoneNumber,
         email,
-        transactionValue,
-        dealValue,
-        claimAmount,
+        preferredTimeline,
+        additionalNotes,
+        // Context fields
+        propertyLocation,
+        titleType,
+        hasDisputes: hasDisputes === true || hasDisputes === 'true',
+        companyType,
+        numberOfEmployees: numberOfEmployees ? parseInt(numberOfEmployees) : undefined,
+        industry,
+        debtType,
+        debtAge,
+        hasContract: hasContract === true || hasContract === 'true',
         businessType,
-        complexity,
-        commitmentFeePaid,
+        numberOfDirectors: numberOfDirectors ? parseInt(numberOfDirectors) : undefined,
+        hasNameReserved: hasNameReserved === true || hasNameReserved === 'true',
+        needsTaxRegistration: needsTaxRegistration === true || needsTaxRegistration === 'true',
+        numberOfBeneficiaries: numberOfBeneficiaries ? parseInt(numberOfBeneficiaries) : undefined,
+        hasInternationalAssets: hasInternationalAssets === true || hasInternationalAssets === 'true',
+        hasBusiness: hasBusiness === true || hasBusiness === 'true',
+        includesNonCompete: includesNonCompete === true || includesNonCompete === 'true',
+        hasProperty: hasProperty === true || hasProperty === 'true',
+        needsCustody: needsCustody === true || needsCustody === 'true',
+        // Payment tracking
+        commitmentFeePaid: false, // Will be updated by M-Pesa callback
         commitmentFeeAmount: 500,
         commitmentFeeTxId,
         status: 'PENDING'
@@ -93,14 +115,10 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
       }
     });
 
-    // Match lawyers based on service tier and specialization
-    const tierFilter: LawyerTier[] = feeCalculation.tier === 'tier2' 
-      ? [LawyerTier.PRO] 
-      : [LawyerTier.LITE, LawyerTier.PRO];
-    
+    // Match ALL verified lawyers (remove tier filtering)
+    // Lawyers will self-select based on their expertise
     const matchedLawyers = await prisma.lawyerProfile.findMany({
       where: {
-        tier: { in: tierFilter },
         specializations: { has: serviceCategory },
         isVerified: true,
         status: 'APPROVED'
@@ -119,7 +137,7 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
       orderBy: [
         { rating: 'desc' }
       ],
-      take: 5 // Match up to 5 lawyers
+      take: 10 // Match up to 10 lawyers (system will select top 3 quotes for user)
     });
 
     // Send notifications to matched lawyers
@@ -139,8 +157,6 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
         serviceCategory: serviceRequest.serviceCategory,
         serviceTitle: serviceRequest.serviceTitle,
         description: serviceRequest.description,
-        estimatedFee: serviceRequest.estimatedFee,
-        tier: serviceRequest.tier,
         urgency: serviceRequest.urgency,
         createdAt: serviceRequest.createdAt,
         phoneNumber: serviceRequest.phoneNumber,
@@ -154,7 +170,7 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
       success: true,
       data: serviceRequest,
       matchedLawyers: matchedLawyers.length,
-      message: `Service request created successfully. ${matchedLawyers.length} qualified lawyers notified.`
+      message: `Service request created successfully. ${matchedLawyers.length} qualified lawyers notified. You will receive up to 3 quotes within 24-48 hours.`
     });
   } catch (error) {
     console.error('Error creating service request:', error);
@@ -483,14 +499,19 @@ export const submitQuote = async (req: AuthRequest, res: Response) => {
     }
 
     const {
-      connectionFeePaid,
-      connectionFeeTxId,
       proposedFee,
       proposedTimeline,
       approach,
       offersMilestones,
       milestones
     } = req.body;
+
+    // Validate required fields
+    if (!proposedFee || !proposedTimeline || !approach) {
+      return res.status(400).json({ 
+        error: 'proposedFee, proposedTimeline, and approach are required' 
+      });
+    }
 
     // Get service request
     const serviceRequest = await prisma.serviceRequest.findUnique({
@@ -501,36 +522,30 @@ export const submitQuote = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Service request not found' });
     }
 
-    if (serviceRequest.status !== 'PENDING') {
+    if (serviceRequest.status !== 'PENDING' && serviceRequest.status !== 'QUOTES_RECEIVED') {
       return res.status(400).json({ error: 'This request is no longer accepting quotes' });
     }
 
-    // Get lawyer tier
+    // Get lawyer profile (verify lawyer is verified)
     const lawyerProfile = await prisma.lawyerProfile.findUnique({
       where: { userId },
-      select: { tier: true }
+      select: { 
+        tier: true,
+        isVerified: true,
+        specializations: true,
+        rating: true,
+        yearsOfExperience: true
+      }
     });
 
     if (!lawyerProfile) {
       return res.status(403).json({ error: 'Lawyer profile not found' });
     }
 
-    // Tier validation
-    if (lawyerProfile.tier === 'LITE' && serviceRequest.tier === 'tier2') {
+    if (!lawyerProfile.isVerified) {
       return res.status(403).json({ 
-        error: 'PRO subscription required for this request',
-        upgradeRequired: true
-      });
-    }
-
-    // Calculate connection fee
-    const connectionFeeAmount = serviceRequest.tier === 'tier2' ? 5000 : 2000;
-
-    // Validate connection fee payment
-    if (!connectionFeePaid || !connectionFeeTxId) {
-      return res.status(400).json({ 
-        error: 'Connection fee payment required',
-        connectionFeeAmount
+        error: 'Only verified lawyers can submit quotes',
+        verificationRequired: true
       });
     }
 
@@ -546,14 +561,14 @@ export const submitQuote = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'You have already submitted a quote for this request' });
     }
 
-    // Create quote
+    // Create quote (no connection fee required - free to submit)
     const quote = await prisma.lawyerQuote.create({
       data: {
         serviceRequestId: id,
         lawyerId: userId!,
-        connectionFeePaid,
-        connectionFeeAmount,
-        connectionFeeTxId,
+        connectionFeePaid: true, // Always true since we removed the fee
+        connectionFeeAmount: 0, // No fee required
+        connectionFeeTxId: null,
         proposedFee,
         proposedTimeline,
         approach,
@@ -602,12 +617,7 @@ export const submitQuote = async (req: AuthRequest, res: Response) => {
     res.status(201).json({
       success: true,
       data: quote,
-      clientContact: {
-        name: `${clientContact?.firstName} ${clientContact?.lastName}`,
-        phone: serviceRequest.phoneNumber || clientContact?.phoneNumber || 'Not provided',
-        email: serviceRequest.email || clientContact?.email || 'Not provided'
-      },
-      message: 'Quote submitted successfully. Client contact details revealed.'
+      message: 'Quote submitted successfully. Client will review and may select you for this case.'
     });
   } catch (error) {
     console.error('Error submitting quote:', error);

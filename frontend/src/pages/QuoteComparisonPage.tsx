@@ -135,34 +135,98 @@ export default function QuoteComparisonPage() {
   });
 
   const handleSelectLawyer = async (quoteId: string) => {
-    if (!confirm('Are you sure you want to select this lawyer? This action cannot be undone.')) {
+    const selectedQuote = quotes.find(q => q.id === quoteId);
+    if (!selectedQuote) return;
+
+    const upfrontAmount = Math.round(selectedQuote.proposedFee * 0.3);
+    const platformCommission = Math.round(selectedQuote.proposedFee * 0.2);
+    const lawyerEscrow = Math.round(selectedQuote.proposedFee * 0.1);
+
+    const confirmMessage = `Pay 30% upfront via M-Pesa?\n\n` +
+      `Total Quote: KES ${selectedQuote.proposedFee.toLocaleString()}\n` +
+      `30% Payment: KES ${upfrontAmount.toLocaleString()}\n\n` +
+      `Split:\n` +
+      `• Platform (20%): KES ${platformCommission.toLocaleString()}\n` +
+      `• Lawyer Escrow (10%): KES ${lawyerEscrow.toLocaleString()}\n\n` +
+      `Remaining 70% (KES ${(selectedQuote.proposedFee * 0.7).toLocaleString()}) paid as case progresses.`;
+
+    if (!confirm(confirmMessage)) {
       return;
     }
+
+    // Prompt for M-Pesa phone number
+    const phoneNumber = prompt('Enter your M-Pesa phone number (254XXXXXXXXX):');
+    if (!phoneNumber) return;
 
     setSelecting(true);
     setSelectedQuoteId(quoteId);
 
     try {
-      const response = await fetch(`/api/service-requests/${id}/select`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ quoteId })
+      // Import axiosInstance dynamically
+      const axiosInstance = (await import('../lib/axios')).default;
+
+      // Step 1: Initiate 30% upfront payment via M-Pesa
+      const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+        phoneNumber,
+        amount: upfrontAmount,
+        serviceRequestId: id,
+        quoteId,
+        paymentType: 'SERVICE_REQUEST_PAYMENT'
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to select lawyer');
-      }
+      const { paymentId } = paymentResponse.data.data;
 
-      const data = await response.json();
-      setSelectedLawyer(data.selectedLawyer);
+      alert(`M-Pesa payment request sent to ${phoneNumber}. Please complete the payment on your phone.`);
+
+      // Step 2: Poll for payment status
+      let paymentComplete = false;
+      const maxAttempts = 60; // 3 minutes (60 * 3 seconds)
+      let attempts = 0;
+
+      const pollInterval = setInterval(async () => {
+        attempts++;
+
+        try {
+          const statusResponse = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
+          const status = statusResponse.data.data.status;
+
+          if (status === 'COMPLETED') {
+            clearInterval(pollInterval);
+            paymentComplete = true;
+
+            // Payment successful - get updated service request with selected lawyer
+            const requestResponse = await axiosInstance.get(`/service-requests/${id}`);
+            const updatedRequest = requestResponse.data.data;
+
+            setSelectedLawyer({
+              name: `${selectedQuote.lawyer.firstName} ${selectedQuote.lawyer.lastName}`,
+              phone: selectedQuote.lawyer.phoneNumber || 'Not provided',
+              email: selectedQuote.lawyer.email,
+              proposedFee: selectedQuote.proposedFee,
+              proposedTimeline: selectedQuote.proposedTimeline
+            });
+
+            setSelecting(false);
+          } else if (status === 'FAILED') {
+            clearInterval(pollInterval);
+            setSelecting(false);
+            setSelectedQuoteId(null);
+            alert('Payment failed. Please try again.');
+          } else if (attempts >= maxAttempts) {
+            clearInterval(pollInterval);
+            setSelecting(false);
+            setSelectedQuoteId(null);
+            alert('Payment timeout. Please check your M-Pesa and try again if payment was not completed.');
+          }
+        } catch (pollError) {
+          console.error('Payment status polling error:', pollError);
+        }
+      }, 3000); // Poll every 3 seconds
+
     } catch (err: any) {
-      alert(err.message || 'Failed to select lawyer');
-    } finally {
       setSelecting(false);
+      setSelectedQuoteId(null);
+      alert(err.response?.data?.error || err.message || 'Failed to process payment');
     }
   };
 
@@ -521,24 +585,34 @@ export default function QuoteComparisonPage() {
                           </div>
                         )}
 
-                        {/* Select Button */}
-                        <button
-                          onClick={() => handleSelectLawyer(quote.id)}
-                          disabled={selecting && selectedQuoteId === quote.id}
-                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
-                        >
-                          {selecting && selectedQuoteId === quote.id ? (
-                            <>
-                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                              Selecting...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle className="w-5 h-5" />
-                              Select This Lawyer
-                            </>
-                          )}
-                        </button>
+                        {/* Select Button with 30% Payment Info */}
+                        <div className="border-t border-gray-200 pt-4 mt-4">
+                          <div className="bg-blue-50 rounded-lg p-3 mb-3">
+                            <p className="text-sm font-medium text-blue-900 mb-1">
+                              30% Upfront Payment: KES {(quote.proposedFee * 0.3).toLocaleString()}
+                            </p>
+                            <p className="text-xs text-blue-700">
+                              Platform: 20% • Lawyer Escrow: 10% • Balance: 70% (paid as case progresses)
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleSelectLawyer(quote.id)}
+                            disabled={selecting && selectedQuoteId === quote.id}
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
+                          >
+                            {selecting && selectedQuoteId === quote.id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                Processing M-Pesa Payment...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="w-5 w-5" />
+                                Pay 30% & Select Lawyer
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
