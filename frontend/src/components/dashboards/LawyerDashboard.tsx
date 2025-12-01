@@ -760,55 +760,8 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         </div>
       )}
 
-      {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <StatCard
-          title="Active Clients"
-          value={stats.activeClients}
-          change="+3 this week"
-          trend="up"
-          icon={Users}
-          iconColor="text-blue-600"
-          description="Total clients"
-          className="hover:shadow-lg transition-all duration-200 cursor-pointer"
-          onClick={() => navigate('/clients')}
-        />
-        <StatCard
-          title="Consultations"
-          value={stats.consultationsThisMonth}
-          change={`+${consultationChange}%`}
-          trend="up"
-          icon={Video}
-          iconColor="text-emerald-600"
-          description="This month"
-          className="hover:shadow-lg transition-all duration-200 cursor-pointer"
-          onClick={() => navigate('/consultations')}
-        />
-        <StatCard
-          title="Revenue"
-          value={`KES ${(stats.revenue / 1000).toFixed(0)}K`}
-          change={`+${revenueChange}%`}
-          trend="up"
-          icon={DollarSign}
-          iconColor="text-purple-600"
-          description="This month"
-          className="hover:shadow-lg transition-all duration-200 cursor-pointer"
-          onClick={() => navigate('/analytics')}
-        />
-        <StatCard
-          title="Completion Rate"
-          value={`${stats.completionRate}%`}
-          change="+2%"
-          trend="up"
-          icon={CheckCircle}
-          iconColor="text-amber-600"
-          description="Case success"
-          className="hover:shadow-lg transition-all duration-200"
-        />
-      </div>
-
-      {/* Performance Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Performance Overview - All Services */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Wallet Balance Card */}
         <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
@@ -844,52 +797,87 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
           )}
         </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+        {/* Consultations Card */}
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">This Month</h3>
-            <TrendingUp className="h-5 w-5" />
+            <h3 className="text-lg font-semibold">Consultations</h3>
+            <Video className="h-5 w-5" />
           </div>
           <div className="space-y-3">
             <div>
-              <p className="text-blue-100 text-sm">Consultations</p>
+              <p className="text-blue-100 text-sm">This Month</p>
               <p className="text-2xl font-bold">{performanceData.thisMonth.consultations}</p>
             </div>
             <div>
-              <p className="text-blue-100 text-sm">Revenue</p>
-              <p className="text-2xl font-bold">KES {(performanceData.thisMonth.revenue / 1000).toFixed(0)}K</p>
+              <p className="text-blue-100 text-sm">Pending</p>
+              <p className="text-xl font-semibold">{stats.pendingConsultations}</p>
+            </div>
+            <div className="pt-3 border-t border-blue-400">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="w-full bg-white text-blue-600 hover:bg-blue-50 border-0"
+                onClick={() => navigate('/consultations')}
+              >
+                View All
+              </Button>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        {/* Documents & Certifications Card */}
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Pending</h3>
-            <Clock className="h-5 w-5 text-amber-600" />
+            <h3 className="text-lg font-semibold">Documents</h3>
+            <FileText className="h-5 w-5" />
           </div>
           <div className="space-y-3">
             <div>
-              <p className="text-gray-600 text-sm">Consultations</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.pendingConsultations}</p>
+              <p className="text-purple-100 text-sm">Total Files</p>
+              <p className="text-2xl font-bold">{stats.totalDocuments}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/consultations?status=pending')}>
-              View Pending
-            </Button>
+            <div>
+              <p className="text-purple-100 text-sm">Certifications</p>
+              <p className="text-xl font-semibold">{tierUsage.usage.certifications.current} / {tierUsage.usage.certifications.limit}</p>
+            </div>
+            <div className="pt-3 border-t border-purple-400">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="w-full bg-white text-purple-600 hover:bg-purple-50 border-0"
+                onClick={() => navigate('/documents')}
+              >
+                Manage Files
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        {/* Services & Offerings Card */}
+        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Documents</h3>
-            <FileText className="h-5 w-5 text-purple-600" />
+            <h3 className="text-lg font-semibold">Services</h3>
+            <Briefcase className="h-5 w-5" />
           </div>
           <div className="space-y-3">
             <div>
-              <p className="text-gray-600 text-sm">Total Files</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalDocuments}</p>
+              <p className="text-amber-100 text-sm">Active Services</p>
+              <p className="text-2xl font-bold">{tierUsage.usage.services.current} / {tierUsage.usage.services.limit}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/documents')}>
-              Manage Files
-            </Button>
+            <div>
+              <p className="text-amber-100 text-sm">Active Clients</p>
+              <p className="text-xl font-semibold">{stats.activeClients}</p>
+            </div>
+            <div className="pt-3 border-t border-amber-400">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="w-full bg-white text-amber-600 hover:bg-amber-50 border-0"
+                onClick={() => navigate('/services')}
+              >
+                View Services
+              </Button>
+            </div>
           </div>
         </div>
       </div>
