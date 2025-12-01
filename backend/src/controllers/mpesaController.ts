@@ -455,6 +455,40 @@ export const mpesaCallback = async (req: Request, res: Response) => {
             });
           }
 
+          // Create conversation thread between client and lawyer
+          const existingConversation = await prisma.conversation.findFirst({
+            where: {
+              participants: {
+                every: {
+                  userId: {
+                    in: [serviceRequest.userId, quote.lawyerId]
+                  }
+                }
+              }
+            }
+          });
+
+          if (!existingConversation) {
+            // Create new conversation
+            await prisma.conversation.create({
+              data: {
+                participants: {
+                  create: [
+                    { userId: serviceRequest.userId },
+                    { userId: quote.lawyerId }
+                  ]
+                },
+                messages: {
+                  create: {
+                    senderId: quote.lawyerId,
+                    content: `Hello! Thank you for selecting my quote. I'm ready to start working on your ${serviceRequest.serviceCategory} case. The estimated timeline is ${quote.proposedTimeline}. Feel free to ask any questions!`,
+                    isRead: false
+                  }
+                }
+              }
+            });
+          }
+
           logger.info('Service request payment processed:', { 
             serviceRequestId: metadata.serviceRequestId,
             quoteId: metadata.quoteId,

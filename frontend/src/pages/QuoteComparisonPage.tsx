@@ -303,22 +303,31 @@ export default function QuoteComparisonPage() {
                   <div className="text-left">
                     <p className="font-medium text-gray-900 mb-2">Next Steps:</p>
                     <ol className="text-sm text-gray-700 space-y-1 list-decimal list-inside">
-                      <li>The lawyer will contact you to confirm details</li>
-                      <li>Agree on payment terms (Proposed: KES {selectedLawyer.proposedFee.toLocaleString()})</li>
-                      <li>Payment happens directly between you and the lawyer</li>
-                      <li>Work begins as per timeline ({selectedLawyer.proposedTimeline})</li>
+                      <li>Check your <strong>Messages inbox</strong> - the lawyer has sent you a message</li>
+                      <li>Discuss case details and timeline ({selectedLawyer.proposedTimeline})</li>
+                      <li>Lawyer proceeds with your case (KES {selectedLawyer.proposedFee.toLocaleString()} total)</li>
+                      <li>Pay remaining 70% balance as case progresses</li>
                       <li>After completion, confirm and rate the lawyer</li>
                     </ol>
                   </div>
                 </div>
               </div>
 
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700"
-              >
-                Back to Dashboard
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => navigate('/messages')}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 flex items-center justify-center gap-2"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                  Open Messages
+                </button>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="flex-1 bg-white border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50"
+                >
+                  Back to Dashboard
+                </button>
+              </div>
             </div>
           </div>
         </div>
