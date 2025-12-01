@@ -195,6 +195,7 @@ function App() {
           <Route path="/document-services" element={<GlobalLayout><DocumentServicesPage /></GlobalLayout>} />
           <Route path="/service-request" element={<GlobalLayout><ServiceRequestPage /></GlobalLayout>} />
           <Route path="/booking/:lawyerId" element={<GlobalLayout><BookingPage /></GlobalLayout>} />
+          <Route path="/payment/document/:purchaseId" element={<GlobalLayout><PaymentPage /></GlobalLayout>} />
           <Route path="/payment-callback" element={<GlobalLayout><PaymentCallbackPage /></GlobalLayout>} />
           <Route path="/verify/:certificateId" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />
           <Route path="/verify" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />

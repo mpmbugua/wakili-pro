@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
 import { CreditCard, CheckCircle, AlertCircle, ArrowLeft, Lock, Smartphone } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import axiosInstance from '../lib/axios';
@@ -37,11 +36,11 @@ type PaymentMethod = 'card' | 'mpesa';
 export const PaymentPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { bookingId, reviewId } = useParams<{ bookingId?: string; reviewId?: string }>();
+  const { bookingId, reviewId, purchaseId } = useParams<{ bookingId?: string; reviewId?: string; purchaseId?: string }>();
   const { isAuthenticated, user } = useAuthStore();
   
   const bookingDetails = location.state as (BookingDetails | DocumentPaymentDetails | ServiceRequestPayment) | null;
-  const isDocumentPayment = (bookingDetails && 'reviewId' in bookingDetails) || !!reviewId;
+  const isDocumentPayment = (bookingDetails && 'reviewId' in bookingDetails) || !!reviewId || !!purchaseId;
   const isServiceRequest = bookingDetails && 'serviceType' in bookingDetails && bookingDetails.serviceType === 'service-request-commitment';
   
   // Safe price getter
@@ -73,6 +72,7 @@ export const PaymentPage: React.FC = () => {
     console.log('isAuthenticated:', isAuthenticated);
     console.log('bookingId:', bookingId);
     console.log('reviewId:', reviewId);
+    console.log('purchaseId:', purchaseId);
     console.log('bookingDetails:', bookingDetails);
     
     if (!isAuthenticated) {
@@ -81,12 +81,12 @@ export const PaymentPage: React.FC = () => {
       return;
     }
     
-    // Only redirect if we have neither bookingDetails, bookingId, nor reviewId
-    if (!bookingDetails && !bookingId && !reviewId) {
-      console.log('No booking details, booking ID, or review ID, redirecting to lawyers');
+    // Only redirect if we have neither bookingDetails, bookingId, reviewId, nor purchaseId
+    if (!bookingDetails && !bookingId && !reviewId && !purchaseId) {
+      console.log('No booking details, booking ID, review ID, or purchase ID, redirecting to lawyers');
       navigate('/lawyers');
     }
-  }, [isAuthenticated, bookingDetails, bookingId, reviewId, navigate]);
+  }, [isAuthenticated, bookingDetails, bookingId, reviewId, purchaseId, navigate]);
 
   const formatCardNumber = (value: string) => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
@@ -433,7 +433,7 @@ export const PaymentPage: React.FC = () => {
   }
 
   return (
-    <GlobalLayout>
+    <>
       <div className="max-w-4xl mx-auto py-12 px-4">
         <button
           onClick={() => navigate(-1)}
@@ -813,6 +813,6 @@ export const PaymentPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </GlobalLayout>
+    </>
   );
 };
