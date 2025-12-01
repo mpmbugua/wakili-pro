@@ -37,7 +37,17 @@ interface NavItem {
   roles?: string[];
 }
 
-const navigation: NavItem[] = [
+// Public user navigation (clients)
+const publicNavigation: NavItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Consultations', href: '/consultations', icon: Video },
+  { name: 'Messages', href: '/messages', icon: MessageSquare },
+  { name: 'Documents', href: '/documents', icon: FileText },
+  { name: 'AI Assistant', href: '/ai', icon: Book },
+];
+
+// Lawyer navigation - main items
+const lawyerMainNavigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Consultations', href: '/consultations', icon: Video },
   { name: 'Appointments', href: '/appointments', icon: Calendar },
@@ -46,21 +56,40 @@ const navigation: NavItem[] = [
   { name: 'AI Assistant', href: '/lawyer/ai', icon: Book },
 ];
 
-const lawyerNavigation: NavItem[] = [
+// Lawyer tools navigation
+const lawyerToolsNavigation: NavItem[] = [
   { name: 'My Clients', href: '/clients', icon: Users },
   { name: 'Services', href: '/my-services', icon: Briefcase },
   { name: 'Billing', href: '/billing', icon: CreditCard },
   { name: 'Analytics', href: '/analytics', icon: TrendingUp },
   { name: 'Performance', href: '/performance', icon: Award },
-  { name: 'Signature & Stamp', href: '/lawyer/signature-setup', icon: FileText },
+  { name: 'Signature & Stamp', href: '/lawyer/signature-setup', icon: Stamp },
 ];
 
-const adminNavigation: NavItem[] = [
+// Admin navigation - main items
+const adminMainNavigation: NavItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Messages', href: '/messages', icon: MessageSquare },
+  { name: 'AI Assistant', href: '/admin/ai', icon: Book },
+];
+
+// Admin management navigation
+const adminManagementNavigation: NavItem[] = [
   { name: 'Admin Dashboard', href: '/admin', icon: Shield },
   { name: 'User Management', href: '/admin/users', icon: Users },
   { name: 'Lawyer Verification', href: '/admin/lawyers', icon: Scale },
   { name: 'System Analytics', href: '/admin/analytics', icon: BarChart3 },
   { name: 'System Settings', href: '/admin/settings', icon: Settings },
+];
+
+// Super Admin additional navigation
+const superAdminNavigation: NavItem[] = [
+  { name: 'Admin Dashboard', href: '/admin', icon: Shield },
+  { name: 'User Management', href: '/admin/users', icon: Users },
+  { name: 'Lawyer Verification', href: '/admin/lawyers', icon: Scale },
+  { name: 'System Analytics', href: '/admin/analytics', icon: BarChart3 },
+  { name: 'System Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
 ];
 
 const bottomNavigation: NavItem[] = [
@@ -72,8 +101,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, collapsed, onClose }) 
   const location = useLocation();
   const { user } = useAuthStore();
 
-  const isAdmin = user?.role === 'ADMIN';
+  const isPublic = user?.role === 'PUBLIC';
   const isLawyer = user?.role === 'LAWYER';
+  const isAdmin = user?.role === 'ADMIN';
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
   const NavLink: React.FC<{ item: NavItem }> = ({ item }) => {
     const isActive = location.pathname === item.href || 
@@ -146,29 +177,61 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, collapsed, onClose }) 
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-6">
-            {/* Main Navigation */}
-            <NavSection 
-              title="Main" 
-              icon={<Home className="h-4 w-4 text-slate-400" />}
-              items={navigation}
-            />
-
-            {/* Lawyer Section */}
-            {isLawyer && (
+            {/* PUBLIC USER Navigation */}
+            {isPublic && (
               <NavSection 
-                title="Lawyer Tools" 
-                icon={<Scale className="h-4 w-4 text-slate-400" />}
-                items={lawyerNavigation}
+                title="My Account" 
+                icon={<Home className="h-4 w-4 text-slate-400" />}
+                items={publicNavigation}
               />
             )}
 
-            {/* Admin Section */}
-            {isAdmin && (
-              <NavSection 
-                title="Administration" 
-                icon={<Shield className="h-4 w-4 text-slate-400" />}
-                items={adminNavigation}
-              />
+            {/* LAWYER Navigation */}
+            {isLawyer && (
+              <>
+                <NavSection 
+                  title="Main" 
+                  icon={<Home className="h-4 w-4 text-slate-400" />}
+                  items={lawyerMainNavigation}
+                />
+                <NavSection 
+                  title="Lawyer Tools" 
+                  icon={<Scale className="h-4 w-4 text-slate-400" />}
+                  items={lawyerToolsNavigation}
+                />
+              </>
+            )}
+
+            {/* ADMIN Navigation */}
+            {isAdmin && !isSuperAdmin && (
+              <>
+                <NavSection 
+                  title="Main" 
+                  icon={<Home className="h-4 w-4 text-slate-400" />}
+                  items={adminMainNavigation}
+                />
+                <NavSection 
+                  title="Administration" 
+                  icon={<Shield className="h-4 w-4 text-slate-400" />}
+                  items={adminManagementNavigation}
+                />
+              </>
+            )}
+
+            {/* SUPER ADMIN Navigation */}
+            {isSuperAdmin && (
+              <>
+                <NavSection 
+                  title="Main" 
+                  icon={<Home className="h-4 w-4 text-slate-400" />}
+                  items={adminMainNavigation}
+                />
+                <NavSection 
+                  title="Super Admin" 
+                  icon={<Shield className="h-4 w-4 text-red-400" />}
+                  items={superAdminNavigation}
+                />
+              </>
             )}
           </nav>
 

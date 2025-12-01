@@ -14,7 +14,27 @@ import { useAuthStore } from '../../store/authStore';
 
 export const GlobalSidebar: React.FC = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
+  
+  // Don't show public sidebar for authenticated users on dashboard/private routes
+  const isDashboardRoute = location.pathname.startsWith('/dashboard') ||
+    location.pathname.startsWith('/consultations') ||
+    location.pathname.startsWith('/appointments') ||
+    location.pathname.startsWith('/messages') ||
+    location.pathname.startsWith('/clients') ||
+    location.pathname.startsWith('/my-services') ||
+    location.pathname.startsWith('/billing') ||
+    location.pathname.startsWith('/analytics') ||
+    location.pathname.startsWith('/performance') ||
+    location.pathname.startsWith('/lawyer/') ||
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/settings') ||
+    location.pathname.startsWith('/help');
+  
+  // If user is authenticated and on a dashboard route, don't show public sidebar
+  if (isAuthenticated && isDashboardRoute) {
+    return null;
+  }
   
   const isActive = (path: string) => {
     if (path === '/' && location.pathname === '/') return true;
@@ -22,12 +42,12 @@ export const GlobalSidebar: React.FC = () => {
     return false;
   };
   
+  // Public navigation items (for non-authenticated users or public pages)
   const navigationItems = [
     { path: '/', icon: Home, label: 'Home' },
     { path: '/ai', icon: MessageSquare, label: 'AI Legal Assistant' },
     { path: '/lawyers', icon: Scale, label: 'Expert Lawyers' },
     { path: '/services', icon: Briefcase, label: 'Legal Services' },
-    { path: '/documents', icon: FileText, label: 'Case Analysis & Documents Review' },
     { path: '/marketplace', icon: ShoppingBag, label: 'Legal Documents' },
     { path: '/resources', icon: Book, label: 'Legal Resources' },
   ];

@@ -7,6 +7,7 @@ import { AppShell } from './components/layout/AppShell';
 import { LandingPage } from './pages/LandingPage';
 import { AIAssistant } from './pages/AIAssistant';
 import { LawyerAIAssistant } from './pages/LawyerAIAssistant';
+import { AdminAIAssistant } from './pages/AdminAIAssistant';
 import { LawyersBrowse } from './pages/LawyersBrowse';
 import { MarketplaceBrowse } from './pages/MarketplaceBrowse';
 import { ResourcesPage } from './pages/ResourcesPage';
@@ -364,6 +365,14 @@ function App() {
                 <ProtectedRoute hydrated={hydrated}>
                   <LawyerAIAssistant />
                 </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/ai" 
+              element={
+                <AdminRoute hydrated={hydrated}>
+                  <AdminAIAssistant />
+                </AdminRoute>
               } 
             />
             <Route 

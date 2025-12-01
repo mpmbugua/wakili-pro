@@ -3,6 +3,8 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { Breadcrumbs } from './Breadcrumbs';
+import { GlobalLayout } from './GlobalLayout';
+import { useAuthStore } from '../../store/authStore';
 
 interface AppShellProps {
   children?: React.ReactNode;
@@ -12,17 +14,22 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
+  const { isAuthenticated } = useAuthStore();
 
-  // Public routes that don't use the shell
+  // Public routes that use GlobalLayout with public sidebar
   const publicRoutes = ['/', '/login', '/register', '/ai', '/lawyers', '/marketplace', '/services', '/resources', '/document-services', '/service-request'];
   const isPublicRoute = publicRoutes.includes(location.pathname) || 
                         location.pathname.startsWith('/booking') ||
-                        location.pathname.startsWith('/payment');
+                        location.pathname.startsWith('/payment') ||
+                        location.pathname.startsWith('/lawyers/') ||
+                        location.pathname.startsWith('/service-requests/');
 
+  // For public routes, use GlobalLayout which has the public sidebar
   if (isPublicRoute) {
-    return <>{children || <Outlet />}</>;
+    return <GlobalLayout>{children || <Outlet />}</GlobalLayout>;
   }
 
+  // For authenticated routes, use AppShell with role-based Sidebar
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Top Navigation Bar */}
