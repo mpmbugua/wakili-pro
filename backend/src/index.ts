@@ -343,7 +343,13 @@ app.use('/api/document-payment', documentPaymentRouter);
 
 // Mount messages routes (Real-time messaging)
 import messagesRouter from './routes/messages';
+import devRouter from './routes/dev';
 app.use('/api/messages', messagesRouter);
+
+// Mount dev routes (Development utilities - only in dev/staging)
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/dev', devRouter);
+}
 
 // Mount article routes
 import articlesRouter from './routes/articles';
