@@ -148,10 +148,10 @@ export const PaymentPage: React.FC = () => {
           const documentDetails = bookingDetails as DocumentPaymentDetails;
           
           // Check if this is a marketplace purchase
-          if (documentDetails.serviceType === 'marketplace-purchase' || (location.state as any)?.type === 'marketplace_document') {
+          if (documentDetails.serviceType === 'marketplace-purchase' || (location.state as any)?.type === 'marketplace_document' || purchaseId) {
             // Marketplace document payment
             const marketplaceData = {
-              purchaseId: (location.state as any)?.purchaseId,
+              purchaseId: purchaseId || (location.state as any)?.purchaseId,
               phoneNumber: mpesaDetails.phoneNumber,
             };
 
@@ -505,14 +505,14 @@ export const PaymentPage: React.FC = () => {
                   <div>
                     <p className="text-sm text-slate-600">Service Type</p>
                     <p className="font-semibold text-slate-900">
-                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase' 
+                      {(location.state as any)?.type === 'marketplace_document' || purchaseId
                         ? 'Legal Document Template' 
                         : (bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' 
                         ? 'AI Document Review' 
                         : 'Lawyer Certification'}
                     </p>
                     <p className="text-sm text-blue-600">
-                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase'
+                      {(location.state as any)?.type === 'marketplace_document' || purchaseId
                         ? 'Instant Download'
                         : (bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' 
                         ? 'Automated Analysis' 
@@ -521,20 +521,24 @@ export const PaymentPage: React.FC = () => {
                   </div>
                   <div className="border-t pt-4">
                     <p className="text-sm text-slate-600">Document</p>
-                    <p className="font-semibold text-slate-900">{(bookingDetails as DocumentPaymentDetails).fileName}</p>
+                    <p className="font-semibold text-slate-900">
+                      {(location.state as any)?.description || (bookingDetails as DocumentPaymentDetails)?.fileName || 'Document'}
+                    </p>
                   </div>
-                  <div className="border-t pt-4">
-                    <p className="text-sm text-slate-600">Document Type</p>
-                    <p className="font-semibold text-slate-900">{(bookingDetails as DocumentPaymentDetails).documentType}</p>
-                  </div>
+                  {!(location.state as any)?.type && !purchaseId && (
+                    <div className="border-t pt-4">
+                      <p className="text-sm text-slate-600">Document Type</p>
+                      <p className="font-semibold text-slate-900">{(bookingDetails as DocumentPaymentDetails).documentType}</p>
+                    </div>
+                  )}
                   <div className="border-t pt-4">
                     <p className="text-sm text-slate-600">
-                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase' 
+                      {(location.state as any)?.type === 'marketplace_document' || purchaseId
                         ? 'Availability' 
                         : 'Processing Time'}
                     </p>
                     <p className="font-semibold text-slate-900">
-                      {(bookingDetails as DocumentPaymentDetails).serviceType === 'marketplace-purchase'
+                      {(location.state as any)?.type === 'marketplace_document' || purchaseId
                         ? 'Instant download after payment'
                         : (bookingDetails as DocumentPaymentDetails).serviceType === 'ai-review' 
                         ? '5-10 minutes' 
@@ -544,7 +548,9 @@ export const PaymentPage: React.FC = () => {
                   <div className="border-t pt-4 bg-blue-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
                     <div className="flex justify-between items-center">
                       <span className="text-slate-900 font-semibold">Total Amount</span>
-                      <span className="text-2xl font-bold text-blue-600">KES {getPrice().toLocaleString()}</span>
+                      <span className="text-2xl font-bold text-blue-600">
+                        KES {((location.state as any)?.amount || getPrice()).toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 </>
