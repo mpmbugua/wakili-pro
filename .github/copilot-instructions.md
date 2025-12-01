@@ -8,6 +8,7 @@
 - **NEVER** duplicate STK Push logic  
 - **NEVER** add separate callback URLs
 - **ALWAYS** use unified controller for new payment types
+- **ALWAYS** trigger email + SMS notifications after payment success
 
 ### 2. UI Feature Protection
 **ABSOLUTE RULE**: DO NOT delete or modify these critical features without explicit user request:
@@ -90,6 +91,7 @@ npm run lint             # ESLint + Prettier check all packages
 - **Validation**: Zod schemas shared from `/shared` package
 - **Testing**: Jest + Supertest for API integration tests
 - **Payments**: **UNIFIED M-Pesa Integration** - ONE endpoint for ALL payment types
+- **Notifications**: Email (SMTP/Gmail) + SMS (AfricasTalking) triggered after payments
 
 ### Shared Package
 - **Types**: Central TypeScript definitions for API contracts
@@ -145,6 +147,14 @@ import { UserSchema } from '@shared/schemas';
 - Server state: React Query for API data
 - Client state: Zustand stores in `/src/store`
 - Form state: React Hook Form with controlled components
+
+### Notification System
+- Email: SMTP via Nodemailer (Gmail/SendGrid)
+- SMS: AfricasTalking API for Kenya market
+- Triggered: Automatically after payment success in M-Pesa callback
+- Non-blocking: Async with error logging (don't throw)
+- Templates: `backend/src/services/emailTemplates.ts`
+- SMS Service: `backend/src/services/smsService.ts`
 
 ### Testing Strategy
 - Unit tests: Individual functions and components
