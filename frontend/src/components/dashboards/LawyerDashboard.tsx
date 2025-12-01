@@ -260,25 +260,28 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => navigate('/lawyer-onboarding')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 inline-flex items-center gap-3 font-semibold text-lg"
             >
-              <User className="h-5 w-5" />
+              <User className="h-6 w-6" />
               Complete Profile Setup
+              <ArrowRight className="h-5 w-5" />
             </button>
+          </div>
+          <div className="mt-4">
             <button
               onClick={checkVerificationStatus}
               disabled={checking}
-              className="px-6 py-3 bg-white border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+              className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2 text-sm"
             >
               {checking ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                  Checking...
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                  Checking Status...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="h-5 w-5" />
-                  Refresh Status
+                  <CheckCircle className="h-4 w-4" />
+                  Refresh Verification Status
                 </>
               )}
             </button>
