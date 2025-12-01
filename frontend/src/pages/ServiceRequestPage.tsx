@@ -130,60 +130,6 @@ export const ServiceRequestPage: React.FC = () => {
 
     return fieldMappings[serviceCategory] || [];
   };
-    try {
-      // Import axiosInstance at the top if not already imported
-      const axiosInstance = (await import('../lib/axios')).default;
-      
-      // Call M-Pesa STK Push API using unified endpoint
-      const response = await axiosInstance.post('/payments/mpesa/initiate', {
-        phoneNumber: paymentPhone,
-        amount: 500,
-        reviewId: 'service-request-' + Date.now(),
-        paymentType: 'SERVICE_REQUEST_COMMITMENT'
-      });
-
-      const data = response.data;
-
-      if (data.success) {
-        const { paymentId } = data.data;
-        
-        // Poll for payment status
-        const checkPayment = setInterval(async () => {
-          const statusResponse = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
-          const statusData = statusResponse.data;
-
-          if (statusData.success && statusData.data.status === 'COMPLETED') {
-            clearInterval(checkPayment);
-            setFormData(prev => ({
-              ...prev,
-              commitmentFeePaid: true,
-              commitmentFeeAmount: 500,
-              commitmentFeeTxId: statusData.data.transactionId || paymentId
-            }));
-            setShowPaymentModal(false);
-            setIsProcessingPayment(false);
-          } else if (statusData.status === 'FAILED') {
-            clearInterval(checkPayment);
-            alert('Payment failed. Please try again.');
-            setIsProcessingPayment(false);
-          }
-        }, 2000);
-
-        // Timeout after 60 seconds
-        setTimeout(() => {
-          clearInterval(checkPayment);
-          setIsProcessingPayment(false);
-        }, 60000);
-      } else {
-        alert('Failed to initiate payment. Please try again.');
-        setIsProcessingPayment(false);
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      alert('Payment error. Please try again.');
-      setIsProcessingPayment(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
