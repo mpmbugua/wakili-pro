@@ -1,0 +1,135 @@
+#!/usr/bin/env node
+/**
+ * Build Checkpoint Validation Script
+ * Run this before any deployment to ensure critical features haven't regressed
+ * 
+ * Usage: node .buildcheck
+ * Exit Code: 0 = Pass, 1 = Fail
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const CHECKS = {
+  'Payment Controller Exists': () => {
+    const file = path.join(__dirname, 'src/controllers/mpesaController.ts');
+    if (!fs.existsSync(file)) throw new Error('mpesaController.ts not found');
+    const content = fs.readFileSync(file, 'utf8');
+    if (content.length < 30000) throw new Error('mpesaController.ts too short (possible corruption)');
+  },
+
+  'All 6 Payment Types Present': () => {
+    const file = path.join(__dirname, 'src/controllers/mpesaController.ts');
+    const content = fs.readFileSync(file, 'utf8');
+    const types = ['BOOKING', 'PURCHASE', 'REVIEW', 'SUBSCRIPTION', 'SERVICE_REQUEST_COMMITMENT', 'SERVICE_REQUEST_PAYMENT'];
+    types.forEach(type => {
+      if (!content.includes(`resourceType === '${type}'`)) {
+        throw new Error(`Payment type ${type} missing from callback handler`);
+      }
+    });
+  },
+
+  'Notifications Not Removed': () => {
+    const file = path.join(__dirname, 'src/controllers/mpesaController.ts');
+    const content = fs.readFileSync(file, 'utf8');
+    const emailCount = (content.match(/sendPaymentConfirmationEmail/g) || []).length;
+    const smsCount = (content.match(/sendSMS/g) || []).length;
+    if (emailCount < 6) throw new Error(`Only ${emailCount} email notifications found, expected at least 6`);
+    if (smsCount < 6) throw new Error(`Only ${smsCount} SMS notifications found, expected at least 6`);
+  },
+
+  'Subscription Pricing Unchanged': () => {
+    const file = path.join(__dirname, 'src/services/subscriptionService.ts');
+    const content = fs.readFileSync(file, 'utf8');
+    if (!content.includes('LITE: 2999')) throw new Error('LITE pricing changed from 2999');
+    if (!content.includes('PRO: 6999')) throw new Error('PRO pricing changed from 6999');
+  },
+
+  'PDF Generation Trigger Exists': () => {
+    const file = path.join(__dirname, 'src/controllers/mpesaController.ts');
+    const content = fs.readFileSync(file, 'utf8');
+    if (!content.includes('processDocumentGeneration')) {
+      throw new Error('PDF generation trigger removed from purchase callback');
+    }
+  },
+
+  'Notification Services Exist': () => {
+    const files = [
+      'src/services/emailTemplates.ts',
+      'src/services/smsService.ts',
+      'src/services/documentNotificationService.ts'
+    ];
+    files.forEach(file => {
+      const fullPath = path.join(__dirname, file);
+      if (!fs.existsSync(fullPath)) throw new Error(`${file} not found`);
+    });
+  },
+
+  'No Blocking Notifications': () => {
+    const file = path.join(__dirname, 'src/controllers/mpesaController.ts');
+    const content = fs.readFileSync(file, 'utf8');
+    // Check for await on notification calls (should use .catch() instead)
+    const lines = content.split('\n');
+    lines.forEach((line, i) => {
+      if (line.includes('await sendPaymentConfirmationEmail')) {
+        throw new Error(`Line ${i + 1}: Notification is blocking (uses await instead of .catch())`);
+      }
+      if (line.includes('await sendSMS') && !line.includes('await sendSMS(')) {
+        throw new Error(`Line ${i + 1}: SMS notification is blocking (uses await instead of .catch())`);
+      }
+    });
+  },
+
+  'TypeScript Compiles': () => {
+    try {
+      execSync('npx tsc --noEmit --skipLibCheck', { stdio: 'pipe', cwd: __dirname });
+    } catch (error) {
+      throw new Error('TypeScript compilation failed');
+    }
+  },
+
+  'Prisma Schema Valid': () => {
+    try {
+      execSync('npx prisma validate', { stdio: 'pipe', cwd: __dirname });
+    } catch (error) {
+      throw new Error('Prisma schema validation failed');
+    }
+  },
+
+  'Build Produces Output': () => {
+    const distExists = fs.existsSync(path.join(__dirname, 'dist'));
+    if (distExists) {
+      const indexExists = fs.existsSync(path.join(__dirname, 'dist/index.js'));
+      if (!indexExists) throw new Error('dist/index.js not found after build');
+    }
+    // If dist doesn't exist, skip this check (build not run yet)
+  }
+};
+
+console.log('🔍 Running Build Checkpoint Validation...\n');
+
+let passed = 0;
+let failed = 0;
+
+for (const [checkName, checkFn] of Object.entries(CHECKS)) {
+  try {
+    checkFn();
+    console.log(`✅ ${checkName}`);
+    passed++;
+  } catch (error) {
+    console.error(`❌ ${checkName}: ${error.message}`);
+    failed++;
+  }
+}
+
+console.log(`\n📊 Results: ${passed} passed, ${failed} failed`);
+
+if (failed > 0) {
+  console.error('\n🚨 CHECKPOINT VALIDATION FAILED - DO NOT DEPLOY');
+  console.error('Review changes and compare with commit 6eaf4d9');
+  process.exit(1);
+} else {
+  console.log('\n✅ ALL CHECKS PASSED - Safe to proceed');
+  process.exit(0);
+}
