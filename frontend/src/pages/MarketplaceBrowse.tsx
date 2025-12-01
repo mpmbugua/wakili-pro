@@ -456,6 +456,186 @@ const sampleDocuments: Document[] = [
     lastUpdated: '2024-02',
     features: ['Stamp duty guide', 'Transfer procedure', 'Tax implications', 'Witness requirements'],
     previewAvailable: true
+  },
+  {
+    id: '29',
+    title: 'Catering Agreement',
+    category: 'Corporate',
+    description: 'Professional catering services contract for weddings, corporate events, and functions. Covers menu, pricing, staffing, and cancellation terms.',
+    price: 850,
+    downloads: 1234,
+    rating: 4.8,
+    reviewCount: 256,
+    pages: 6,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-11',
+    features: ['Menu specifications', 'Staff requirements', 'Equipment rental', 'Payment schedule', 'Cancellation policy', 'Food safety clauses'],
+    previewAvailable: true
+  },
+  {
+    id: '30',
+    title: 'Domestic Worker Employment Contract',
+    category: 'Employment',
+    description: 'Employment agreement for house helps, gardeners, security guards, and domestic staff. Compliant with Kenya Labour Laws and includes NSSF/NHIF provisions.',
+    price: 550,
+    downloads: 2145,
+    rating: 4.9,
+    reviewCount: 412,
+    pages: 5,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-11',
+    features: ['Salary & allowances', 'Working hours', 'Leave entitlements', 'NSSF/NHIF guide', 'Termination terms', 'Accommodation clause'],
+    previewAvailable: true
+  },
+  {
+    id: '31',
+    title: 'Employment Termination Agreement',
+    category: 'Employment',
+    description: 'Mutual separation agreement for ending employment. Includes severance calculation, notice period waiver, and settlement terms.',
+    price: 1100,
+    downloads: 567,
+    rating: 4.7,
+    reviewCount: 98,
+    pages: 7,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-10',
+    features: ['Severance calculator', 'Notice waiver', 'Non-compete clause', 'Final settlement', 'Reference letter', 'Dispute waiver'],
+    previewAvailable: true
+  },
+  {
+    id: '32',
+    title: 'Franchise Agreement',
+    category: 'Corporate',
+    description: 'Comprehensive franchise agreement for expanding business through franchisees. Covers brand usage, royalties, territories, and operational standards.',
+    price: 3500,
+    downloads: 178,
+    rating: 5.0,
+    reviewCount: 34,
+    pages: 22,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-11',
+    features: ['Royalty structure', 'Territory rights', 'Brand guidelines', 'Training requirements', 'Quality standards', 'Renewal terms'],
+    previewAvailable: true
+  },
+  {
+    id: '33',
+    title: 'Distribution Agreement',
+    category: 'Corporate',
+    description: 'Product distribution contract between manufacturers and distributors. Defines territories, pricing, targets, and exclusive/non-exclusive rights.',
+    price: 1650,
+    downloads: 423,
+    rating: 4.8,
+    reviewCount: 87,
+    pages: 12,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-10',
+    features: ['Territory definition', 'Pricing structure', 'Sales targets', 'Marketing support', 'Stock management', 'Termination clause'],
+    previewAvailable: true
+  },
+  {
+    id: '34',
+    title: 'Agency Agreement',
+    category: 'Corporate',
+    description: 'Sales agent or representative agreement. Covers commission structure, territory, reporting, and agent obligations for product/service sales.',
+    price: 1250,
+    downloads: 634,
+    rating: 4.7,
+    reviewCount: 124,
+    pages: 9,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-11',
+    features: ['Commission rates', 'Territory rights', 'Sales targets', 'Reporting requirements', 'Expenses policy', 'Non-compete'],
+    previewAvailable: true
+  },
+  {
+    id: '35',
+    title: 'Property Management Agreement',
+    category: 'Property',
+    description: 'Contract between property owner and property manager. Covers rent collection, maintenance, tenant management, and management fees.',
+    price: 1400,
+    downloads: 489,
+    rating: 4.9,
+    reviewCount: 102,
+    pages: 11,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-11',
+    features: ['Management fee structure', 'Rent collection', 'Maintenance authority', 'Tenant screening', 'Reporting obligations', 'Insurance'],
+    previewAvailable: true
+  },
+  {
+    id: '36',
+    title: 'Bedsitter Tenancy Agreement',
+    category: 'Property',
+    description: 'Simplified rental agreement for single-room bedsitters and studio apartments. Affordable and tenant-friendly format.',
+    price: 400,
+    downloads: 3267,
+    rating: 4.8,
+    reviewCount: 589,
+    pages: 4,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-11',
+    features: ['Simple language', 'Utility sharing', 'Deposit terms', 'Notice period', 'Affordable pricing', 'Swahili translation'],
+    previewAvailable: true
+  },
+  {
+    id: '37',
+    title: 'Boundary Dispute Settlement Agreement',
+    category: 'Property',
+    description: 'Mediated settlement for land boundary disputes. Includes survey requirements, compensation, and dispute resolution framework.',
+    price: 1750,
+    downloads: 312,
+    rating: 4.9,
+    reviewCount: 67,
+    pages: 8,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-10',
+    features: ['Survey provisions', 'Compensation formula', 'Mediation framework', 'Beacons placement', 'Registration guide', 'Court filing option'],
+    previewAvailable: true
+  },
+  {
+    id: '38',
+    title: 'Consent to Travel (Minor)',
+    category: 'Family Law',
+    description: 'Parental consent for children traveling internationally with one parent, guardian, or alone. Embassy-ready format.',
+    price: 350,
+    downloads: 1876,
+    rating: 4.6,
+    reviewCount: 287,
+    pages: 2,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-11',
+    features: ['Notarization guide', 'Embassy requirements', 'Multiple destinations', 'Duration flexibility', 'Guardian details', 'Emergency contacts'],
+    previewAvailable: true
+  },
+  {
+    id: '39',
+    title: 'Guarantee Agreement',
+    category: 'Financial',
+    description: 'Personal or corporate guarantee for loans and credit facilities. Defines guarantor obligations, liability limits, and release conditions.',
+    price: 1050,
+    downloads: 723,
+    rating: 4.8,
+    reviewCount: 156,
+    pages: 8,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-11',
+    features: ['Liability definition', 'Release conditions', 'Maximum exposure', 'Call procedures', 'Joint guarantees', 'Indemnity clauses'],
+    previewAvailable: true
+  },
+  {
+    id: '40',
+    title: 'Debt Settlement Agreement',
+    category: 'Financial',
+    description: 'Restructuring agreement for overdue debts. Includes payment plans, interest waivers, and full & final settlement terms.',
+    price: 750,
+    downloads: 1456,
+    rating: 4.7,
+    reviewCount: 298,
+    pages: 6,
+    format: 'PDF + DOCX',
+    lastUpdated: '2024-10',
+    features: ['Payment plan template', 'Interest reduction', 'Lump sum discount', 'Default consequences', 'Credit bureau reporting', 'Legal protection'],
+    previewAvailable: true
   }
 ];
 
@@ -1074,21 +1254,131 @@ export const MarketplaceBrowse: React.FC = () => {
                       </>
                     )}
                     
+                    {/* Employment - Domestic Worker */}
+                    {previewDocument.title.includes('Domestic Worker') && (
+                      <>
+                        <p><strong>DOMESTIC WORKER EMPLOYMENT CONTRACT</strong></p>
+                        <p>This Agreement is made on _____ day of _________, 20___</p>
+                        <p><strong>BETWEEN:</strong></p>
+                        <p className="pl-4">Employer: _________________________ ("Employer")</p>
+                        <p className="pl-4">Address: _________________________</p>
+                        <p className="pl-4">Employee: _________________________ ("Worker")</p>
+                        <p className="pl-4">ID No: _________________________</p>
+                        <p className="mt-4"><strong>1. POSITION AND DUTIES</strong></p>
+                        <p className="pl-4">Position: ☐ House Help ☐ Gardener ☐ Security Guard ☐ Cook ☐ Nanny</p>
+                        <p className="pl-4">Duties: _________________________</p>
+                        <p className="mt-4"><strong>2. SALARY AND BENEFITS</strong></p>
+                        <p className="pl-4">Monthly Salary: KES _________________________</p>
+                        <p className="pl-4">Accommodation: ☐ Provided ☐ Not Provided</p>
+                        <p className="pl-4">Meals: ☐ Provided ☐ Allowance KES _____</p>
+                        <p className="pl-4">NSSF: ☐ Employer pays ☐ Shared</p>
+                        <p className="pl-4">NHIF: ☐ Employer pays ☐ Worker pays</p>
+                        <p className="mt-4"><strong>3. WORKING HOURS</strong></p>
+                        <p className="pl-4">Start Time: _____ End Time: _____</p>
+                        <p className="pl-4">Rest Days: _________________________</p>
+                        <p className="pl-4">Overtime Rate: KES _____ per hour</p>
+                        <p className="mt-4"><strong>4. LEAVE ENTITLEMENT</strong></p>
+                        <p className="pl-4">Annual Leave: 21 days per year</p>
+                        <p className="pl-4">Sick Leave: As per Labour Laws</p>
+                        <p className="pl-4">Maternity Leave: 3 months (if applicable)</p>
+                        <p className="mt-4"><strong>5. TERMINATION</strong></p>
+                        <p className="pl-4">Notice Period: _____ days written notice</p>
+                        <p className="pl-4">Grounds for termination: Misconduct, theft, neglect...</p>
+                        <p className="mt-4 text-slate-500 italic text-xs">
+                          [Includes: NSSF/NHIF registration guide, Service gratuity, Disciplinary procedure, Reference letter template]
+                        </p>
+                      </>
+                    )}
+                    
+                    {/* Catering Agreement */}
+                    {previewDocument.title.includes('Catering') && (
+                      <>
+                        <p><strong>CATERING SERVICES AGREEMENT</strong></p>
+                        <p>This Agreement is made on _____ day of _________, 20___</p>
+                        <p><strong>BETWEEN:</strong></p>
+                        <p className="pl-4">Caterer: _________________________ ("Service Provider")</p>
+                        <p className="pl-4">Client: _________________________ ("Client")</p>
+                        <p className="mt-4"><strong>EVENT DETAILS:</strong></p>
+                        <p className="pl-4">Event Type: ☐ Wedding ☐ Corporate ☐ Birthday ☐ Other: _____</p>
+                        <p className="pl-4">Date: _________________________ Time: _____</p>
+                        <p className="pl-4">Venue: _________________________</p>
+                        <p className="pl-4">Number of Guests: _________________________</p>
+                        <p className="mt-4"><strong>1. MENU AND SERVICES</strong></p>
+                        <p className="pl-4">Menu Package: _________________________</p>
+                        <p className="pl-4">☐ Appetizers ☐ Main Course ☐ Dessert ☐ Drinks</p>
+                        <p className="pl-4">Special Dietary Requirements: _________________________</p>
+                        <p className="mt-4"><strong>2. PRICING</strong></p>
+                        <p className="pl-4">Price per Person: KES _________________________</p>
+                        <p className="pl-4">Total Package Cost: KES _________________________</p>
+                        <p className="pl-4">Additional Services: KES _________________________</p>
+                        <p className="pl-4">☐ Waiters/Servers ☐ Equipment Rental ☐ Decor</p>
+                        <p className="mt-4"><strong>3. PAYMENT TERMS</strong></p>
+                        <p className="pl-4">Deposit (50%): KES _____ Due: _____</p>
+                        <p className="pl-4">Balance (50%): KES _____ Due: 3 days before event</p>
+                        <p className="mt-4"><strong>4. CANCELLATION POLICY</strong></p>
+                        <p className="pl-4">30+ days: Full refund less 10%</p>
+                        <p className="pl-4">14-29 days: 50% refund</p>
+                        <p className="pl-4">Less than 14 days: No refund</p>
+                        <p className="mt-4"><strong>5. CATERER'S OBLIGATIONS</strong></p>
+                        <p className="pl-4">5.1 Food safety and hygiene standards</p>
+                        <p className="pl-4">5.2 Timely setup and service</p>
+                        <p className="pl-4">5.3 Professional staff and presentation</p>
+                        <p className="mt-4 text-slate-500 italic text-xs">
+                          [Includes: Menu tasting options, Equipment list, Staff ratio, Food safety certificates, Liability insurance]
+                        </p>
+                      </>
+                    )}
+                    
+                    {/* Financial - Guarantee */}
+                    {previewDocument.title.includes('Guarantee') && (
+                      <>
+                        <p><strong>GUARANTEE AGREEMENT</strong></p>
+                        <p>This Agreement is made on _____ day of _________, 20___</p>
+                        <p><strong>PARTIES:</strong></p>
+                        <p className="pl-4">Lender: _________________________ ("Creditor")</p>
+                        <p className="pl-4">Borrower: _________________________ ("Principal Debtor")</p>
+                        <p className="pl-4">Guarantor: _________________________ ("Guarantor")</p>
+                        <p className="pl-4">Guarantor ID: _________________________</p>
+                        <p className="mt-4"><strong>1. GUARANTEE DETAILS</strong></p>
+                        <p className="pl-4">Principal Loan Amount: KES _________________________</p>
+                        <p className="pl-4">Maximum Liability: KES _________________________</p>
+                        <p className="pl-4">Guarantee Type: ☐ Full ☐ Limited ☐ Continuing</p>
+                        <p className="mt-4"><strong>2. GUARANTOR'S OBLIGATIONS</strong></p>
+                        <p className="pl-4">2.1 Pay all amounts due if borrower defaults</p>
+                        <p className="pl-4">2.2 Liable for principal, interest, and costs</p>
+                        <p className="pl-4">2.3 Cannot dispute validity of underlying debt</p>
+                        <p className="mt-4"><strong>3. SECURITY PROVIDED</strong></p>
+                        <p className="pl-4">Collateral: _________________________</p>
+                        <p className="pl-4">Title Deed No: _________________________</p>
+                        <p className="mt-4"><strong>4. RELEASE CONDITIONS</strong></p>
+                        <p className="pl-4">Guarantee released upon: Full loan repayment</p>
+                        <p className="pl-4">Written confirmation from lender required</p>
+                        <p className="mt-4 text-slate-500 italic text-xs">
+                          [Includes: Joint guarantee provisions, Call procedures, Legal fees, Indemnity clauses, Asset disclosure]
+                        </p>
+                      </>
+                    )}
+                    
                     {/* Generic fallback - only if no other match */}
                     {!previewDocument.title.includes('Employment') && 
                      !previewDocument.title.includes('Freelance') &&
+                     !previewDocument.title.includes('Domestic Worker') &&
                      !previewDocument.title.includes('Rental') && 
                      !previewDocument.title.includes('Lease') && 
                      !previewDocument.title.includes('Tenant') &&
+                     !previewDocument.title.includes('Bedsitter') &&
                      !previewDocument.title.includes('Land') && 
                      !previewDocument.title.includes('Construction') &&
                      !previewDocument.title.includes('Divorce') && 
                      !previewDocument.title.includes('Prenuptial') &&
                      !previewDocument.title.includes('Custody') &&
+                     !previewDocument.title.includes('Travel') &&
                      !previewDocument.title.includes('Partnership') &&
                      !previewDocument.title.includes('NDA') &&
                      !previewDocument.title.includes('Non-Disclosure') &&
-                     !previewDocument.title.includes('Car Hire') && (
+                     !previewDocument.title.includes('Car Hire') &&
+                     !previewDocument.title.includes('Catering') &&
+                     !previewDocument.title.includes('Guarantee') && (
                       <>
                         <p><strong>THIS AGREEMENT</strong> is made on the _____ day of _________, 20___</p>
                         <p><strong>BETWEEN:</strong></p>
