@@ -28,7 +28,7 @@ export async function initiateMarketplacePayment(req: AuthenticatedRequest, res:
     const purchase = await prisma.documentPurchase.findUnique({
       where: { id: purchaseId },
       include: {
-        document: true
+        DocumentTemplate: true
       }
     });
 
@@ -143,7 +143,7 @@ export async function handleMarketplacePaymentCallback(req: AuthenticatedRequest
       const purchase = await prisma.documentPurchase.findUnique({
         where: { id: purchaseId },
         include: {
-          document: true
+          DocumentTemplate: true
         }
       });
 
