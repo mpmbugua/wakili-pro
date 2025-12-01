@@ -1066,6 +1066,85 @@ When adding a NEW payment feature:
 4. ✅ Poll `/api/payments/mpesa/status/:paymentId`
 5. ✅ Update resource status on payment completion
 6. ✅ Handle payment in callback (`mpesaController.handleCallback`)
+7. ✅ **Add notification triggers** (email + SMS)
+
+### Payment Notification Requirements
+
+**CRITICAL**: Every payment completion MUST trigger notifications to keep users informed.
+
+**Implementation Pattern** (in `mpesaController.ts` callback):
+```typescript
+// After updating resource status (booking, review, purchase, etc.)
+
+// 1. Fetch user details
+const user = await prisma.user.findUnique({
+  where: { id: payment.userId },
+});
+
+// 2. Send email notification (non-blocking)
+if (user?.email) {
+  sendPaymentConfirmationEmail(
+    user.email,
+    `${user.firstName} ${user.lastName}`,
+    {
+      bookingId: resourceId,
+      amount: payment.amount,
+      transactionId: callbackResult.transactionId || payment.id,
+      paymentMethod: 'M-Pesa'
+    }
+  ).catch(err => logger.error('[Payment] Email notification error:', err));
+}
+
+// 3. Send SMS notification (non-blocking)
+if (user?.phoneNumber) {
+  const smsMessage = `Wakili Pro: Payment of KES ${payment.amount.toLocaleString()} received. [Service details]. Ref: ${callbackResult.transactionId}`;
+  sendSMS(user.phoneNumber, smsMessage).catch(err => logger.error('[Payment] SMS notification error:', err));
+}
+```
+
+**Notification Triggers by Payment Type**:
+
+| Payment Type | Email Recipient | SMS Recipient | Email Subject | SMS Content |
+|--------------|-----------------|---------------|---------------|-------------|
+| **Booking** | Client | Client | Payment Confirmation | "Booking confirmed. KES X,XXX" |
+| **Purchase** | Client | Client | Document Purchase Confirmed | "Document ready. Download now" |
+| **Review** | Client | Client | Review Payment Confirmed | "AI/Certification processing" |
+| **Subscription** | Lawyer | Lawyer | Subscription Activated | "LITE/PRO subscription active" |
+| **Service Request Commitment** | Client | Client | Service Request Submitted | "Expect 3 quotes in 24-48hr" |
+| **Service Request 30% Payment** | Client + Lawyer | Client + Lawyer | Case Started / Escrow Credited | "Lawyer ready" / "Escrow KES X" |
+
+**Service Request 30% Payment - Dual Notifications**:
+```typescript
+// Client notification
+sendPaymentConfirmationEmail(client.email, clientName, { ... });
+sendSMS(client.phone, `30% payment received. Lawyer ready to start.`);
+
+// Lawyer notification with payment breakdown
+const emailBody = `
+  <h2>Client Selected Your Quote!</h2>
+  <p>Payment Breakdown:</p>
+  <ul>
+    <li>Total Quote: KES ${quotedAmount}</li>
+    <li>Client Paid (30%): KES ${paidAmount}</li>
+    <li>Your Escrow (10%): KES ${lawyerEscrow} ✅</li>
+    <li>Platform Commission (20%): KES ${platformCommission}</li>
+    <li>Balance (70%): KES ${balance} (later)</li>
+  </ul>
+`;
+sendPaymentConfirmationEmail(lawyer.email, lawyerName, { ... });
+sendSMS(lawyer.phone, `Escrow credited. Check Messages.`);
+```
+
+**Error Handling**:
+- Notifications are **non-blocking** - use `.catch()` not `await`
+- Log errors but **don't throw** (payment already completed)
+- Failed notifications don't rollback payment status
+
+**Files to Import**:
+```typescript
+import { sendPaymentConfirmationEmail } from '../services/emailTemplates';
+import { sendSMS } from '../services/smsService';
+```
 
 **DO NOT**:
 - ❌ Create new payment endpoints
@@ -1074,6 +1153,14 @@ When adding a NEW payment feature:
 - ❌ Create payment-specific controllers
 - ❌ Leave orphaned code blocks outside functions
 - ❌ Use `await` outside async functions
+- ❌ Skip notification triggers after payment
+
+**DO**:
+- ✅ Send email + SMS on every payment success
+- ✅ Include transaction reference in all notifications
+- ✅ Use non-blocking async notifications
+- ✅ Customize SMS message per payment type
+- ✅ Send dual notifications for service request payments
 
 ## Development Rules
 
