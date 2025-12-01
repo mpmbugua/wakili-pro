@@ -52,7 +52,7 @@ const lawyerMainNavigation: NavItem[] = [
   { name: 'Consultations', href: '/consultations', icon: Video },
   { name: 'Appointments', href: '/appointments', icon: Calendar },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
-  { name: 'Documents', href: '/documents', icon: FileText },
+  { name: 'Document Reviews', href: '/document-reviews', icon: FileText },
   { name: 'AI Assistant', href: '/lawyer/ai', icon: Book },
 ];
 
