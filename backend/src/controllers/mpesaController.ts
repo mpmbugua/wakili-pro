@@ -463,7 +463,6 @@ export const mpesaCallback = async (req: Request, res: Response) => {
             where: { id: subscription.lawyerId },
             data: { 
               tier: subscription.tier,
-              subscriptionStatus: 'ACTIVE',
             },
           });
 
@@ -473,6 +472,26 @@ export const mpesaCallback = async (req: Request, res: Response) => {
             lawyerId: subscription.lawyerId 
           });
 
+          // Send subscription activation notifications
+          if (subscription.lawyer?.email) {
+            const lawyerName = `${subscription.lawyer.firstName} ${subscription.lawyer.lastName}`;
+            sendPaymentConfirmationEmail(
+              subscription.lawyer.email,
+              lawyerName,
+              {
+                bookingId: metadata.subscriptionId,
+                amount: payment.amount,
+                transactionId: callbackResult.transactionId || payment.id,
+                paymentMethod: 'M-Pesa'
+              }
+            ).catch(err => logger.error('[Subscription] Email notification error:', err));
+          }
+          if (subscription.lawyer?.phoneNumber) {
+            const tierName = subscription.tier === 'LITE' ? 'LITE (KES 2,999)' : 'PRO (KES 6,999)';
+            const smsMessage = `Wakili Pro: ${tierName} subscription activated! Enjoy premium features. Ref: ${callbackResult.transactionId}`;
+            sendSMS(subscription.lawyer.phoneNumber, smsMessage).catch(err => logger.error('[Subscription] SMS notification error:', err));
+          }
+        }
       } else if (metadata?.resourceType === 'SERVICE_REQUEST_COMMITMENT' && metadata?.serviceRequestId) {
         // Update service request commitment fee status
         const serviceRequest = await prisma.serviceRequest.update({
@@ -502,46 +521,6 @@ export const mpesaCallback = async (req: Request, res: Response) => {
           const smsMessage = `Wakili Pro: Service request submitted! Expect 3 quotes within 24-48 hours. Category: ${serviceRequest.serviceCategory}. Ref: ${callbackResult.transactionId}`;
           sendSMS(serviceRequest.phoneNumber, smsMessage).catch(err => logger.error('[ServiceRequest] SMS notification error:', err));
         }
-      } else if (metadata?.resourceType === 'SERVICE_REQUEST_PAYMENT' && metadata?.serviceRequestId && metadata?.quoteId) {
-            ).catch(err => logger.error('[Subscription] Email notification error:', err));
-          }
-          if (subscription.lawyer?.phoneNumber) {
-            const tierName = subscription.tier === 'LITE' ? 'LITE (KES 2,999)' : 'PRO (KES 4,999)';
-            const smsMessage = `Wakili Pro: ${tierName} subscription activated! Enjoy premium features. Ref: ${callbackResult.transactionId}`;
-            sendSMS(subscription.lawyer.phoneNumber, smsMessage).catch(err => logger.error('[Subscription] SMS notification error:', err));
-          }
-        }
-      } else if (metadata?.resourceType === 'SERVICE_REQUEST_COMMITMENT' && metadata?.serviceRequestId) {
-              status: 'ACTIVE',
-              activatedAt: new Date(),
-            },
-          });
-
-          // Update lawyer tier
-          await prisma.lawyerProfile.update({
-            where: { id: subscription.lawyerId },
-            data: { 
-              tier: subscription.tier,
-              subscriptionStatus: 'ACTIVE',
-            },
-          });
-
-          logger.info('Subscription activated:', { 
-            subscriptionId: metadata.subscriptionId,
-            tier: subscription.tier,
-            lawyerId: subscription.lawyerId 
-          });
-        }
-      } else if (metadata?.resourceType === 'SERVICE_REQUEST_COMMITMENT' && metadata?.serviceRequestId) {
-        // Update service request commitment fee status
-        await prisma.serviceRequest.update({
-          where: { id: metadata.serviceRequestId },
-          data: { 
-            commitmentFeePaid: true,
-            status: 'PENDING', // Waiting for lawyer quotes
-          },
-        });
-        logger.info('Service request commitment fee paid:', { serviceRequestId: metadata.serviceRequestId });
       } else if (metadata?.resourceType === 'SERVICE_REQUEST_PAYMENT' && metadata?.serviceRequestId && metadata?.quoteId) {
         // Handle 30% upfront payment with 20% platform commission and 10% lawyer escrow
         const serviceRequest = await prisma.serviceRequest.findUnique({
@@ -606,6 +585,10 @@ export const mpesaCallback = async (req: Request, res: Response) => {
                 balance: lawyerEscrow,
                 availableBalance: lawyerEscrow,
                 currency: 'KES',
+              },
+            });
+          }
+
           // Send 30% payment confirmation to client
           const client = await prisma.user.findUnique({
             where: { id: serviceRequest.userId },
@@ -669,43 +652,8 @@ export const mpesaCallback = async (req: Request, res: Response) => {
             sendSMS(quote.lawyer.phoneNumber, smsMessage).catch(err => logger.error('[ServiceRequestPayment] Lawyer SMS notification error:', err));
           }
 
-          logger.info('Service request payment processed:', { 
-            serviceRequestId: metadata.serviceRequestId,
-            quoteId: metadata.quoteId,
-            quotedAmount,
-            paidAmount,
-            platformCommission,
-            lawyerEscrow,
-          });
-        }
-      }
-
-      logger.info('Payment completed successfully:', {
-        paymentId: payment.id,
-        transactionId: callbackResult.transactionId,
-      });   }
-          });
-
-          if (!existingConversation) {
-            // Create new conversation
-            await prisma.conversation.create({
-              data: {
-                participants: {
-                  create: [
-                    { userId: serviceRequest.userId },
-                    { userId: quote.lawyerId }
-                  ]
-                },
-                messages: {
-                  create: {
-                    senderId: quote.lawyerId,
-                    content: `Hello! Thank you for selecting my quote. I'm ready to start working on your ${serviceRequest.serviceCategory} case. The estimated timeline is ${quote.proposedTimeline}. Feel free to ask any questions!`,
-                    isRead: false
-                  }
-                }
-              }
-            });
-          }
+          // TODO: Auto-create conversation thread between client and lawyer
+          // Requires Conversation model to be implemented
 
           logger.info('Service request payment processed:', { 
             serviceRequestId: metadata.serviceRequestId,
