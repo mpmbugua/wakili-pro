@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
 import {
   ArrowLeft,
   Upload,
@@ -382,7 +381,7 @@ export const ServiceRequestPage: React.FC = () => {
   };
 
   return (
-    <GlobalLayout>
+    <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           {/* Header */}
@@ -769,7 +768,7 @@ export const ServiceRequestPage: React.FC = () => {
       </div>
 
       {/* Payment Modal removed - now navigates to payment page directly */}
-    </GlobalLayout>
+    </>
   );
 };
 

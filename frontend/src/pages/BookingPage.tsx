@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { GlobalLayout } from '../components/layout';
 import { Calendar, Clock, Video, DollarSign, ArrowLeft, Phone } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import axiosInstance from '../lib/axios';
@@ -179,7 +178,7 @@ export const BookingPage: React.FC = () => {
   }
 
   return (
-    <GlobalLayout>
+    <>
       <div className="max-w-4xl mx-auto py-12 px-4">
         <button
           onClick={() => navigate(-1)}
@@ -392,6 +391,6 @@ export const BookingPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </GlobalLayout>
+    </>
   );
 };
