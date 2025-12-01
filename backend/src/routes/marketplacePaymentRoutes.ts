@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateJWT } from '../middleware/authMiddleware';
+import { authenticateToken } from '../middleware/authMiddleware';
 import {
   initiateMarketplacePayment,
   handleMarketplacePaymentCallback,
@@ -10,15 +10,15 @@ import {
 const router = Router();
 
 // Initiate M-Pesa payment for marketplace document
-router.post('/initiate', authenticateJWT, initiateMarketplacePayment);
+router.post('/initiate', authenticateToken, initiateMarketplacePayment);
 
 // M-Pesa callback (no auth - called by Safaricom)
 router.post('/callback', handleMarketplacePaymentCallback);
 
 // Check payment status
-router.get('/:paymentId/status', authenticateJWT, checkMarketplacePaymentStatus);
+router.get('/:paymentId/status', authenticateToken, checkMarketplacePaymentStatus);
 
 // Download purchased document
-router.get('/download/:purchaseId', authenticateJWT, downloadMarketplaceDocument);
+router.get('/download/:purchaseId', authenticateToken, downloadMarketplaceDocument);
 
 export default router;
