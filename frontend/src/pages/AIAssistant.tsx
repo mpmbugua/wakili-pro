@@ -412,7 +412,7 @@ export const AIAssistant: React.FC = () => {
                   </p>
                   <p className="flex items-start gap-2">
                     <span className="text-blue-600">ℹ️</span>
-                    For personalized legal advice, consider <button onClick={() => navigate('/marketplace')} className="text-blue-600 underline hover:text-blue-700">booking a consultation</button>
+                    For personalized legal advice, consider <button onClick={() => navigate('/lawyers')} className="text-blue-600 underline hover:text-blue-700">booking a consultation</button>
                   </p>
                 </div>
               </div>
