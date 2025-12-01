@@ -56,6 +56,7 @@ npm run lint             # ESLint + Prettier check all packages
 - **Logging**: Winston with structured JSON logging
 - **Validation**: Zod schemas shared from `/shared` package
 - **Testing**: Jest + Supertest for API integration tests
+- **Payments**: **UNIFIED M-Pesa Integration** - ONE endpoint for ALL payment types
 
 ### Shared Package
 - **Types**: Central TypeScript definitions for API contracts
@@ -157,6 +158,111 @@ import { UserSchema } from '@shared/schemas';
 - Implement loading and error states for all async operations
 - Follow React Query patterns for server state
 - Create reusable components in `/components` directory
+
+## Payment Integration Architecture
+
+### ⚠️ CRITICAL: Unified M-Pesa Payment System
+
+**RULE: There is ONLY ONE M-Pesa payment endpoint for ALL payment types.**
+
+#### Single Source of Truth
+```typescript
+// Backend: POST /api/payments/mpesa/initiate
+// Controller: backend/src/controllers/mpesaController.ts
+// Service: backend/src/services/mpesaDarajaService.ts
+```
+
+#### Supported Payment Types (8 Services)
+All payments use the **SAME endpoint** with different parameters:
+
+1. **Legal Consultations** → `bookingId`
+2. **Marketplace Documents** → `purchaseId`
+3. **AI Document Review** → `reviewId` + reviewType='AI_ONLY'
+4. **Lawyer Certification** → `reviewId` + reviewType='CERTIFICATION'
+5. **AI + Certification** → `reviewId` + reviewType='AI_PLUS_CERTIFICATION'
+6. **Service Request Fee** → `reviewId` (commitment fee)
+7. **Lawyer Subscription LITE** → `subscriptionId` (KES 2,999)
+8. **Lawyer Subscription PRO** → `subscriptionId` (KES 4,999)
+
+#### Payment Request Format
+```typescript
+// POST /api/payments/mpesa/initiate
+{
+  phoneNumber: string,        // Required (254XXXXXXXXX)
+  amount: number,            // Required (in KES)
+  paymentType?: string,      // Optional metadata
+  
+  // Exactly ONE of these (mutually exclusive):
+  bookingId?: string,        // For consultations
+  purchaseId?: string,       // For marketplace documents
+  reviewId?: string,         // For document reviews/certifications
+  subscriptionId?: string    // For lawyer subscriptions
+}
+```
+
+#### Payment Status Polling
+```typescript
+// GET /api/payments/mpesa/status/:paymentId
+// Returns: { success: true, data: { status: 'PENDING' | 'COMPLETED' | 'FAILED' } }
+```
+
+#### M-Pesa Callback
+```typescript
+// POST /api/payments/mpesa/callback (Safaricom calls this)
+// Automatically updates:
+// - Payment status to COMPLETED/FAILED
+// - Activates subscriptions
+// - Updates lawyer tier
+// - Marks bookings/reviews as paid
+```
+
+### Frontend Payment Pattern
+```typescript
+// Step 1: Create resource (booking, subscription, etc.)
+const createResponse = await axiosInstance.post('/api/resource/create', data);
+const { resourceId, amount } = createResponse.data.data;
+
+// Step 2: Initiate M-Pesa payment (UNIFIED ENDPOINT)
+const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+  phoneNumber: '254712345678',
+  amount: amount,
+  [resourceType + 'Id']: resourceId, // bookingId, purchaseId, etc.
+  paymentType: 'RESOURCE_TYPE'
+});
+
+// Step 3: Poll for payment status
+const { paymentId } = paymentResponse.data.data;
+const pollInterval = setInterval(async () => {
+  const status = await axiosInstance.get(`/payments/mpesa/status/${paymentId}`);
+  if (status.data.data.status === 'COMPLETED') {
+    clearInterval(pollInterval);
+    // Payment successful!
+  }
+}, 3000);
+```
+
+### 🚫 DO NOT:
+- Create new M-Pesa payment endpoints
+- Duplicate payment initiation logic
+- Use different callback URLs per service
+- Implement separate STK Push logic
+- Create service-specific payment controllers
+
+### ✅ DO:
+- Always use `/api/payments/mpesa/initiate`
+- Add new payment types by extending mpesaController
+- Use correct parameter (bookingId, purchaseId, reviewId, subscriptionId)
+- Poll unified status endpoint
+- Let callback handler update resource status
+
+### Files to Reference
+- **Controller**: `backend/src/controllers/mpesaController.ts`
+- **Service**: `backend/src/services/mpesaDarajaService.ts`
+- **Routes**: `backend/src/routes/mpesaRoutes.ts`
+- **Frontend Examples**:
+  - `frontend/src/pages/PaymentPage.tsx`
+  - `frontend/src/pages/DocumentsPage.tsx`
+  - `frontend/src/components/SubscriptionDashboard.tsx`
 
 This project emphasizes type safety, consistent patterns, and maintainable architecture across the full stack.
 
