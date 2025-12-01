@@ -58,6 +58,7 @@ export const UpdateAvailabilitySchema = z.object({
 export const UpdateUserProfileSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters').max(50).optional(),
   lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50).optional(),
+  email: z.string().email('Invalid email address').optional(),
   phoneNumber: z.string()
     .regex(/^(\+254|0)[17]\d{8}$/, 'Invalid Kenyan phone number format')
     .optional(),

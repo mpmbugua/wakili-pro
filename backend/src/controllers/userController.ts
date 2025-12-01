@@ -97,6 +97,27 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response): P
 
     const { profile, ...userUpdateData } = validationResult.data;
 
+    // If email is being changed, check if it's already in use by another user
+    if (userUpdateData.email) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email: userUpdateData.email,
+          NOT: { id: userId }
+        }
+      });
+
+      if (existingUser) {
+        res.status(400).json({
+          success: false,
+          message: 'Email address is already in use by another account'
+        });
+        return;
+      }
+
+      // If email is being changed, set emailVerified to false
+      userUpdateData.emailVerified = false;
+    }
+
     // Update user fields
     const updatedUser = await prisma.user.update({
       where: { id: userId },

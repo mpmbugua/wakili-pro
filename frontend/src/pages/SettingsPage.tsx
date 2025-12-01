@@ -13,6 +13,7 @@ export const SettingsPage: React.FC = () => {
   // Profile form state
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
+  const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phoneNumber || '');
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,11 +64,12 @@ export const SettingsPage: React.FC = () => {
   const handleSaveProfile = async () => {
     try {
       setSaving(true);
-      console.log('Saving profile:', { firstName, lastName, phone });
+      console.log('Saving profile:', { firstName, lastName, email, phone });
 
       const response = await axiosInstance.put('/users/profile', {
         firstName,
         lastName,
+        email,
         phoneNumber: phone,
       });
 
@@ -78,6 +80,7 @@ export const SettingsPage: React.FC = () => {
             ...user,
             firstName: response.data.data.firstName,
             lastName: response.data.data.lastName,
+            email: response.data.data.email,
             phoneNumber: response.data.data.phoneNumber,
           });
         }
@@ -199,11 +202,11 @@ export const SettingsPage: React.FC = () => {
                       <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
                       <input
                         type="email"
-                        value={user?.email || ''}
-                        disabled
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
-                      <p className="text-xs text-slate-500 mt-1">Email cannot be changed</p>
+                      <p className="text-xs text-slate-500 mt-1">Make sure you have access to this email for verification</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">Phone Number</label>
