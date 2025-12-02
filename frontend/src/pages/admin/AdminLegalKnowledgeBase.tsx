@@ -205,6 +205,27 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
     }
   };
 
+  const handleSeedRealPDFs = async () => {
+    if (!confirm('This will download and ingest 10 real PDFs from Kenya Law (Companies Act, Data Protection Act, Evidence Act, etc.). This may take 2-3 minutes. Continue?')) {
+      return;
+    }
+
+    try {
+      setScraping(true);
+      const response = await axiosInstance.post('/admin/crawler/seed-real-pdfs');
+      if (response.data.success) {
+        const { discovered, ingested } = response.data.data;
+        alert(`✅ Success!\n\nIngested: ${ingested}/${discovered} real Kenya Law PDFs\n\nDocuments are now available for AI queries!`);
+        fetchDocuments();
+        fetchStats();
+      }
+    } catch (error: any) {
+      alert('❌ Failed: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setScraping(false);
+    }
+  };
+
   const handleDeleteDocument = async (documentId: string) => {
     if (!confirm('Are you sure you want to delete this document and all its vectors?')) {
       return;
@@ -489,6 +510,15 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
             >
               {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <Database className="h-5 w-5" />}
               {scraping ? 'Testing...' : 'Test Kenya Law Crawler'}
+            </button>
+
+            <button
+              onClick={handleSeedRealPDFs}
+              disabled={scraping}
+              className="w-full bg-purple-500 text-white hover:bg-purple-600 py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
+              {scraping ? 'Downloading & Ingesting...' : 'Ingest Real Kenya Law PDFs'}
             </button>
 
             <button

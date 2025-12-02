@@ -74,6 +74,63 @@ router.post('/trigger', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'
 });
 
 /**
+ * POST /api/admin/crawler/seed-real-pdfs
+ * Download and ingest real PDFs from Kenya Law (direct URLs)
+ */
+router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
+  try {
+    logger.info(`[Crawler API] Real PDF seeding triggered by user: ${req.user?.email}`);
+    
+    // Import crawler to use its ingestion logic
+    const { IntelligentLegalCrawler } = await import('../../services/intelligentLegalCrawler');
+    const crawler = new IntelligentLegalCrawler({ maxDocumentsPerRun: 10 });
+
+    // Real Kenya Law PDF URLs that we know exist
+    const realPDFs = [
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesActNo17of2015.pdf', title: 'Companies Act No. 17 of 2015', type: 'LEGISLATION' as const, category: 'Corporate Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/2019/TheDataProtectionAct_No24of2019.pdf', title: 'Data Protection Act No. 24 of 2019', type: 'LEGISLATION' as const, category: 'Data Protection' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EvidenceAct_Cap80.pdf', title: 'Evidence Act Cap. 80', type: 'LEGISLATION' as const, category: 'Evidence Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CivilProcedureAct_Cap21.pdf', title: 'Civil Procedure Act Cap. 21', type: 'LEGISLATION' as const, category: 'Civil Procedure' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/PenalCode_Cap63.pdf', title: 'Penal Code Cap. 63', type: 'LEGISLATION' as const, category: 'Criminal Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CriminalProcedureCode_Cap75.pdf', title: 'Criminal Procedure Code Cap. 75', type: 'LEGISLATION' as const, category: 'Criminal Procedure' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LawofSuccessionAct_Cap160.pdf', title: 'Law of Succession Act Cap. 160', type: 'LEGISLATION' as const, category: 'Succession Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/Employment_Act_2007.pdf', title: 'Employment Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandActNo6of2012.pdf', title: 'Land Act No. 6 of 2012', type: 'LEGISLATION' as const, category: 'Land Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandRegistrationActNo3of2012.pdf', title: 'Land Registration Act No. 3 of 2012', type: 'LEGISLATION' as const, category: 'Land Law' }
+    ];
+
+    // Set discovered documents
+    (crawler as any).discoveredDocuments = realPDFs.map(doc => ({
+      url: doc.url,
+      title: doc.title,
+      sourceUrl: 'http://kenyalaw.org',
+      type: doc.type,
+      category: doc.category,
+      depth: 0
+    }));
+
+    // Ingest them
+    const ingestedCount = await (crawler as any).ingestDocuments();
+
+    res.json({
+      success: true,
+      message: `Successfully ingested ${ingestedCount}/${realPDFs.length} real Kenya Law PDFs`,
+      data: {
+        discovered: realPDFs.length,
+        ingested: ingestedCount
+      }
+    });
+  } catch (error) {
+    logger.error('[Crawler API] Failed to seed real PDFs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to seed real PDFs',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * POST /api/admin/crawler/seed-sample-data
  * Add sample legal documents for testing (bypasses actual crawling)
  */
