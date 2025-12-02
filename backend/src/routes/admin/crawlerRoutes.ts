@@ -218,4 +218,43 @@ router.post('/stop', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), 
   }
 });
 
+/**
+ * GET /api/admin/crawler/test
+ * Test crawler on a single Kenya Law URL to verify it's finding documents
+ */
+router.get('/test', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
+  try {
+    const { IntelligentLegalCrawler } = await import('../../services/intelligentLegalCrawler');
+    
+    // Test with a single Kenya Law judgments page
+    const testCrawler = new IntelligentLegalCrawler({
+      seedUrls: ['https://kenyalaw.org/caselaw/'],
+      maxDepth: 2,
+      maxDocumentsPerRun: 10
+    });
+
+    logger.info('[Crawler Test] Starting test crawl of Kenya Law...');
+    const result = await testCrawler.crawl();
+
+    res.json({
+      success: true,
+      message: `Test crawl complete. Found ${result.discovered} documents.`,
+      data: {
+        discovered: result.discovered,
+        ingested: result.ingested,
+        testUrl: 'https://kenyalaw.org/caselaw/',
+        note: 'This is a limited test. Full crawl covers 15+ seed URLs.'
+      }
+    });
+  } catch (error) {
+    logger.error('[Crawler Test] Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Test crawl failed',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 export default router;
+

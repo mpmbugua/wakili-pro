@@ -354,15 +354,28 @@ export class IntelligentLegalCrawler {
           continue;
         }
 
-        // Download PDF
+        // Download document
         logger.info(`[Crawler] Downloading: ${doc.title}`);
-        const pdfResponse = await axios.get(doc.url, {
+        const docResponse = await axios.get(doc.url, {
           responseType: 'arraybuffer',
           timeout: 30000,
           headers: {
-            'User-Agent': 'WakiliPro Legal Crawler/1.0'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
           }
         });
+
+        // Determine file extension
+        const urlLower = doc.url.toLowerCase();
+        let fileExtension = 'pdf';
+        let fileType: 'pdf' | 'docx' = 'pdf';
+        
+        if (urlLower.endsWith('.docx') || urlLower.includes('.docx?')) {
+          fileExtension = 'docx';
+          fileType = 'docx';
+        } else if (urlLower.endsWith('.doc') || urlLower.includes('.doc?')) {
+          fileExtension = 'doc';
+          fileType = 'docx'; // Treat .doc as docx for processing
+        }
 
         // Save to file
         const fs = await import('fs/promises');
@@ -370,19 +383,23 @@ export class IntelligentLegalCrawler {
         const tempDir = path.join(process.cwd(), 'storage', 'legal-materials');
         await fs.mkdir(tempDir, { recursive: true });
         
-        const fileName = `crawled-${Date.now()}-${doc.title.replace(/[^a-z0-9]/gi, '-').substring(0, 50)}.pdf`;
+        const fileName = `crawled-${Date.now()}-${doc.title.replace(/[^a-z0-9]/gi, '-').substring(0, 50)}.${fileExtension}`;
         const filePath = path.join(tempDir, fileName);
-        await fs.writeFile(filePath, Buffer.from(pdfResponse.data));
+        await fs.writeFile(filePath, Buffer.from(docResponse.data));
 
         // Ingest into knowledge base
-        logger.info(`[Crawler] Ingesting: ${doc.title}`);
-        const ingestionResult = await documentIngestionService.ingestDocumentFile(filePath, {
-          title: doc.title,
-          documentType: doc.type,
-          category: doc.category,
-          sourceUrl: doc.url,
-          uploadedBy: systemUser.id
-        });
+        logger.info(`[Crawler] Ingesting: ${doc.title} (${fileType})`);
+        const ingestionResult = await documentIngestionService.ingestDocumentFile(
+          filePath,
+          fileType,
+          {
+            title: doc.title,
+            documentType: doc.type,
+            category: doc.category,
+            sourceUrl: doc.url,
+            uploadedBy: systemUser.id
+          }
+        );
 
         // Save metadata
         await prisma.legalDocument.create({
@@ -393,7 +410,7 @@ export class IntelligentLegalCrawler {
             sourceUrl: doc.url,
             filePath,
             fileName,
-            fileSize: pdfResponse.data.byteLength,
+            fileSize: docResponse.data.byteLength,
             chunksCount: ingestionResult.chunksProcessed,
             vectorsCount: ingestionResult.vectorsStored,
             uploadedBy: systemUser.id
