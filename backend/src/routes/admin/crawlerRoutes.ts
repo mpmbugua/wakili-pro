@@ -74,6 +74,98 @@ router.post('/trigger', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'
 });
 
 /**
+ * POST /api/admin/crawler/seed-sample-data
+ * Add sample legal documents for testing (bypasses actual crawling)
+ */
+router.post('/seed-sample-data', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
+  try {
+    logger.info(`[Crawler API] Sample data seeding triggered by user: ${req.user?.email}`);
+    
+    const { prisma } = await import('../../lib/prisma');
+    
+    // Sample legal documents
+    const sampleDocs = [
+      {
+        title: 'The Constitution of Kenya, 2010',
+        content: 'The Constitution of Kenya is the supreme law of the Republic of Kenya. The current constitution was promulgated on 27 August 2010. It replaced the Independence Constitution of 1963.',
+        documentType: 'LEGISLATION',
+        category: 'Constitutional Law',
+        citation: 'Constitution of Kenya, 2010',
+        sourceUrl: 'https://www.constituteproject.org/constitution/Kenya_2010.pdf'
+      },
+      {
+        title: 'Employment Act, 2007',
+        content: 'An Act of Parliament to declare and define the fundamental rights of employees, to provide basic conditions of employment of employees, to regulate employment of children, and for connected purposes.',
+        documentType: 'LEGISLATION',
+        category: 'Employment Law',
+        citation: 'Employment Act No. 11 of 2007',
+        sourceUrl: 'http://www.parliament.go.ke'
+      },
+      {
+        title: 'The Land Act, 2012',
+        content: 'An Act of Parliament to give effect to Article 68 of the Constitution; to revise, consolidate and rationalize land laws; and for connected purposes.',
+        documentType: 'LEGISLATION',
+        category: 'Land & Property Law',
+        citation: 'Land Act No. 6 of 2012',
+        sourceUrl: 'http://www.kenyalaw.org'
+      },
+      {
+        title: 'Companies Act, 2015',
+        content: 'An Act of Parliament to consolidate the law relating to companies and to promote transparency, accountability and efficiency in the administration and management of companies.',
+        documentType: 'LEGISLATION',
+        category: 'Corporate Law',
+        citation: 'Companies Act No. 17 of 2015',
+        sourceUrl: 'http://www.kenyalaw.org'
+      },
+      {
+        title: 'Data Protection Act, 2019',
+        content: 'An Act of Parliament to regulate the processing of personal data; to provide for the rights of data subjects and obligations of data controllers and processors.',
+        documentType: 'LEGISLATION',
+        category: 'Technology & Privacy Law',
+        citation: 'Data Protection Act No. 24 of 2019',
+        sourceUrl: 'http://www.kenyalaw.org'
+      }
+    ];
+
+    let createdCount = 0;
+    for (const doc of sampleDocs) {
+      const existing = await prisma.legalDocument.findFirst({
+        where: { title: doc.title }
+      });
+      
+      if (!existing) {
+        await prisma.legalDocument.create({
+          data: {
+            ...doc,
+            chunksCount: 10,
+            vectorsCount: 10
+          }
+        });
+        createdCount++;
+      }
+    }
+
+    logger.info(`[Crawler API] Sample data seeded: ${createdCount} new documents`);
+
+    res.json({
+      success: true,
+      message: `Seeded ${createdCount} sample legal documents`,
+      data: {
+        created: createdCount,
+        total: sampleDocs.length
+      }
+    });
+  } catch (error) {
+    logger.error('[Crawler API] Failed to seed sample data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to seed sample data',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * POST /api/admin/crawler/start
  * Start the automated crawler scheduler
  */
