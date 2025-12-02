@@ -65,9 +65,25 @@ export const uploadLegalDocument = async (req: Request, res: Response) => {
 
     logger.info(`[AI] Uploading legal document: ${title}`);
 
+    // Detect file type from extension
+    const fileExtension = req.file.originalname.split('.').pop()?.toLowerCase();
+    let fileType: 'pdf' | 'docx';
+    
+    if (fileExtension === 'pdf') {
+      fileType = 'pdf';
+    } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+      fileType = 'docx';
+    } else {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Unsupported file type. Only PDF and DOCX files are supported.' 
+      });
+    }
+
     // Ingest the document (extract text, chunk, embed, store in Pinecone)
     const ingestionResult = await documentIngestionService.ingestDocumentFile(
       req.file.path,
+      fileType,
       {
         title,
         documentType,
