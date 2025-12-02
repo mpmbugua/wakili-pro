@@ -151,17 +151,6 @@ export const LegalServicesPage: React.FC = () => {
                         <Clock className="h-4 w-4" />
                         <span>Delivery: {service.deliveryTime}</span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500">Starting from</p>
-                        <p className="text-xl font-bold text-gray-900">
-                          KES {service.priceRange.min.toLocaleString()}
-                        </p>
-                        {service.priceRange.max !== service.priceRange.min && (
-                          <p className="text-xs text-gray-500">
-                            Up to KES {service.priceRange.max.toLocaleString()}
-                          </p>
-                        )}
-                      </div>
                     </div>
 
                     {/* What's Included - Collapsible */}
