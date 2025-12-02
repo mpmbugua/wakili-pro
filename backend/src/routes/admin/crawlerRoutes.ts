@@ -39,21 +39,32 @@ router.get('/status', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'),
 
 /**
  * POST /api/admin/crawler/trigger
- * Manually trigger an immediate crawl
+ * Manually trigger an immediate crawl (runs in background)
  */
 router.post('/trigger', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
   try {
     logger.info(`[Crawler API] Manual crawl triggered by user: ${req.user?.email}`);
 
-    const result = await crawlerScheduler.triggerManualCrawl();
+    // Run crawler in background (don't wait for completion)
+    crawlerScheduler.triggerManualCrawl()
+      .then(result => {
+        logger.info(`[Crawler API] Background crawl complete: Discovered ${result.discovered}, Ingested ${result.ingested}`);
+      })
+      .catch(error => {
+        logger.error('[Crawler API] Background crawl failed:', error);
+      });
 
+    // Respond immediately
     res.json({
       success: true,
-      message: `Crawl complete! Discovered ${result.discovered} documents, ingested ${result.ingested}`,
-      data: result
+      message: 'Crawler started in background. Check logs for progress. Results will appear in 5-10 minutes.',
+      data: {
+        status: 'running',
+        estimatedTime: '5-10 minutes for first results'
+      }
     });
   } catch (error) {
-    logger.error('[Crawler API] Manual crawl failed:', error);
+    logger.error('[Crawler API] Failed to trigger manual crawl:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to trigger manual crawl',

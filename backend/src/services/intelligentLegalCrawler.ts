@@ -44,7 +44,7 @@ export class IntelligentLegalCrawler {
         ...(config?.seedUrls || [])
       ],
       maxDepth: 3, // Follow links up to 3 levels deep
-      maxDocumentsPerRun: parseInt(process.env.SCRAPER_BATCH_SIZE || '50'),
+      maxDocumentsPerRun: parseInt(process.env.SCRAPER_BATCH_SIZE || '5'), // Reduced to 5 for faster initial results
       allowedDomains: [
         'kenyalaw.org',
         'judiciary.go.ke',
