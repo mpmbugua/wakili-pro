@@ -488,3 +488,368 @@ export async function scrapeKenyanLawReviewEvents() {
     return [];
   }
 }
+
+/**
+ * Scrape Kenya Law for actual legal documents (Acts, Bills, Case Law)
+ * and ingest into AI knowledge base (Pinecone)
+ */
+export async function scrapeKenyaLawDocuments() {
+  try {
+    logger.info('Starting Kenya Law legal documents scraping for AI knowledge base...');
+    
+    const categories = [
+      { url: 'https://new.kenyalaw.org/judgments/', type: 'CASE_LAW', category: 'Court Judgments' },
+      { url: 'https://new.kenyalaw.org/akn/ke/act/', type: 'LEGISLATION', category: 'Acts of Parliament' },
+      { url: 'https://judiciary.go.ke/judgments/', type: 'CASE_LAW', category: 'Judiciary Judgments' },
+      { url: 'https://judiciary.go.ke/judgements/', type: 'CASE_LAW', category: 'Judiciary Judgements' }, // Alternative spelling
+      { url: 'https://judiciary.go.ke/legal-resources/', type: 'LEGAL_GUIDE', category: 'Legal Resources' }
+    ];
+
+    const scrapedDocuments: Array<{ title: string; url: string; type: string; category: string }> = [];
+    let ingestedCount = 0;
+
+    for (const cat of categories) {
+      try {
+        const response = await axios.get(cat.url, {
+          timeout: 15000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          }
+        });
+
+        const $ = cheerio.load(response.data);
+
+        // Target Kenya Law judgment page structure
+        // Look for PDF links and document titles
+        $('a[href*=".pdf"]').each((_, el) => {
+          const $el = $(el);
+          let title = $el.text().trim();
+          const href = $el.attr('href');
+
+          // If link text is empty, try to find title in parent or nearby elements
+          if (!title || title.length < 10) {
+            title = $el.closest('tr').find('td').first().text().trim() || 
+                    $el.closest('div').find('h3, h4, .title, .judgment-title').first().text().trim() ||
+                    $el.attr('title') || 
+                    '';
+          }
+
+          if (title && href && title.length > 10) {
+            const fullUrl = href.startsWith('http') ? href : `https://new.kenyalaw.org${href}`;
+            
+            scrapedDocuments.push({
+              title: title.substring(0, 200), // Limit title length
+              url: fullUrl,
+              type: cat.type,
+              category: cat.category
+            });
+          }
+        });
+
+        // Also look for download buttons/links
+        $('a[href*="download"], a[download], .download-link, .btn-download').each((_, el) => {
+          const $el = $(el);
+          const href = $el.attr('href');
+          
+          if (href && href.includes('.pdf')) {
+            const title = $el.text().trim() || 
+                         $el.closest('tr').find('td').first().text().trim() ||
+                         $el.attr('aria-label') || 
+                         'Untitled Document';
+            
+            if (title.length > 10) {
+              const fullUrl = href.startsWith('http') ? href : `https://new.kenyalaw.org${href}`;
+              
+              // Avoid duplicates
+              if (!scrapedDocuments.find(d => d.url === fullUrl)) {
+                scrapedDocuments.push({
+                  title: title.substring(0, 200),
+                  url: fullUrl,
+                  type: cat.type,
+                  category: cat.category
+                });
+              }
+            }
+          }
+        });
+
+        logger.info(`Found ${scrapedDocuments.length} documents from ${cat.url}`);
+
+        // Rate limiting between categories
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        logger.error(`Failed to scrape category ${cat.category}:`, error);
+      }
+    }
+
+    logger.info(`Scraped ${scrapedDocuments.length} legal documents from Kenya Law`);
+
+    // Import document ingestion service
+    const { documentIngestionService } = await import('./ai/documentIngestionService');
+    const systemUser = await getSystemUser();
+
+    // Download and ingest PDFs (configurable limit)
+    const BATCH_SIZE = parseInt(process.env.SCRAPER_BATCH_SIZE || '50'); // Process 50 per run
+    for (const doc of scrapedDocuments.slice(0, BATCH_SIZE)) {
+      try {
+        // Check if already exists
+        const existing = await prisma.legalDocument.findFirst({
+          where: { sourceUrl: doc.url }
+        });
+
+        if (existing) {
+          logger.info(`Document already indexed: ${doc.title}`);
+          continue;
+        }
+
+        // Download PDF
+        logger.info(`Downloading: ${doc.title}`);
+        const pdfResponse = await axios.get(doc.url, {
+          responseType: 'arraybuffer',
+          timeout: 30000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+
+        // Save to temp file
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        const tempDir = path.join(process.cwd(), 'storage', 'legal-materials');
+        await fs.mkdir(tempDir, { recursive: true });
+        
+        const fileName = `scraped-${Date.now()}-${doc.title.replace(/[^a-z0-9]/gi, '-').substring(0, 50)}.pdf`;
+        const filePath = path.join(tempDir, fileName);
+        await fs.writeFile(filePath, Buffer.from(pdfResponse.data));
+
+        // Ingest into knowledge base
+        logger.info(`Ingesting: ${doc.title}`);
+        const ingestionResult = await documentIngestionService.ingestDocumentFile(filePath, {
+          title: doc.title,
+          documentType: doc.type,
+          category: doc.category,
+          sourceUrl: doc.url,
+          uploadedBy: systemUser.id
+        });
+
+        // Save metadata to database
+        await prisma.legalDocument.create({
+          data: {
+            title: doc.title,
+            documentType: doc.type,
+            category: doc.category,
+            sourceUrl: doc.url,
+            filePath,
+            fileName,
+            fileSize: pdfResponse.data.byteLength,
+            chunksCount: ingestionResult.chunksProcessed,
+            vectorsCount: ingestionResult.vectorsStored,
+            uploadedBy: systemUser.id
+          }
+        });
+
+        ingestedCount++;
+        logger.info(`Successfully ingested: ${doc.title} (${ingestionResult.chunksProcessed} chunks)`);
+
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      } catch (error) {
+        logger.error(`Failed to ingest document "${doc.title}":`, error);
+      }
+    }
+
+    return {
+      scraped: scrapedDocuments.length,
+      ingested: ingestedCount,
+      documents: scrapedDocuments
+    };
+
+  } catch (error) {
+    logger.error('Kenya Law documents scraping error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Scrape Judiciary of Kenya website for legal documents
+ * Specialized scraper for judiciary.go.ke structure
+ */
+export async function scrapeJudiciaryDocuments() {
+  try {
+    logger.info('Starting Judiciary of Kenya documents scraping for AI knowledge base...');
+    
+    const judiciaryUrls = [
+      'https://judiciary.go.ke/judgments/',
+      'https://judiciary.go.ke/judgements/',
+      'https://judiciary.go.ke/court-of-appeal/',
+      'https://judiciary.go.ke/supreme-court/',
+      'https://judiciary.go.ke/high-court/'
+    ];
+
+    const scrapedDocuments: Array<{ title: string; url: string; type: string; category: string }> = [];
+    let ingestedCount = 0;
+
+    for (const url of judiciaryUrls) {
+      try {
+        logger.info(`Scraping: ${url}`);
+        const response = await axios.get(url, {
+          timeout: 15000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          }
+        });
+
+        const $ = cheerio.load(response.data);
+
+        // Judiciary-specific selectors
+        // Look for PDF links in various formats
+        $('a[href*=".pdf"], a[href*="/wp-content/uploads/"], a.pdf-link, .download-link').each((_, el) => {
+          const $el = $(el);
+          let title = $el.text().trim();
+          const href = $el.attr('href');
+
+          // Extract title from various sources
+          if (!title || title.length < 10) {
+            title = $el.attr('title') || 
+                    $el.closest('tr').find('td').first().text().trim() ||
+                    $el.closest('div').find('h1, h2, h3, h4, .entry-title, .post-title').first().text().trim() ||
+                    $el.closest('article').find('h1, h2, h3').first().text().trim() ||
+                    '';
+          }
+
+          // Clean up title
+          title = title.replace(/download|view|pdf|click here/gi, '').trim();
+
+          if (title && href && title.length > 10) {
+            const fullUrl = href.startsWith('http') ? href : `https://judiciary.go.ke${href}`;
+            
+            // Only include if it's actually a PDF
+            if (fullUrl.toLowerCase().includes('.pdf') || fullUrl.includes('/wp-content/uploads/')) {
+              scrapedDocuments.push({
+                title: title.substring(0, 200),
+                url: fullUrl,
+                type: 'CASE_LAW',
+                category: 'Judiciary of Kenya'
+              });
+            }
+          }
+        });
+
+        // Also check for WordPress attachment links
+        $('a[href*="/wp-content/uploads/"][href*=".pdf"]').each((_, el) => {
+          const $el = $(el);
+          const href = $el.attr('href');
+          let title = $el.text().trim() || $el.attr('aria-label') || 'Judiciary Document';
+
+          if (href) {
+            const fullUrl = href.startsWith('http') ? href : `https://judiciary.go.ke${href}`;
+            
+            if (!scrapedDocuments.find(d => d.url === fullUrl)) {
+              scrapedDocuments.push({
+                title: title.substring(0, 200),
+                url: fullUrl,
+                type: 'CASE_LAW',
+                category: 'Judiciary of Kenya'
+              });
+            }
+          }
+        });
+
+        logger.info(`Found ${scrapedDocuments.length} documents from ${url}`);
+        
+        // Rate limiting between URLs
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        logger.error(`Failed to scrape ${url}:`, error);
+      }
+    }
+
+    logger.info(`Total scraped ${scrapedDocuments.length} documents from Judiciary of Kenya`);
+
+    // Import services
+    const { documentIngestionService } = await import('./ai/documentIngestionService');
+    const systemUser = await getSystemUser();
+
+    // Process documents (limit per batch)
+    const BATCH_SIZE = parseInt(process.env.SCRAPER_BATCH_SIZE || '50');
+    for (const doc of scrapedDocuments.slice(0, BATCH_SIZE)) {
+      try {
+        // Check if already exists
+        const existing = await prisma.legalDocument.findFirst({
+          where: { sourceUrl: doc.url }
+        });
+
+        if (existing) {
+          logger.info(`Document already indexed: ${doc.title}`);
+          continue;
+        }
+
+        // Download PDF
+        logger.info(`Downloading: ${doc.title}`);
+        const pdfResponse = await axios.get(doc.url, {
+          responseType: 'arraybuffer',
+          timeout: 30000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+
+        // Save to file
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        const tempDir = path.join(process.cwd(), 'storage', 'legal-materials');
+        await fs.mkdir(tempDir, { recursive: true });
+        
+        const fileName = `judiciary-${Date.now()}-${doc.title.replace(/[^a-z0-9]/gi, '-').substring(0, 50)}.pdf`;
+        const filePath = path.join(tempDir, fileName);
+        await fs.writeFile(filePath, Buffer.from(pdfResponse.data));
+
+        // Ingest into knowledge base
+        logger.info(`Ingesting: ${doc.title}`);
+        const ingestionResult = await documentIngestionService.ingestDocumentFile(filePath, {
+          title: doc.title,
+          documentType: doc.type,
+          category: doc.category,
+          sourceUrl: doc.url,
+          uploadedBy: systemUser.id
+        });
+
+        // Save metadata
+        await prisma.legalDocument.create({
+          data: {
+            title: doc.title,
+            documentType: doc.type,
+            category: doc.category,
+            sourceUrl: doc.url,
+            filePath,
+            fileName,
+            fileSize: pdfResponse.data.byteLength,
+            chunksCount: ingestionResult.chunksProcessed,
+            vectorsCount: ingestionResult.vectorsStored,
+            uploadedBy: systemUser.id
+          }
+        });
+
+        ingestedCount++;
+        logger.info(`Successfully ingested: ${doc.title} (${ingestionResult.chunksProcessed} chunks)`);
+
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      } catch (error) {
+        logger.error(`Failed to ingest document "${doc.title}":`, error);
+      }
+    }
+
+    return {
+      scraped: scrapedDocuments.length,
+      ingested: ingestedCount,
+      documents: scrapedDocuments
+    };
+
+  } catch (error) {
+    logger.error('Judiciary documents scraping error:', error);
+    throw error;
+  }
+}

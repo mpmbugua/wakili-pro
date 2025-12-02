@@ -221,6 +221,7 @@ model User {
   documents                                                  UserDocument[]          @relation("UserDocuments")
   conversationParticipants                                   ConversationParticipant[] @relation("ConversationParticipants")
   directMessages                                             Message[]               @relation("DirectMessagesSent")
+  uploadedLegalDocuments                                     LegalDocument[]         @relation("UploadedLegalDocuments")
   onlineStatus                                               String?                 @default("offline")
   lastSeen                                                   DateTime?
 }
@@ -1311,4 +1312,28 @@ model MessageAttachment {
   message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
   
   @@index([messageId])
+}
+
+model LegalDocument {
+  id            String    @id @default(cuid())
+  title         String
+  documentType  String    // LEGISLATION, CASE_LAW, STATUTORY_INSTRUMENT, GAZETTE_NOTICE, etc.
+  category      String    // Constitutional Law, Criminal Law, etc.
+  citation      String?   // Legal citation (e.g., [2010] eKLR)
+  sourceUrl     String?   // Original source URL
+  effectiveDate DateTime? // When the law/document became effective
+  filePath      String    // Path to uploaded file
+  fileName      String    // Original filename
+  fileSize      Int       // File size in bytes
+  chunksCount   Int       @default(0) // Number of text chunks processed
+  vectorsCount  Int       @default(0) // Number of vectors stored in Pinecone
+  uploadedBy    String    // Admin user who uploaded
+  uploadedAt    DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  uploader User @relation("UploadedLegalDocuments", fields: [uploadedBy], references: [id])
+  
+  @@index([documentType])
+  @@index([category])
+  @@index([uploadedAt])
 }

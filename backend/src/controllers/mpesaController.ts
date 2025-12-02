@@ -140,7 +140,7 @@ export const initiateMpesaPayment = async (req: AuthRequest, res: Response) => {
       transactionDesc = 'Document Review Payment';
     } else if (subscriptionId) {
       // Lawyer subscription payment
-      const subscription = await prisma.subscription.findUnique({
+      const subscription = await prisma.lawyerSubscription.findUnique({
         where: { id: subscriptionId },
       });
 
@@ -355,7 +355,7 @@ export const mpesaCallback = async (req: Request, res: Response) => {
         const purchase = await prisma.documentPurchase.findUnique({
           where: { id: metadata.purchaseId },
           include: {
-            document: true,
+            DocumentTemplate: true,
             user: true,
           },
         });
@@ -367,7 +367,7 @@ export const mpesaCallback = async (req: Request, res: Response) => {
             await processDocumentGeneration(
               metadata.purchaseId,
               purchase.documentId,
-              purchase.document?.title || purchase.description || 'Legal Document',
+              purchase.DocumentTemplate?.title || purchase.description || 'Legal Document',
               {} // User input can be passed here if needed
             );
             logger.info('[Purchase] Document generated successfully');
@@ -386,7 +386,7 @@ export const mpesaCallback = async (req: Request, res: Response) => {
           // Send payment confirmation email
           if (purchase.user?.email) {
             const userName = `${purchase.user.firstName} ${purchase.user.lastName}`;
-            const documentTitle = purchase.document?.title || purchase.description || 'Legal Document';
+            const documentTitle = purchase.DocumentTemplate?.title || purchase.description || 'Legal Document';
             
             sendPaymentConfirmationEmail(
               purchase.user.email,
@@ -402,7 +402,7 @@ export const mpesaCallback = async (req: Request, res: Response) => {
 
           // Send SMS notification with download link
           if (purchase.user?.phoneNumber) {
-            const documentTitle = purchase.document?.title || 'document';
+            const documentTitle = purchase.DocumentTemplate?.title || 'document';
             const downloadUrl = `${process.env.FRONTEND_URL}/documents`;
             const smsMessage = `Wakili Pro: "${documentTitle}" purchase confirmed! KES ${payment.amount.toLocaleString()}. Download now: ${downloadUrl} Ref: ${callbackResult.transactionId}`;
             sendSMS(purchase.user.phoneNumber, smsMessage).catch(err => logger.error('[Purchase] SMS notification error:', err));
@@ -450,7 +450,7 @@ export const mpesaCallback = async (req: Request, res: Response) => {
         
         if (subscription) {
           // Update subscription to ACTIVE
-          await prisma.subscription.update({
+          await prisma.lawyerSubscription.update({
             where: { id: metadata.subscriptionId },
             data: { 
               status: 'ACTIVE',

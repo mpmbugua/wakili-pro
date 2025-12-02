@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Loader, Bot, User, Sparkles, Shield } from 'lucide-react';
+import { Send, Loader, User, Shield } from 'lucide-react';
 import axiosInstance from '../lib/axios';
 import { useAuthStore } from '../store/authStore';
 

@@ -277,6 +277,10 @@ app.use('/api/admin/legal-materials', adminLegalMaterialsRouter);
 import adminLegalScraperRouter from './routes/admin/legalScraperRoutes';
 app.use('/api/admin/legal-scraper', adminLegalScraperRouter);
 
+// Mount admin intelligent crawler router
+import adminCrawlerRouter from './routes/admin/crawlerRoutes';
+app.use('/api/admin/crawler', adminCrawlerRouter);
+
 // Mount admin lawyer management router
 import adminLawyerRouter from './routes/admin/lawyerAdminRoutes';
 app.use('/api/admin/lawyers', adminLawyerRouter);
@@ -412,9 +416,16 @@ httpServer.listen(port, host, () => {
   }).catch((error) => {
     console.error('❌ Failed to start scheduled jobs:', error);
   });
-});
 
-// Start legal scraper scheduler
-import './services/legalScraperScheduler';
+  // Start intelligent legal document crawler scheduler
+  import('./services/crawlerScheduler').then(({ crawlerScheduler }) => {
+    crawlerScheduler.start();
+    const nextRun = crawlerScheduler.getNextRunTime();
+    console.log(`📚 Legal document crawler scheduled: Daily at 5:00 PM`);
+    console.log(`⏰ Next run: ${nextRun?.toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })}`);
+  }).catch((error) => {
+    console.error('❌ Failed to start crawler scheduler:', error);
+  });
+});
 
 export default app;

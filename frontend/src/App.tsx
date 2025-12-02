@@ -48,6 +48,7 @@ import DocumentReviewDashboard from './pages/DocumentReviewDashboard';
 import { ArticleManagementPage } from './pages/admin/ArticleManagementPage';
 import { AdminLawyerApproval } from './pages/admin/AdminLawyerApproval';
 import AdminWithdrawalManagement from './pages/admin/AdminWithdrawalManagement';
+import AdminLegalKnowledgeBase from './pages/admin/AdminLegalKnowledgeBase';
 import { AdminDashboard } from './components/dashboards/AdminDashboard';
 import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard';
 import { AdminLoginPage } from './pages/auth/AdminLoginPage';
@@ -473,6 +474,14 @@ function App() {
               element={
                 <AdminRoute hydrated={hydrated}>
                   <AdminWithdrawalManagement />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/legal-knowledge" 
+              element={
+                <AdminRoute hydrated={hydrated}>
+                  <AdminLegalKnowledgeBase />
                 </AdminRoute>
               } 
             />

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  FileText, 
   DollarSign, 
   Clock, 
   CheckCircle, 

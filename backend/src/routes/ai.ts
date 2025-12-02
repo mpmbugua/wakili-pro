@@ -92,4 +92,10 @@ router.get('/knowledge-base/stats', authorizeRoles('ADMIN'), getKnowledgeBaseSta
 // Delete document from knowledge base
 router.delete('/document/:documentId', authorizeRoles('ADMIN'), deleteLegalDocument);
 
+// =====================================================
+// NEW AI DOCUMENT MANAGEMENT ROUTES (Modern UI)
+// =====================================================
+import aiDocumentRoutes from './aiDocumentRoutes';
+router.use('/documents', aiDocumentRoutes);
+
 export default router;

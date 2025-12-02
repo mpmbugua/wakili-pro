@@ -1,12 +1,29 @@
 /**
  * SMS service for sending transactional SMS messages
- * Uses Africa's Talking, Twilio, or similar service in production
- * Logs to console in development
+ * Uses AfricasTalking API for production SMS delivery
+ * Logs to console in development mode
  */
 
+import axios from 'axios';
+
+const AFRICASTALKING_API_URL = 'https://api.sandbox.africastalking.com/version1/messaging';
+const AFRICASTALKING_PROD_URL = 'https://api.africastalking.com/version1/messaging';
+
+interface AfricasTalkingResponse {
+  SMSMessageData: {
+    Message: string;
+    Recipients: Array<{
+      statusCode: number;
+      number: string;
+      status: string;
+      cost: string;
+      messageId: string;
+    }>;
+  };
+}
+
 /**
- * Send an SMS message
- * In production, this should use Africa's Talking, Twilio, or similar service
+ * Send an SMS message via AfricasTalking API
  * 
  * @param phoneNumber - Phone number in format +254XXXXXXXXX or 254XXXXXXXXX
  * @param message - SMS message (max 160 characters recommended)
@@ -27,44 +44,66 @@ export async function sendSMS(phoneNumber: string, message: string): Promise<voi
     return;
   }
 
-  // TODO: Production implementation
-  // Example with Africa's Talking:
-  /*
-  const AfricasTalking = require('africastalking');
-  const africastalking = AfricasTalking({
-    apiKey: process.env.AFRICASTALKING_API_KEY,
-    username: process.env.AFRICASTALKING_USERNAME,
-  });
+  // Check if AfricasTalking credentials are configured
+  const apiKey = process.env.AFRICASTALKING_API_KEY;
+  const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
 
-  const sms = africastalking.SMS;
-  const result = await sms.send({
-    to: [normalizedPhone],
-    message: message,
-    from: process.env.SMS_SENDER_ID || 'WAKILIPRO',
-  });
+  if (!apiKey) {
+    console.warn('⚠️ AfricasTalking API key not configured. SMS would be sent:', {
+      to: normalizedPhone,
+      message: message.substring(0, 50) + (message.length > 50 ? '...' : '')
+    });
+    return;
+  }
 
-  console.log('SMS sent:', result);
-  */
+  try {
+    // Determine API URL based on username
+    const apiUrl = username === 'sandbox' ? AFRICASTALKING_API_URL : AFRICASTALKING_PROD_URL;
 
-  // Example with Twilio:
-  /*
-  const twilio = require('twilio');
-  const client = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-  );
+    // Send SMS via AfricasTalking API
+    const response = await axios.post<AfricasTalkingResponse>(
+      apiUrl,
+      new URLSearchParams({
+        username: username,
+        to: normalizedPhone,
+        message: message,
+        from: process.env.SMS_SENDER_ID || 'WAKILIPRO'
+      }).toString(),
+      {
+        headers: {
+          'apiKey': apiKey,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        }
+      }
+    );
 
-  await client.messages.create({
-    body: message,
-    from: process.env.TWILIO_PHONE_NUMBER,
-    to: normalizedPhone,
-  });
-  */
+    const result = response.data;
+    const recipient = result.SMSMessageData.Recipients[0];
 
-  console.warn('⚠️ SMS service not configured for production. SMS would be sent:', {
-    to: normalizedPhone,
-    message: message.substring(0, 50) + (message.length > 50 ? '...' : '')
-  });
+    if (recipient.statusCode === 101) {
+      console.log('✅ SMS sent successfully:', {
+        to: normalizedPhone,
+        status: recipient.status,
+        messageId: recipient.messageId,
+        cost: recipient.cost
+      });
+    } else {
+      console.error('❌ SMS delivery failed:', {
+        to: normalizedPhone,
+        status: recipient.status,
+        statusCode: recipient.statusCode
+      });
+      throw new Error(`SMS delivery failed: ${recipient.status}`);
+    }
+  } catch (error: any) {
+    console.error('❌ AfricasTalking SMS error:', {
+      message: error.message,
+      response: error.response?.data,
+      to: normalizedPhone
+    });
+    // Don't throw - allow application to continue even if SMS fails
+  }
 }
 
 /**
@@ -129,6 +168,129 @@ export async function sendBulkSMS(
   phoneNumbers: string[],
   message: string
 ): Promise<void> {
-  const sendPromises = phoneNumbers.map(phone => sendSMS(phone, message));
-  await Promise.all(sendPromises);
+  // In development mode
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`\n📱 [BULK SMS - DEV MODE] Sending to ${phoneNumbers.length} recipients`);
+    phoneNumbers.forEach(phone => console.log(`  → ${normalizePhoneNumber(phone)}`));
+    console.log(`Message: ${message}\n`);
+    return;
+  }
+
+  const apiKey = process.env.AFRICASTALKING_API_KEY;
+  const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
+
+  if (!apiKey) {
+    console.warn(`⚠️ Bulk SMS not sent (no API key) to ${phoneNumbers.length} recipients`);
+    return;
+  }
+
+  try {
+    const apiUrl = username === 'sandbox' ? AFRICASTALKING_API_URL : AFRICASTALKING_PROD_URL;
+    const normalizedPhones = phoneNumbers.map(normalizePhoneNumber);
+
+    const response = await axios.post<AfricasTalkingResponse>(
+      apiUrl,
+      new URLSearchParams({
+        username: username,
+        to: normalizedPhones.join(','), // Comma-separated for bulk
+        message: message,
+        from: process.env.SMS_SENDER_ID || 'WAKILIPRO'
+      }).toString(),
+      {
+        headers: {
+          'apiKey': apiKey,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        }
+      }
+    );
+
+    const result = response.data;
+    const successful = result.SMSMessageData.Recipients.filter(r => r.statusCode === 101);
+    const failed = result.SMSMessageData.Recipients.filter(r => r.statusCode !== 101);
+
+    console.log(`✅ Bulk SMS: ${successful.length} sent, ${failed.length} failed`);
+    
+    if (failed.length > 0) {
+      console.warn('Failed recipients:', failed.map(r => ({ number: r.number, status: r.status })));
+    }
+  } catch (error: any) {
+    console.error('❌ Bulk SMS error:', error.message);
+  }
+}
+
+/**
+ * Fetch SMS delivery reports
+ * Check status of previously sent messages
+ */
+export async function fetchDeliveryReports(messageId?: string): Promise<any> {
+  const apiKey = process.env.AFRICASTALKING_API_KEY;
+  const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
+
+  if (!apiKey) {
+    console.warn('⚠️ Cannot fetch delivery reports: API key not configured');
+    return null;
+  }
+
+  try {
+    const baseUrl = username === 'sandbox' 
+      ? 'https://api.sandbox.africastalking.com/version1/messaging'
+      : 'https://api.africastalking.com/version1/messaging';
+
+    const params: any = { username };
+    if (messageId) {
+      params.messageId = messageId;
+    }
+
+    const response = await axios.get(`${baseUrl}`, {
+      params,
+      headers: {
+        'apiKey': apiKey,
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log('📊 Delivery reports fetched:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Error fetching delivery reports:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Check account balance (SMS credits remaining)
+ */
+export async function checkBalance(): Promise<{ balance: string; currency: string } | null> {
+  const apiKey = process.env.AFRICASTALKING_API_KEY;
+  const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
+
+  if (!apiKey) {
+    console.warn('⚠️ Cannot check balance: API key not configured');
+    return null;
+  }
+
+  try {
+    const baseUrl = username === 'sandbox'
+      ? 'https://api.sandbox.africastalking.com/version1/user'
+      : 'https://api.africastalking.com/version1/user';
+
+    const response = await axios.get(`${baseUrl}?username=${username}`, {
+      headers: {
+        'apiKey': apiKey,
+        'Accept': 'application/json'
+      }
+    });
+
+    const balanceData = response.data.UserData.balance;
+    console.log(`💰 AfricasTalking Balance: ${balanceData}`);
+    
+    return {
+      balance: balanceData.split(' ')[0],
+      currency: balanceData.split(' ')[1] || 'KES'
+    };
+  } catch (error: any) {
+    console.error('❌ Error checking balance:', error.message);
+    return null;
+  }
 }
