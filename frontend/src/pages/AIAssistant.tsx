@@ -391,12 +391,9 @@ export const AIAssistant: React.FC = () => {
           {messages.length === 0 && (
             <div className="flex justify-center">
               <div className="max-w-2xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-10 border-2 border-indigo-200 shadow-lg">
-                <h2 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 tracking-tight">
-                  👋 Your Smart AI Lawyer
+                <h2 className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 tracking-tight">
+                  👋 Your Smart AI Kenyan Lawyer
                 </h2>
-                <p className="text-xl text-slate-600 mb-8 leading-relaxed font-light">
-                  Instant legal guidance powered by Kenyan law expertise.
-                </p>
                 <div className="mt-6 pt-6 border-t-2 border-indigo-200">
                   <p className="flex items-start gap-3 text-lg">
                     <span className="text-2xl">💡</span>
