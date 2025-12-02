@@ -164,6 +164,26 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
     }
   };
 
+  const handleSeedSampleData = async () => {
+    if (!confirm('This will add 5 sample Kenyan legal documents to the knowledge base. Continue?')) {
+      return;
+    }
+
+    try {
+      setScraping(true);
+      const response = await axiosInstance.post('/admin/crawler/seed-sample-data');
+      if (response.data.success) {
+        alert(`✅ ${response.data.message}`);
+        fetchDocuments();
+        fetchStats();
+      }
+    } catch (error: any) {
+      alert('❌ Seeding failed: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setScraping(false);
+    }
+  };
+
   const handleDeleteDocument = async (documentId: string) => {
     if (!confirm('Are you sure you want to delete this document and all its vectors?')) {
       return;
@@ -431,14 +451,25 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={handleTriggerCrawl}
-            disabled={scraping}
-            className="w-full bg-white text-emerald-700 hover:bg-emerald-50 py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
-            {scraping ? 'Crawling in Progress...' : 'Trigger Manual Crawl Now'}
-          </button>
+          <div className="space-y-3">
+            <button
+              onClick={handleTriggerCrawl}
+              disabled={scraping}
+              className="w-full bg-white text-emerald-700 hover:bg-emerald-50 py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
+              {scraping ? 'Crawling in Progress...' : 'Trigger Manual Crawl Now'}
+            </button>
+
+            <button
+              onClick={handleSeedSampleData}
+              disabled={scraping}
+              className="w-full bg-amber-500 text-white hover:bg-amber-600 py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <Database className="h-5 w-5" />}
+              {scraping ? 'Seeding Data...' : 'Seed Sample Data (Testing)'}
+            </button>
+          </div>
         </div>
 
         {/* Documents List */}
