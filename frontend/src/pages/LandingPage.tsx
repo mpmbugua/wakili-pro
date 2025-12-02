@@ -60,7 +60,7 @@ export const LandingPage: React.FC = () => {
                     <div className="bg-blue-50 p-2 rounded">
                       <MessageSquare className="h-5 w-5 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900">AI Legal Assistant</h3>
+                    <h3 className="text-base font-semibold text-slate-900">Smart AI Lawyer</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
                     Get instant answers to legal questions, 24/7. AI-powered guidance based on Kenyan law.
@@ -76,7 +76,7 @@ export const LandingPage: React.FC = () => {
                     <div className="bg-blue-50 p-2 rounded">
                       <Scale className="h-5 w-5 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900">Expert Lawyers</h3>
+                    <h3 className="text-base font-semibold text-slate-900">Find a Lawyer</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
                     Book video consultations with 500+ verified advocates across all practice areas.
@@ -92,7 +92,7 @@ export const LandingPage: React.FC = () => {
                     <div className="bg-blue-50 p-2 rounded">
                       <ShoppingBag className="h-5 w-5 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900">Legal Documents</h3>
+                    <h3 className="text-base font-semibold text-slate-900">Get Legal Document</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
                     Access 500+ professional legal templates. Free AI review with every purchase.
@@ -112,7 +112,7 @@ export const LandingPage: React.FC = () => {
                     <div className="bg-blue-50 p-2 rounded">
                       <FileText className="h-5 w-5 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900">Case Analysis & Review</h3>
+                    <h3 className="text-base font-semibold text-slate-900">Case Analysis & Advice</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
                     Upload documents for AI analysis (KES 500) or lawyer certification (from KES 2,000). 24-hour turnaround.
@@ -128,7 +128,7 @@ export const LandingPage: React.FC = () => {
                     <div className="bg-blue-50 p-2 rounded">
                       <Briefcase className="h-5 w-5 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900">Legal Services</h3>
+                    <h3 className="text-base font-semibold text-slate-900">Book Legal Service Package</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
                     Fixed-price packages for common legal needs. Property, business, family law, and more.
@@ -144,7 +144,7 @@ export const LandingPage: React.FC = () => {
                     <div className="bg-blue-50 p-2 rounded">
                       <Book className="h-5 w-5 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900">Legal Resources</h3>
+                    <h3 className="text-base font-semibold text-slate-900">Explore Legal Guides</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
                     Free guides, articles, and information to help you understand Kenyan law.
