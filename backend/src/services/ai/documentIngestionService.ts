@@ -10,9 +10,7 @@ import { embeddingService } from './embeddingService';
 import { vectorDbService } from './vectorDatabaseService';
 import { logger } from '../../utils/logger';
 import { readFile } from 'fs/promises';
-
-// pdf-parse is CommonJS only, use require
-const pdf = require('pdf-parse');
+import pdf from 'pdf-parse';
 
 const prisma = new PrismaClient();
 
