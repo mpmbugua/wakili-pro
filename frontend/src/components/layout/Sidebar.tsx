@@ -42,8 +42,8 @@ const publicNavigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Consultations', href: '/consultations', icon: Video },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
-  { name: 'Documents', href: '/documents', icon: FileText },
-  { name: 'AI Assistant', href: '/ai', icon: Book },
+  { name: 'Get Legal Document', href: '/documents', icon: FileText },
+  { name: 'Smart AI Lawyer', href: '/ai', icon: Book },
 ];
 
 // Lawyer navigation - main items
@@ -53,7 +53,7 @@ const lawyerMainNavigation: NavItem[] = [
   { name: 'Appointments', href: '/appointments', icon: Calendar },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Document Reviews', href: '/document-reviews', icon: FileText },
-  { name: 'AI Assistant', href: '/lawyer/ai', icon: Book },
+  { name: 'Smart AI Lawyer', href: '/lawyer/ai', icon: Book },
 ];
 
 // Lawyer tools navigation
@@ -70,7 +70,7 @@ const lawyerToolsNavigation: NavItem[] = [
 const adminMainNavigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
-  { name: 'AI Assistant', href: '/admin/ai', icon: Book },
+  { name: 'Smart AI Lawyer', href: '/admin/ai', icon: Book },
 ];
 
 // Admin management navigation
