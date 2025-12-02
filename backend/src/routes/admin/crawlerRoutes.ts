@@ -85,26 +85,24 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
     const { IntelligentLegalCrawler } = await import('../../services/intelligentLegalCrawler');
     const crawler = new IntelligentLegalCrawler({ maxDocumentsPerRun: 10 });
 
-    // ⚠️ CRITICAL: Kenya Law Reports restructured their URLs - old /Acts/ subfolder no longer works
-    // Using VERIFIED stable URLs from kenyalaw.org/kl/fileadmin/pdfdownloads/ (tested Dec 2025)
+    // ✅ FINAL FIX: Kenya Law migrated to new.kenyalaw.org with Akoma Ntoso URL structure
+    // Using VERIFIED PDF download URLs from new.kenyalaw.org (tested Dec 2025)
     const realPDFs = [
-      // Constitution - verified stable URL
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/TheConstitutionOfKenya.pdf', title: 'Constitution of Kenya 2010', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
+      // Constitution - VERIFIED working PDF download URL
+      { url: 'https://new.kenyalaw.org/akn/ke/act/2010/constitution/eng@2010-09-03/publication', title: 'Constitution of Kenya 2010', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
       
-      // Cap Acts - using legacy Cap numbering system (more stable)
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LawofSuccessionAct_Cap160.pdf', title: 'Law of Succession Act Cap. 160', type: 'LEGISLATION' as const, category: 'Succession Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EvidenceAct_Cap80.pdf', title: 'Evidence Act Cap. 80', type: 'LEGISLATION' as const, category: 'Civil Procedure' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/PenalCode_Cap63.pdf', title: 'Penal Code Cap. 63', type: 'LEGISLATION' as const, category: 'Criminal Law' },
+      // Recent Acts with Akoma Ntoso PDF URLs (Act Number format: YYYY/NUMBER)
+      { url: 'https://new.kenyalaw.org/akn/ke/act/2007/11/eng@2024-04-26/publication', title: 'Employment Act No. 11 of 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
+      { url: 'https://new.kenyalaw.org/akn/ke/act/2012/6/eng@2023-12-31/publication', title: 'Land Act No. 6 of 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
+      { url: 'https://new.kenyalaw.org/akn/ke/act/2015/17/eng@2023-12-31/publication', title: 'Companies Act No. 17 of 2015', type: 'LEGISLATION' as const, category: 'Corporate Law' },
+      { url: 'https://new.kenyalaw.org/akn/ke/act/2019/24/eng@2019-11-08/publication', title: 'Data Protection Act No. 24 of 2019', type: 'LEGISLATION' as const, category: 'Privacy Law' },
       
-      // Recent Acts - using year-based naming (2007-2016)
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/Employment_Act_2007.pdf', title: 'Employment Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/2019/TheDataProtectionAct_No24of2019.pdf', title: 'Data Protection Act 2019', type: 'LEGISLATION' as const, category: 'Privacy Law' },
-      
-      // 2010-2016 Constitutional Acts
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CountyGovernmentsAct_No17of2012.pdf', title: 'County Governments Act 2012', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandActNo6of2012.pdf', title: 'Land Act 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandRegistrationActNo3of2012.pdf', title: 'Land Registration Act 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/CompaniesActNo17of2015.pdf', title: 'Companies Act 2015', type: 'LEGISLATION' as const, category: 'Corporate Law' }
+      // Cap Acts (Legacy numbering system) - Akoma Ntoso format
+      { url: 'https://new.kenyalaw.org/akn/ke/act/cap/63/eng@2023-12-31/publication', title: 'Penal Code Cap. 63', type: 'LEGISLATION' as const, category: 'Criminal Law' },
+      { url: 'https://new.kenyalaw.org/akn/ke/act/cap/80/eng@2023-12-31/publication', title: 'Evidence Act Cap. 80', type: 'LEGISLATION' as const, category: 'Civil Procedure' },
+      { url: 'https://new.kenyalaw.org/akn/ke/act/cap/160/eng@2023-12-31/publication', title: 'Law of Succession Act Cap. 160', type: 'LEGISLATION' as const, category: 'Succession Law' },
+      { url: 'https://new.kenyalaw.org/akn/ke/act/2012/17/eng@2023-12-31/publication', title: 'County Governments Act No. 17 of 2012', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
+      { url: 'https://new.kenyalaw.org/akn/ke/act/2012/3/eng@2023-12-31/publication', title: 'Land Registration Act No. 3 of 2012', type: 'LEGISLATION' as const, category: 'Property Law' }
     ];
 
     // Set discovered documents
