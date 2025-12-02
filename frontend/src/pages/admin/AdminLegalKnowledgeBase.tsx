@@ -5,7 +5,6 @@ import {
   Globe, Calendar, Tag, Search, Filter
 } from 'lucide-react';
 import axiosInstance from '../../lib/axios';
-import { GlobalLayout } from '../../components/layout/GlobalLayout';
 
 interface LegalDocument {
   id: string;
@@ -190,13 +189,12 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
   });
 
   return (
-    <GlobalLayout>
-      <div className="min-h-screen bg-gray-50 p-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Legal Knowledge Base</h1>
-          <p className="text-gray-600">Upload legal documents and train AI with Kenyan law</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 p-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Legal Knowledge Base</h1>
+        <p className="text-gray-600">Upload legal documents and train AI with Kenyan law</p>
+      </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -535,7 +533,6 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
           )}
         </div>
       </div>
-    </GlobalLayout>
   );
 };
 
