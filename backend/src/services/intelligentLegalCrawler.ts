@@ -33,25 +33,24 @@ export class IntelligentLegalCrawler {
   constructor(config?: Partial<CrawlConfig>) {
     this.config = {
       seedUrls: [
-        // Kenya Law Reports - Primary sources
+        // Kenya Law Reports - Follow detail pages
         'https://new.kenyalaw.org/judgments/',
         'https://kenyalaw.org/kl/index.php?id=398', // Case law database
-        'https://kenyalaw.org/caselaw/', // Direct caselaw access
         'https://kenyalaw.org/kl/index.php?id=409', // Acts
         'https://kenyalaw.org/kl/index.php?id=6515', // Constitution
-        // Judiciary
+        // Judiciary - More likely to have direct PDFs
         'https://judiciary.go.ke/judgments/',
-        'https://judiciary.go.ke/supreme-court/',
-        'https://judiciary.go.ke/court-of-appeal/',
-        'https://judiciary.go.ke/high-court/',
-        'https://judiciary.go.ke/environment-and-land-court/',
-        'https://judiciary.go.ke/employment-and-labour-relations-court/',
+        'https://judiciary.go.ke/download-category/judgments/',
+        'https://judiciary.go.ke/download-category/supreme-court/',
+        'https://judiciary.go.ke/download-category/court-of-appeal/',
+        'https://judiciary.go.ke/download-category/high-court/',
+        'https://judiciary.go.ke/download-category/employment-and-labour-relations-court/',
         // Parliament
         'http://www.parliament.go.ke/the-national-assembly/house-business/bills',
-        'http://www.parliament.go.ke/the-senate/house-business/bills',
         'http://www.parliament.go.ke/the-national-assembly/house-business/acts',
         // LSK Resources
         'https://lsk.or.ke/resources/',
+        'https://lsk.or.ke/resources/legal-resources/',
         ...(config?.seedUrls || [])
       ],
       maxDepth: 3, // Follow links up to 3 levels deep
@@ -264,20 +263,29 @@ export class IntelligentLegalCrawler {
               fullUrl.includes('statute') ||
               fullUrl.includes('download') ||
               fullUrl.includes('document') ||
-              // Kenya Law specific patterns
-              fullUrl.includes('kenyalaw.org/kl/fileadmin') ||
+              fullUrl.includes('/wp-content/') ||
+              // Kenya Law specific patterns - BE AGGRESSIVE
+              fullUrl.includes('kenyalaw.org/kl/') ||
               fullUrl.includes('kenyalaw.org/caselaw') ||
-              fullUrl.match(/id=\d+/) || // Query parameter patterns
+              fullUrl.includes('kenyalaw.org/acts') ||
+              fullUrl.match(/[?&]id=\d+/) || // Query parameter patterns
+              fullUrl.match(/[?&]view=/) ||
+              fullUrl.match(/[?&]download=/) ||
+              // Judiciary patterns
+              fullUrl.includes('judiciary.go.ke/download') ||
+              fullUrl.includes('judiciary.go.ke/category') ||
               // Link text patterns
               linkText.includes('judgment') ||
-              linkText.includes('case') ||
-              linkText.includes('act') ||
-              linkText.includes('bill') ||
               linkText.includes('download') ||
               linkText.includes('view') ||
               linkText.includes('read') ||
+              linkText.includes('case') ||
+              linkText.includes('act') ||
+              linkText.includes('bill') ||
+              linkText.match(/\d{4}/) || // Year in link text
               parentText.includes('judgment') ||
-              parentText.includes('case');
+              parentText.includes('case') ||
+              parentText.includes('download');
 
             if (isLegalLink) {
               pageCount++;
@@ -304,7 +312,7 @@ export class IntelligentLegalCrawler {
       }
 
       // Recursively crawl discovered pages (rate limited)
-      for (const link of links.slice(0, 10)) { // Limit to 10 links per page
+      for (const link of links.slice(0, 20)) { // Increased to 20 links per page for Kenya Law
         await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
         await this.crawlPage(link, depth + 1);
       }
