@@ -33,24 +33,36 @@ export class IntelligentLegalCrawler {
   constructor(config?: Partial<CrawlConfig>) {
     this.config = {
       seedUrls: [
+        // Kenya Law Reports - Primary sources
         'https://new.kenyalaw.org/judgments/',
+        'https://kenyalaw.org/kl/index.php?id=398', // Case law database
+        'https://kenyalaw.org/caselaw/', // Direct caselaw access
+        'https://kenyalaw.org/kl/index.php?id=409', // Acts
+        'https://kenyalaw.org/kl/index.php?id=6515', // Constitution
+        // Judiciary
         'https://judiciary.go.ke/judgments/',
         'https://judiciary.go.ke/supreme-court/',
         'https://judiciary.go.ke/court-of-appeal/',
         'https://judiciary.go.ke/high-court/',
+        'https://judiciary.go.ke/environment-and-land-court/',
+        'https://judiciary.go.ke/employment-and-labour-relations-court/',
+        // Parliament
         'http://www.parliament.go.ke/the-national-assembly/house-business/bills',
         'http://www.parliament.go.ke/the-senate/house-business/bills',
+        'http://www.parliament.go.ke/the-national-assembly/house-business/acts',
+        // LSK Resources
         'https://lsk.or.ke/resources/',
         ...(config?.seedUrls || [])
       ],
       maxDepth: 3, // Follow links up to 3 levels deep
-      maxDocumentsPerRun: parseInt(process.env.SCRAPER_BATCH_SIZE || '5'), // Reduced to 5 for faster initial results
+      maxDocumentsPerRun: parseInt(process.env.SCRAPER_BATCH_SIZE || '20'), // Increased to 20 for better results
       allowedDomains: [
         'kenyalaw.org',
         'judiciary.go.ke',
         'parliament.go.ke',
         'lsk.or.ke',
-        'kenyalaw.go.ke'
+        'kenyalaw.go.ke',
+        'new.kenyalaw.org'
       ],
       respectRobotsTxt: true,
       ...config
@@ -72,13 +84,24 @@ export class IntelligentLegalCrawler {
   }
 
   /**
-   * Check if URL points to a legal document (PDF)
+   * Check if URL points to a legal document (PDF or DOCX)
    */
   private isLegalDocument(url: string): boolean {
     const lowerUrl = url.toLowerCase();
     return lowerUrl.endsWith('.pdf') || 
+           lowerUrl.endsWith('.docx') ||
+           lowerUrl.endsWith('.doc') ||
            lowerUrl.includes('.pdf?') ||
-           lowerUrl.includes('/wp-content/uploads/') && lowerUrl.includes('.pdf');
+           lowerUrl.includes('.docx?') ||
+           lowerUrl.includes('.doc?') ||
+           lowerUrl.includes('/wp-content/uploads/') && (lowerUrl.includes('.pdf') || lowerUrl.includes('.docx')) ||
+           // Kenya Law specific patterns
+           lowerUrl.includes('kenyalaw.org/caselaw/') ||
+           lowerUrl.includes('kenyalaw.org/kl/fileadmin/') ||
+           (lowerUrl.includes('kenyalaw.org') && lowerUrl.match(/\d{4}/)) || // Year patterns
+           // Judiciary patterns
+           lowerUrl.includes('judiciary.go.ke/download/') ||
+           lowerUrl.includes('judiciary.go.ke/wp-content/uploads/');
   }
 
   /**
@@ -164,8 +187,12 @@ export class IntelligentLegalCrawler {
       const response = await axios.get(url, {
         timeout: 15000,
         headers: {
-          'User-Agent': 'WakiliPro Legal Crawler/1.0 (educational purpose)',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Connection': 'keep-alive',
+          'Upgrade-Insecure-Requests': '1'
         },
         maxRedirects: 5
       });
@@ -174,6 +201,9 @@ export class IntelligentLegalCrawler {
 
       // Find all links on the page
       const links: string[] = [];
+      let pdfCount = 0;
+      let pageCount = 0;
+      
       $('a[href]').each((_, el) => {
         const href = $(el).attr('href');
         if (!href) return;
@@ -183,6 +213,7 @@ export class IntelligentLegalCrawler {
           
           // Check if it's a PDF document
           if (this.isLegalDocument(fullUrl)) {
+            pdfCount++;
             const title = this.extractTitle($, $(el));
             const { type, category } = this.categorizeDocument(fullUrl, url);
 
@@ -195,25 +226,44 @@ export class IntelligentLegalCrawler {
               depth
             });
 
-            logger.info(`[Crawler] Found document: ${title}`);
+            logger.info(`[Crawler] ✓ Found document #${this.discoveredDocuments.length}: ${title.substring(0, 80)}`);
           } 
           // Or a page to crawl further
           else if (this.isAllowedDomain(fullUrl) && !this.visited.has(fullUrl)) {
             // Only follow links that look legal-related
             const linkText = $(el).text().toLowerCase();
+            const parentText = $(el).parent().text().toLowerCase();
             const isLegalLink = 
+              // URL patterns
               fullUrl.includes('judgment') ||
+              fullUrl.includes('caselaw') ||
+              fullUrl.includes('case') ||
               fullUrl.includes('act') ||
               fullUrl.includes('bill') ||
               fullUrl.includes('legal') ||
               fullUrl.includes('court') ||
               fullUrl.includes('resource') ||
+              fullUrl.includes('legislation') ||
+              fullUrl.includes('statute') ||
+              fullUrl.includes('download') ||
+              fullUrl.includes('document') ||
+              // Kenya Law specific patterns
+              fullUrl.includes('kenyalaw.org/kl/fileadmin') ||
+              fullUrl.includes('kenyalaw.org/caselaw') ||
+              fullUrl.match(/id=\d+/) || // Query parameter patterns
+              // Link text patterns
               linkText.includes('judgment') ||
               linkText.includes('case') ||
               linkText.includes('act') ||
-              linkText.includes('bill');
+              linkText.includes('bill') ||
+              linkText.includes('download') ||
+              linkText.includes('view') ||
+              linkText.includes('read') ||
+              parentText.includes('judgment') ||
+              parentText.includes('case');
 
             if (isLegalLink) {
+              pageCount++;
               links.push(fullUrl);
             }
           }
@@ -221,6 +271,8 @@ export class IntelligentLegalCrawler {
           // Invalid URL, skip
         }
       });
+
+      logger.info(`[Crawler] Page summary - PDFs: ${pdfCount}, Pages to crawl: ${pageCount}`);
 
       // Recursively crawl discovered pages (rate limited)
       for (const link of links.slice(0, 10)) { // Limit to 10 links per page
