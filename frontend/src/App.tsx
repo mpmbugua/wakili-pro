@@ -481,9 +481,7 @@ function App() {
               path="/admin/legal-knowledge" 
               element={
                 <AdminRoute hydrated={hydrated}>
-                  <AppShell>
-                    <AdminLegalKnowledgeBase />
-                  </AppShell>
+                  <AdminLegalKnowledgeBase />
                 </AdminRoute>
               } 
             />
