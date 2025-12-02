@@ -181,7 +181,7 @@ export class IntelligentLegalCrawler {
     }
 
     this.visited.add(url);
-    logger.info(`[Crawler] Crawling: ${url} (depth: ${depth})`);
+    logger.info(`[Crawler] 📍 Crawling: ${url} (depth: ${depth})`);
 
     try {
       const response = await axios.get(url, {
@@ -197,12 +197,21 @@ export class IntelligentLegalCrawler {
         maxRedirects: 5
       });
 
+      logger.info(`[Crawler] ✓ Page loaded: ${response.status} ${response.statusText} (${response.data.length} bytes)`);
+
       const $ = cheerio.load(response.data);
+
+      // Count total links on page
+      const totalLinks = $('a[href]').length;
+      logger.info(`[Crawler] Found ${totalLinks} total links on page`);
 
       // Find all links on the page
       const links: string[] = [];
       let pdfCount = 0;
+      let docxCount = 0;
       let pageCount = 0;
+      let skippedCount = 0;
+      const sampleUrls: string[] = [];
       
       $('a[href]').each((_, el) => {
         const href = $(el).attr('href');
@@ -211,9 +220,17 @@ export class IntelligentLegalCrawler {
         try {
           const fullUrl = href.startsWith('http') ? href : new URL(href, url).href;
           
+          // Log first 5 Kenya Law URLs for debugging
+          if (sampleUrls.length < 5 && fullUrl.includes('kenyalaw')) {
+            sampleUrls.push(fullUrl);
+          }
+          
           // Check if it's a PDF document
           if (this.isLegalDocument(fullUrl)) {
-            pdfCount++;
+            const urlLower = fullUrl.toLowerCase();
+            if (urlLower.includes('.pdf')) pdfCount++;
+            if (urlLower.includes('.docx') || urlLower.includes('.doc')) docxCount++;
+            
             const title = this.extractTitle($, $(el));
             const { type, category } = this.categorizeDocument(fullUrl, url);
 
@@ -265,6 +282,8 @@ export class IntelligentLegalCrawler {
             if (isLegalLink) {
               pageCount++;
               links.push(fullUrl);
+            } else {
+              skippedCount++;
             }
           }
         } catch (error) {
@@ -272,7 +291,17 @@ export class IntelligentLegalCrawler {
         }
       });
 
-      logger.info(`[Crawler] Page summary - PDFs: ${pdfCount}, Pages to crawl: ${pageCount}`);
+      logger.info(`[Crawler] 📊 Page summary - PDFs: ${pdfCount}, DOCX: ${docxCount}, Pages to crawl: ${pageCount}, Skipped: ${skippedCount}`);
+
+      // Log sample Kenya Law URLs found
+      if (sampleUrls.length > 0) {
+        logger.info(`[Crawler] 🔍 Sample Kenya Law URLs found: ${sampleUrls.join(' | ')}`);
+      }
+
+      // Log first few links found
+      if (links.length > 0) {
+        logger.info(`[Crawler] Sample links to follow: ${links.slice(0, 3).join(', ')}`);
+      }
 
       // Recursively crawl discovered pages (rate limited)
       for (const link of links.slice(0, 10)) { // Limit to 10 links per page
