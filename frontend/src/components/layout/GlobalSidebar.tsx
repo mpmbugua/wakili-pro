@@ -44,12 +44,13 @@ export const GlobalSidebar: React.FC = () => {
   
   // Public navigation items (for non-authenticated users or public pages)
   const navigationItems = [
-    { path: '/', icon: Home, label: 'Home' },
-    { path: '/ai', icon: MessageSquare, label: 'AI Legal Assistant' },
-    { path: '/lawyers', icon: Scale, label: 'Expert Lawyers' },
-    { path: '/services', icon: Briefcase, label: 'Legal Services' },
-    { path: '/marketplace', icon: ShoppingBag, label: 'Legal Documents' },
-    { path: '/resources', icon: Book, label: 'Legal Resources' },
+    { path: '/', icon: Home, label: 'home' },
+    { path: '/ai', icon: MessageSquare, label: 'Smart AI Lawyer' },
+    { path: '/lawyers', icon: Scale, label: 'Find a Lawyer' },
+    { path: '/services', icon: Briefcase, label: 'Book Legal Service Package' },
+    { path: '/marketplace', icon: ShoppingBag, label: 'Get Legal Document' },
+    { path: '/documents', icon: FileText, label: 'Case Analysis & Advice' },
+    { path: '/resources', icon: Book, label: 'Explore Legal Guides' },
   ];
   
   const dashboardItem = { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' };
