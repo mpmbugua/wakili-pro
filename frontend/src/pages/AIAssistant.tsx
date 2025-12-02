@@ -395,9 +395,9 @@ export const AIAssistant: React.FC = () => {
                   👋 Your Smart AI Kenyan Lawyer
                 </h2>
                 <div className="mt-6 pt-6 border-t-2 border-indigo-200">
-                  <p className="flex items-start gap-3 text-lg">
-                    <span className="text-2xl">💡</span>
-                    <span className="text-slate-700">Need personalized advice? <button onClick={() => navigate('/lawyers')} className="text-indigo-600 underline decoration-2 hover:text-indigo-800 font-semibold transition-colors">Book a consultation</button></span>
+                  <p className="flex items-start gap-2 text-sm">
+                    <span className="text-lg">💡</span>
+                    <span className="text-slate-600">Need personalized advice? <button onClick={() => navigate('/lawyers')} className="text-indigo-600 underline decoration-2 hover:text-indigo-800 font-semibold transition-colors">Book a consultation</button></span>
                   </p>
                 </div>
               </div>
