@@ -390,17 +390,17 @@ export const AIAssistant: React.FC = () => {
           {/* Welcome Message - Shows when no messages */}
           {messages.length === 0 && (
             <div className="flex justify-center">
-              <div className="max-w-2xl bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 border border-blue-200 shadow-sm">
-                <h2 className="text-3xl font-bold text-slate-900 mb-4 tracking-tight">
+              <div className="max-w-2xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-10 border-2 border-indigo-200 shadow-lg">
+                <h2 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 tracking-tight">
                   👋 Your Smart AI Lawyer
                 </h2>
-                <p className="text-lg text-slate-700 mb-6 leading-relaxed">
+                <p className="text-xl text-slate-600 mb-8 leading-relaxed font-light">
                   Instant legal guidance powered by Kenyan law expertise.
                 </p>
-                <div className="mt-6 pt-4 border-t border-blue-200">
-                  <p className="flex items-start gap-3 text-blue-700">
-                    <span className="text-xl">💡</span>
-                    <span>Need personalized advice? <button onClick={() => navigate('/lawyers')} className="text-blue-600 underline hover:text-blue-800 font-semibold">Book a consultation</button></span>
+                <div className="mt-6 pt-6 border-t-2 border-indigo-200">
+                  <p className="flex items-start gap-3 text-lg">
+                    <span className="text-2xl">💡</span>
+                    <span className="text-slate-700">Need personalized advice? <button onClick={() => navigate('/lawyers')} className="text-indigo-600 underline decoration-2 hover:text-indigo-800 font-semibold transition-colors">Book a consultation</button></span>
                   </p>
                 </div>
               </div>
