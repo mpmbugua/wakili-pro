@@ -16,7 +16,7 @@ export const EmergencyCallButton: React.FC = () => {
   return (
     <>
       {/* Floating Button */}
-      <div className="fixed bottom-24 left-4 sm:left-6 z-50">
+      <div className="fixed top-20 left-4 sm:left-6 z-50">
         {!isExpanded ? (
           <button
             onClick={() => setIsExpanded(true)}
