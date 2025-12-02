@@ -184,6 +184,27 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
     }
   };
 
+  const handleTestCrawler = async () => {
+    if (!confirm('This will test the crawler on Kenya Law Reports to verify it can find documents. Continue?')) {
+      return;
+    }
+
+    try {
+      setScraping(true);
+      const response = await axiosInstance.get('/admin/crawler/test');
+      if (response.data.success) {
+        const { discovered, ingested } = response.data.data;
+        alert(`✅ Test Complete!\n\nDiscovered: ${discovered} documents\nIngested: ${ingested} documents\n\nCheck the documents list below.`);
+        fetchDocuments();
+        fetchStats();
+      }
+    } catch (error: any) {
+      alert('❌ Test failed: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setScraping(false);
+    }
+  };
+
   const handleDeleteDocument = async (documentId: string) => {
     if (!confirm('Are you sure you want to delete this document and all its vectors?')) {
       return;
@@ -459,6 +480,15 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
             >
               {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
               {scraping ? 'Crawling in Progress...' : 'Trigger Manual Crawl Now'}
+            </button>
+
+            <button
+              onClick={handleTestCrawler}
+              disabled={scraping}
+              className="w-full bg-blue-500 text-white hover:bg-blue-600 py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <Database className="h-5 w-5" />}
+              {scraping ? 'Testing...' : 'Test Kenya Law Crawler'}
             </button>
 
             <button
