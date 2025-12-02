@@ -109,8 +109,12 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
       depth: 0
     }));
 
+    logger.info(`[Crawler API] Set ${realPDFs.length} documents for ingestion`);
+
     // Ingest them
-    const ingestedCount = await (crawler as any).ingestDocuments();
+    logger.info(`[Crawler API] Starting ingestion...`);
+    const ingestedCount = await crawler.ingestDocuments();
+    logger.info(`[Crawler API] Ingestion complete: ${ingestedCount}/${realPDFs.length}`);
 
     res.json({
       success: true,

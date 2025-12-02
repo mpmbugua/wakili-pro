@@ -353,8 +353,9 @@ export class IntelligentLegalCrawler {
 
   /**
    * Ingest discovered documents into knowledge base
+   * Made public so it can be called from API routes
    */
-  private async ingestDocuments(): Promise<number> {
+  async ingestDocuments(): Promise<number> {
     let ingestedCount = 0;
 
     // Get or create system user
@@ -460,10 +461,16 @@ export class IntelligentLegalCrawler {
         // Rate limiting
         await new Promise(resolve => setTimeout(resolve, 3000));
       } catch (error) {
-        logger.error(`[Crawler] Failed to ingest document "${doc.title}":`, error);
+        logger.error(`[Crawler] ❌ Failed to ingest document "${doc.title}":`, error);
+        logger.error(`[Crawler] Error details:`, {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          url: doc.url
+        });
       }
     }
 
+    logger.info(`[Crawler] Ingestion summary: ${ingestedCount}/${documentsToProcess.length} documents successfully ingested`);
     return ingestedCount;
   }
 }
