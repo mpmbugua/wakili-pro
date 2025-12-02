@@ -76,20 +76,20 @@ const adminMainNavigation: NavItem[] = [
 // Admin management navigation
 const adminManagementNavigation: NavItem[] = [
   { name: 'Admin Dashboard', href: '/admin', icon: Shield },
-  { name: 'User Management', href: '/admin/users', icon: Users },
+  { name: 'User Management', href: '/admin', icon: Users },
   { name: 'Lawyer Verification', href: '/admin/lawyers', icon: Scale },
-  { name: 'System Analytics', href: '/admin/analytics', icon: BarChart3 },
-  { name: 'System Settings', href: '/admin/settings', icon: Settings },
+  { name: 'System Analytics', href: '/admin', icon: BarChart3 },
+  { name: 'System Settings', href: '/admin', icon: Settings },
 ];
 
 // Super Admin additional navigation
 const superAdminNavigation: NavItem[] = [
   { name: 'Admin Dashboard', href: '/admin', icon: Shield },
-  { name: 'User Management', href: '/admin/users', icon: Users },
+  { name: 'User Management', href: '/super-admin', icon: Users },
   { name: 'Lawyer Verification', href: '/admin/lawyers', icon: Scale },
-  { name: 'System Analytics', href: '/admin/analytics', icon: BarChart3 },
-  { name: 'System Settings', href: '/admin/settings', icon: Settings },
-  { name: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
+  { name: 'System Analytics', href: '/super-admin', icon: BarChart3 },
+  { name: 'System Settings', href: '/super-admin', icon: Settings },
+  { name: 'Audit Logs', href: '/super-admin', icon: FileText },
 ];
 
 const bottomNavigation: NavItem[] = [
