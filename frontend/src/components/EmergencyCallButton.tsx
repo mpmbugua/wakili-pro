@@ -24,7 +24,7 @@ export const EmergencyCallButton: React.FC = () => {
             aria-label="Emergency Legal Help"
           >
             <Phone className="h-6 w-6" />
-            <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-900 text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+            <span className="absolute -top-1 -right-1 bg-yellow-400 text-red-900 text-[10px] font-bold px-2 py-0.5 rounded-full animate-bounce whitespace-nowrap leading-tight">
               Talk to a Lawyer now
             </span>
           </button>
