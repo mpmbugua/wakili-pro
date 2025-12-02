@@ -306,20 +306,6 @@ export const ServiceRequestPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Info Banner - Updated for connection fee model */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start space-x-3">
-            <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1 text-sm text-blue-800">
-              <p className="font-medium mb-1">How it works:</p>
-              <ol className="list-decimal list-inside space-y-1 text-blue-700">
-                <li>Pay KES 500 commitment fee (non-refundable, ensures serious requests)</li>
-                <li>We match you with 3-5 qualified lawyers based on your needs</li>
-                <li>Review all quotes side-by-side and select your preferred lawyer</li>
-                <li>Handle payment directly with your chosen lawyer (no platform fees)</li>
-              </ol>
-            </div>
-          </div>
-
           {/* How It Works Info */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
             <div className="flex items-start space-x-3">
