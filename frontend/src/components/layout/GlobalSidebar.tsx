@@ -45,7 +45,7 @@ export const GlobalSidebar: React.FC = () => {
   // Public navigation items (for non-authenticated users or public pages)
   const navigationItems = [
     { path: '/', icon: Home, label: 'home' },
-    { path: '/ai', icon: MessageSquare, label: 'Smart AI Lawyer' },
+    { path: '/ai', icon: MessageSquare, label: 'Smart AI Kenyan Lawyer' },
     { path: '/lawyers', icon: Scale, label: 'Find a Lawyer' },
     { path: '/services', icon: Briefcase, label: 'Book Legal Service Package' },
     { path: '/marketplace', icon: ShoppingBag, label: 'Get Legal Document' },

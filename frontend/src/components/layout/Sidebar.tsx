@@ -43,7 +43,7 @@ const publicNavigation: NavItem[] = [
   { name: 'Consultations', href: '/consultations', icon: Video },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Get Legal Document', href: '/documents', icon: FileText },
-  { name: 'Smart AI Lawyer', href: '/ai', icon: Book },
+  { name: 'Smart AI Kenyan Lawyer', href: '/ai', icon: Book },
 ];
 
 // Lawyer navigation - main items
@@ -53,7 +53,7 @@ const lawyerMainNavigation: NavItem[] = [
   { name: 'Appointments', href: '/appointments', icon: Calendar },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Document Reviews', href: '/document-reviews', icon: FileText },
-  { name: 'Smart AI Lawyer', href: '/lawyer/ai', icon: Book },
+  { name: 'Smart AI Kenyan Lawyer', href: '/lawyer/ai', icon: Book },
 ];
 
 // Lawyer tools navigation
@@ -70,7 +70,7 @@ const lawyerToolsNavigation: NavItem[] = [
 const adminMainNavigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
-  { name: 'Smart AI Lawyer', href: '/admin/ai', icon: Book },
+  { name: 'Smart AI Kenyan Lawyer', href: '/admin/ai', icon: Book },
 ];
 
 // Admin management navigation

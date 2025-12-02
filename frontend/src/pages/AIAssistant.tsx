@@ -394,12 +394,6 @@ export const AIAssistant: React.FC = () => {
                 <h2 className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 tracking-tight">
                   👋 Your Smart AI Kenyan Lawyer
                 </h2>
-                <div className="mt-6 pt-6 border-t-2 border-indigo-200">
-                  <p className="flex items-start gap-2 text-sm">
-                    <span className="text-lg">💡</span>
-                    <span className="text-slate-600">Need personalized advice? <button onClick={() => navigate('/lawyers')} className="text-indigo-600 underline decoration-2 hover:text-indigo-800 font-semibold transition-colors">Book a consultation</button></span>
-                  </p>
-                </div>
               </div>
             </div>
           )}

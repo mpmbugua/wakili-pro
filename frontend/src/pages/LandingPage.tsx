@@ -60,7 +60,7 @@ export const LandingPage: React.FC = () => {
                     <div className="bg-blue-50 p-2 rounded">
                       <MessageSquare className="h-5 w-5 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900">Smart AI Lawyer</h3>
+                    <h3 className="text-base font-semibold text-slate-900">Smart AI Kenyan Lawyer</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
                     Get instant answers to legal questions, 24/7. AI-powered guidance based on Kenyan law.
