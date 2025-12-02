@@ -397,25 +397,11 @@ export const AIAssistant: React.FC = () => {
                 <p className="text-lg text-slate-700 mb-6 leading-relaxed">
                   Instant legal guidance powered by Kenyan law expertise.
                 </p>
-                <div className="space-y-3 text-base text-slate-600">
-                  <p className="flex items-center gap-3">
-                    <span className="text-green-600 text-xl">✓</span>
-                    <span className="font-medium">Ask anything in plain language</span>
+                <div className="mt-6 pt-4 border-t border-blue-200">
+                  <p className="flex items-start gap-3 text-blue-700">
+                    <span className="text-xl">💡</span>
+                    <span>Need personalized advice? <button onClick={() => navigate('/lawyers')} className="text-blue-600 underline hover:text-blue-800 font-semibold">Book a consultation</button></span>
                   </p>
-                  <p className="flex items-center gap-3">
-                    <span className="text-green-600 text-xl">✓</span>
-                    <span className="font-medium">Upload documents for instant analysis</span>
-                  </p>
-                  <p className="flex items-center gap-3">
-                    <span className="text-green-600 text-xl">✓</span>
-                    <span className="font-medium">Available 24/7, always ready</span>
-                  </p>
-                  <div className="mt-6 pt-4 border-t border-blue-200">
-                    <p className="flex items-start gap-3 text-blue-700">
-                      <span className="text-xl">💡</span>
-                      <span>Need personalized advice? <button onClick={() => navigate('/lawyers')} className="text-blue-600 underline hover:text-blue-800 font-semibold">Book a consultation</button></span>
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
