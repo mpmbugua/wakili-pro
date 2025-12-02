@@ -25,7 +25,7 @@ export const EmergencyCallButton: React.FC = () => {
           >
             <Phone className="h-6 w-6" />
             <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-900 text-xs font-bold px-2 py-1 rounded-full animate-bounce">
-              Dial-a-Lawyer
+              Talk to a Lawyer now
             </span>
           </button>
         ) : (
