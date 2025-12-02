@@ -5,7 +5,6 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuthStore } from './store/authStore';
 import { AppShell } from './components/layout/AppShell';
 import { GlobalLayout } from './components/layout/GlobalLayout';
-import { DashboardLayout } from './components/layout/DashboardLayout';
 import { LandingPage } from './pages/LandingPage';
 import { AIAssistant } from './pages/AIAssistant';
 import { LawyerAIAssistant } from './pages/LawyerAIAssistant';
@@ -482,9 +481,9 @@ function App() {
               path="/admin/legal-knowledge" 
               element={
                 <AdminRoute hydrated={hydrated}>
-                  <DashboardLayout>
+                  <AppShell>
                     <AdminLegalKnowledgeBase />
-                  </DashboardLayout>
+                  </AppShell>
                 </AdminRoute>
               } 
             />
