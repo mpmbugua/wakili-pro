@@ -390,30 +390,32 @@ export const AIAssistant: React.FC = () => {
           {/* Welcome Message - Shows when no messages */}
           {messages.length === 0 && (
             <div className="flex justify-center">
-              <div className="max-w-2xl bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                  👋 Welcome to Wakili Pro AI Assistant
+              <div className="max-w-2xl bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 border border-blue-200 shadow-sm">
+                <h2 className="text-3xl font-bold text-slate-900 mb-4 tracking-tight">
+                  👋 Your Smart AI Lawyer
                 </h2>
-                <p className="text-slate-700 mb-4">
-                  Get instant answers to your legal questions. Our AI assistant provides general legal information based on Kenyan law.
+                <p className="text-lg text-slate-700 mb-6 leading-relaxed">
+                  Instant legal guidance powered by Kenyan law expertise.
                 </p>
-                <div className="space-y-2 text-sm text-slate-600">
-                  <p className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    Ask questions in plain language
+                <div className="space-y-3 text-base text-slate-600">
+                  <p className="flex items-center gap-3">
+                    <span className="text-green-600 text-xl">✓</span>
+                    <span className="font-medium">Ask anything in plain language</span>
                   </p>
-                  <p className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    Upload documents or images for analysis
+                  <p className="flex items-center gap-3">
+                    <span className="text-green-600 text-xl">✓</span>
+                    <span className="font-medium">Upload documents for instant analysis</span>
                   </p>
-                  <p className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    Get instant responses 24/7
+                  <p className="flex items-center gap-3">
+                    <span className="text-green-600 text-xl">✓</span>
+                    <span className="font-medium">Available 24/7, always ready</span>
                   </p>
-                  <p className="flex items-start gap-2">
-                    <span className="text-blue-600">ℹ️</span>
-                    For personalized legal advice, consider <button onClick={() => navigate('/lawyers')} className="text-blue-600 underline hover:text-blue-700">booking a consultation</button>
-                  </p>
+                  <div className="mt-6 pt-4 border-t border-blue-200">
+                    <p className="flex items-start gap-3 text-blue-700">
+                      <span className="text-xl">💡</span>
+                      <span>Need personalized advice? <button onClick={() => navigate('/lawyers')} className="text-blue-600 underline hover:text-blue-800 font-semibold">Book a consultation</button></span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
