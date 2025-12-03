@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { 
   Upload, FileText, Database, RefreshCw, Trash2, Eye, 
   BookOpen, AlertCircle, CheckCircle, Loader, Download,
-  Globe, Calendar, Tag, Search, Filter
+  Globe, Calendar, Tag, Search, Filter, TestTube
 } from 'lucide-react';
 import axiosInstance from '../../lib/axios';
+import { useNavigate } from 'react-router-dom';
 
 interface LegalDocument {
   id: string;
@@ -28,6 +29,7 @@ interface IngestionStats {
 }
 
 export const AdminLegalKnowledgeBase: React.FC = () => {
+  const navigate = useNavigate();
   const [documents, setDocuments] = useState<LegalDocument[]>([]);
   const [stats, setStats] = useState<IngestionStats>({
     totalDocuments: 0,
@@ -192,8 +194,19 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Legal Knowledge Base</h1>
-        <p className="text-gray-600">Upload legal documents and train AI with Kenyan law</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Legal Knowledge Base</h1>
+            <p className="text-gray-600">Upload legal documents and train AI with Kenyan law</p>
+          </div>
+          <button
+            onClick={() => navigate('/admin/pinecone-test')}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 shadow-sm"
+          >
+            <TestTube className="h-4 w-4" />
+            Pinecone Diagnostics
+          </button>
+        </div>
       </div>
 
         {/* Stats Cards */}
