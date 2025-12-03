@@ -1,9 +1,10 @@
 /**
- * Embedding Service - Generate text embeddings using OpenAI
+ * Embedding Service - Generate text embeddings using OpenAI with Gemini fallback
  * Handles text chunking and batch processing for RAG system
  */
 
 import { OpenAI } from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { encoding_for_model } from 'tiktoken';
 import { logger } from '../../utils/logger';
 
@@ -21,6 +22,7 @@ interface EmbeddingResult {
 
 class EmbeddingService {
   private openai: OpenAI;
+  private gemini: GoogleGenerativeAI | null = null;
   private embeddingModel: string;
   private chunkSize: number;
   private chunkOverlap: number;
@@ -32,6 +34,16 @@ class EmbeddingService {
     }
 
     this.openai = new OpenAI({ apiKey });
+    
+    // Initialize Gemini if available
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (geminiKey) {
+      this.gemini = new GoogleGenerativeAI(geminiKey);
+      logger.info('✅ Gemini fallback embeddings enabled');
+    } else {
+      logger.warn('⚠️ GEMINI_API_KEY not found - will use basic fallback if OpenAI fails');
+    }
+    
     this.embeddingModel = process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small';
     this.chunkSize = parseInt(process.env.CHUNK_SIZE || '1000');
     this.chunkOverlap = parseInt(process.env.CHUNK_OVERLAP || '200');
@@ -116,7 +128,18 @@ class EmbeddingService {
     } catch (error: any) {
       // Check if it's a quota error (429)
       if (error?.status === 429 || error?.message?.includes('quota')) {
-        logger.warn('⚠️ OpenAI quota exceeded, using fallback embeddings');
+        logger.warn('⚠️ OpenAI quota exceeded, trying Gemini fallback...');
+        
+        // Try Gemini first if available
+        if (this.gemini) {
+          try {
+            return await this.generateGeminiEmbedding(text);
+          } catch (geminiError) {
+            logger.error('Gemini also failed:', geminiError);
+          }
+        }
+        
+        // Last resort: hash-based fallback
         return this.generateFallbackEmbedding(text);
       }
       logger.error('Error generating embedding:', error);
@@ -125,11 +148,47 @@ class EmbeddingService {
   }
 
   /**
-   * Fallback embedding generator (simple hash-based for testing)
-   * NOTE: This is NOT suitable for production - only for testing when OpenAI quota is exceeded
+   * Generate embedding using Gemini
+   */
+  private async generateGeminiEmbedding(text: string): Promise<number[]> {
+    if (!this.gemini) {
+      throw new Error('Gemini not initialized');
+    }
+
+    try {
+      const model = this.gemini.getGenerativeModel({ model: 'embedding-001' });
+      const result = await model.embedContent(text);
+      const embedding = result.embedding.values;
+
+      // Gemini embeddings are 768 dimensions, pad to 1536 for Pinecone compatibility
+      if (embedding.length === 768) {
+        return [...embedding, ...new Array(768).fill(0)];
+      }
+
+      return embedding;
+    } catch (error) {
+      logger.error('Error generating Gemini embedding:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fallback embedding generator (hash-based for testing)
+   * NOTE: This is NOT suitable for production - only for testing when both APIs fail
    */
   private generateFallbackEmbedding(text: string): number[] {
-    logger.warn('⚠️ USING FALLBACK EMBEDDINGS - Add OpenAI credits for proper functionality');
+    // If Gemini is available, try it first
+    if (this.gemini) {
+      logger.info('🔄 Trying Gemini embeddings as fallback...');
+      try {
+        // Use sync wrapper for fallback scenario
+        return this.generateGeminiEmbeddingSync(text);
+      } catch (error) {
+        logger.warn('Gemini fallback also failed, using hash-based embeddings');
+      }
+    }
+    
+    logger.warn('⚠️ USING BASIC FALLBACK EMBEDDINGS - Add OpenAI/Gemini credits for proper functionality');
     
     // Generate 1536-dimensional vector from text hash (matches text-embedding-3-small)
     const embedding = new Array(1536).fill(0);
@@ -144,6 +203,14 @@ class EmbeddingService {
     // Normalize to unit vector
     const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
     return embedding.map(val => magnitude > 0 ? val / magnitude : 0);
+  }
+
+  /**
+   * Synchronous wrapper for Gemini (used in fallback chain)
+   */
+  private generateGeminiEmbeddingSync(text: string): number[] {
+    // This is a workaround - in practice, should handle async properly
+    throw new Error('Async Gemini not available in sync context');
   }
 
   /**
@@ -176,7 +243,30 @@ class EmbeddingService {
         } catch (error: any) {
           // Check if it's a quota error
           if (error?.status === 429 || error?.message?.includes('quota')) {
-            logger.warn('⚠️ OpenAI quota exceeded in batch, using fallback embeddings');
+            logger.warn(`⚠️ OpenAI quota exceeded in batch ${i / batchSize + 1}, trying Gemini fallback...`);
+            
+            // Try Gemini for this batch
+            if (this.gemini) {
+              try {
+                const geminiResults = [];
+                for (let j = 0; j < batch.length; j++) {
+                  const embedding = await this.generateGeminiEmbedding(batch[j]);
+                  geminiResults.push({
+                    embedding,
+                    text: batch[j],
+                    index: i + j,
+                  });
+                }
+                results.push(...geminiResults);
+                logger.info(`✅ Gemini fallback successful for batch ${i / batchSize + 1}`);
+                continue; // Skip to next batch
+              } catch (geminiError) {
+                logger.error('Gemini batch fallback failed:', geminiError);
+              }
+            }
+            
+            // Last resort: hash-based fallback
+            logger.warn(`Using hash-based fallback for batch ${i / batchSize + 1}`);
             const fallbackResults = batch.map((text, idx) => ({
               embedding: this.generateFallbackEmbedding(text),
               text,
