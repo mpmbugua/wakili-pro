@@ -11,9 +11,6 @@ import { vectorDbService } from './vectorDatabaseService';
 import { logger } from '../../utils/logger';
 import { readFile } from 'fs/promises';
 
-// pdf-parse is a CommonJS module - use require for compatibility
-const pdfParse = require('pdf-parse');
-
 const prisma = new PrismaClient();
 
 interface DocumentMetadata {
@@ -38,17 +35,10 @@ class DocumentIngestionService {
    */
   async extractPdfText(filepath: string): Promise<string> {
     try {
+      // Dynamic import of pdf-parse to handle CommonJS module
+      const pdfParse = require('pdf-parse');
       const dataBuffer = await readFile(filepath);
-      // PDFParse is a class that needs to be instantiated
-      const PDFParseClass = (pdfParse as any).PDFParse;
-      
-      if (!PDFParseClass) {
-        throw new Error(`PDFParse class not found. Available: ${Object.keys(pdfParse || {}).join(', ')}`);
-      }
-      
-      // Instantiate the class and call parse method
-      const parser = new PDFParseClass();
-      const data = await parser.parse(dataBuffer);
+      const data = await pdfParse(dataBuffer);
       return data.text;
     } catch (error) {
       logger.error('Error extracting PDF text:', error);
