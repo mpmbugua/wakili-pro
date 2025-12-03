@@ -90,36 +90,36 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
     const realPDFs = [
       // Try multiple mirrors for each document
       { 
-        url: 'https://commons.wikimedia.org/wiki/File:Constitution_of_Kenya,_2010.pdf?action=raw', 
-        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/ConstitutionofKenya2010.pdf',
+        url: 'https://www.refworld.org/pdfid/4c8508822.pdf', 
+        fallback: 'http://extwprlegs1.fao.org/docs/pdf/ken127322.pdf',
         title: 'Constitution of Kenya 2010', 
         type: 'LEGISLATION' as const, 
         category: 'Constitutional Law' 
       },
       { 
-        url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct_No17of2015.pdf',
-        fallback: 'https://www.businesslawsafrica.com/wp-content/uploads/2019/08/Companies-Act-2015.pdf',
+        url: 'https://www.businesslawsafrica.com/wp-content/uploads/2019/08/Companies-Act-2015.pdf',
+        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct_No17of2015.pdf',
         title: 'Companies Act 2015', 
         type: 'LEGISLATION' as const, 
         category: 'Corporate Law' 
       },
       { 
-        url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct_No11of2007.pdf',
-        fallback: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76076/119461/F-1180658069/KEN76076.pdf',
+        url: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76076/119461/F-1180658069/KEN76076.pdf',
+        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct_No11of2007.pdf',
         title: 'Employment Act 2007', 
         type: 'LEGISLATION' as const, 
         category: 'Employment Law' 
       },
       { 
-        url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct6of2012.pdf',
-        fallback: 'https://landportal.org/sites/default/files/land_act_no_6_of_2012.pdf',
+        url: 'https://landportal.org/sites/default/files/land_act_no_6_of_2012.pdf',
+        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct6of2012.pdf',
         title: 'Land Act 2012', 
         type: 'LEGISLATION' as const, 
         category: 'Property Law' 
       },
       { 
-        url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/DataProtectionAct_No24of2019.pdf',
-        fallback: 'https://www.odpc.go.ke/wp-content/uploads/2023/06/Data-Protection-Act-2019.pdf',
+        url: 'https://www.odpc.go.ke/wp-content/uploads/2023/06/Data-Protection-Act-2019.pdf',
+        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/DataProtectionAct_No24of2019.pdf',
         title: 'Data Protection Act 2019', 
         type: 'LEGISLATION' as const, 
         category: 'Technology Law' 

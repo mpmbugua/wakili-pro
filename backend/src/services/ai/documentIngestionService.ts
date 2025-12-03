@@ -34,13 +34,21 @@ class DocumentIngestionService {
   /**
    * Extract text from PDF file
    */
-  async extractPdfText(filepath: string): Promise<string> {
+  private async extractPdfText(filepath: string): Promise<string> {
     try {
       const dataBuffer = await readFile(filepath);
-      // Handle both CommonJS and ES module exports
-      const parse = (pdfParse as any).default || pdfParse;
-      const data = await parse(dataBuffer);
-      return data.text;
+      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(dataBuffer) });
+      const pdf = await loadingTask.promise;
+      
+      let fullText = '';
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str).join(' ');
+        fullText += pageText + '\n';
+      }
+      
+      return fullText.trim();
     } catch (error) {
       logger.error('Error extracting PDF text:', error);
       throw new Error('Failed to extract text from PDF');
