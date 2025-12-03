@@ -39,7 +39,9 @@ class DocumentIngestionService {
   async extractPdfText(filepath: string): Promise<string> {
     try {
       const dataBuffer = await readFile(filepath);
-      const data = await pdfParse(dataBuffer);
+      // pdf-parse CommonJS module - access default export if it exists
+      const parsePdf = typeof pdfParse === 'function' ? pdfParse : pdfParse.default;
+      const data = await parsePdf(dataBuffer);
       return data.text;
     } catch (error) {
       logger.error('Error extracting PDF text:', error);
