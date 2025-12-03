@@ -124,7 +124,6 @@ class DocumentIngestionService {
       const document = await prisma.legalDocument.create({
         data: {
           title: metadata.title,
-          content: text,
           documentType: metadata.documentType,
           category: metadata.category,
           citation: metadata.citation,
