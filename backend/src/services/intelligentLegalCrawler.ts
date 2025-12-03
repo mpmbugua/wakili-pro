@@ -184,7 +184,7 @@ export class IntelligentLegalCrawler {
 
     try {
       const response = await axios.get(url, {
-        timeout: 30000, // Increased from 15s to 30s for slow government sites
+        timeout: 120000, // Increased to 120s for extremely slow government sites
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -392,15 +392,30 @@ export class IntelligentLegalCrawler {
           continue;
         }
 
-        // Download document
+        // Download document with retry logic
         logger.info(`[Crawler] Downloading: ${doc.title}`);
-        const docResponse = await axios.get(doc.url, {
-          responseType: 'arraybuffer',
-          timeout: 30000,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+        
+        let docResponse;
+        let retries = 3;
+        for (let attempt = 1; attempt <= retries; attempt++) {
+          try {
+            docResponse = await axios.get(doc.url, {
+              responseType: 'arraybuffer',
+              timeout: 120000, // 2 minutes for slow servers
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                'Accept': 'application/pdf,application/octet-stream,*/*'
+              }
+            });
+            break; // Success, exit retry loop
+          } catch (downloadError: any) {
+            if (attempt === retries) {
+              throw downloadError; // Final attempt failed
+            }
+            logger.warn(`[Crawler] Download attempt ${attempt}/${retries} failed for "${doc.title}": ${downloadError.message}. Retrying in ${attempt * 2}s...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000)); // Exponential backoff
           }
-        });
+        }
 
         // Determine file extension
         const urlLower = doc.url.toLowerCase();
