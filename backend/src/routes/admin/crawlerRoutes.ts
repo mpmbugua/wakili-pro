@@ -90,20 +90,20 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
       // Constitution (stable URL from kenyalaw.org)
       { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/ConstitutionofKenya.pdf', title: 'Constitution of Kenya 2010', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
       
-      // Employment & Labour Laws
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct_No11of2007.pdf', title: 'Employment Act No. 11 of 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LabourRelationsAct2007.pdf', title: 'Labour Relations Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
+      // Employment & Labour Laws - CORRECTED URLs
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct__No_11_of_2007.pdf', title: 'Employment Act No. 11 of 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LabourRelationsAct__No_14_of_2007.pdf', title: 'Labour Relations Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
       
-      // Corporate & Business Laws
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct_No17of2015.pdf', title: 'Companies Act No. 17 of 2015', type: 'LEGISLATION' as const, category: 'Corporate Law' },
+      // Corporate & Business Laws - CORRECTED URL
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct__No_17_of_2015.pdf', title: 'Companies Act No. 17 of 2015', type: 'LEGISLATION' as const, category: 'Corporate Law' },
       
-      // Property & Land Laws
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct_No6of2012.pdf', title: 'Land Act No. 6 of 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandRegistrationAct_No3of2012.pdf', title: 'Land Registration Act No. 3 of 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
+      // Property & Land Laws - CORRECTED URLs
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct__No_6_of_2012.pdf', title: 'Land Act No. 6 of 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandRegistrationAct__No_3_of_2012.pdf', title: 'Land Registration Act No. 3 of 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
       
       // Civil Procedure & Evidence
       { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EvidenceAct_Cap80.pdf', title: 'Evidence Act Cap. 80', type: 'LEGISLATION' as const, category: 'Civil Procedure' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CivilProcedureAct_Cap21.pdf', title: 'Civil Procedure Act Cap. 21', type: 'LEGISLATION' as const, category: 'Civil Procedure' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CivilProcedureAct_Cap_21.pdf', title: 'Civil Procedure Act Cap. 21', type: 'LEGISLATION' as const, category: 'Civil Procedure' },
       
       // Criminal Law
       { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/PenalCode_Cap63.pdf', title: 'Penal Code Cap. 63', type: 'LEGISLATION' as const, category: 'Criminal Law' },

@@ -35,9 +35,8 @@ class DocumentIngestionService {
    */
   async extractPdfText(filepath: string): Promise<string> {
     try {
-      // Dynamic import to avoid TypeScript transpilation issues
-      const pdfParseModule = await import('pdf-parse');
-      const pdfParse = pdfParseModule.default || pdfParseModule;
+      // Use require() directly since we compile to CommonJS
+      const pdfParse = require('pdf-parse');
       const dataBuffer = await readFile(filepath);
       const data = await pdfParse(dataBuffer);
       return data.text;
