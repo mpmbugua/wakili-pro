@@ -598,6 +598,7 @@ export const AIAssistant: React.FC = () => {
 
           {/* Input Area */}
           <div className="border-t border-slate-200 p-2 sm:p-4 bg-slate-50">
+            <p className="text-xs text-slate-500 mb-2">👋 Your Smart AI Kenyan Lawyer</p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3">
               <textarea
                 value={input}
