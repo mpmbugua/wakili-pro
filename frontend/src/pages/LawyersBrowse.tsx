@@ -427,13 +427,6 @@ export const LawyersBrowse: React.FC = () => {
                   alt={lawyer.name}
                   className="w-full h-48 object-cover"
                 />
-                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold ${
-                  lawyer.availability === 'Available' ? 'bg-green-500 text-white' :
-                  lawyer.availability === 'Busy' ? 'bg-yellow-500 text-white' :
-                  'bg-gray-500 text-white'
-                }`}>
-                  {lawyer.availability}
-                </div>
               </div>
 
               {/* Lawyer Details */}

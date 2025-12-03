@@ -216,16 +216,11 @@ export const PublicLawyerProfile: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
                 {lawyer.isVerified && (
-                  <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full flex items-center space-x-1 text-sm font-medium">
+                  <div className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium space-x-1">
                     <Shield className="h-4 w-4" />
                     <span>Verified</span>
                   </div>
                 )}
-                <div className={`absolute bottom-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${
-                  lawyer.isAvailable ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'
-                }`}>
-                  {lawyer.isAvailable ? 'Available' : 'Busy'}
-                </div>
               </div>
 
               {/* Profile Info */}
@@ -259,12 +254,7 @@ export const PublicLawyerProfile: React.FC = () => {
                 {/* Book Button */}
                 <button
                   onClick={handleBookConsultation}
-                  disabled={!lawyer.isAvailable}
-                  className={`w-full py-2.5 rounded-lg font-semibold text-sm transition ${
-                    lawyer.isAvailable
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                  className="w-full py-2.5 rounded-lg font-semibold text-sm transition bg-blue-600 text-white hover:bg-blue-700"
                 >
                   Request Consultation
                 </button>
