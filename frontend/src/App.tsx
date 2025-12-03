@@ -193,6 +193,7 @@ function App() {
           <Route path="/services" element={<GlobalLayout><LegalServicesPage /></GlobalLayout>} />
           <Route path="/marketplace" element={<GlobalLayout><MarketplaceBrowse /></GlobalLayout>} />
           <Route path="/resources" element={<GlobalLayout><ResourcesPage /></GlobalLayout>} />
+          <Route path="/documents" element={<GlobalLayout><DocumentsPage /></GlobalLayout>} />
           <Route path="/resources/article/:id" element={<GlobalLayout><ArticleDetailPage /></GlobalLayout>} />
           <Route path="/document-services" element={<GlobalLayout><DocumentServicesPage /></GlobalLayout>} />
           <Route path="/service-request" element={<GlobalLayout><ServiceRequestPage /></GlobalLayout>} />
@@ -386,14 +387,6 @@ function App() {
                 <ProtectedRoute hydrated={hydrated}>
                   <MessagesPage />
                 </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/documents" 
-              element={
-                <GlobalLayout>
-                  <DocumentsPage />
-                </GlobalLayout>
               } 
             />
             <Route 
