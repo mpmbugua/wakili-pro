@@ -96,6 +96,10 @@ router.post('/create', authenticateToken, async (req: any, res) => {
 
     const amount = pricing[reviewType] || 500;
 
+    // Calculate deadline (2 hours from now for all services)
+    const deadline = new Date();
+    deadline.setHours(deadline.getHours() + 2);
+
     // Create document review record
     const review = await prisma.documentReview.create({
       data: {
@@ -103,9 +107,12 @@ router.post('/create', authenticateToken, async (req: any, res) => {
         documentSource: 'USER_UPLOAD',
         userDocumentId: documentId,
         uploadedDocumentUrl: document.filePath,
+        documentType: document.type, // Use document type from UserDocument
         reviewType: reviewType || 'AI_ONLY',
         status: 'PENDING_PAYMENT',
-        urgencyLevel: urgencyLevel || 'STANDARD'
+        urgencyLevel: urgencyLevel || 'STANDARD',
+        price: amount, // Add price
+        deadline: deadline // Add deadline (2 hours from now)
       }
     });
 
