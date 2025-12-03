@@ -113,10 +113,37 @@ class EmbeddingService {
       });
 
       return response.data[0].embedding;
-    } catch (error) {
+    } catch (error: any) {
+      // Check if it's a quota error (429)
+      if (error?.status === 429 || error?.message?.includes('quota')) {
+        logger.warn('⚠️ OpenAI quota exceeded, using fallback embeddings');
+        return this.generateFallbackEmbedding(text);
+      }
       logger.error('Error generating embedding:', error);
       throw error;
     }
+  }
+
+  /**
+   * Fallback embedding generator (simple hash-based for testing)
+   * NOTE: This is NOT suitable for production - only for testing when OpenAI quota is exceeded
+   */
+  private generateFallbackEmbedding(text: string): number[] {
+    logger.warn('⚠️ USING FALLBACK EMBEDDINGS - Add OpenAI credits for proper functionality');
+    
+    // Generate 1536-dimensional vector from text hash (matches text-embedding-3-small)
+    const embedding = new Array(1536).fill(0);
+    
+    // Simple deterministic hash-based embedding
+    for (let i = 0; i < text.length; i++) {
+      const char = text.charCodeAt(i);
+      const idx = (char * (i + 1)) % 1536;
+      embedding[idx] = (embedding[idx] + (char / 255)) % 1;
+    }
+    
+    // Normalize to unit vector
+    const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
+    return embedding.map(val => magnitude > 0 ? val / magnitude : 0);
   }
 
   /**
@@ -133,18 +160,33 @@ class EmbeddingService {
         
         logger.info(`Generating embeddings for batch ${i / batchSize + 1} (${batch.length} texts)`);
         
-        const response = await this.openai.embeddings.create({
-          model: this.embeddingModel,
-          input: batch,
-        });
+        try {
+          const response = await this.openai.embeddings.create({
+            model: this.embeddingModel,
+            input: batch,
+          });
 
-        const batchResults = response.data.map((item, idx) => ({
-          embedding: item.embedding,
-          text: batch[idx],
-          index: i + idx,
-        }));
+          const batchResults = response.data.map((item, idx) => ({
+            embedding: item.embedding,
+            text: batch[idx],
+            index: i + idx,
+          }));
 
-        results.push(...batchResults);
+          results.push(...batchResults);
+        } catch (error: any) {
+          // Check if it's a quota error
+          if (error?.status === 429 || error?.message?.includes('quota')) {
+            logger.warn('⚠️ OpenAI quota exceeded in batch, using fallback embeddings');
+            const fallbackResults = batch.map((text, idx) => ({
+              embedding: this.generateFallbackEmbedding(text),
+              text,
+              index: i + idx,
+            }));
+            results.push(...fallbackResults);
+          } else {
+            throw error;
+          }
+        }
 
         // Add small delay to avoid rate limits
         if (i + batchSize < texts.length) {
