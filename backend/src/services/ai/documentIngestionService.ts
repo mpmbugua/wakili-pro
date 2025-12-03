@@ -39,22 +39,11 @@ class DocumentIngestionService {
   async extractPdfText(filepath: string): Promise<string> {
     try {
       const dataBuffer = await readFile(filepath);
-      // Log the actual structure to debug
-      logger.info(`[PDF] Module type: ${typeof pdfParse}, has default: ${!!pdfParse?.default}, keys: ${Object.keys(pdfParse || {})}`);
-      
-      // Try multiple ways to access the function
-      let parsePdf;
-      if (typeof pdfParse === 'function') {
-        parsePdf = pdfParse;
-      } else if (pdfParse && typeof pdfParse.default === 'function') {
-        parsePdf = pdfParse.default;
-      } else if (pdfParse && typeof pdfParse === 'object') {
-        // Sometimes it's wrapped in a module object
-        parsePdf = (pdfParse as any)['default'] || (pdfParse as any)['pdf-parse'];
-      }
+      // pdf-parse exports the function as PDFParse (capital letters)
+      const parsePdf = (pdfParse as any).PDFParse || pdfParse;
       
       if (!parsePdf || typeof parsePdf !== 'function') {
-        throw new Error(`pdf-parse module not found correctly. Type: ${typeof pdfParse}, Structure: ${JSON.stringify(Object.keys(pdfParse || {}))}`);
+        throw new Error(`pdf-parse function not found. Available: ${Object.keys(pdfParse || {}).join(', ')}`);
       }
       
       const data = await parsePdf(dataBuffer);
