@@ -287,7 +287,7 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Featured Lawyers Section */}
-          <section id="lawyers" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
+          <section id="lawyers" className="py-8 bg-white border-b border-slate-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
@@ -394,7 +394,7 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Insights & Analysis (Thought Leadership) */}
-          <section id="insights" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
+          <section id="insights" className="py-8 bg-white border-b border-slate-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">

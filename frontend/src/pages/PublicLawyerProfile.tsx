@@ -266,7 +266,7 @@ export const PublicLawyerProfile: React.FC = () => {
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  {lawyer.isAvailable ? 'Book Consultation' : 'Currently Unavailable'}
+                  Request Consultation
                 </button>
               </div>
             </div>

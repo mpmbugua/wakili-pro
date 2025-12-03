@@ -1,5 +1,11 @@
 import express from 'express';
-import { createConsultation, getMyConsultations } from '../controllers/consultationController';
+import { 
+  createConsultation, 
+  getMyConsultations,
+  confirmConsultation,
+  rejectConsultation,
+  requestReschedule
+} from '../controllers/consultationController';
 import {
   createBooking,
   getBooking,
@@ -46,6 +52,27 @@ router.get('/:id', authenticateToken, getBooking);
  * @access  Private (authenticated users)
  */
 router.patch('/:id/confirm', authenticateToken, confirmSession);
+
+/**
+ * @route   POST /api/consultations/:id/lawyer-confirm
+ * @desc    Lawyer confirms a pending consultation booking
+ * @access  Private (lawyer only)
+ */
+router.post('/:id/lawyer-confirm', authenticateToken, confirmConsultation);
+
+/**
+ * @route   POST /api/consultations/:id/lawyer-reject
+ * @desc    Lawyer rejects a pending consultation booking
+ * @access  Private (lawyer only)
+ */
+router.post('/:id/lawyer-reject', authenticateToken, rejectConsultation);
+
+/**
+ * @route   POST /api/consultations/:id/lawyer-reschedule
+ * @desc    Lawyer requests to reschedule a consultation
+ * @access  Private (lawyer only)
+ */
+router.post('/:id/lawyer-reschedule', authenticateToken, requestReschedule);
 
 /**
  * @route   PATCH /api/consultations/:id/cancel

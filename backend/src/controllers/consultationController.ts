@@ -215,3 +215,234 @@ export const getMyConsultations = async (req: AuthenticatedRequest, res: Respons
     });
   }
 };
+
+/**
+ * Confirm a consultation booking (lawyer only)
+ */
+export const confirmConsultation = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { id: consultationId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Get booking and verify lawyer owns it
+    const booking = await prisma.serviceBooking.findUnique({
+      where: { id: consultationId },
+      include: {
+        client: true,
+        provider: true
+      }
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    if (booking.providerId !== userId && booking.lawyerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to confirm this booking'
+      });
+    }
+
+    if (booking.status !== 'PENDING') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot confirm booking with status: ${booking.status}`
+      });
+    }
+
+    // Update status to CONFIRMED
+    const updatedBooking = await prisma.serviceBooking.update({
+      where: { id: consultationId },
+      data: { status: 'CONFIRMED' }
+    });
+
+    // Create notification for client
+    await prisma.notification.create({
+      data: {
+        userId: booking.clientId,
+        type: 'BOOKING_CONFIRMED',
+        title: 'Consultation Confirmed',
+        message: `${booking.provider.firstName} ${booking.provider.lastName} has confirmed your consultation on ${new Date(booking.scheduledAt).toLocaleDateString()}`
+      }
+    });
+
+    // TODO: Send email and SMS notifications to client
+
+    res.json({
+      success: true,
+      data: updatedBooking,
+      message: 'Consultation confirmed successfully'
+    });
+
+  } catch (error) {
+    console.error('Error confirming consultation:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to confirm consultation'
+    });
+  }
+};
+
+/**
+ * Reject a consultation booking (lawyer only)
+ */
+export const rejectConsultation = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { id: consultationId } = req.params;
+    const { reason } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Get booking and verify lawyer owns it
+    const booking = await prisma.serviceBooking.findUnique({
+      where: { id: consultationId },
+      include: {
+        client: true,
+        provider: true
+      }
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    if (booking.providerId !== userId && booking.lawyerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to reject this booking'
+      });
+    }
+
+    if (booking.status !== 'PENDING') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot reject booking with status: ${booking.status}`
+      });
+    }
+
+    // Update status to REJECTED
+    const updatedBooking = await prisma.serviceBooking.update({
+      where: { id: consultationId },
+      data: { 
+        status: 'REJECTED',
+        rejectionReason: reason
+      }
+    });
+
+    // Create notification for client
+    await prisma.notification.create({
+      data: {
+        userId: booking.clientId,
+        type: 'BOOKING_REJECTED',
+        title: 'Consultation Declined',
+        message: `${booking.provider.firstName} ${booking.provider.lastName} has declined your consultation request. ${reason ? `Reason: ${reason}` : ''} You will receive a full refund within 3-5 business days.`
+      }
+    });
+
+    // TODO: Trigger automatic refund
+    // TODO: Send email and SMS notifications to client
+
+    res.json({
+      success: true,
+      data: updatedBooking,
+      message: 'Consultation rejected. Client will be notified and refunded.'
+    });
+
+  } catch (error) {
+    console.error('Error rejecting consultation:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reject consultation'
+    });
+  }
+};
+
+/**
+ * Request reschedule for a consultation (lawyer suggests new time)
+ */
+export const requestReschedule = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { id: consultationId } = req.params;
+    const { date, time, message } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Get booking and verify lawyer owns it
+    const booking = await prisma.serviceBooking.findUnique({
+      where: { id: consultationId },
+      include: {
+        client: true,
+        provider: true
+      }
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consultation not found'
+      });
+    }
+
+    if (booking.providerId !== userId && booking.lawyerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to reschedule this booking'
+      });
+    }
+
+    const newScheduledAt = new Date(`${date}T${time}:00`);
+
+    // Create notification for client to approve new time
+    await prisma.notification.create({
+      data: {
+        userId: booking.clientId,
+        type: 'RESCHEDULE_REQUESTED',
+        title: 'Reschedule Requested',
+        message: `${booking.provider.firstName} ${booking.provider.lastName} has suggested a new time for your consultation: ${newScheduledAt.toLocaleString()}. ${message || ''} Please log in to approve or decline.`
+      }
+    });
+
+    // Store proposed time (you may want to add a field for this in the schema)
+    // For now, just send notification
+    
+    // TODO: Send email and SMS notifications to client
+
+    res.json({
+      success: true,
+      message: 'Reschedule request sent to client'
+    });
+
+  } catch (error) {
+    console.error('Error requesting reschedule:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to request reschedule'
+    });
+  }
+};

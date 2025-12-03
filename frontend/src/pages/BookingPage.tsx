@@ -219,7 +219,7 @@ export const BookingPage: React.FC = () => {
           <div className="card">
             <div className="p-8">
               <h1 className="text-2xl font-semibold text-slate-900 mb-2">
-                Book a Consultation
+                Request Consultation Booking
               </h1>
               
               {/* Lawyer Profile Header */}
@@ -246,9 +246,9 @@ export const BookingPage: React.FC = () => {
               
               <p className="text-slate-600 mb-6">
                 {lawyerName ? (
-                  <>Schedule your consultation with <span className="font-semibold text-blue-600">{lawyerName}</span></>
+                  <>Request a consultation with <span className="font-semibold text-blue-600">{lawyerName}</span>. They will confirm or suggest alternative times within 24 hours.</>
                 ) : (
-                  'Schedule your video consultation with a qualified lawyer'
+                  'Request a video consultation with a qualified lawyer. They will confirm or suggest alternative times within 24 hours.'
                 )}
               </p>
 
@@ -408,11 +408,17 @@ export const BookingPage: React.FC = () => {
                 </div>
               </form>
 
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-900">
-                  <strong>Important:</strong> After payment, the lawyer must confirm, reschedule, or reject your booking within 24 hours. 
-                  If the lawyer doesn't respond within 24 hours, you'll receive a full refund. You'll get email and SMS notifications for all updates.
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-900 mb-2">
+                  <strong>How it works:</strong>
                 </p>
+                <ol className="text-sm text-blue-900 space-y-1 list-decimal list-inside">
+                  <li>You pay for the consultation upfront</li>
+                  <li>The lawyer receives your request and reviews your preferred date/time</li>
+                  <li>Within 24 hours, they will either confirm, suggest a different time, or decline</li>
+                  <li>If declined or no response within 24 hours, you receive a full automatic refund</li>
+                  <li>You'll receive email and SMS notifications at each step</li>
+                </ol>
               </div>
             </div>
           </div>

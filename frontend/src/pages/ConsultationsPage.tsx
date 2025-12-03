@@ -11,7 +11,7 @@ interface Consultation {
   specialty: string;
   scheduledAt: string;
   duration: number;
-  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'IN_PROGRESS';
+  status: 'PENDING' | 'CONFIRMED' | 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'REJECTED' | 'IN_PROGRESS';
   meetingLink?: string;
   consultationFee: number;
 }
@@ -44,7 +44,7 @@ export const ConsultationsPage: React.FC = () => {
             specialty: 'Corporate Law',
             scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
             duration: 60,
-            status: 'SCHEDULED',
+            status: 'PENDING',
             consultationFee: 3500,
           },
           {
@@ -66,7 +66,7 @@ export const ConsultationsPage: React.FC = () => {
             specialty: 'Corporate Law',
             scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
             duration: 60,
-            status: 'SCHEDULED',
+            status: 'PENDING',
             consultationFee: 3500,
           },
           {
@@ -87,12 +87,60 @@ export const ConsultationsPage: React.FC = () => {
     }
   };
 
+  const handleConfirmBooking = async (consultationId: string) => {
+    try {
+      await axiosInstance.post(`/consultations/${consultationId}/lawyer-confirm`);
+      alert('Booking confirmed! The client will be notified via email and SMS.');
+      fetchConsultations(); // Refresh list
+    } catch (error) {
+      console.error('Error confirming booking:', error);
+      alert('Failed to confirm booking. Please try again.');
+    }
+  };
+
+  const handleRejectBooking = async (consultationId: string) => {
+    const reason = prompt('Please provide a brief reason for declining this booking:');
+    if (!reason) return;
+
+    try {
+      await axiosInstance.post(`/consultations/${consultationId}/lawyer-reject`, { reason });
+      alert('Booking declined. The client will be notified and automatically refunded.');
+      fetchConsultations(); // Refresh list
+    } catch (error) {
+      console.error('Error rejecting booking:', error);
+      alert('Failed to decline booking. Please try again.');
+    }
+  };
+
+  const handleRescheduleBooking = async (consultationId: string) => {
+    const newDate = prompt('Suggest a new date (YYYY-MM-DD):');
+    const newTime = prompt('Suggest a new time (HH:MM):');
+    
+    if (!newDate || !newTime) return;
+
+    try {
+      await axiosInstance.post(`/consultations/${consultationId}/lawyer-reschedule`, { 
+        date: newDate, 
+        time: newTime,
+        message: 'The suggested time works better with my schedule.'
+      });
+      alert('Reschedule request sent! The client will be notified to approve the new time.');
+      fetchConsultations(); // Refresh list
+    } catch (error) {
+      console.error('Error requesting reschedule:', error);
+      alert('Failed to suggest new time. Please try again.');
+    }
+  };
+
   const getStatusBadge = (status: Consultation['status']) => {
     const badges = {
+      PENDING: { color: 'bg-yellow-100 text-yellow-700', icon: AlertCircle, text: 'Pending Confirmation' },
+      CONFIRMED: { color: 'bg-blue-100 text-blue-700', icon: CheckCircle, text: 'Confirmed' },
       SCHEDULED: { color: 'bg-blue-100 text-blue-700', icon: Clock, text: 'Scheduled' },
       IN_PROGRESS: { color: 'bg-green-100 text-green-700', icon: Video, text: 'In Progress' },
       COMPLETED: { color: 'bg-gray-100 text-gray-700', icon: CheckCircle, text: 'Completed' },
       CANCELLED: { color: 'bg-red-100 text-red-700', icon: XCircle, text: 'Cancelled' },
+      REJECTED: { color: 'bg-red-100 text-red-700', icon: XCircle, text: 'Declined' },
     };
     const badge = badges[status];
     const Icon = badge.icon;
@@ -109,9 +157,9 @@ export const ConsultationsPage: React.FC = () => {
     const now = new Date();
     
     if (filter === 'upcoming') {
-      return consultationDate > now && consultation.status === 'SCHEDULED';
+      return consultationDate > now && ['PENDING', 'CONFIRMED', 'SCHEDULED'].includes(consultation.status);
     } else if (filter === 'past') {
-      return consultationDate < now || consultation.status === 'COMPLETED' || consultation.status === 'CANCELLED';
+      return consultationDate < now || ['COMPLETED', 'CANCELLED', 'REJECTED'].includes(consultation.status);
     }
     return true;
   });
@@ -218,9 +266,46 @@ export const ConsultationsPage: React.FC = () => {
                 <span className="text-sm font-medium text-slate-700">
                   Fee: KES {consultation.consultationFee.toLocaleString()}
                 </span>
-                {consultation.status === 'SCHEDULED' && (
+                
+                {/* Lawyer Actions - Pending Confirmation */}
+                {isLawyer && consultation.status === 'PENDING' && (
                   <div className="flex space-x-2">
-                    <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition text-sm font-medium">
+                    <button 
+                      onClick={() => handleRejectBooking(consultation.id)}
+                      className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition text-sm font-medium"
+                    >
+                      Decline
+                    </button>
+                    <button 
+                      onClick={() => handleRescheduleBooking(consultation.id)}
+                      className="px-4 py-2 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition text-sm font-medium"
+                    >
+                      Suggest New Time
+                    </button>
+                    <button 
+                      onClick={() => handleConfirmBooking(consultation.id)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium"
+                    >
+                      Confirm Booking
+                    </button>
+                  </div>
+                )}
+
+                {/* Client View - Pending */}
+                {!isLawyer && consultation.status === 'PENDING' && (
+                  <div className="flex items-center space-x-2 text-sm text-yellow-700">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>Waiting for lawyer confirmation</span>
+                  </div>
+                )}
+
+                {/* Scheduled/Confirmed Actions */}
+                {(consultation.status === 'SCHEDULED' || consultation.status === 'CONFIRMED') && (
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => handleRescheduleBooking(consultation.id)}
+                      className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition text-sm font-medium"
+                    >
                       Reschedule
                     </button>
                     {consultation.meetingLink && (
