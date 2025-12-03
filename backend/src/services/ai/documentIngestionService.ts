@@ -39,8 +39,24 @@ class DocumentIngestionService {
   async extractPdfText(filepath: string): Promise<string> {
     try {
       const dataBuffer = await readFile(filepath);
-      // pdf-parse CommonJS module - access default export if it exists
-      const parsePdf = typeof pdfParse === 'function' ? pdfParse : pdfParse.default;
+      // Log the actual structure to debug
+      logger.info(`[PDF] Module type: ${typeof pdfParse}, has default: ${!!pdfParse?.default}, keys: ${Object.keys(pdfParse || {})}`);
+      
+      // Try multiple ways to access the function
+      let parsePdf;
+      if (typeof pdfParse === 'function') {
+        parsePdf = pdfParse;
+      } else if (pdfParse && typeof pdfParse.default === 'function') {
+        parsePdf = pdfParse.default;
+      } else if (pdfParse && typeof pdfParse === 'object') {
+        // Sometimes it's wrapped in a module object
+        parsePdf = (pdfParse as any)['default'] || (pdfParse as any)['pdf-parse'];
+      }
+      
+      if (!parsePdf || typeof parsePdf !== 'function') {
+        throw new Error(`pdf-parse module not found correctly. Type: ${typeof pdfParse}, Structure: ${JSON.stringify(Object.keys(pdfParse || {}))}`);
+      }
+      
       const data = await parsePdf(dataBuffer);
       return data.text;
     } catch (error) {
