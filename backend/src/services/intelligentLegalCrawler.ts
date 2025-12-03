@@ -392,29 +392,47 @@ export class IntelligentLegalCrawler {
           continue;
         }
 
-        // Download document with retry logic
+        // Download document with retry logic and fallback URL
         logger.info(`[Crawler] Downloading: ${doc.title}`);
         
         let docResponse;
         let retries = 3;
-        for (let attempt = 1; attempt <= retries; attempt++) {
-          try {
-            docResponse = await axios.get(doc.url, {
-              responseType: 'arraybuffer',
-              timeout: 120000, // 2 minutes for slow servers
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-                'Accept': 'application/pdf,application/octet-stream,*/*'
+        let urlsToTry = [doc.url];
+        if ((doc as any).fallbackUrl) {
+          urlsToTry.push((doc as any).fallbackUrl);
+        }
+        
+        let lastError;
+        for (const urlToTry of urlsToTry) {
+          for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+              logger.info(`[Crawler] Trying URL: ${urlToTry} (attempt ${attempt}/${retries})`);
+              docResponse = await axios.get(urlToTry, {
+                responseType: 'arraybuffer',
+                timeout: 120000, // 2 minutes for slow servers
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                  'Accept': 'application/pdf,application/octet-stream,*/*'
+                }
+              });
+              logger.info(`[Crawler] ✅ Successfully downloaded from: ${urlToTry}`);
+              break; // Success, exit retry loop
+            } catch (downloadError: any) {
+              lastError = downloadError;
+              if (attempt === retries) {
+                logger.warn(`[Crawler] All ${retries} attempts failed for URL: ${urlToTry}`);
+                break; // Try next URL
               }
-            });
-            break; // Success, exit retry loop
-          } catch (downloadError: any) {
-            if (attempt === retries) {
-              throw downloadError; // Final attempt failed
+              logger.warn(`[Crawler] Download attempt ${attempt}/${retries} failed for "${doc.title}": ${downloadError.message}. Retrying in ${attempt * 2}s...`);
+              await new Promise(resolve => setTimeout(resolve, attempt * 2000)); // Exponential backoff
             }
-            logger.warn(`[Crawler] Download attempt ${attempt}/${retries} failed for "${doc.title}": ${downloadError.message}. Retrying in ${attempt * 2}s...`);
-            await new Promise(resolve => setTimeout(resolve, attempt * 2000)); // Exponential backoff
           }
+          
+          if (docResponse) break; // Successfully downloaded, no need to try fallback
+        }
+        
+        if (!docResponse) {
+          throw lastError || new Error('All download attempts failed');
         }
 
         // Determine file extension

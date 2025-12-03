@@ -85,20 +85,51 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
     const { IntelligentLegalCrawler } = await import('../../services/intelligentLegalCrawler');
     const crawler = new IntelligentLegalCrawler({ maxDocumentsPerRun: 10 });
 
-    // ✅ VERIFIED WORKING URLS: Updated December 2025
-    // Using Kenya Law official archive (kenyalaw.org direct links, no API)
+    // ✅ MULTIPLE MIRROR SOURCES: December 2025
+    // Using various reliable sources with fallbacks
     const realPDFs = [
-      // Kenya Law Official Archive - Direct PDF links
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/ConstitutionofKenya2010.pdf', title: 'Constitution of Kenya 2010', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct_No17of2015.pdf', title: 'Companies Act 2015', type: 'LEGISLATION' as const, category: 'Corporate Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct_No11of2007.pdf', title: 'Employment Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct6of2012.pdf', title: 'Land Act 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/DataProtectionAct_No24of2019.pdf', title: 'Data Protection Act 2019', type: 'LEGISLATION' as const, category: 'Technology Law' }
+      // Try multiple mirrors for each document
+      { 
+        url: 'https://commons.wikimedia.org/wiki/File:Constitution_of_Kenya,_2010.pdf?action=raw', 
+        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/ConstitutionofKenya2010.pdf',
+        title: 'Constitution of Kenya 2010', 
+        type: 'LEGISLATION' as const, 
+        category: 'Constitutional Law' 
+      },
+      { 
+        url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct_No17of2015.pdf',
+        fallback: 'https://www.businesslawsafrica.com/wp-content/uploads/2019/08/Companies-Act-2015.pdf',
+        title: 'Companies Act 2015', 
+        type: 'LEGISLATION' as const, 
+        category: 'Corporate Law' 
+      },
+      { 
+        url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct_No11of2007.pdf',
+        fallback: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76076/119461/F-1180658069/KEN76076.pdf',
+        title: 'Employment Act 2007', 
+        type: 'LEGISLATION' as const, 
+        category: 'Employment Law' 
+      },
+      { 
+        url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct6of2012.pdf',
+        fallback: 'https://landportal.org/sites/default/files/land_act_no_6_of_2012.pdf',
+        title: 'Land Act 2012', 
+        type: 'LEGISLATION' as const, 
+        category: 'Property Law' 
+      },
+      { 
+        url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/DataProtectionAct_No24of2019.pdf',
+        fallback: 'https://www.odpc.go.ke/wp-content/uploads/2023/06/Data-Protection-Act-2019.pdf',
+        title: 'Data Protection Act 2019', 
+        type: 'LEGISLATION' as const, 
+        category: 'Technology Law' 
+      }
     ];
 
-    // Set discovered documents
+    // Set discovered documents with fallback URLs
     (crawler as any).discoveredDocuments = realPDFs.map(doc => ({
       url: doc.url,
+      fallbackUrl: doc.fallback,
       title: doc.title,
       sourceUrl: 'http://kenyalaw.org',
       type: doc.type,
