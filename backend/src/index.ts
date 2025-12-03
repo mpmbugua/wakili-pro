@@ -287,6 +287,10 @@ app.use('/api/admin/legal-scraper', adminLegalScraperRouter);
 import adminCrawlerRouter from './routes/admin/crawlerRoutes';
 app.use('/api/admin/crawler', adminCrawlerRouter);
 
+// Mount Pinecone diagnostic router
+import pineconeTestRouter from './routes/admin/pineconeTestRoutes';
+app.use('/api/admin/pinecone', pineconeTestRouter);
+
 // Mount admin lawyer management router
 import adminLawyerRouter from './routes/admin/lawyerAdminRoutes';
 app.use('/api/admin/lawyers', adminLawyerRouter);
