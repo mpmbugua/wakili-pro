@@ -39,14 +39,16 @@ class DocumentIngestionService {
   async extractPdfText(filepath: string): Promise<string> {
     try {
       const dataBuffer = await readFile(filepath);
-      // pdf-parse exports the function as PDFParse (capital letters)
-      const parsePdf = (pdfParse as any).PDFParse || pdfParse;
+      // PDFParse is a class that needs to be instantiated
+      const PDFParseClass = (pdfParse as any).PDFParse;
       
-      if (!parsePdf || typeof parsePdf !== 'function') {
-        throw new Error(`pdf-parse function not found. Available: ${Object.keys(pdfParse || {}).join(', ')}`);
+      if (!PDFParseClass) {
+        throw new Error(`PDFParse class not found. Available: ${Object.keys(pdfParse || {}).join(', ')}`);
       }
       
-      const data = await parsePdf(dataBuffer);
+      // Instantiate the class and call parse method
+      const parser = new PDFParseClass();
+      const data = await parser.parse(dataBuffer);
       return data.text;
     } catch (error) {
       logger.error('Error extracting PDF text:', error);
