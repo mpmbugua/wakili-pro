@@ -90,24 +90,19 @@ export const uploadLegalDocument = async (req: Request, res: Response) => {
         category,
         citation,
         sourceUrl,
-        uploadedBy: userId
+        effectiveDate: effectiveDate ? new Date(effectiveDate) : undefined
       }
     );
 
-    // Store document metadata in database
-    const document = await prisma.legalDocument.create({
+    // Update document with file metadata
+    const document = await prisma.legalDocument.update({
+      where: { id: ingestionResult.documentId },
       data: {
-        title,
-        documentType,
-        category,
-        citation,
-        sourceUrl,
-        effectiveDate: effectiveDate ? new Date(effectiveDate) : null,
         filePath: req.file.path,
         fileName: req.file.originalname,
         fileSize: req.file.size,
         chunksCount: ingestionResult.chunksProcessed,
-        vectorsCount: ingestionResult.vectorsStored,
+        vectorsCount: ingestionResult.vectorsCreated,
         uploadedBy: userId
       }
     });
@@ -121,7 +116,7 @@ export const uploadLegalDocument = async (req: Request, res: Response) => {
         documentId: document.id,
         title: document.title,
         chunksProcessed: ingestionResult.chunksProcessed,
-        vectorsStored: ingestionResult.vectorsStored
+        vectorsStored: ingestionResult.vectorsCreated
       }
     });
   } catch (error: any) {
@@ -296,25 +291,50 @@ export const reindexDocument = async (req: Request, res: Response) => {
 
     logger.info(`[AI] Re-indexing document: ${document.title}`);
 
+    // Detect file type from file path
+    const fileExtension = document.filePath.split('.').pop()?.toLowerCase();
+    let fileType: 'pdf' | 'docx';
+    
+    if (fileExtension === 'pdf') {
+      fileType = 'pdf';
+    } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+      fileType = 'docx';
+    } else {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Unsupported file type for re-indexing. Only PDF and DOCX files are supported.' 
+      });
+    }
+
+    // Delete existing document record (ingestion will create new one)
+    await prisma.legalDocument.delete({
+      where: { id }
+    });
+
     // Re-ingest the document
     const ingestionResult = await documentIngestionService.ingestDocumentFile(
       document.filePath,
+      fileType,
       {
         title: document.title,
         documentType: document.documentType,
         category: document.category,
         citation: document.citation || undefined,
         sourceUrl: document.sourceUrl || undefined,
-        uploadedBy: document.uploadedBy
+        effectiveDate: document.effectiveDate || undefined
       }
     );
 
-    // Update vector counts
+    // Update with file metadata and uploader info
     await prisma.legalDocument.update({
-      where: { id },
+      where: { id: ingestionResult.documentId },
       data: {
+        filePath: document.filePath,
+        fileName: document.fileName,
+        fileSize: document.fileSize,
         chunksCount: ingestionResult.chunksProcessed,
-        vectorsCount: ingestionResult.vectorsStored
+        vectorsCount: ingestionResult.vectorsCreated,
+        uploadedBy: document.uploadedBy
       }
     });
 
