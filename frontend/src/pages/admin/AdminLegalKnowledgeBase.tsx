@@ -143,70 +143,8 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
     }
   };
 
-  const handleTriggerCrawl = async () => {
-    if (!confirm('This will trigger the intelligent crawler to discover and ingest legal documents from Kenya Law, Judiciary, Parliament, and other sources. Continue?')) {
-      return;
-    }
-
-    try {
-      setScraping(true);
-      const response = await axiosInstance.post('/admin/crawler/trigger');
-      if (response.data.success) {
-        alert(`✅ ${response.data.message}`);
-        fetchDocuments();
-        fetchStats();
-        fetchCrawlerStatus();
-      }
-    } catch (error: any) {
-      alert('❌ Crawl failed: ' + (error.response?.data?.message || error.message));
-    } finally {
-      setScraping(false);
-    }
-  };
-
-  const handleSeedSampleData = async () => {
-    if (!confirm('This will add 5 sample Kenyan legal documents to the knowledge base. Continue?')) {
-      return;
-    }
-
-    try {
-      setScraping(true);
-      const response = await axiosInstance.post('/admin/crawler/seed-sample-data');
-      if (response.data.success) {
-        alert(`✅ ${response.data.message}`);
-        fetchDocuments();
-        fetchStats();
-      }
-    } catch (error: any) {
-      alert('❌ Seeding failed: ' + (error.response?.data?.message || error.message));
-    } finally {
-      setScraping(false);
-    }
-  };
-
-  const handleTestCrawler = async () => {
-    if (!confirm('This will test the crawler on Kenya Law Reports to verify it can find documents. Continue?')) {
-      return;
-    }
-
-    try {
-      setScraping(true);
-      const response = await axiosInstance.get('/admin/crawler/test');
-      if (response.data.success) {
-        const { discovered, ingested } = response.data.data;
-        alert(`✅ Test Complete!\n\nDiscovered: ${discovered} documents\nIngested: ${ingested} documents\n\nCheck the documents list below.`);
-        fetchDocuments();
-        fetchStats();
-      }
-    } catch (error: any) {
-      alert('❌ Test failed: ' + (error.response?.data?.message || error.message));
-    } finally {
-      setScraping(false);
-    }
-  };
-
   const handleSeedRealPDFs = async () => {
-    if (!confirm('This will download and ingest 10 real PDFs from Kenya Law (Companies Act, Data Protection Act, Evidence Act, etc.). This may take 2-3 minutes. Continue?')) {
+    if (!confirm('This will download and ingest 10 real PDFs from Kenya Law (Constitution, Companies Act, Data Protection Act, etc.). This may take 2-3 minutes. Continue?')) {
       return;
     }
 
@@ -215,7 +153,7 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
       const response = await axiosInstance.post('/admin/crawler/seed-real-pdfs');
       if (response.data.success) {
         const { discovered, ingested } = response.data.data;
-        alert(`✅ Success!\n\nIngested: ${ingested}/${discovered} real Kenya Law PDFs\n\nDocuments are now available for AI queries!`);
+        alert(`✅ Success!\n\nIngested: ${ingested}/${discovered} Kenya Law PDFs\n\nDocuments are now available for AI queries!`);
         fetchDocuments();
         fetchStats();
       }
@@ -486,49 +424,26 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
             <div className="flex gap-3">
               <AlertCircle className="h-5 w-5 text-blue-200 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-white/90">
-                <strong>Intelligent Discovery:</strong> The crawler automatically finds legal documents by exploring
-                Kenya Law, Judiciary of Kenya, Parliament, and LSK websites. It follows relevant links up to 3 levels
-                deep and categorizes documents by type (legislation, case law, guides). Runs daily at 5:00 PM.
+                <strong>Kenya Law Integration:</strong> Downloads and processes verified legal documents from new.kenyalaw.org
+                including the Constitution, Companies Act, Data Protection Act, Employment Act, Land Act, and more.
+                Uses direct PDF URLs with Akoma Ntoso format for reliable ingestion.
               </div>
             </div>
           </div>
 
           <div className="space-y-3">
             <button
-              onClick={handleTriggerCrawl}
-              disabled={scraping}
-              className="w-full bg-white text-emerald-700 hover:bg-emerald-50 py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
-              {scraping ? 'Crawling in Progress...' : 'Trigger Manual Crawl Now'}
-            </button>
-
-            <button
-              onClick={handleTestCrawler}
-              disabled={scraping}
-              className="w-full bg-blue-500 text-white hover:bg-blue-600 py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <Database className="h-5 w-5" />}
-              {scraping ? 'Testing...' : 'Test Kenya Law Crawler'}
-            </button>
-
-            <button
               onClick={handleSeedRealPDFs}
               disabled={scraping}
-              className="w-full bg-purple-500 text-white hover:bg-purple-600 py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800 py-4 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
             >
               {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
-              {scraping ? 'Downloading & Ingesting...' : 'Ingest Real Kenya Law PDFs'}
+              {scraping ? 'Downloading & Processing PDFs...' : 'Ingest Kenya Law Documents (10 PDFs)'}
             </button>
-
-            <button
-              onClick={handleSeedSampleData}
-              disabled={scraping}
-              className="w-full bg-amber-500 text-white hover:bg-amber-600 py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {scraping ? <Loader className="h-5 w-5 animate-spin" /> : <Database className="h-5 w-5" />}
-              {scraping ? 'Seeding Data...' : 'Seed Sample Data (Testing)'}
-            </button>
+            
+            <div className="text-center text-white/70 text-sm">
+              Downloads 10 verified legal documents from Kenya Law (~2-3 minutes)
+            </div>
           </div>
         </div>
 
