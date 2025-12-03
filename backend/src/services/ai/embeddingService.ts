@@ -177,17 +177,6 @@ class EmbeddingService {
    * NOTE: This is NOT suitable for production - only for testing when both APIs fail
    */
   private generateFallbackEmbedding(text: string): number[] {
-    // If Gemini is available, try it first
-    if (this.gemini) {
-      logger.info('🔄 Trying Gemini embeddings as fallback...');
-      try {
-        // Use sync wrapper for fallback scenario
-        return this.generateGeminiEmbeddingSync(text);
-      } catch (error) {
-        logger.warn('Gemini fallback also failed, using hash-based embeddings');
-      }
-    }
-    
     logger.warn('⚠️ USING BASIC FALLBACK EMBEDDINGS - Add OpenAI/Gemini credits for proper functionality');
     
     // Generate 1536-dimensional vector from text hash (matches text-embedding-3-small)
@@ -203,14 +192,6 @@ class EmbeddingService {
     // Normalize to unit vector
     const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
     return embedding.map(val => magnitude > 0 ? val / magnitude : 0);
-  }
-
-  /**
-   * Synchronous wrapper for Gemini (used in fallback chain)
-   */
-  private generateGeminiEmbeddingSync(text: string): number[] {
-    // This is a workaround - in practice, should handle async properly
-    throw new Error('Async Gemini not available in sync context');
   }
 
   /**
