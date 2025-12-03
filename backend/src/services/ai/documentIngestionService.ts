@@ -10,7 +10,7 @@ import { embeddingService } from './embeddingService';
 import { vectorDbService } from './vectorDatabaseService';
 import { logger } from '../../utils/logger';
 import { readFile } from 'fs/promises';
-import pdf from 'pdf-parse';
+import * as pdfParse from 'pdf-parse';
 
 const prisma = new PrismaClient();
 
@@ -37,6 +37,8 @@ class DocumentIngestionService {
   async extractPdfText(filepath: string): Promise<string> {
     try {
       const dataBuffer = await readFile(filepath);
+      // Handle CommonJS default export
+      const pdf = (pdfParse as any).default || pdfParse;
       const data = await pdf(dataBuffer);
       return data.text;
     } catch (error) {
