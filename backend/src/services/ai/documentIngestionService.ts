@@ -197,25 +197,16 @@ class DocumentIngestionService {
       // Upload to Pinecone
       await vectorDbService.upsertVectors(vectors);
 
-      // Store embedding records in database
-      const embeddingRecords = await Promise.all(
-        embeddings.map((emb, idx) =>
-          prisma.documentEmbedding.create({
-            data: {
-              documentId: document.id,
-              chunkText: emb.text,
-              chunkIndex: idx,
-              vectorId: `${document.id}-chunk-${idx}`,
-              metadata: {
-                tokens: embeddingService.countTokens(emb.text),
-                section: this.extractSection(emb.text),
-              },
-            },
-          })
-        )
-      );
+      // Update document with counts (no documentEmbedding table in schema)
+      await prisma.legalDocument.update({
+        where: { id: document.id },
+        data: {
+          chunksCount: embeddings.length,
+          vectorsCount: vectors.length
+        }
+      });
 
-      logger.info(`Successfully ingested document: ${document.id} (${embeddings.length} chunks)`);
+      logger.info(`Successfully ingested document: ${document.id} (${embeddings.length} chunks, ${vectors.length} vectors)`);
 
       return {
         documentId: document.id,
@@ -229,14 +220,14 @@ class DocumentIngestionService {
   }
 
   /**
-   * Delete document and all its embeddings
+   * Delete document and all its vectors from Pinecone
    */
   async deleteDocument(documentId: string): Promise<void> {
     try {
-      // Delete from vector database
+      // Delete from vector database (Pinecone)
       await vectorDbService.deleteByDocumentId(documentId);
 
-      // Delete from PostgreSQL (cascades to embeddings)
+      // Delete from PostgreSQL
       await prisma.legalDocument.delete({
         where: { id: documentId },
       });
@@ -262,10 +253,28 @@ class DocumentIngestionService {
           ...(options?.documentType && { documentType: options.documentType }),
           ...(options?.category && { category: options.category }),
         },
-        include: {
-          _count: {
-            select: { embeddings: true },
-          },
+        select: {
+          id: true,
+          title: true,
+          documentType: true,
+          category: true,
+          citation: true,
+          sourceUrl: true,
+          effectiveDate: true,
+          fileName: true,
+          fileSize: true,
+          chunksCount: true,
+          vectorsCount: true,
+          uploadedAt: true,
+          updatedAt: true,
+          uploader: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          }
         },
         orderBy: { uploadedAt: 'desc' },
         take: options?.limit || 50,
@@ -292,7 +301,17 @@ class DocumentIngestionService {
   async getStats(): Promise<any> {
     try {
       const totalDocs = await prisma.legalDocument.count();
-      const totalChunks = await prisma.documentEmbedding.count();
+      
+      // Get total chunks from all documents
+      const aggregateResult = await prisma.legalDocument.aggregate({
+        _sum: {
+          chunksCount: true,
+          vectorsCount: true
+        }
+      });
+      
+      const totalChunks = aggregateResult._sum.chunksCount || 0;
+      const totalVectors = aggregateResult._sum.vectorsCount || 0;
       
       const byType = await prisma.legalDocument.groupBy({
         by: ['documentType'],
@@ -307,6 +326,7 @@ class DocumentIngestionService {
       return {
         totalDocuments: totalDocs,
         totalChunks,
+        totalVectors,
         byType,
         byCategory,
       };
