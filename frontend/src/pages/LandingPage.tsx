@@ -141,14 +141,14 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Popular Legal Services */}
-          <section id="service-packages" className="py-8 bg-[#e7f3ff] border-b border-blue-200">
+          <section id="service-packages" className="py-8 bg-white border-b border-slate-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                  Popular Legal Services
+                  Legal Service Packages
                 </h2>
                 <p className="text-xs text-slate-600">
-                  Fixed-price legal services by verified lawyers. Transparent pricing, clear deliverables.
+                  Fixed-price legal services by verified lawyers. Transparent pricing, clear deliverables, professional results.
                 </p>
               </div>
               
@@ -291,10 +291,10 @@ export const LandingPage: React.FC = () => {
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                  Featured Lawyers
+                  Find a Lawyer
                 </h2>
                 <p className="text-xs text-slate-600">
-                  Connect with verified legal experts across Kenya. Premium verified profiles.
+                  Connect with verified legal experts across Kenya
                 </p>
               </div>
               <div className="grid md:grid-cols-3 gap-4">
