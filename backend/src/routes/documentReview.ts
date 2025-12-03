@@ -104,13 +104,13 @@ router.post('/create', authenticateToken, async (req: any, res) => {
     const review = await prisma.documentReview.create({
       data: {
         userId,
-        documentSource: 'USER_UPLOAD',
+        documentSource: 'EXTERNAL', // Use EXTERNAL for user-uploaded documents
         userDocumentId: documentId,
         uploadedDocumentUrl: document.filePath,
         documentType: document.type, // Use document type from UserDocument
         reviewType: reviewType || 'AI_ONLY',
         status: 'PENDING_PAYMENT',
-        urgencyLevel: urgencyLevel || 'STANDARD',
+        urgencyLevel: 'STANDARD', // All services are standard 2-hour delivery
         price: amount, // Add price
         deadline: deadline // Add deadline (2 hours from now)
       }

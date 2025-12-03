@@ -3,8 +3,6 @@ import { FileText, Download, Eye, Trash2, Upload, Search, Filter, X } from 'luci
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../lib/axios';
-import { ServiceSelectionModal } from '../components/documents/ServiceSelectionModal';
-import { PaymentStatusPoller } from '../components/payments/PaymentStatusPoller';
 
 interface Document {
   id: string;
@@ -32,14 +30,6 @@ export const DocumentsPage: React.FC = () => {
   const [uploadCategory, setUploadCategory] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Service selection and payment states
-  const [showServiceModal, setShowServiceModal] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<{ id: string; title: string } | null>(null);
-  const [paymentInProgress, setPaymentInProgress] = useState<{
-    paymentId: string;
-    paymentMethod: 'MPESA' | 'FLUTTERWAVE';
-  } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -223,132 +213,12 @@ export const DocumentsPage: React.FC = () => {
       return;
     }
 
-    // Show service selection modal
-    setSelectedDocument({ id: documentId, title: documentTitle });
-    setShowServiceModal(true);
-  };
-
-  const handleServiceConfirm = async (selection: {
-    serviceType: string;
-    urgencyLevel: string;
-    totalPrice: number;
-  }) => {
-    if (!selectedDocument) return;
-
-    setShowServiceModal(false);
-
-    try {
-      // Step 1: Create document review record first
-      console.log('[DocumentsPage] Creating document review:', {
-        documentId: selectedDocument.id,
-        reviewType: selection.serviceType,
-        urgencyLevel: selection.urgencyLevel
-      });
-
-      const createResponse = await axiosInstance.post('/document-review/create', {
-        documentId: selectedDocument.id,
-        reviewType: selection.serviceType,
-        urgencyLevel: selection.urgencyLevel
-      });
-
-      if (!createResponse.data.success) {
-        alert(createResponse.data.message || 'Failed to create document review');
-        return;
-      }
-
-      const { reviewId, amount } = createResponse.data.data;
-
-      console.log('[DocumentsPage] Document review created:', {
-        reviewId,
-        amount
-      });
-
-      // Step 2: Get phone number for M-Pesa payment
-      const phoneNumber = await getPhoneNumber();
-      
-      if (!phoneNumber) {
-        alert('Phone number is required for M-Pesa payment');
-        return;
-      }
-
-      console.log('[DocumentsPage] Initiating M-Pesa payment:', {
-        reviewId,
-        phoneNumber,
-        amount
-      });
-
-      // Step 3: Initiate M-Pesa payment using unified endpoint
-      const response = await axiosInstance.post('/payments/mpesa/initiate', {
-        phoneNumber: phoneNumber,
-        amount: amount,
-        reviewId: reviewId,
-        paymentType: 'DOCUMENT_REVIEW'
-      });
-
-      console.log('[DocumentsPage] M-Pesa initiation response:', response.data);
-
-      if (response.data.success && response.data.data) {
-        const { paymentId, customerMessage } = response.data.data;
-
-        console.log('[DocumentsPage] Setting payment in progress:', paymentId);
-
-        // Start polling for M-Pesa payment status
-        setPaymentInProgress({
-          paymentId,
-          paymentMethod: 'MPESA'
-        });
-
-        // Close service modal
-        setShowServiceModal(false);
-      } else {
-        // Handle error response
-        const errorMsg = response.data.error || response.data.message || 'Failed to initiate payment';
-        console.error('[DocumentsPage] Payment initiation failed:', errorMsg);
-        console.error('[DocumentsPage] Full response:', response.data);
-        alert(errorMsg);
-      }
-    } catch (error: any) {
-      console.error('[DocumentsPage] Error:', error);
-      console.error('[DocumentsPage] Error response data:', error.response?.data);
-      console.error('[DocumentsPage] Error response status:', error.response?.status);
-      
-      const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Failed to initiate payment. Please try again.';
-      alert(errorMsg);
-    }
-  };
-
-  const getPhoneNumber = (): Promise<string> => {
-    return new Promise((resolve) => {
-      const phone = window.prompt(
-        '💳 M-Pesa Payment\n\n' +
-        'Enter your M-Pesa phone number:\n' +
-        'Format: 254XXXXXXXXX\n' +
-        'Example: 254712345678'
-      );
-      
-      // Basic validation
-      if (phone && phone.startsWith('254') && phone.length === 12) {
-        resolve(phone);
-      } else if (phone && phone.startsWith('0') && phone.length === 10) {
-        // Convert 07XX format to 254 format
-        resolve('254' + phone.substring(1));
-      } else {
-        resolve(phone || '');
+    // Navigate to dedicated review request page
+    navigate(`/documents/${documentId}/request-review`, {
+      state: {
+        document: { id: documentId, title: documentTitle }
       }
     });
-  };
-
-  const handlePaymentSuccess = (payment: any) => {
-    setPaymentInProgress(null);
-    console.log('Payment successful:', payment);
-    alert('Payment successful! Your document review will begin shortly.');
-    fetchDocuments(); // Refresh documents to show updated status
-    navigate('/dashboard');
-  };
-
-  const handlePaymentError = (error: string) => {
-    setPaymentInProgress(null);
-    alert(`Payment failed: ${error}`);
   };
 
   const handleDelete = async (documentId: string) => {
@@ -733,29 +603,6 @@ export const DocumentsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Service Selection Modal */}
-      {showServiceModal && selectedDocument && (
-        <ServiceSelectionModal
-          isOpen={showServiceModal}
-          onClose={() => {
-            setShowServiceModal(false);
-            setSelectedDocument(null);
-          }}
-          documentId={selectedDocument.id}
-          documentTitle={selectedDocument.title}
-          onConfirm={handleServiceConfirm}
-        />
-      )}
-
-      {/* Payment Status Poller for M-Pesa */}
-      {paymentInProgress && (
-        <PaymentStatusPoller
-          paymentId={paymentInProgress.paymentId}
-          paymentMethod={paymentInProgress.paymentMethod}
-          onSuccess={handlePaymentSuccess}
-          onError={handlePaymentError}
-        />
-      )}
     </div>
   );
 };
