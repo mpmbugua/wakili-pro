@@ -10,7 +10,8 @@ import { embeddingService } from './embeddingService';
 import { vectorDbService } from './vectorDatabaseService';
 import { logger } from '../../utils/logger';
 import { readFile } from 'fs/promises';
-import * as pdfParse from 'pdf-parse';
+// Use require for pdfjs-dist to avoid ES6/CommonJS issues
+const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
 
 const prisma = new PrismaClient();
 
