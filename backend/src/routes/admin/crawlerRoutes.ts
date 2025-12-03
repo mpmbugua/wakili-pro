@@ -85,41 +85,45 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
     const { IntelligentLegalCrawler } = await import('../../services/intelligentLegalCrawler');
     const crawler = new IntelligentLegalCrawler({ maxDocumentsPerRun: 10 });
 
-    // ✅ MULTIPLE MIRROR SOURCES: December 2025
-    // Using various reliable sources with fallbacks
+    // ✅ WORKING MIRROR SOURCES: December 2025
+    // Using stable government/international archives
     const realPDFs = [
-      // Try multiple mirrors for each document
+      // Constitution - UN RefWorld (reliable)
       { 
         url: 'https://www.refworld.org/pdfid/4c8508822.pdf', 
-        fallback: 'http://extwprlegs1.fao.org/docs/pdf/ken127322.pdf',
+        fallback: 'https://aceproject.org/ero-en/regions/africa/KE/kenya-constitution-2010/view',
         title: 'Constitution of Kenya 2010', 
         type: 'LEGISLATION' as const, 
         category: 'Constitutional Law' 
       },
+      // Companies Act - Kenya Gazette (official)
       { 
-        url: 'https://www.businesslawsafrica.com/wp-content/uploads/2019/08/Companies-Act-2015.pdf',
-        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct_No17of2015.pdf',
+        url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/2015/CompaniesAct_No17of2015.pdf',
+        fallback: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/100794/120562/F237665119/KEN100794.pdf',
         title: 'Companies Act 2015', 
         type: 'LEGISLATION' as const, 
         category: 'Corporate Law' 
       },
+      // Employment Act - ILO NATLEX (very stable)
       { 
-        url: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76076/119461/F-1180658069/KEN76076.pdf',
-        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct_No11of2007.pdf',
+        url: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76126/81017/F898198425/KEN76126.pdf',
+        fallback: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct_No11of2007.pdf',
         title: 'Employment Act 2007', 
         type: 'LEGISLATION' as const, 
         category: 'Employment Law' 
       },
+      // Land Act - FAO Legal Database (stable)
       { 
-        url: 'https://landportal.org/sites/default/files/land_act_no_6_of_2012.pdf',
-        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct6of2012.pdf',
+        url: 'http://extwprlegs1.fao.org/docs/pdf/ken127322.pdf',
+        fallback: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct6of2012.pdf',
         title: 'Land Act 2012', 
         type: 'LEGISLATION' as const, 
         category: 'Property Law' 
       },
+      // Data Protection - ODPC Official (government site)
       { 
-        url: 'https://www.odpc.go.ke/wp-content/uploads/2023/06/Data-Protection-Act-2019.pdf',
-        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/DataProtectionAct_No24of2019.pdf',
+        url: 'https://www.odpc.go.ke/wp-content/uploads/2019/11/Data-Protection-Act-2019.pdf',
+        fallback: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/2019/TheDataProtectionAct__No24of2019.pdf',
         title: 'Data Protection Act 2019', 
         type: 'LEGISLATION' as const, 
         category: 'Technology Law' 
