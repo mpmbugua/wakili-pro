@@ -85,21 +85,15 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
     const { IntelligentLegalCrawler } = await import('../../services/intelligentLegalCrawler');
     const crawler = new IntelligentLegalCrawler({ maxDocumentsPerRun: 10 });
 
-    // ✅ VERIFIED WORKING URLS: Tested December 2025
-    // Using only confirmed accessible PDFs from reliable international sources
+    // ✅ VERIFIED WORKING URLS: Updated December 2025
+    // Using Kenya Law official archive (kenyalaw.org direct links, no API)
     const realPDFs = [
-      // ILO Database - Fast, reliable international CDN
-      { url: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76076/119461/F-1180658069/KEN76076.pdf', title: 'Employment Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
-      { url: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76050/119328/F-1970336253/KEN76050.pdf', title: 'Labour Relations Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
-      
-      // LandPortal - UN-backed legal archive
-      { url: 'https://landportal.org/sites/default/files/land_act_no_6_of_2012.pdf', title: 'Land Act 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
-      
-      // Parliament of Kenya - Official government source
-      { url: 'http://www.parliament.go.ke/sites/default/files/2017-05/ConstitutionofKenya%202010.pdf', title: 'Constitution of Kenya 2010', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
-      
-      // Kenya Judiciary - Official portal
-      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct_No17of2015.pdf', title: 'Companies Act 2015', type: 'LEGISLATION' as const, category: 'Corporate Law' }
+      // Kenya Law Official Archive - Direct PDF links
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/ConstitutionofKenya2010.pdf', title: 'Constitution of Kenya 2010', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct_No17of2015.pdf', title: 'Companies Act 2015', type: 'LEGISLATION' as const, category: 'Corporate Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct_No11of2007.pdf', title: 'Employment Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct6of2012.pdf', title: 'Land Act 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
+      { url: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/DataProtectionAct_No24of2019.pdf', title: 'Data Protection Act 2019', type: 'LEGISLATION' as const, category: 'Technology Law' }
     ];
 
     // Set discovered documents

@@ -35,8 +35,22 @@ class DocumentIngestionService {
    */
   async extractPdfText(filepath: string): Promise<string> {
     try {
-      // Dynamic import for pdf-parse (works in both dev and production)
-      const pdfParse = (await import('pdf-parse')).default;
+      // Try multiple import methods for pdf-parse
+      let pdfParse: any;
+      
+      try {
+        // Method 1: Direct require (works in compiled CommonJS)
+        pdfParse = eval('require')('pdf-parse');
+      } catch (e1) {
+        try {
+          // Method 2: Dynamic import with default
+          const module = await import('pdf-parse');
+          pdfParse = module.default || module;
+        } catch (e2) {
+          throw new Error('Failed to load pdf-parse library');
+        }
+      }
+      
       const dataBuffer = await readFile(filepath);
       const data = await pdfParse(dataBuffer);
       return data.text;
