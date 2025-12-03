@@ -1,7 +1,4 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Alert, AlertDescription } from '../../components/ui/alert';
 import axiosInstance from '../../services/api';
 import { CheckCircle2, XCircle, AlertTriangle, Loader2, Upload, Database } from 'lucide-react';
 
@@ -11,6 +8,52 @@ interface TestResult {
   results?: any;
   error?: string;
 }
+
+const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <div className={`bg-white rounded-lg shadow-sm border border-slate-200 ${className}`}>
+    {children}
+  </div>
+);
+
+const CardHeader = ({ children }: { children: React.ReactNode }) => (
+  <div className="p-6 border-b border-slate-200">{children}</div>
+);
+
+const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <h2 className={`text-xl font-semibold text-slate-900 ${className}`}>{children}</h2>
+);
+
+const CardContent = ({ children }: { children: React.ReactNode }) => (
+  <div className="p-6">{children}</div>
+);
+
+const Button = ({ 
+  onClick, 
+  disabled, 
+  children, 
+  className = '' 
+}: { 
+  onClick: () => void; 
+  disabled?: boolean; 
+  children: React.ReactNode; 
+  className?: string 
+}) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${className}`}
+  >
+    {children}
+  </button>
+);
+
+const Alert = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <div className={`p-4 rounded-lg border ${className}`}>{children}</div>
+);
+
+const AlertDescription = ({ children }: { children: React.ReactNode }) => (
+  <div>{children}</div>
+);
 
 export const PineconeTestPage = () => {
   const [testing, setTesting] = useState(false);
