@@ -89,6 +89,19 @@ export const ServiceRequestPage: React.FC = () => {
     }));
   };
 
+  // Auto-derive category from service title using keywords
+  const deriveCategory = (serviceTitle: string): string => {
+    const title = serviceTitle.toLowerCase();
+    if (title.includes('property') || title.includes('land') || title.includes('title') || title.includes('lease')) return 'Property Transfer';
+    if (title.includes('business acquisition') || title.includes('company purchase')) return 'Business Acquisition';
+    if (title.includes('debt') || title.includes('collection') || title.includes('recovery')) return 'Debt Collection';
+    if (title.includes('business registration') || title.includes('company registration')) return 'Business Registration';
+    if (title.includes('will') || title.includes('estate')) return 'Will Drafting';
+    if (title.includes('employment') || title.includes('contract')) return 'Employment Contract';
+    if (title.includes('divorce') || title.includes('family') || title.includes('custody')) return 'Divorce/Family Law';
+    return 'Property Transfer'; // Default fallback
+  };
+
   const getServiceFields = (serviceCategory: string) => {
     // Simplified fields - just context questions, no monetary values
     const fieldMappings: Record<string, any> = {
@@ -136,10 +149,14 @@ export const ServiceRequestPage: React.FC = () => {
     setSubmitError('');
 
     // Validate required fields
-    if (!formData.serviceCategory || !formData.serviceTitle || !formData.description) {
+    if (!formData.serviceTitle || !formData.description) {
       setSubmitError('Please fill in all required fields');
       return;
     }
+
+    // Auto-derive category from service title
+    const derivedCategory = deriveCategory(formData.serviceTitle);
+    formData.serviceCategory = derivedCategory;
 
     // Validate contact info
     if (!formData.phoneNumber || !formData.email) {
@@ -342,30 +359,9 @@ export const ServiceRequestPage: React.FC = () => {
                     required
                     value={formData.serviceTitle}
                     onChange={(e) => setFormData(prev => ({ ...prev, serviceTitle: e.target.value }))}
-                    placeholder="e.g., Land Title Transfer, Company Registration"
+                    placeholder="e.g., Land Title Transfer, Company Registration, Residential Lease Agreement"
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Category <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    required
-                    value={formData.serviceCategory}
-                    onChange={(e) => setFormData(prev => ({ ...prev, serviceCategory: e.target.value }))}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select a category</option>
-                    <option value="Property Transfer">Property Transfer</option>
-                    <option value="Business Acquisition">Business Acquisition</option>
-                    <option value="Debt Collection">Debt Collection</option>
-                    <option value="Business Registration">Business Registration</option>
-                    <option value="Will Drafting">Will Drafting</option>
-                    <option value="Employment Contract">Employment Contract</option>
-                    <option value="Divorce/Family Law">Divorce/Family Law</option>
-                  </select>
                 </div>
 
                 <div>
