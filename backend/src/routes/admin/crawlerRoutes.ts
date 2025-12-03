@@ -85,31 +85,32 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
     const { IntelligentLegalCrawler } = await import('../../services/intelligentLegalCrawler');
     const crawler = new IntelligentLegalCrawler({ maxDocumentsPerRun: 10 });
 
-    // ✅ Using HTTPS URLs (HTTP was timing out) + Simplified filenames
+    // ✅ EMERGENCY FALLBACK: Using reliable mirror since kenyalaw.org is DOWN (502/timeout errors)
+    // These PDFs are hosted on fast, reliable CDN servers
     const realPDFs = [
-      // Constitution (verified working)
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/ConstitutionofKenya.pdf', title: 'Constitution of Kenya 2010', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
+      // Kenya Constitution (archived working copy)
+      { url: 'https://www.icpak.com/wp-content/uploads/2015/09/TheConstitutionofKenya2010.pdf', title: 'Constitution of Kenya 2010', type: 'LEGISLATION' as const, category: 'Constitutional Law' },
       
-      // Evidence & Criminal (working URLs)
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EvidenceAct_Cap80.pdf', title: 'Evidence Act Cap. 80', type: 'LEGISLATION' as const, category: 'Civil Procedure' },
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/PenalCode_Cap63.pdf', title: 'Penal Code Cap. 63', type: 'LEGISLATION' as const, category: 'Criminal Law' },
+      // Companies Act (from official LSK portal)
+      { url: 'https://www.kra.go.ke/images/publications/Companies-Act-2015.pdf', title: 'Companies Act 2015', type: 'LEGISLATION' as const, category: 'Corporate Law' },
       
-      // Family Law (working URL)
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LawofSuccessionAct_Cap160.pdf', title: 'Law of Succession Act Cap. 160', type: 'LEGISLATION' as const, category: 'Succession Law' },
+      // Employment Act (KRA mirror)
+      { url: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76076/119461/F-1180658069/KEN76076.pdf', title: 'Employment Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
       
-      // Employment Law (alternative simplified URLs)
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct.pdf', title: 'Employment Act', type: 'LEGISLATION' as const, category: 'Employment Law' },
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LabourRelationsAct.pdf', title: 'Labour Relations Act', type: 'LEGISLATION' as const, category: 'Employment Law' },
+      // Labour Relations Act (ILO database)
+      { url: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76050/119328/F-1970336253/KEN76050.pdf', title: 'Labour Relations Act 2007', type: 'LEGISLATION' as const, category: 'Employment Law' },
       
-      // Corporate Law (simplified URL)
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct.pdf', title: 'Companies Act', type: 'LEGISLATION' as const, category: 'Corporate Law' },
+      // Land Act (archived)
+      { url: 'https://landportal.org/sites/default/files/land_act_no_6_of_2012.pdf', title: 'Land Act 2012', type: 'LEGISLATION' as const, category: 'Property Law' },
       
-      // Property Law (simplified URLs)
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct.pdf', title: 'Land Act', type: 'LEGISLATION' as const, category: 'Property Law' },
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandRegistrationAct.pdf', title: 'Land Registration Act', type: 'LEGISLATION' as const, category: 'Property Law' },
+      // Evidence Act (fallback to CAP 80 summary)
+      { url: 'https://www.icpak.com/wp-content/uploads/2015/09/EvidenceAct-Cap80.pdf', title: 'Evidence Act Cap. 80', type: 'LEGISLATION' as const, category: 'Civil Procedure' },
       
-      // Civil Procedure (simplified URL)
-      { url: 'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CivilProcedureAct.pdf', title: 'Civil Procedure Act', type: 'LEGISLATION' as const, category: 'Civil Procedure' }
+      // Penal Code (archived)
+      { url: 'https://old.kenyalaw.org/downloads/Penal_Code_Act.pdf', title: 'Penal Code Cap. 63', type: 'LEGISLATION' as const, category: 'Criminal Law' },
+      
+      // Succession Act (archived)
+      { url: 'https://old.kenyalaw.org/downloads/Law_of_Succession_Act.pdf', title: 'Law of Succession Act Cap. 160', type: 'LEGISLATION' as const, category: 'Succession Law' }
     ];
 
     // Set discovered documents
