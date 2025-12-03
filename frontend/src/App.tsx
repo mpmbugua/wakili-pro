@@ -391,9 +391,9 @@ function App() {
             <Route 
               path="/documents" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
+                <GlobalLayout>
                   <DocumentsPage />
-                </ProtectedRoute>
+                </GlobalLayout>
               } 
             />
             <Route 

@@ -17,7 +17,7 @@ interface Document {
 }
 
 export const DocumentsPage: React.FC = () => {
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +30,33 @@ export const DocumentsPage: React.FC = () => {
   const [uploadCategory, setUploadCategory] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // If not authenticated, show login prompt
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <FileText className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">
+            Document Upload & Review
+          </h2>
+          <p className="text-slate-600 mb-6">
+            Upload your legal documents for AI analysis (KES 500) or lawyer certification (from KES 2,000). 
+            Get comprehensive legal review with actionable insights within 24 hours.
+          </p>
+          <p className="text-slate-700 font-medium mb-6">
+            Please log in to upload and manage your documents.
+          </p>
+          <button
+            onClick={() => navigate('/login', { state: { from: '/documents' } })}
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+          >
+            Log In to Continue
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (user) {
