@@ -21,6 +21,7 @@ interface DocumentMetadata {
   citation?: string;
   sourceUrl?: string;
   effectiveDate?: Date;
+  uploadedBy: string; // User ID who uploaded the document
 }
 
 interface IngestionResult {
@@ -128,6 +129,11 @@ class DocumentIngestionService {
           citation: metadata.citation,
           sourceUrl: metadata.sourceUrl,
           effectiveDate: metadata.effectiveDate,
+          uploadedBy: metadata.uploadedBy,
+          // File metadata will be added later via update
+          filePath: '',
+          fileName: '',
+          fileSize: 0
         },
       });
 

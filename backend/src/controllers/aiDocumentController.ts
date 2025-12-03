@@ -90,7 +90,8 @@ export const uploadLegalDocument = async (req: Request, res: Response) => {
         category,
         citation,
         sourceUrl,
-        effectiveDate: effectiveDate ? new Date(effectiveDate) : undefined
+        effectiveDate: effectiveDate ? new Date(effectiveDate) : undefined,
+        uploadedBy: userId
       }
     );
 
@@ -102,8 +103,7 @@ export const uploadLegalDocument = async (req: Request, res: Response) => {
         fileName: req.file.originalname,
         fileSize: req.file.size,
         chunksCount: ingestionResult.chunksProcessed,
-        vectorsCount: ingestionResult.vectorsCreated,
-        uploadedBy: userId
+        vectorsCount: ingestionResult.vectorsCreated
       }
     });
 
@@ -321,11 +321,12 @@ export const reindexDocument = async (req: Request, res: Response) => {
         category: document.category,
         citation: document.citation || undefined,
         sourceUrl: document.sourceUrl || undefined,
-        effectiveDate: document.effectiveDate || undefined
+        effectiveDate: document.effectiveDate || undefined,
+        uploadedBy: document.uploadedBy
       }
     );
 
-    // Update with file metadata and uploader info
+    // Update with file metadata
     await prisma.legalDocument.update({
       where: { id: ingestionResult.documentId },
       data: {
@@ -333,8 +334,7 @@ export const reindexDocument = async (req: Request, res: Response) => {
         fileName: document.fileName,
         fileSize: document.fileSize,
         chunksCount: ingestionResult.chunksProcessed,
-        vectorsCount: ingestionResult.vectorsCreated,
-        uploadedBy: document.uploadedBy
+        vectorsCount: ingestionResult.vectorsCreated
       }
     });
 
