@@ -299,7 +299,7 @@ export default function LawyerQuoteSubmissionPage() {
                 <Info className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">Quote Submission is FREE</p>
-                  <p>Submit your best proposal. If selected, client pays 30% upfront (you receive 10% escrow to start, platform takes 20% commission).</p>
+                  <p>Submit your best proposal. If selected, client pays 30% upfront.</p>
                 </div>
               </div>
 

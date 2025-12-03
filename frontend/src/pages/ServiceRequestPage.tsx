@@ -316,11 +316,11 @@ export const ServiceRequestPage: React.FC = () => {
                   <li>Pay KES 500 commitment fee to submit your request</li>
                   <li>Receive up to 3 quotes from qualified lawyers within 24-48 hours</li>
                   <li>Select your preferred lawyer based on their quote and profile</li>
-                  <li><strong>Pay 30% upfront</strong> of quoted amount (platform takes 20% commission, lawyer gets 10% escrow to start case)</li>
+                  <li><strong>Pay 30% upfront</strong> of quoted amount</li>
                   <li>Lawyer proceeds with your case - <strong>remaining 70% balance</strong> payable as case progresses</li>
                 </ol>
                 <p className="text-xs text-slate-600 mt-3">
-                  <strong>Note:</strong> The commitment fee is non-refundable. The 30% upfront payment splits: 20% platform fee, 10% to lawyer's escrow to begin work.
+                  <strong>Note:</strong> The commitment fee is non-refundable.
                 </p>
               </div>
             </div>
