@@ -271,14 +271,31 @@ export const DocumentsPage: React.FC = () => {
     }
   };
 
-  const handleView = (doc: Document) => {
+  const handleView = async (doc: Document) => {
     if (!doc.id) {
       alert('Document ID not available');
       return;
     }
-    // Use backend proxy to view file in new tab
-    const viewUrl = `${axiosInstance.defaults.baseURL}/user-documents/${doc.id}/download`;
-    window.open(viewUrl, '_blank', 'noopener,noreferrer');
+    
+    try {
+      // Fetch the document to get authenticated download URL
+      const response = await axiosInstance.get(`/user-documents/${doc.id}/download`, {
+        responseType: 'blob'
+      });
+      
+      // Create a blob URL and open in new tab
+      const blob = new Blob([response.data], { type: response.headers['content-type'] || 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+      
+      // Clean up the blob URL after a delay
+      if (newWindow) {
+        setTimeout(() => window.URL.revokeObjectURL(url), 100);
+      }
+    } catch (error) {
+      console.error('Error viewing document:', error);
+      alert('Failed to view document. Please try again.');
+    }
   };
 
   const filteredDocuments = documents.filter(doc => {
