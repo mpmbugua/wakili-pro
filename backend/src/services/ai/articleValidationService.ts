@@ -1,6 +1,6 @@
 /**
  * Article Validation Service - AI-powered validation of scraped legal content
- * Uses GPT-4 to validate quality, accuracy, relevance and generate metadata
+ * Uses GPT-4o to validate quality, accuracy, relevance and generate metadata
  */
 
 import { OpenAI } from 'openai';
@@ -166,9 +166,9 @@ Provide a JSON response with the following structure:
 
 Respond ONLY with valid JSON, no additional text.`;
 
-      // Call GPT-4 for validation
+      // Call GPT-4o for validation
       const completion = await this.openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',

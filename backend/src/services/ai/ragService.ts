@@ -108,8 +108,8 @@ class RAGService {
     try {
       const useGPT4 = context.avgConfidence < this.highConfidenceThreshold || !this.useGPT35ForHighConfidence;
       const model = useGPT4
-        ? (process.env.OPENAI_CHAT_MODEL_COMPLEX || 'gpt-4')
-        : (process.env.OPENAI_CHAT_MODEL_SIMPLE || 'gpt-3.5-turbo');
+        ? (process.env.OPENAI_CHAT_MODEL_COMPLEX || 'gpt-4o')
+        : (process.env.OPENAI_CHAT_MODEL_SIMPLE || 'gpt-4o-mini');
 
       logger.info(`Using model: ${model} (confidence: ${context.avgConfidence.toFixed(3)})`);
 
@@ -194,7 +194,7 @@ class RAGService {
     try {
       logger.info('Falling back to GPT without RAG');
 
-      const model = process.env.OPENAI_CHAT_MODEL_COMPLEX || 'gpt-4';
+      const model = process.env.OPENAI_CHAT_MODEL_COMPLEX || 'gpt-4o';
 
       const systemPrompt = `You are an expert legal assistant specializing in Kenyan law. 
 Provide accurate, helpful information about Kenyan legal matters.

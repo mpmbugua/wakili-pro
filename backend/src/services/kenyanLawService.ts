@@ -150,9 +150,9 @@ Be conversational but professional, accurate but accessible to laypeople.
       logger.info('Calling OpenAI API with fallback method...');
       logger.info(`API Key present: ${!!process.env.OPENAI_API_KEY}, starts with: ${process.env.OPENAI_API_KEY?.substring(0, 10)}...`);
       
-      // Try with gpt-3.5-turbo first (more reliable, cheaper)
+      // Try with gpt-4o-mini first (more reliable, cheaper)
       const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: this.kenyanLawContext },
           { role: 'user', content: prompt }
@@ -233,7 +233,7 @@ Format as structured research brief suitable for legal professionals.
 `;
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: this.kenyanLawContext },
           { role: 'user', content: researchPrompt }
@@ -287,7 +287,7 @@ Generate a professional, legally sound document template.
 `;
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4o',
         messages: [
           { 
             role: 'system', 
@@ -352,7 +352,7 @@ Rate the overall contract risk as LOW/MEDIUM/HIGH and explain.
 `;
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4o',
         messages: [
           { 
             role: 'system', 
