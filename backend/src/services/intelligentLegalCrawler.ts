@@ -184,7 +184,7 @@ export class IntelligentLegalCrawler {
 
     try {
       const response = await axios.get(url, {
-        timeout: 15000,
+        timeout: 30000, // Increased from 15s to 30s for slow government sites
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
