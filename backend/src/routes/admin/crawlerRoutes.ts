@@ -86,7 +86,7 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
     const crawler = new IntelligentLegalCrawler({ maxDocumentsPerRun: 10 });
 
     // ✅ VERIFIED WORKING SOURCES: December 2025
-    // Using direct PDF downloads only
+    // Using Kenya Law Akoma Ntoso official API + trusted mirrors
     const realPDFs = [
       // Constitution - RefWorld VERIFIED ✅
       { 
@@ -96,34 +96,34 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
         type: 'LEGISLATION' as const, 
         category: 'Constitutional Law' 
       },
-      // Companies Act - Try direct government source
+      // Companies Act - Kenya Law Akoma Ntoso PDF
       { 
-        url: 'http://www.parliament.go.ke/sites/default/files/2017-05/Companies_Act_2015.pdf',
-        fallback: 'https://africatraderpolicy.org/wp-content/uploads/2019/08/Companies-Act-2015.pdf',
+        url: 'https://new.kenyalaw.org/akn/ke/act/2015/17/media/ke-act-2015-17.pdf',
+        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/CompaniesAct_No17of2015.pdf',
         title: 'Companies Act 2015', 
         type: 'LEGISLATION' as const, 
         category: 'Corporate Law' 
       },
-      // Employment Act - ILO direct PDF
+      // Employment Act - Kenya Law Official
       { 
-        url: 'https://www.ilo.org/wcmsp5/groups/public/---ed_protect/---protrav/---travail/documents/legaldocument/wcms_563061.pdf',
-        fallback: 'https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/76126/81017/F898198425/KEN76126.pdf',
+        url: 'https://new.kenyalaw.org/akn/ke/act/2007/11/media/ke-act-2007-11.pdf',
+        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/EmploymentAct_No11of2007.pdf',
         title: 'Employment Act 2007', 
         type: 'LEGISLATION' as const, 
         category: 'Employment Law' 
       },
-      // Land Act - FAO verified
+      // Land Act - Kenya Law Official
       { 
-        url: 'http://extwprlegs1.fao.org/docs/pdf/ken127322.pdf',
-        fallback: 'https://www.landesa.org/wp-content/uploads/Kenya-Land-Act.pdf',
+        url: 'https://new.kenyalaw.org/akn/ke/act/2012/6/media/ke-act-2012-6.pdf',
+        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/LandAct_No6of2012.pdf',
         title: 'Land Act 2012', 
         type: 'LEGISLATION' as const, 
         category: 'Property Law' 
       },
-      // Data Protection - ODPC official
+      // Data Protection - Kenya Law Official
       { 
-        url: 'https://www.odpc.go.ke/wp-content/uploads/2019/11/Data-Protection-Act-2019.pdf',
-        fallback: 'https://www.dataguidance.com/sites/default/files/kenya_data_protection_act_2019.pdf',
+        url: 'https://new.kenyalaw.org/akn/ke/act/2019/24/media/ke-act-2019-24.pdf',
+        fallback: 'http://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/2019/TheDataProtectionAct_No24of2019.pdf',
         title: 'Data Protection Act 2019', 
         type: 'LEGISLATION' as const, 
         category: 'Technology Law' 
