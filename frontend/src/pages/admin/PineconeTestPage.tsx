@@ -162,7 +162,7 @@ export const PineconeTestPage = () => {
     try {
       const response = await axiosInstance.post('/ai/documents/bulk-upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 300000 // 5 minutes timeout for bulk uploads (processing multiple files + AI embeddings)
+        timeout: 3600000 // 60 minutes timeout for bulk uploads (up to 50 files × ~45s each = ~37min worst case)
       });
       setBulkUploadResult({
         success: true,
