@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import axiosInstance from '../../services/api';
-import { CheckCircle2, XCircle, AlertTriangle, Loader2, Upload, Database } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Loader2, Upload, Database, Globe, Info } from 'lucide-react';
 
 interface TestResult {
   success: boolean;
@@ -61,11 +61,13 @@ export const PineconeTestPage = () => {
   const [bulkUploading, setBulkUploading] = useState(false);
   const [folderUploading, setFolderUploading] = useState(false);
   const [cleaning, setCleaning] = useState(false);
+  const [crawling, setCrawling] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [uploadResult, setUploadResult] = useState<TestResult | null>(null);
   const [bulkUploadResult, setBulkUploadResult] = useState<TestResult | null>(null);
   const [folderUploadResult, setFolderUploadResult] = useState<TestResult | null>(null);
   const [cleanupResult, setCleanupResult] = useState<TestResult | null>(null);
+  const [crawlerResult, setCrawlerResult] = useState<TestResult | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [folderPath, setFolderPath] = useState('');
@@ -250,6 +252,34 @@ export const PineconeTestPage = () => {
       });
     } finally {
       setCleaning(false);
+    }
+  };
+
+  const handleCrawlerTest = async () => {
+    if (!confirm('This will crawl Kenya Law, Judiciary, and other legal sites to discover documents. May take 5-15 minutes. Continue?')) {
+      return;
+    }
+
+    setCrawling(true);
+    setCrawlerResult(null);
+
+    try {
+      const response = await axiosInstance.post('/admin/crawler/trigger', {}, {
+        timeout: 900000 // 15 minutes for crawler
+      });
+      setCrawlerResult({
+        success: true,
+        message: response.data.message || 'Crawler completed successfully',
+        results: response.data.data
+      });
+    } catch (error: any) {
+      setCrawlerResult({
+        success: false,
+        message: 'Crawler failed',
+        error: error.response?.data?.message || error.message
+      });
+    } finally {
+      setCrawling(false);
     }
   };
 
@@ -730,6 +760,105 @@ export const PineconeTestPage = () => {
               </div>
             </Alert>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Crawler Test */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="w-5 h-5" />
+            Legal Document Crawler
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded">
+              <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-blue-700">
+                <p className="font-medium mb-1">Crawler Information:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Crawls up to 10 levels deep on legal websites</li>
+                  <li>Processes up to 500 documents per run</li>
+                  <li>Filters out junk (Site Map, Contact Us, etc.)</li>
+                  <li>Scheduled to run daily at midnight (currently disabled)</li>
+                  <li>Expected duration: 5-15 minutes</li>
+                </ul>
+              </div>
+            </div>
+
+            <Button 
+              onClick={handleCrawlerTest} 
+              disabled={crawling}
+              className="w-full"
+            >
+              {crawling ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Crawling... (This may take 5-15 minutes)
+                </>
+              ) : (
+                <>
+                  <Globe className="w-4 h-4 mr-2" />
+                  Test Crawler Now
+                </>
+              )}
+            </Button>
+
+            {crawlerResult && (
+              <Alert className={`${crawlerResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="flex items-start gap-2">
+                  {crawlerResult.success ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+                  ) : (
+                    <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                  )}
+                  <AlertDescription className="flex-1">
+                    <div className={`text-sm ${crawlerResult.success ? 'text-green-700' : 'text-red-700'}`}>
+                      <strong>{crawlerResult.success ? 'Success:' : 'Error:'}</strong> {crawlerResult.message}
+                    </div>
+
+                    {crawlerResult.success && crawlerResult.results && (
+                      <div className="mt-3 space-y-2">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="bg-white p-3 rounded border border-green-200">
+                            <div className="text-green-600 font-medium">Documents Discovered</div>
+                            <div className="text-2xl font-bold text-green-700">
+                              {crawlerResult.results.discovered || 0}
+                            </div>
+                          </div>
+                          <div className="bg-white p-3 rounded border border-green-200">
+                            <div className="text-green-600 font-medium">Successfully Ingested</div>
+                            <div className="text-2xl font-bold text-green-700">
+                              {crawlerResult.results.ingested || 0}
+                            </div>
+                          </div>
+                        </div>
+
+                        {crawlerResult.results.filtered && (
+                          <div className="bg-white p-3 rounded border border-amber-200">
+                            <div className="text-amber-600 font-medium text-sm">Junk Filtered Out</div>
+                            <div className="text-xl font-bold text-amber-700">
+                              {crawlerResult.results.filtered} documents
+                            </div>
+                            <div className="text-xs text-amber-600 mt-1">
+                              (Site maps, contact pages, navigation items)
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {crawlerResult.error && (
+                      <div className="mt-2 text-sm text-red-700">
+                        <strong>Error Details:</strong> {crawlerResult.error}
+                      </div>
+                    )}
+                  </AlertDescription>
+                </div>
+              </Alert>
+            )}
+          </div>
         </CardContent>
       </Card>
 
