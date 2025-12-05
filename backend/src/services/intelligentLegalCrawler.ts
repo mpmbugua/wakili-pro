@@ -51,8 +51,8 @@ export class IntelligentLegalCrawler {
         'https://judiciary.go.ke/judgments/',
         ...(config?.seedUrls || [])
       ],
-      maxDepth: 10, // Follow links up to 10 levels deep (increased from 5 to reach deeply nested PDFs)
-      maxDocumentsPerRun: parseInt(process.env.SCRAPER_BATCH_SIZE || '500'), // Process up to 500 documents per run (increased from 20)
+      maxDepth: 5, // Follow links up to 5 levels deep (balance between discovery and speed)
+      maxDocumentsPerRun: parseInt(process.env.SCRAPER_BATCH_SIZE || '50'), // Process up to 50 documents per run (to avoid timeout)
       allowedDomains: [
         'kenyalaw.org',
         'judiciary.go.ke',
@@ -423,10 +423,16 @@ export class IntelligentLegalCrawler {
     this.visited.clear();
     this.discoveredDocuments = [];
 
-    // Crawl all seed URLs
+    // Crawl all seed URLs (stop early if we have enough)
     for (const seedUrl of this.config.seedUrls) {
       await this.crawlPage(seedUrl, 0);
       await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay between seeds
+      
+      // Stop early if we've discovered enough documents
+      if (this.discoveredDocuments.length >= this.config.maxDocumentsPerRun * 2) {
+        logger.info(`[Crawler] Early stop: Discovered ${this.discoveredDocuments.length} documents (will process ${this.config.maxDocumentsPerRun})`);
+        break;
+      }
     }
 
     logger.info(`[Crawler] Discovery complete. Found ${this.discoveredDocuments.length} documents`);
@@ -578,10 +584,10 @@ export class IntelligentLegalCrawler {
         });
 
         ingestedCount++;
-        logger.info(`[Crawler] Successfully ingested: ${doc.title} (${ingestionResult.chunksProcessed} chunks)`);
+        logger.info(`[Crawler] ✅ Successfully ingested ${ingestedCount}/${documentsToProcess.length}: ${doc.title} (${ingestionResult.chunksProcessed} chunks)`);
 
-        // Rate limiting
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Rate limiting - reduced for faster ingestion
+        await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (error) {
         logger.error(`[Crawler] ❌ Failed to ingest document "${doc.title}":`, error);
         logger.error(`[Crawler] Error details:`, {
