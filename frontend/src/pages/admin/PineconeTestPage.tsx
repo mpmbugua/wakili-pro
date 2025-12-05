@@ -58,11 +58,14 @@ const AlertDescription = ({ children }: { children: React.ReactNode }) => (
 export const PineconeTestPage = () => {
   const [testing, setTesting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [bulkUploading, setBulkUploading] = useState(false);
   const [folderUploading, setFolderUploading] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [uploadResult, setUploadResult] = useState<TestResult | null>(null);
+  const [bulkUploadResult, setBulkUploadResult] = useState<TestResult | null>(null);
   const [folderUploadResult, setFolderUploadResult] = useState<TestResult | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [folderPath, setFolderPath] = useState('');
 
   const runConnectionTest = async () => {
@@ -134,12 +137,53 @@ export const PineconeTestPage = () => {
     }
   };
 
+  const handleBulkFileUpload = async () => {
+    if (!selectedFiles || selectedFiles.length === 0) {
+      setBulkUploadResult({
+        success: false,
+        message: 'No files selected',
+        error: 'Please select files to upload'
+      });
+      return;
+    }
+
+    setBulkUploading(true);
+    setBulkUploadResult(null);
+
+    const formData = new FormData();
+    for (let i = 0; i < selectedFiles.length; i++) {
+      formData.append('files', selectedFiles[i]);
+    }
+    formData.append('documentType', 'LEGISLATION');
+    formData.append('category', 'General');
+
+    try {
+      const response = await axiosInstance.post('/ai/documents/bulk-upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setBulkUploadResult({
+        success: true,
+        message: response.data.message || 'Files uploaded successfully',
+        results: response.data.data
+      });
+      setSelectedFiles(null);
+    } catch (error: any) {
+      setBulkUploadResult({
+        success: false,
+        message: 'Bulk upload failed',
+        error: error.response?.data?.message || error.message
+      });
+    } finally {
+      setBulkUploading(false);
+    }
+  };
+
   const handleFolderUpload = async () => {
     if (!folderPath.trim()) {
       setFolderUploadResult({
         success: false,
         message: 'Folder path is required',
-        error: 'Please enter a valid folder path'
+        error: 'Please enter a valid folder path (server-side path only)'
       });
       return;
     }
@@ -291,43 +335,174 @@ export const PineconeTestPage = () => {
           >
             {uploading ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              'Test Text Ingestion'
-            )}
-          </Button>
+      {/* Bulk File Upload */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="w-5 h-5" />
+            Bulk File Upload (Multiple PDFs)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-600 mb-4">
+            Upload multiple PDF or DOCX files at once. Select all files from your folder using Ctrl+Click or Shift+Click.
+          </p>
 
-          {uploadResult && (
-            <Alert className={uploadResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}>
+          <div className="space-y-4">
+            <input
+              type="file"
+              accept=".pdf,.docx,.doc"
+              multiple
+              onChange={(e) => setSelectedFiles(e.target.files)}
+              className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded file:border-0
+                file:text-sm file:font-semibold
+                file:bg-green-50 file:text-green-700
+                hover:file:bg-green-100"
+            />
+
+            {selectedFiles && selectedFiles.length > 0 && (
+              <div className="text-sm text-gray-600 bg-green-50 p-3 rounded border border-green-200">
+                <strong>{selectedFiles.length} files selected</strong>
+                <div className="mt-2 max-h-32 overflow-y-auto text-xs">
+                  {Array.from(selectedFiles).map((file, idx) => (
+                    <div key={idx}>• {file.name}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Button 
+              onClick={handleBulkFileUpload} 
+              disabled={!selectedFiles || selectedFiles.length === 0 || bulkUploading}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {bulkUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Uploading {selectedFiles?.length} files...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload {selectedFiles?.length || 0} Files
+                </>
+              )}
+            </Button>
+          </div>
+
+          {bulkUploadResult && (
+            <Alert className={`mt-4 ${bulkUploadResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
               <div className="flex items-start gap-2">
-                {uploadResult.success ? (
+                {bulkUploadResult.success ? (
                   <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
                 ) : (
                   <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
                 )}
                 <div className="flex-1">
                   <AlertDescription>
-                    <strong>{uploadResult.message}</strong>
+                    <strong>{bulkUploadResult.message}</strong>
                     
-                    {uploadResult.results && (
-                      <div className="mt-3 bg-white p-3 rounded border">
-                        <pre className="text-xs overflow-x-auto">
-                          {JSON.stringify(uploadResult.results, null, 2)}
-                        </pre>
+                    {bulkUploadResult.results && (
+                      <div className="mt-3 space-y-3">
+                        {/* Summary */}
+                        {bulkUploadResult.results.summary && (
+                          <div className="bg-white p-4 rounded border">
+                            <h4 className="font-semibold mb-2">Summary</h4>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div>Total Files: <strong>{bulkUploadResult.results.summary.total}</strong></div>
+                              <div className="text-green-600">Successful: <strong>{bulkUploadResult.results.summary.successful}</strong></div>
+                              <div className="text-red-600">Failed: <strong>{bulkUploadResult.results.summary.failed}</strong></div>
+                              <div>Total Chunks: <strong>{bulkUploadResult.results.summary.totalChunks}</strong></div>
+                              <div className="col-span-2">Total Vectors: <strong>{bulkUploadResult.results.summary.totalVectors}</strong></div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Successful Files */}
+                        {bulkUploadResult.results.details?.successful && bulkUploadResult.results.details.successful.length > 0 && (
+                          <div className="bg-white p-4 rounded border max-h-48 overflow-y-auto">
+                            <h4 className="font-semibold mb-2 text-green-600">✅ Successfully Processed</h4>
+                            <div className="space-y-1 text-xs">
+                              {bulkUploadResult.results.details.successful.map((file: any, idx: number) => (
+                                <div key={idx}>• {file.filename} ({file.chunks} chunks, {file.vectors} vectors)</div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Failed Files */}
+                        {bulkUploadResult.results.details?.failed && bulkUploadResult.results.details.failed.length > 0 && (
+                          <div className="bg-red-50 p-4 rounded border border-red-200 max-h-48 overflow-y-auto">
+                            <h4 className="font-semibold mb-2 text-red-600">❌ Failed Files</h4>
+                            <div className="space-y-1 text-xs">
+                              {bulkUploadResult.results.details.failed.map((file: any, idx: number) => (
+                                <div key={idx}>• {file.filename}: {file.error}</div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
-                    {uploadResult.error && (
+                    {bulkUploadResult.error && (
                       <div className="mt-2 text-sm text-red-700">
-                        <strong>Error:</strong> {uploadResult.error}
+                        <strong>Error:</strong> {bulkUploadResult.error}
                       </div>
                     )}
                   </AlertDescription>
                 </div>
               </div>
             </Alert>
+          )}
+      {/* Folder Upload (Server-Side Only) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="w-5 h-5" />
+            Server Folder Upload (Advanced)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-red-50 border border-red-200 rounded p-3 mb-4">
+            <p className="text-sm text-red-800">
+              <strong>⚠️ Server-Side Only:</strong> This requires a folder path on the Render server, not your local machine. 
+              For local files, use <strong>Bulk File Upload</strong> above instead.
+            </p>
+          </div>
+
+          <p className="text-sm text-gray-600 mb-4">
+            If you have files uploaded to the server, this will:
+          </p>
+          <ul className="list-disc list-inside text-sm text-gray-600 mb-4 space-y-1">
+            <li>Recursively scan all subfolders for PDF/DOCX files</li>
+            <li>Auto-detect document type from folder names (Acts, Regulations, Cases, etc.)</li>
+            <li>Infer category from folder structure (Constitutional Law, Property Law, etc.)</li>
+            <li>Extract year from filenames for effective date</li>
+            <li>Preserve folder hierarchy as metadata</li>
+          </ul>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Server Folder Path (e.g., /app/storage/legal-materials)
+              </label>
+              <input
+                type="text"
+                value={folderPath}
+                onChange={(e) => setFolderPath(e.target.value)}
+                placeholder="/app/storage/legal-materials"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div className="bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="text-sm text-amber-800">
+                <strong>Note:</strong> This only works for folders that exist on the Render server. 
+                Use "Bulk File Upload" to upload files from your computer.
+              </p>
+            </div>t>
           )}
         </CardContent>
       </Card>
