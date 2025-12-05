@@ -335,6 +335,46 @@ export const PineconeTestPage = () => {
           >
             {uploading ? (
               <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Test Document
+              </>
+            )}
+          </Button>
+
+          {uploadResult && (
+            <Alert className={`mt-4 ${uploadResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <div className="flex items-start gap-2">
+                {uploadResult.success ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                )}
+                <div className="flex-1">
+                  <AlertDescription>
+                    <strong>{uploadResult.message}</strong>
+                    {uploadResult.results && (
+                      <pre className="mt-2 text-xs bg-white p-2 rounded border overflow-x-auto">
+                        {JSON.stringify(uploadResult.results, null, 2)}
+                      </pre>
+                    )}
+                    {uploadResult.error && (
+                      <div className="mt-2 text-sm text-red-700">
+                        <strong>Error:</strong> {uploadResult.error}
+                      </div>
+                    )}
+                  </AlertDescription>
+                </div>
+              </div>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Bulk File Upload */}
       <Card className="mb-6">
         <CardHeader>
@@ -456,72 +496,6 @@ export const PineconeTestPage = () => {
               </div>
             </Alert>
           )}
-      {/* Folder Upload (Server-Side Only) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Database className="w-5 h-5" />
-            Server Folder Upload (Advanced)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-red-50 border border-red-200 rounded p-3 mb-4">
-            <p className="text-sm text-red-800">
-              <strong>⚠️ Server-Side Only:</strong> This requires a folder path on the Render server, not your local machine. 
-              For local files, use <strong>Bulk File Upload</strong> above instead.
-            </p>
-          </div>
-
-          <p className="text-sm text-gray-600 mb-4">
-            If you have files uploaded to the server, this will:
-          </p>
-          <ul className="list-disc list-inside text-sm text-gray-600 mb-4 space-y-1">
-            <li>Recursively scan all subfolders for PDF/DOCX files</li>
-            <li>Auto-detect document type from folder names (Acts, Regulations, Cases, etc.)</li>
-            <li>Infer category from folder structure (Constitutional Law, Property Law, etc.)</li>
-            <li>Extract year from filenames for effective date</li>
-            <li>Preserve folder hierarchy as metadata</li>
-          </ul>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Server Folder Path (e.g., /app/storage/legal-materials)
-              </label>
-              <input
-                type="text"
-                value={folderPath}
-                onChange={(e) => setFolderPath(e.target.value)}
-                placeholder="/app/storage/legal-materials"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div className="bg-amber-50 p-3 rounded border border-amber-200">
-              <p className="text-sm text-amber-800">
-                <strong>Note:</strong> This only works for folders that exist on the Render server. 
-                Use "Bulk File Upload" to upload files from your computer.
-              </p>
-            </div>
-
-            <Button 
-              onClick={handleFolderUpload} 
-              disabled={!folderPath.trim() || folderUploading}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              {folderUploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processing Folder...
-                </>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Server Folder
-                </>
-              )}
-            </Button>
-          </div>
         </CardContent>
       </Card>
 
@@ -744,3 +718,5 @@ export const PineconeTestPage = () => {
     </div>
   );
 };
+
+export default PineconeTestPage;
