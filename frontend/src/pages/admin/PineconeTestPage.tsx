@@ -167,11 +167,6 @@ export const PineconeTestPage = () => {
         message: response.data.message || 'Files uploaded successfully',
         results: response.data.data
       });
-      setSelectedFiles(null);
-      // Reset the file input
-      if (bulkFileInputRef.current) {
-        bulkFileInputRef.current.value = '';
-      }
     } catch (error: any) {
       setBulkUploadResult({
         success: false,
@@ -180,6 +175,13 @@ export const PineconeTestPage = () => {
       });
     } finally {
       setBulkUploading(false);
+      // Reset the file input and state after upload completes
+      setTimeout(() => {
+        setSelectedFiles(null);
+        if (bulkFileInputRef.current) {
+          bulkFileInputRef.current.value = '';
+        }
+      }, 100);
     }
   };
 
