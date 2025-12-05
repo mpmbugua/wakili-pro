@@ -431,18 +431,18 @@ httpServer.listen(port, host, () => {
     console.error('❌ Failed to start scheduled jobs:', error);
   });
 
-  // DISABLED: Intelligent legal document crawler (creates junk data - needs filtering improvements)
-  // TODO: Re-enable after improving document filtering in intelligentLegalCrawler.ts
+  // DISABLED: Intelligent legal document crawler (waiting for initial seeding to complete)
+  // TODO: Re-enable after bulk upload seeding is complete
   // import('./services/crawlerScheduler').then(({ crawlerScheduler }) => {
   //   crawlerScheduler.start();
   //   const nextRun = crawlerScheduler.getNextRunTime();
-  //   console.log(`📚 Legal document crawler scheduled: Daily at 5:00 PM`);
+  //   console.log(`📚 Legal document crawler scheduled: Daily at midnight (12:00 AM)`);
   //   console.log(`⏰ Next run: ${nextRun?.toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })}`);
   // }).catch((error) => {
   //   console.error('❌ Failed to start crawler scheduler:', error);
   // });
 
-  console.log('⚠️  Automated crawler DISABLED - use manual trigger via /api/admin/crawler/trigger');
+  console.log('⚠️  Automated crawler DISABLED - waiting for bulk seeding. Will run at midnight after re-enabled.');
   });
 });
 

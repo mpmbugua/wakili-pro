@@ -53,7 +53,7 @@ export class IntelligentLegalCrawler {
         'https://lsk.or.ke/resources/legal-resources/',
         ...(config?.seedUrls || [])
       ],
-      maxDepth: 5, // Follow links up to 5 levels deep (increased from 3 to reach actual PDFs)
+      maxDepth: 10, // Follow links up to 10 levels deep (increased from 5 to reach deeply nested PDFs)
       maxDocumentsPerRun: parseInt(process.env.SCRAPER_BATCH_SIZE || '500'), // Process up to 500 documents per run (increased from 20)
       allowedDomains: [
         'kenyalaw.org',

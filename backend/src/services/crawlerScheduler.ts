@@ -10,15 +10,15 @@ export class CrawlerScheduler {
   private cronJob: cron.ScheduledTask | null = null;
 
   /**
-   * Start automated daily crawling at 5:00 PM
+   * Start automated daily crawling at midnight
    */
   start() {
-    // Schedule for 5:00 PM daily (17:00 in 24-hour format)
+    // Schedule for midnight daily (00:00 in 24-hour format)
     // Cron format: minute hour day month day-of-week
-    const cronExpression = '0 17 * * *'; // Every day at 5:00 PM
+    const cronExpression = '0 0 * * *'; // Every day at midnight (12:00 AM)
 
     logger.info('[Crawler Scheduler] Initializing automated legal document crawler...');
-    logger.info('[Crawler Scheduler] Schedule: Daily at 5:00 PM (East Africa Time)');
+    logger.info('[Crawler Scheduler] Schedule: Daily at midnight (12:00 AM East Africa Time)');
 
     this.cronJob = cron.schedule(cronExpression, async () => {
       logger.info('[Crawler Scheduler] Starting scheduled crawl...');
@@ -72,13 +72,13 @@ export class CrawlerScheduler {
    * Get next scheduled run time
    */
   getNextRunTime(): Date | null {
-    // Calculate next 5:00 PM
+    // Calculate next midnight (12:00 AM)
     const now = new Date();
     const next = new Date();
-    next.setHours(17, 0, 0, 0);
+    next.setHours(0, 0, 0, 0);
 
-    // If 5:00 PM already passed today, schedule for tomorrow
-    if (now.getHours() >= 17) {
+    // Midnight already passed today, schedule for tomorrow
+    if (now.getHours() >= 0 && now > next) {
       next.setDate(next.getDate() + 1);
     }
 
