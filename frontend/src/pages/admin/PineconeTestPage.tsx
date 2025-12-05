@@ -571,51 +571,27 @@ export const PineconeTestPage = () => {
               )}
             </Button>
           </div>
-
-          {uploadResult && (
-            <Alert className={`mt-4 ${uploadResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-              <div className="flex items-start gap-2">
-                {uploadResult.success ? (
-                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
-                ) : (
-                  <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <AlertDescription>
-                    <strong>{uploadResult.message}</strong>
-                    
-                    {uploadResult.results && (
-                      <div className="mt-3 bg-white p-3 rounded border">
-                        <pre className="text-xs overflow-x-auto">
-                          {JSON.stringify(uploadResult.results, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-
-                    {uploadResult.error && (
-                      <div className="mt-2 text-sm text-red-700">
-                        <strong>Error:</strong> {uploadResult.error}
-                      </div>
-                    )}
-                  </AlertDescription>
-                </div>
-              </div>
-            </Alert>
-          )}
         </CardContent>
       </Card>
 
-      {/* Folder Upload */}
+      {/* Server Folder Upload (Advanced) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="w-5 h-5" />
-            Folder Upload (Bulk Ingestion)
+            Server Folder Upload (Advanced)
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="bg-red-50 border border-red-200 rounded p-3 mb-4">
+            <p className="text-sm text-red-800">
+              <strong>⚠️ Server-Side Only:</strong> This requires a folder path on the Render server, not your local machine. 
+              For local files, use <strong>Bulk File Upload</strong> above instead.
+            </p>
+          </div>
+
           <p className="text-sm text-gray-600 mb-4">
-            Upload an entire folder of legal documents. The system will:
+            If you have files uploaded to the server, this will:
           </p>
           <ul className="list-disc list-inside text-sm text-gray-600 mb-4 space-y-1">
             <li>Recursively scan all subfolders for PDF/DOCX files</li>
@@ -628,28 +604,28 @@ export const PineconeTestPage = () => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Folder Path (e.g., D:\Legal-Documents\Kenya-Laws)
+                Server Folder Path (e.g., /app/storage/legal-materials)
               </label>
               <input
                 type="text"
                 value={folderPath}
                 onChange={(e) => setFolderPath(e.target.value)}
-                placeholder="D:\COM 14\LawPro\Lexwise Assets\Judgements"
+                placeholder="/app/storage/legal-materials"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             <div className="bg-amber-50 p-3 rounded border border-amber-200">
               <p className="text-sm text-amber-800">
-                <strong>Note:</strong> This will process ALL PDF/DOCX files in the folder and subfolders. 
-                Large folders may take several minutes to process.
+                <strong>Note:</strong> This only works for folders that exist on the Render server. 
+                Use "Bulk File Upload" to upload files from your computer.
               </p>
             </div>
 
             <Button 
               onClick={handleFolderUpload} 
               disabled={!folderPath.trim() || folderUploading}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-purple-600 hover:bg-purple-700"
             >
               {folderUploading ? (
                 <>
@@ -659,7 +635,7 @@ export const PineconeTestPage = () => {
               ) : (
                 <>
                   <Upload className="w-4 h-4 mr-2" />
-                  Upload Folder
+                  Upload Server Folder
                 </>
               )}
             </Button>
@@ -746,8 +722,9 @@ export const PineconeTestPage = () => {
         <ul className="list-disc list-inside text-sm space-y-1">
           <li><strong>Connection Test:</strong> Pinecone API key, environment, index creation, embedding dimension</li>
           <li><strong>Text Upload:</strong> Document chunking, embedding generation, vector storage, database records</li>
-          <li><strong>File Upload:</strong> PDF/DOCX extraction, complete ingestion pipeline</li>
-          <li><strong>Folder Upload:</strong> Recursive scanning, metadata inference, bulk processing, folder structure preservation</li>
+          <li><strong>Single File Upload:</strong> PDF/DOCX extraction, complete ingestion pipeline</li>
+          <li><strong>Bulk File Upload:</strong> Multiple file processing, error handling per file</li>
+          <li><strong>Server Folder Upload:</strong> Recursive scanning, metadata inference, bulk processing, folder structure preservation</li>
         </ul>
         
         <div className="mt-4 p-3 bg-white rounded border border-blue-200">
