@@ -130,6 +130,128 @@ export const uploadLegalDocument = async (req: Request, res: Response) => {
 };
 
 /**
+ * Upload and ingest multiple legal documents (bulk upload)
+ * POST /api/ai/documents/bulk-upload
+ */
+export const uploadBulkLegalDocuments = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return res.status(400).json({ success: false, message: 'No files uploaded' });
+    }
+
+    logger.info(`[AI] Bulk upload started: ${files.length} files`);
+
+    const {
+      documentType = 'LEGISLATION',
+      category = 'General'
+    } = req.body;
+
+    const results = {
+      successful: [] as Array<{ filename: string; documentId: string; chunks: number; vectors: number }>,
+      failed: [] as Array<{ filename: string; error: string }>
+    };
+
+    // Process each file
+    for (const file of files) {
+      try {
+        // Extract title from filename (remove extension)
+        const title = file.originalname.replace(/\.[^/.]+$/, '');
+
+        // Detect file type from extension
+        const fileExtension = file.originalname.split('.').pop()?.toLowerCase();
+        let fileType: 'pdf' | 'docx';
+        
+        if (fileExtension === 'pdf') {
+          fileType = 'pdf';
+        } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+          fileType = 'docx';
+        } else {
+          results.failed.push({
+            filename: file.originalname,
+            error: 'Unsupported file type. Only PDF and DOCX files are supported.'
+          });
+          continue;
+        }
+
+        logger.info(`[AI] Processing: ${file.originalname}`);
+
+        // Ingest the document (extract text, chunk, embed, store in Pinecone)
+        const ingestionResult = await documentIngestionService.ingestDocumentFile(
+          file.path,
+          fileType,
+          {
+            title,
+            documentType,
+            category,
+            uploadedBy: userId
+          }
+        );
+
+        // Update document with file metadata
+        await prisma.legalDocument.update({
+          where: { id: ingestionResult.documentId },
+          data: {
+            filePath: file.path,
+            fileName: file.originalname,
+            fileSize: file.size,
+            chunksCount: ingestionResult.chunksProcessed,
+            vectorsCount: ingestionResult.vectorsCreated
+          }
+        });
+
+        results.successful.push({
+          filename: file.originalname,
+          documentId: ingestionResult.documentId,
+          chunks: ingestionResult.chunksProcessed,
+          vectors: ingestionResult.vectorsCreated
+        });
+
+        logger.info(`[AI] ✅ Processed: ${file.originalname}`);
+      } catch (error: any) {
+        logger.error(`[AI] ❌ Failed to process ${file.originalname}:`, error);
+        results.failed.push({
+          filename: file.originalname,
+          error: error.message || 'Unknown error'
+        });
+      }
+    }
+
+    const totalChunks = results.successful.reduce((sum, r) => sum + r.chunks, 0);
+    const totalVectors = results.successful.reduce((sum, r) => sum + r.vectors, 0);
+
+    logger.info(`[AI] Bulk upload completed: ${results.successful.length}/${files.length} successful`);
+
+    return res.json({
+      success: true,
+      message: `Bulk upload completed: ${results.successful.length}/${files.length} files processed`,
+      data: {
+        summary: {
+          total: files.length,
+          successful: results.successful.length,
+          failed: results.failed.length,
+          totalChunks,
+          totalVectors
+        },
+        details: results
+      }
+    });
+  } catch (error: any) {
+    logger.error('[AI] Error in bulk upload:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Bulk upload failed',
+      error: error.message
+    });
+  }
+};
+
+/**
  * Get all indexed documents
  * GET /api/ai/documents
  */

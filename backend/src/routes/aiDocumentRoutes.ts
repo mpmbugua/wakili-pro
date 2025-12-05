@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   uploadLegalDocument,
+  uploadBulkLegalDocuments,
   getIndexedDocuments,
   getIngestionStats,
   deleteLegalDocument,
@@ -16,10 +17,17 @@ router.use(authenticateToken);
 
 /**
  * @route   POST /api/ai/documents/upload
- * @desc    Upload and ingest legal document for AI training
+ * @desc    Upload and ingest single legal document for AI training
  * @access  Admin only
  */
 router.post('/upload', authorizeRoles('ADMIN', 'SUPER_ADMIN'), upload.single('file'), uploadLegalDocument);
+
+/**
+ * @route   POST /api/ai/documents/bulk-upload
+ * @desc    Upload and ingest multiple legal documents for AI training
+ * @access  Admin only
+ */
+router.post('/bulk-upload', authorizeRoles('ADMIN', 'SUPER_ADMIN'), upload.array('files', 50), uploadBulkLegalDocuments);
 
 /**
  * @route   GET /api/ai/documents
