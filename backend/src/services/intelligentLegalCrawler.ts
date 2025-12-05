@@ -95,19 +95,30 @@ export class IntelligentLegalCrawler {
    */
   private isLegalDocument(url: string): boolean {
     const lowerUrl = url.toLowerCase();
-    return lowerUrl.endsWith('.pdf') || 
-           lowerUrl.endsWith('.docx') ||
-           lowerUrl.endsWith('.doc') ||
-           lowerUrl.includes('.pdf?') ||
-           lowerUrl.includes('.docx?') ||
-           lowerUrl.includes('.doc?') ||
-           lowerUrl.includes('/wp-content/uploads/') && (lowerUrl.includes('.pdf') || lowerUrl.includes('.docx')) ||
-           // Kenya Law patterns - ONLY actual file paths
-           lowerUrl.includes('kenyalaw.org/kl/fileadmin/') || // Direct PDF downloads
-           lowerUrl.includes('kenyalaw.org/caselaw/cases/') || // Case law PDFs
-           // Judiciary patterns
-           lowerUrl.includes('judiciary.go.ke/download/') ||
-           lowerUrl.includes('judiciary.go.ke/wp-content/uploads/');
+    
+    // STRICT: Only accept actual file extensions
+    const hasFileExtension = 
+      lowerUrl.endsWith('.pdf') || 
+      lowerUrl.endsWith('.docx') ||
+      lowerUrl.endsWith('.doc') ||
+      lowerUrl.includes('.pdf?') ||
+      lowerUrl.includes('.pdf#') ||
+      lowerUrl.includes('.docx?') ||
+      lowerUrl.includes('.doc?');
+    
+    if (!hasFileExtension) {
+      return false; // Not a file, just a page
+    }
+    
+    // Additional patterns for file downloads
+    const isFileDownload = 
+      lowerUrl.includes('/wp-content/uploads/') ||
+      lowerUrl.includes('/fileadmin/') ||
+      lowerUrl.includes('/download/') ||
+      lowerUrl.includes('judiciary.go.ke/download/') ||
+      lowerUrl.includes('judiciary.go.ke/wp-content/uploads/');
+    
+    return hasFileExtension || isFileDownload;
   }
 
   /**
