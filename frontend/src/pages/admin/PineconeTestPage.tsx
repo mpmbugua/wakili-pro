@@ -805,6 +805,38 @@ export const PineconeTestPage = () => {
               )}
             </Button>
 
+            {/* Progress indicator while crawling */}
+            {crawling && (
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
+                <div className="flex items-center gap-3 mb-3">
+                  <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                  <div>
+                    <div className="font-medium text-blue-900">Crawler Running...</div>
+                    <div className="text-sm text-blue-700">Please wait while the crawler discovers and processes documents</div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 text-sm text-blue-700">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                    <span>Crawling Kenya Law fileadmin directories...</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                    <span>Discovering PDF documents...</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                    <span>Processing and ingesting files...</span>
+                  </div>
+                </div>
+
+                <div className="mt-3 text-xs text-blue-600">
+                  ⏱️ Estimated time: 5-15 minutes • Processing up to 50 documents
+                </div>
+              </div>
+            )}
+
             {crawlerResult && (
               <Alert className={`${crawlerResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                 <div className="flex items-start gap-2">
