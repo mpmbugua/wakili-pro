@@ -119,7 +119,8 @@ export const PineconeTestPage = () => {
 
     try {
       const response = await axiosInstance.post('/ai/documents/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 300000 // 5 minutes timeout for AI processing
       });
       setUploadResult({
         success: true,
@@ -160,7 +161,8 @@ export const PineconeTestPage = () => {
 
     try {
       const response = await axiosInstance.post('/ai/documents/bulk-upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 300000 // 5 minutes timeout for bulk uploads (processing multiple files + AI embeddings)
       });
       setBulkUploadResult({
         success: true,
@@ -201,6 +203,8 @@ export const PineconeTestPage = () => {
     try {
       const response = await axiosInstance.post('/ai/documents/folder-upload', {
         folderPath: folderPath.trim()
+      }, {
+        timeout: 600000 // 10 minutes timeout for folder uploads (can process many files)
       });
       setFolderUploadResult({
         success: true,
