@@ -33,12 +33,15 @@ export class IntelligentLegalCrawler {
   constructor(config?: Partial<CrawlConfig>) {
     this.config = {
       seedUrls: [
-        // Kenya Law Reports - Follow detail pages
+        // NEW Kenya Law site - PRIORITIZE THIS
         'https://new.kenyalaw.org/judgments/',
-        'https://kenyalaw.org/kl/index.php?id=398', // Case law database
-        'https://kenyalaw.org/kl/index.php?id=409', // Acts
-        'https://kenyalaw.org/kl/index.php?id=6515', // Constitution
-        // Judiciary - More likely to have direct PDFs
+        'https://new.kenyalaw.org/judgments/supreme-court/',
+        'https://new.kenyalaw.org/judgments/court-of-appeal/',
+        'https://new.kenyalaw.org/judgments/high-court/',
+        'https://new.kenyalaw.org/judgments/employment-and-labour-relations-court/',
+        'https://new.kenyalaw.org/akn/ke/act/',
+        'https://new.kenyalaw.org/akn/ke/constitution/',
+        // Judiciary - Direct PDF downloads
         'https://judiciary.go.ke/judgments/',
         'https://judiciary.go.ke/download-category/judgments/',
         'https://judiciary.go.ke/download-category/supreme-court/',
@@ -74,8 +77,18 @@ export class IntelligentLegalCrawler {
   private isAllowedDomain(url: string): boolean {
     try {
       const urlObj = new URL(url);
+      const hostname = urlObj.hostname;
+      const path = urlObj.pathname + urlObj.search;
+      
+      // Skip old Kenya Law navigation pages (index.php with just id parameter)
+      if (hostname.includes('kenyalaw.org') && !hostname.includes('new.kenyalaw.org')) {
+        if (path.includes('index.php?id=') && !path.includes('download') && !path.includes('fileadmin')) {
+          return false; // Skip old site navigation pages
+        }
+      }
+      
       return this.config.allowedDomains.some(domain => 
-        urlObj.hostname.includes(domain)
+        hostname.includes(domain)
       );
     } catch {
       return false;
@@ -94,7 +107,10 @@ export class IntelligentLegalCrawler {
            lowerUrl.includes('.docx?') ||
            lowerUrl.includes('.doc?') ||
            lowerUrl.includes('/wp-content/uploads/') && (lowerUrl.includes('.pdf') || lowerUrl.includes('.docx')) ||
-           // Kenya Law specific patterns
+           // NEW Kenya Law patterns
+           lowerUrl.includes('new.kenyalaw.org/akn/') || // Legislation (Acts, Constitution)
+           lowerUrl.includes('new.kenyalaw.org/judgments/') || // Case law
+           // Old Kenya Law patterns (fallback)
            lowerUrl.includes('kenyalaw.org/caselaw/') ||
            lowerUrl.includes('kenyalaw.org/kl/fileadmin/') ||
            (lowerUrl.includes('kenyalaw.org') && lowerUrl.match(/\d{4}/)) || // Year patterns
