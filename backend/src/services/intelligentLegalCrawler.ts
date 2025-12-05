@@ -33,20 +33,18 @@ export class IntelligentLegalCrawler {
   constructor(config?: Partial<CrawlConfig>) {
     this.config = {
       seedUrls: [
-        // Judiciary - PRIORITIZE - Has direct PDF downloads
-        'https://judiciary.go.ke/download-category/judgments/',
-        'https://judiciary.go.ke/download-category/supreme-court/',
-        'https://judiciary.go.ke/download-category/court-of-appeal/',
-        'https://judiciary.go.ke/download-category/high-court/',
-        'https://judiciary.go.ke/download-category/employment-and-labour-relations-court/',
-        'https://judiciary.go.ke/download-category/environment-and-land-court/',
-        'https://judiciary.go.ke/download-category/industrial-court/',
-        // Old Kenya Law - Known to work
-        'https://kenyalaw.org/kl/index.php?id=398', // Case law - leads to PDFs
+        // Kenya Law fileadmin - Direct PDF storage (PROVEN TO WORK)
         'https://kenyalaw.org/kl/fileadmin/pdfdownloads/',
-        // Parliament
-        'http://www.parliament.go.ke/the-national-assembly/house-business/bills',
-        'http://www.parliament.go.ke/the-national-assembly/house-business/acts',
+        'https://kenyalaw.org/kl/fileadmin/pdfdownloads/Acts/',
+        'https://kenyalaw.org/kl/fileadmin/pdfdownloads/bills/',
+        'https://kenyalaw.org/kl/fileadmin/CommissionReports/',
+        // Kenya Law case law database
+        'https://kenyalaw.org/kl/index.php?id=398', // Case law database
+        'https://kenyalaw.org/kl/index.php?id=409', // Acts
+        'https://kenyalaw.org/kl/index.php?id=6515', // Constitution
+        // Try a few Judiciary main pages (avoid 404s)
+        'https://judiciary.go.ke/',
+        'https://judiciary.go.ke/judgments/',
         ...(config?.seedUrls || [])
       ],
       maxDepth: 10, // Follow links up to 10 levels deep (increased from 5 to reach deeply nested PDFs)
