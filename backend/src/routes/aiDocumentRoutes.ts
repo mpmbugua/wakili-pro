@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   uploadLegalDocument,
   uploadBulkLegalDocuments,
+  uploadFromFolder,
   getIndexedDocuments,
   getIngestionStats,
   deleteLegalDocument,
@@ -28,6 +29,13 @@ router.post('/upload', authorizeRoles('ADMIN', 'SUPER_ADMIN'), upload.single('fi
  * @access  Admin only
  */
 router.post('/bulk-upload', authorizeRoles('ADMIN', 'SUPER_ADMIN'), upload.array('files', 50), uploadBulkLegalDocuments);
+
+/**
+ * @route   POST /api/ai/documents/folder-upload
+ * @desc    Upload and ingest all documents from a folder (recursive)
+ * @access  Admin only
+ */
+router.post('/folder-upload', authorizeRoles('ADMIN', 'SUPER_ADMIN'), uploadFromFolder);
 
 /**
  * @route   GET /api/ai/documents

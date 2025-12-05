@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 import { prisma } from '../lib/prisma';
 import { logger } from '../utils/logger';
 import { documentIngestionService } from '../services/ai/documentIngestionService';
@@ -34,6 +35,133 @@ export const upload = multer({
     }
   }
 });
+
+/**
+ * Infer document type from folder/file name
+ */
+function inferDocumentType(pathSegment: string): string {
+  const normalized = pathSegment.toLowerCase();
+  
+  if (normalized.includes('constitution')) return 'CONSTITUTION';
+  if (normalized.includes('act') || normalized.includes('acts')) return 'ACT';
+  if (normalized.includes('regulation') || normalized.includes('regulations')) return 'REGULATION';
+  if (normalized.includes('case') || normalized.includes('judgement') || normalized.includes('judgment')) return 'CASE_LAW';
+  if (normalized.includes('procedure')) return 'PROCEDURE';
+  if (normalized.includes('form')) return 'FORM';
+  if (normalized.includes('guideline')) return 'GUIDELINE';
+  if (normalized.includes('treaty') || normalized.includes('treaties')) return 'TREATY';
+  
+  return 'ACT'; // Default fallback
+}
+
+/**
+ * Infer category from folder structure
+ */
+function inferCategory(relativePath: string): string {
+  const parts = relativePath.split(path.sep);
+  
+  // Common legal categories
+  const categoryMap: Record<string, string> = {
+    'constitutional': 'Constitutional Law',
+    'criminal': 'Criminal Law',
+    'civil': 'Civil Law',
+    'commercial': 'Commercial Law',
+    'property': 'Property Law',
+    'land': 'Property Law',
+    'family': 'Family Law',
+    'employment': 'Employment Law',
+    'labour': 'Employment Law',
+    'labor': 'Employment Law',
+    'tax': 'Tax Law',
+    'taxation': 'Tax Law',
+    'corporate': 'Corporate Law',
+    'company': 'Corporate Law',
+    'banking': 'Banking & Finance',
+    'finance': 'Banking & Finance',
+    'insurance': 'Insurance Law',
+    'intellectual': 'Intellectual Property',
+    'ip': 'Intellectual Property',
+    'environmental': 'Environmental Law',
+    'health': 'Health Law',
+    'medical': 'Health Law',
+    'education': 'Education Law',
+    'immigration': 'Immigration Law',
+    'cyber': 'Cyber Law',
+    'technology': 'Technology Law',
+    'energy': 'Energy Law',
+    'mining': 'Mining Law',
+    'transport': 'Transport Law',
+    'aviation': 'Aviation Law',
+    'maritime': 'Maritime Law',
+    'agriculture': 'Agriculture Law'
+  };
+  
+  // Check each path segment for category keywords
+  for (const part of parts) {
+    const normalized = part.toLowerCase();
+    for (const [keyword, category] of Object.entries(categoryMap)) {
+      if (normalized.includes(keyword)) {
+        return category;
+      }
+    }
+  }
+  
+  // Use first folder as category if no match
+  return parts[0] || 'General';
+}
+
+/**
+ * Extract metadata from filename (e.g., "Land_Act_2012.pdf" -> { effectiveDate: 2012 })
+ */
+function extractMetadataFromFilename(filename: string): { citation?: string; effectiveDate?: Date } {
+  const metadata: { citation?: string; effectiveDate?: Date } = {};
+  
+  // Extract year from filename (e.g., 2012, 2010)
+  const yearMatch = filename.match(/(19|20)\d{2}/);
+  if (yearMatch) {
+    const year = parseInt(yearMatch[0]);
+    metadata.effectiveDate = new Date(`${year}-01-01`);
+  }
+  
+  // Extract citation if present (e.g., [2010] eKLR)
+  const citationMatch = filename.match(/\[\d{4}\]\s*\w+/);
+  if (citationMatch) {
+    metadata.citation = citationMatch[0];
+  }
+  
+  return metadata;
+}
+
+/**
+ * Recursively find all PDF/DOCX files in a directory
+ */
+async function findDocumentsInFolder(folderPath: string, basePath: string = folderPath): Promise<Array<{ filePath: string; relativePath: string }>> {
+  const results: Array<{ filePath: string; relativePath: string }> = [];
+  
+  try {
+    const entries = await fsPromises.readdir(folderPath, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(folderPath, entry.name);
+      
+      if (entry.isDirectory()) {
+        // Recursively search subdirectories
+        const subResults = await findDocumentsInFolder(fullPath, basePath);
+        results.push(...subResults);
+      } else if (entry.isFile()) {
+        const ext = path.extname(entry.name).toLowerCase();
+        if (['.pdf', '.docx', '.doc'].includes(ext)) {
+          const relativePath = path.relative(basePath, fullPath);
+          results.push({ filePath: fullPath, relativePath });
+        }
+      }
+    }
+  } catch (error: any) {
+    logger.error(`[AI] Error reading folder ${folderPath}:`, error);
+  }
+  
+  return results;
+}
 
 /**
  * Upload and ingest legal document
@@ -124,6 +252,143 @@ export const uploadLegalDocument = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to upload document',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Upload and ingest documents from a folder (folder-based upload)
+ * POST /api/ai/documents/folder-upload
+ */
+export const uploadFromFolder = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const { folderPath } = req.body;
+    if (!folderPath) {
+      return res.status(400).json({ success: false, message: 'Folder path is required' });
+    }
+
+    if (!fs.existsSync(folderPath)) {
+      return res.status(400).json({ success: false, message: 'Folder does not exist' });
+    }
+
+    logger.info(`[AI] Folder upload started: ${folderPath}`);
+
+    // Recursively find all documents
+    const documents = await findDocumentsInFolder(folderPath);
+    logger.info(`[AI] Found ${documents.length} documents in folder`);
+
+    const results = {
+      successful: [] as Array<{ filename: string; documentId: string; chunks: number; vectors: number; category: string; documentType: string }>,
+      failed: [] as Array<{ filename: string; error: string }>
+    };
+
+    // Process each document
+    for (const doc of documents) {
+      try {
+        const filename = path.basename(doc.filePath);
+        const title = filename.replace(/\.[^/.]+$/, ''); // Remove extension
+        
+        // Infer metadata from folder structure and filename
+        const category = inferCategory(doc.relativePath);
+        const documentType = inferDocumentType(doc.relativePath);
+        const { citation, effectiveDate } = extractMetadataFromFilename(filename);
+        
+        // Detect file type
+        const fileExtension = filename.split('.').pop()?.toLowerCase();
+        let fileType: 'pdf' | 'docx';
+        
+        if (fileExtension === 'pdf') {
+          fileType = 'pdf';
+        } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+          fileType = 'docx';
+        } else {
+          results.failed.push({
+            filename,
+            error: 'Unsupported file type'
+          });
+          continue;
+        }
+
+        logger.info(`[AI] Processing: ${doc.relativePath} [${documentType} - ${category}]`);
+
+        // Ingest the document
+        const ingestionResult = await documentIngestionService.ingestDocumentFile(
+          doc.filePath,
+          fileType,
+          {
+            title,
+            documentType,
+            category,
+            citation,
+            effectiveDate,
+            uploadedBy: userId
+          }
+        );
+
+        // Get file stats
+        const stats = await fsPromises.stat(doc.filePath);
+
+        // Update document with file metadata
+        await prisma.legalDocument.update({
+          where: { id: ingestionResult.documentId },
+          data: {
+            filePath: doc.filePath,
+            fileName: filename,
+            fileSize: stats.size,
+            chunksCount: ingestionResult.chunksProcessed,
+            vectorsCount: ingestionResult.vectorsCreated
+          }
+        });
+
+        results.successful.push({
+          filename,
+          documentId: ingestionResult.documentId,
+          chunks: ingestionResult.chunksProcessed,
+          vectors: ingestionResult.vectorsCreated,
+          category,
+          documentType
+        });
+
+        logger.info(`[AI] ✅ Processed: ${filename}`);
+      } catch (error: any) {
+        logger.error(`[AI] ❌ Failed to process ${doc.relativePath}:`, error);
+        results.failed.push({
+          filename: path.basename(doc.filePath),
+          error: error.message || 'Unknown error'
+        });
+      }
+    }
+
+    const totalChunks = results.successful.reduce((sum, r) => sum + r.chunks, 0);
+    const totalVectors = results.successful.reduce((sum, r) => sum + r.vectors, 0);
+
+    logger.info(`[AI] Folder upload completed: ${results.successful.length}/${documents.length} successful`);
+
+    return res.json({
+      success: true,
+      message: `Folder upload completed: ${results.successful.length}/${documents.length} files processed`,
+      data: {
+        summary: {
+          total: documents.length,
+          successful: results.successful.length,
+          failed: results.failed.length,
+          totalChunks,
+          totalVectors
+        },
+        details: results
+      }
+    });
+  } catch (error: any) {
+    logger.error('[AI] Error in folder upload:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Folder upload failed',
       error: error.message
     });
   }
