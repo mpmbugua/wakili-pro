@@ -42,6 +42,10 @@ export class IntelligentLegalCrawler {
         'https://kenyalaw.org/kl/index.php?id=398', // Case law database
         'https://kenyalaw.org/kl/index.php?id=409', // Acts
         'https://kenyalaw.org/kl/index.php?id=6515', // Constitution
+        // Parliament downloads
+        'https://www.parliament.go.ke/downloads',
+        'https://www.parliament.go.ke/the-national-assembly/house-business/bills',
+        'https://www.parliament.go.ke/the-national-assembly/house-business/acts',
         // Try a few Judiciary main pages (avoid 404s)
         'https://judiciary.go.ke/',
         'https://judiciary.go.ke/judgments/',
