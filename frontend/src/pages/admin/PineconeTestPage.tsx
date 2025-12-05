@@ -58,9 +58,12 @@ const AlertDescription = ({ children }: { children: React.ReactNode }) => (
 export const PineconeTestPage = () => {
   const [testing, setTesting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [folderUploading, setFolderUploading] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [uploadResult, setUploadResult] = useState<TestResult | null>(null);
+  const [folderUploadResult, setFolderUploadResult] = useState<TestResult | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [folderPath, setFolderPath] = useState('');
 
   const runConnectionTest = async () => {
     setTesting(true);
@@ -128,6 +131,40 @@ export const PineconeTestPage = () => {
       });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleFolderUpload = async () => {
+    if (!folderPath.trim()) {
+      setFolderUploadResult({
+        success: false,
+        message: 'Folder path is required',
+        error: 'Please enter a valid folder path'
+      });
+      return;
+    }
+
+    setFolderUploading(true);
+    setFolderUploadResult(null);
+
+    try {
+      const response = await axiosInstance.post('/ai/documents/folder-upload', {
+        folderPath: folderPath.trim()
+      });
+      setFolderUploadResult({
+        success: true,
+        message: response.data.message || 'Folder uploaded successfully',
+        results: response.data.data
+      });
+      setFolderPath('');
+    } catch (error: any) {
+      setFolderUploadResult({
+        success: false,
+        message: 'Folder upload failed',
+        error: error.response?.data?.message || error.message
+      });
+    } finally {
+      setFolderUploading(false);
     }
   };
 
@@ -296,7 +333,7 @@ export const PineconeTestPage = () => {
       </Card>
 
       {/* Manual File Upload */}
-      <Card>
+      <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="w-5 h-5" />
@@ -375,13 +412,164 @@ export const PineconeTestPage = () => {
         </CardContent>
       </Card>
 
+      {/* Folder Upload */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="w-5 h-5" />
+            Folder Upload (Bulk Ingestion)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-600 mb-4">
+            Upload an entire folder of legal documents. The system will:
+          </p>
+          <ul className="list-disc list-inside text-sm text-gray-600 mb-4 space-y-1">
+            <li>Recursively scan all subfolders for PDF/DOCX files</li>
+            <li>Auto-detect document type from folder names (Acts, Regulations, Cases, etc.)</li>
+            <li>Infer category from folder structure (Constitutional Law, Property Law, etc.)</li>
+            <li>Extract year from filenames for effective date</li>
+            <li>Preserve folder hierarchy as metadata</li>
+          </ul>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Folder Path (e.g., D:\Legal-Documents\Kenya-Laws)
+              </label>
+              <input
+                type="text"
+                value={folderPath}
+                onChange={(e) => setFolderPath(e.target.value)}
+                placeholder="D:\COM 14\LawPro\Lexwise Assets\Judgements"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div className="bg-amber-50 p-3 rounded border border-amber-200">
+              <p className="text-sm text-amber-800">
+                <strong>Note:</strong> This will process ALL PDF/DOCX files in the folder and subfolders. 
+                Large folders may take several minutes to process.
+              </p>
+            </div>
+
+            <Button 
+              onClick={handleFolderUpload} 
+              disabled={!folderPath.trim() || folderUploading}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {folderUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing Folder...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Folder
+                </>
+              )}
+            </Button>
+          </div>
+
+          {folderUploadResult && (
+            <Alert className={`mt-4 ${folderUploadResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <div className="flex items-start gap-2">
+                {folderUploadResult.success ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                )}
+                <div className="flex-1">
+                  <AlertDescription>
+                    <strong>{folderUploadResult.message}</strong>
+                    
+                    {folderUploadResult.results && (
+                      <div className="mt-3 space-y-3">
+                        {/* Summary */}
+                        {folderUploadResult.results.summary && (
+                          <div className="bg-white p-4 rounded border">
+                            <h4 className="font-semibold mb-2">Summary</h4>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div>Total Files: <strong>{folderUploadResult.results.summary.total}</strong></div>
+                              <div className="text-green-600">Successful: <strong>{folderUploadResult.results.summary.successful}</strong></div>
+                              <div className="text-red-600">Failed: <strong>{folderUploadResult.results.summary.failed}</strong></div>
+                              <div>Total Chunks: <strong>{folderUploadResult.results.summary.totalChunks}</strong></div>
+                              <div className="col-span-2">Total Vectors: <strong>{folderUploadResult.results.summary.totalVectors}</strong></div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Successful Files */}
+                        {folderUploadResult.results.details?.successful && folderUploadResult.results.details.successful.length > 0 && (
+                          <div className="bg-white p-4 rounded border max-h-64 overflow-y-auto">
+                            <h4 className="font-semibold mb-2 text-green-600">✅ Successfully Processed</h4>
+                            <div className="space-y-2">
+                              {folderUploadResult.results.details.successful.map((file: any, idx: number) => (
+                                <div key={idx} className="text-xs border-b pb-2">
+                                  <div className="font-medium">{file.filename}</div>
+                                  <div className="text-gray-600">
+                                    Type: {file.documentType} | Category: {file.category} | 
+                                    Chunks: {file.chunks} | Vectors: {file.vectors}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Failed Files */}
+                        {folderUploadResult.results.details?.failed && folderUploadResult.results.details.failed.length > 0 && (
+                          <div className="bg-red-50 p-4 rounded border border-red-200 max-h-64 overflow-y-auto">
+                            <h4 className="font-semibold mb-2 text-red-600">❌ Failed Files</h4>
+                            <div className="space-y-2">
+                              {folderUploadResult.results.details.failed.map((file: any, idx: number) => (
+                                <div key={idx} className="text-xs border-b border-red-200 pb-2">
+                                  <div className="font-medium">{file.filename}</div>
+                                  <div className="text-red-700">Error: {file.error}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {folderUploadResult.error && (
+                      <div className="mt-2 text-sm text-red-700">
+                        <strong>Error:</strong> {folderUploadResult.error}
+                      </div>
+                    )}
+                  </AlertDescription>
+                </div>
+              </div>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="mt-6 p-4 bg-blue-50 rounded border border-blue-200">
         <h3 className="font-semibold mb-2">What These Tests Check:</h3>
         <ul className="list-disc list-inside text-sm space-y-1">
           <li><strong>Connection Test:</strong> Pinecone API key, environment, index creation, embedding dimension</li>
           <li><strong>Text Upload:</strong> Document chunking, embedding generation, vector storage, database records</li>
           <li><strong>File Upload:</strong> PDF/DOCX extraction, complete ingestion pipeline</li>
+          <li><strong>Folder Upload:</strong> Recursive scanning, metadata inference, bulk processing, folder structure preservation</li>
         </ul>
+        
+        <div className="mt-4 p-3 bg-white rounded border border-blue-200">
+          <h4 className="font-semibold text-sm mb-2">Folder Structure Example:</h4>
+          <pre className="text-xs text-gray-600">
+{`D:\\Legal-Documents\\
+├── Constitutional-Law\\
+│   ├── Constitution_2010.pdf → Type: CONSTITUTION, Category: Constitutional Law
+│   └── Devolution_Act_2012.pdf → Type: ACT, Category: Constitutional Law
+├── Property-Law\\
+│   └── Land_Act_2012.pdf → Type: ACT, Category: Property Law, Date: 2012
+└── Criminal-Law\\
+    └── Penal_Code.pdf → Type: ACT, Category: Criminal Law`}
+          </pre>
+        </div>
       </div>
     </div>
   );
