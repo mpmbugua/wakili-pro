@@ -502,8 +502,26 @@ export const PineconeTestPage = () => {
                 <strong>Note:</strong> This only works for folders that exist on the Render server. 
                 Use "Bulk File Upload" to upload files from your computer.
               </p>
-            </div>t>
-          )}
+            </div>
+
+            <Button 
+              onClick={handleFolderUpload} 
+              disabled={!folderPath.trim() || folderUploading}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {folderUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing Folder...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Server Folder
+                </>
+              )}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
