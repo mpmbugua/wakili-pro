@@ -145,6 +145,79 @@ export class IntelligentLegalCrawler {
   }
 
   /**
+   * Check if title/URL is actually a legal document (not navigation/junk)
+   */
+  private isValidLegalDocument(title: string, url: string): boolean {
+    const titleLower = title.toLowerCase();
+    const urlLower = url.toLowerCase();
+
+    // Reject navigation/website pages
+    const junkKeywords = [
+      'site map', 'sitemap', 'contact us', 'contact', 'about us', 'about',
+      'careers', 'jobs', 'vacancies', 'product catalogue', 'products',
+      'privacy policy', 'terms of service', 'terms and conditions',
+      'cookie policy', 'disclaimer', 'home page', 'home', 'homepage',
+      'navigation', 'menu', 'footer', 'header', 'search', 'search results',
+      'login', 'sign in', 'register', 'sign up', 'subscribe',
+      'newsletter', 'rss feed', 'feedback', 'help', 'faq',
+      'accessibility', 'press release', 'news', 'blog', 'events',
+      'downloads', 'resources', 'links', 'related links',
+      'more information', 'click here', 'read more', 'view all',
+      'back to top', 'print', 'email', 'share', 'social media'
+    ];
+
+    for (const keyword of junkKeywords) {
+      if (titleLower.includes(keyword) && titleLower.length < 50) {
+        return false; // Short titles matching junk keywords are likely navigation
+      }
+    }
+
+    // Reject if title is too short (likely navigation link)
+    if (title.length < 15) {
+      return false;
+    }
+
+    // Reject generic filenames that aren't documents
+    const genericNames = [
+      'untitled', 'document', 'file', 'download', 'attachment',
+      'temp', 'test', 'sample', 'example', 'draft'
+    ];
+
+    if (genericNames.some(name => titleLower === name || titleLower === name + '.pdf')) {
+      return false;
+    }
+
+    // Accept if it has legal document indicators
+    const legalIndicators = [
+      'v.', 'vs.', 'versus', // Case names
+      'act', 'bill', 'law', 'statute', 'regulation', // Legislation
+      'judgment', 'ruling', 'order', 'decree', // Court documents
+      'petition', 'appeal', 'application', 'suit', // Case types
+      'constitution', 'amendment', 'ordinance', // Constitutional docs
+      '[20', '(20', '19', // Years in citations
+      'klr', 'eklr', 'ksc', 'keca', 'kehc', // Kenya Law Reports
+      'civil', 'criminal', 'commercial', 'election', // Case categories
+      'supreme court', 'court of appeal', 'high court' // Court types
+    ];
+
+    const hasLegalIndicator = legalIndicators.some(indicator => 
+      titleLower.includes(indicator) || urlLower.includes(indicator)
+    );
+
+    if (hasLegalIndicator) {
+      return true;
+    }
+
+    // If it's a PDF from a legal domain and reasonably long title, probably valid
+    if (urlLower.endsWith('.pdf') && title.length >= 20) {
+      return true;
+    }
+
+    // Default reject if no clear legal indicators
+    return false;
+  }
+
+  /**
    * Extract title from link or surrounding context
    */
   private extractTitle($: cheerio.CheerioAPI, $link: cheerio.Cheerio<cheerio.Element>): string {
@@ -231,6 +304,14 @@ export class IntelligentLegalCrawler {
             if (urlLower.includes('.docx') || urlLower.includes('.doc')) docxCount++;
             
             const title = this.extractTitle($, $(el));
+            
+            // Validate it's actually a legal document (not navigation/junk)
+            if (!this.isValidLegalDocument(title, fullUrl)) {
+              logger.info(`[Crawler] ⏭️  Skipping junk: "${title.substring(0, 60)}"`);
+              skippedCount++;
+              return;
+            }
+            
             const { type, category } = this.categorizeDocument(fullUrl, url);
 
             this.discoveredDocuments.push({
