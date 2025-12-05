@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import axiosInstance from '../../services/api';
 import { CheckCircle2, XCircle, AlertTriangle, Loader2, Upload, Database } from 'lucide-react';
 
@@ -67,6 +67,7 @@ export const PineconeTestPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [folderPath, setFolderPath] = useState('');
+  const bulkFileInputRef = useRef<HTMLInputElement>(null);
 
   const runConnectionTest = async () => {
     setTesting(true);
@@ -167,6 +168,10 @@ export const PineconeTestPage = () => {
         results: response.data.data
       });
       setSelectedFiles(null);
+      // Reset the file input
+      if (bulkFileInputRef.current) {
+        bulkFileInputRef.current.value = '';
+      }
     } catch (error: any) {
       setBulkUploadResult({
         success: false,
@@ -390,6 +395,7 @@ export const PineconeTestPage = () => {
 
           <div className="space-y-4">
             <input
+              ref={bulkFileInputRef}
               type="file"
               accept=".pdf,.docx,.doc"
               multiple
