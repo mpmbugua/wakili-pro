@@ -295,6 +295,10 @@ app.use('/api/admin/pinecone', pineconeTestRouter);
 import adminLawyerRouter from './routes/admin/lawyerAdminRoutes';
 app.use('/api/admin/lawyers', adminLawyerRouter);
 
+// Mount admin cleanup router
+import adminCleanupRouter from './routes/admin/cleanupRoutes';
+app.use('/api/admin/cleanup', adminCleanupRouter);
+
 // Mount AI assistant routes
 import aiRouter from './routes/ai';
 app.use('/api/ai', aiRouter);

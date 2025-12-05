@@ -60,10 +60,12 @@ export const PineconeTestPage = () => {
   const [uploading, setUploading] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
   const [folderUploading, setFolderUploading] = useState(false);
+  const [cleaning, setCleaning] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [uploadResult, setUploadResult] = useState<TestResult | null>(null);
   const [bulkUploadResult, setBulkUploadResult] = useState<TestResult | null>(null);
   const [folderUploadResult, setFolderUploadResult] = useState<TestResult | null>(null);
+  const [cleanupResult, setCleanupResult] = useState<TestResult | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [folderPath, setFolderPath] = useState('');
@@ -220,6 +222,34 @@ export const PineconeTestPage = () => {
       });
     } finally {
       setFolderUploading(false);
+    }
+  };
+
+  const handleCleanup = async () => {
+    if (!confirm('This will remove ALL duplicates, junk documents, and documents with 0 vectors. Continue?')) {
+      return;
+    }
+
+    setCleaning(true);
+    setCleanupResult(null);
+
+    try {
+      const response = await axiosInstance.delete('/admin/cleanup/all', {
+        timeout: 300000 // 5 minutes for cleanup
+      });
+      setCleanupResult({
+        success: true,
+        message: response.data.message || 'Cleanup completed successfully',
+        results: response.data.data
+      });
+    } catch (error: any) {
+      setCleanupResult({
+        success: false,
+        message: 'Cleanup failed',
+        error: error.response?.data?.message || error.message
+      });
+    } finally {
+      setCleaning(false);
     }
   };
 
@@ -693,6 +723,80 @@ export const PineconeTestPage = () => {
                     {folderUploadResult.error && (
                       <div className="mt-2 text-sm text-red-700">
                         <strong>Error:</strong> {folderUploadResult.error}
+                      </div>
+                    )}
+                  </AlertDescription>
+                </div>
+              </div>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Database Cleanup */}
+      <Card className="mb-6 border-red-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-700">
+            <XCircle className="w-5 h-5" />
+            Database Cleanup (Danger Zone)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-red-50 border border-red-200 rounded p-4 mb-4">
+            <p className="text-sm text-red-800 font-semibold mb-2">⚠️ Warning: This action cannot be undone!</p>
+            <p className="text-sm text-red-700">
+              This will remove:
+            </p>
+            <ul className="list-disc list-inside text-sm text-red-700 mt-2 space-y-1">
+              <li><strong>Duplicates:</strong> Keep only the best version (highest vectors, most recent)</li>
+              <li><strong>Junk documents:</strong> "Site Map", "Contact Us", "Careers", etc. (non-legal pages)</li>
+              <li><strong>Zero-vector documents:</strong> Documents that failed AI processing (0 vectors)</li>
+            </ul>
+          </div>
+
+          <Button 
+            onClick={handleCleanup} 
+            disabled={cleaning}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            {cleaning ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Cleaning Database...
+              </>
+            ) : (
+              <>
+                <XCircle className="w-4 h-4 mr-2" />
+                Clean Up Database
+              </>
+            )}
+          </Button>
+
+          {cleanupResult && (
+            <Alert className={`mt-4 ${cleanupResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <div className="flex items-start gap-2">
+                {cleanupResult.success ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                )}
+                <div className="flex-1">
+                  <AlertDescription>
+                    <strong>{cleanupResult.message}</strong>
+                    {cleanupResult.results && (
+                      <div className="mt-3 bg-white p-4 rounded border">
+                        <h4 className="font-semibold mb-2">Cleanup Summary</h4>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>Duplicates Removed: <strong className="text-red-600">{cleanupResult.results.duplicatesRemoved}</strong></div>
+                          <div>Junk Removed: <strong className="text-red-600">{cleanupResult.results.junkRemoved}</strong></div>
+                          <div className="col-span-2">Zero-Vector Removed: <strong className="text-red-600">{cleanupResult.results.zeroVectorRemoved}</strong></div>
+                          <div className="col-span-2 pt-2 border-t">Total Removed: <strong className="text-red-700 text-lg">{cleanupResult.results.totalRemoved}</strong></div>
+                        </div>
+                      </div>
+                    )}
+                    {cleanupResult.error && (
+                      <div className="mt-2 text-sm text-red-700">
+                        <strong>Error:</strong> {cleanupResult.error}
                       </div>
                     )}
                   </AlertDescription>
