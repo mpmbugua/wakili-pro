@@ -39,28 +39,25 @@ router.get('/status', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'),
 
 /**
  * POST /api/admin/crawler/trigger
- * Manually trigger an immediate crawl (runs in background)
+ * Manually trigger an immediate crawl
  */
 router.post('/trigger', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
   try {
     logger.info(`[Crawler API] Manual crawl triggered by user: ${req.user?.email}`);
 
-    // Run crawler in background (don't wait for completion)
-    crawlerScheduler.triggerManualCrawl()
-      .then(result => {
-        logger.info(`[Crawler API] Background crawl complete: Discovered ${result.discovered}, Ingested ${result.ingested}`);
-      })
-      .catch(error => {
-        logger.error('[Crawler API] Background crawl failed:', error);
-      });
+    // Run crawler and WAIT for completion
+    const result = await crawlerScheduler.triggerManualCrawl();
+    
+    logger.info(`[Crawler API] Crawl complete: Discovered ${result.discovered}, Ingested ${result.ingested}`);
 
-    // Respond immediately
+    // Respond with actual results
     res.json({
       success: true,
-      message: 'Crawler started in background. Check logs for progress. Results will appear in 5-10 minutes.',
+      message: `Crawler completed successfully. Discovered ${result.discovered} documents, ingested ${result.ingested}.`,
       data: {
-        status: 'running',
-        estimatedTime: '5-10 minutes for first results'
+        discovered: result.discovered,
+        ingested: result.ingested,
+        filtered: result.discovered - result.ingested // Rough estimate of junk filtered
       }
     });
   } catch (error) {
