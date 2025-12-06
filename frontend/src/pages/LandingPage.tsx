@@ -166,10 +166,10 @@ export const LandingPage: React.FC = () => {
                     <div className="bg-blue-50 p-2 rounded">
                       <FileText className="h-5 w-5 text-blue-600" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900">Explore Legal Guides</h3>
+                    <h3 className="text-base font-semibold text-slate-900">Legal Guides and Insights</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
-                    Free guides, articles, and information to help you understand Kenyan law.
+                    Expert articles and guides to help you understand Kenyan law.
                   </p>
                   <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
                     Browse resources <ArrowRight className="ml-1 h-3 w-3" />
