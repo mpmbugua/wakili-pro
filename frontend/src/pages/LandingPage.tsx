@@ -218,7 +218,7 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <Link 
                         to="/services" 
-                        className="block w-full text-center px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                       >
                         View Details
                       </Link>
@@ -295,7 +295,7 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <Link 
                         to="/marketplace" 
-                        className="block w-full text-center px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                       >
                         Purchase Now
                       </Link>
@@ -365,7 +365,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <Link 
                   to="/lawyers" 
-                  className="block w-full text-center px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                 >
                   View Profile
                 </Link>
