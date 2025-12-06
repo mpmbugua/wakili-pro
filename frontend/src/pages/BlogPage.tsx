@@ -327,7 +327,7 @@ export const BlogPage: React.FC = () => {
                   Book a Lawyer
                 </Link>
                 <Link 
-                  to="/documents"
+                  to="/marketplace"
                   className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded hover:bg-blue-200"
                 >
                   Get Documents
