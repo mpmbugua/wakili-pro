@@ -122,7 +122,7 @@ const faqs: FAQ[] = [
   {
     category: 'Service Requests',
     question: 'What is a service request?',
-    answer: 'Service requests are for comprehensive legal services like company registration, land conveyancing, divorce proceedings, etc. You describe your needs, pay KES 500, and receive up to 3 customized quotes from verified lawyers within 24-48 hours.'
+    answer: 'Service requests are for comprehensive legal services like company registration, land conveyancing, divorce proceedings, etc. You describe your needs, pay KES 500, and receive up to 3 customized quotes from verified lawyers within 12 hours.'
   },
   {
     category: 'Service Requests',

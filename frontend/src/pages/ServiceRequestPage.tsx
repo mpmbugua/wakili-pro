@@ -212,7 +212,7 @@ export const ServiceRequestPage: React.FC = () => {
       const createResponse = await axiosInstance.post('/service-requests', requestData);
 
       if (createResponse.data.success) {
-        alert(`Service request submitted!\n\nM-Pesa payment request for KES 500 commitment fee sent to ${phoneNumber}\n\nPlease complete the payment on your phone.\n\nYou will receive 3 quotes from qualified lawyers within 24-48 hours.`);
+        alert(`Service request submitted!\n\nM-Pesa payment request for KES 500 commitment fee sent to ${phoneNumber}\n\nPlease complete the payment on your phone.\n\nYou will receive 3 quotes from qualified lawyers within 12 hours.`);
         navigate('/dashboard');
       } else {
         throw new Error(createResponse.data.message || 'Failed to create service request');
@@ -343,7 +343,7 @@ export const ServiceRequestPage: React.FC = () => {
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">How It Works</h3>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-slate-700">
                   <li>Pay KES 500 commitment fee to submit your request</li>
-                  <li>Receive up to 3 quotes from qualified lawyers within 24-48 hours</li>
+                  <li>Receive up to 3 quotes from qualified lawyers within 12 hours</li>
                   <li>Select your preferred lawyer based on their quote and profile</li>
                   <li><strong>Pay 30% upfront</strong> of quoted amount</li>
                   <li>Lawyer proceeds with your case - <strong>remaining 70% balance</strong> payable as case progresses</li>
