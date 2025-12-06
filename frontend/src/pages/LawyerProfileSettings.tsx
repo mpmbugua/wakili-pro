@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, User, Save, Camera, X } from 'lucide-react';
-import { GlobalLayout } from '@/components/layout/GlobalLayout';
 import axiosInstance from '../lib/axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -194,20 +193,17 @@ export const LawyerProfileSettings: React.FC = () => {
 
   if (loading) {
     return (
-      <GlobalLayout>
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading profile...</p>
-          </div>
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading profile...</p>
         </div>
-      </GlobalLayout>
+      </div>
     );
   }
 
   return (
-    <GlobalLayout>
-      <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
           <p className="text-gray-600">Manage your professional profile and photo</p>
@@ -397,6 +393,6 @@ export const LawyerProfileSettings: React.FC = () => {
           </div>
         </div>
       </div>
-    </GlobalLayout>
+    </div>
   );
 };
