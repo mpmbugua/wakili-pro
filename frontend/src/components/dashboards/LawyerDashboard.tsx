@@ -862,10 +862,10 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
       {/* Performance Overview - All Services */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Wallet Balance Card */}
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">My Wallet</h3>
-            <Wallet className="h-5 w-5" />
+            <h3 className="text-lg font-semibold text-gray-900">My Wallet</h3>
+            <Wallet className="h-5 w-5 text-emerald-600" />
           </div>
           {walletBalance.loading ? (
             <div className="flex items-center justify-center py-4">
@@ -874,18 +874,18 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
           ) : (
             <div className="space-y-3">
               <div>
-                <p className="text-emerald-100 text-sm">Available Balance</p>
-                <p className="text-2xl font-bold">KES {walletBalance.availableBalance.toLocaleString()}</p>
+                <p className="text-gray-600 text-sm">Available Balance</p>
+                <p className="text-2xl font-bold text-gray-900">KES {walletBalance.availableBalance.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-emerald-100 text-sm">Pending (Escrow)</p>
-                <p className="text-xl font-semibold">KES {walletBalance.pendingBalance.toLocaleString()}</p>
+                <p className="text-gray-600 text-sm">Pending (Escrow)</p>
+                <p className="text-xl font-semibold text-gray-900">KES {walletBalance.pendingBalance.toLocaleString()}</p>
               </div>
-              <div className="pt-3 border-t border-emerald-400">
+              <div className="pt-3 border-t border-emerald-200">
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="w-full bg-white text-emerald-600 hover:bg-emerald-50 border-0"
+                  className="w-full bg-emerald-600 text-white hover:bg-emerald-700 border-0"
                   onClick={() => navigate('/lawyer/wallet')}
                 >
                   <ArrowDownCircle className="h-4 w-4 mr-2" />
@@ -897,25 +897,25 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         </div>
 
         {/* Consultations Card */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Consultations</h3>
-            <Video className="h-5 w-5" />
+            <h3 className="text-lg font-semibold text-gray-900">Consultations</h3>
+            <Video className="h-5 w-5 text-emerald-600" />
           </div>
           <div className="space-y-3">
             <div>
-              <p className="text-blue-100 text-sm">This Month</p>
-              <p className="text-2xl font-bold">{performanceData.thisMonth.consultations}</p>
+              <p className="text-gray-600 text-sm">This Month</p>
+              <p className="text-2xl font-bold text-gray-900">{performanceData.thisMonth.consultations}</p>
             </div>
             <div>
-              <p className="text-blue-100 text-sm">Pending</p>
-              <p className="text-xl font-semibold">{stats.pendingConsultations}</p>
+              <p className="text-gray-600 text-sm">Pending</p>
+              <p className="text-xl font-semibold text-gray-900">{stats.pendingConsultations}</p>
             </div>
-            <div className="pt-3 border-t border-blue-400">
+            <div className="pt-3 border-t border-emerald-200">
               <Button 
                 variant="outline" 
                 size="sm"
-                className="w-full bg-white text-blue-600 hover:bg-blue-50 border-0"
+                className="w-full bg-emerald-600 text-white hover:bg-emerald-700 border-0"
                 onClick={() => navigate('/lawyer/consultations')}
               >
                 View All
@@ -925,25 +925,25 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         </div>
 
         {/* Documents & Certifications Card */}
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Documents</h3>
-            <FileText className="h-5 w-5" />
+            <h3 className="text-lg font-semibold text-gray-900">Documents</h3>
+            <FileText className="h-5 w-5 text-emerald-600" />
           </div>
           <div className="space-y-3">
             <div>
-              <p className="text-purple-100 text-sm">Total Files</p>
-              <p className="text-2xl font-bold">{stats.totalDocuments}</p>
+              <p className="text-gray-600 text-sm">Total Files</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalDocuments}</p>
             </div>
             <div>
-              <p className="text-purple-100 text-sm">Certifications</p>
-              <p className="text-xl font-semibold">{tierUsage.usage.certifications.current} / {tierUsage.usage.certifications.limit}</p>
+              <p className="text-gray-600 text-sm">Certifications</p>
+              <p className="text-xl font-semibold text-gray-900">{tierUsage.usage.certifications.current} / {tierUsage.usage.certifications.limit}</p>
             </div>
-            <div className="pt-3 border-t border-purple-400">
+            <div className="pt-3 border-t border-emerald-200">
               <Button 
                 variant="outline" 
                 size="sm"
-                className="w-full bg-white text-purple-600 hover:bg-purple-50 border-0"
+                className="w-full bg-emerald-600 text-white hover:bg-emerald-700 border-0"
                 onClick={() => navigate('/document-reviews')}
               >
                 Manage Files
@@ -953,25 +953,25 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         </div>
 
         {/* Services & Offerings Card */}
-        <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Services</h3>
-            <Briefcase className="h-5 w-5" />
+            <h3 className="text-lg font-semibold text-gray-900">Services</h3>
+            <Briefcase className="h-5 w-5 text-emerald-600" />
           </div>
           <div className="space-y-3">
             <div>
-              <p className="text-amber-100 text-sm">Active Services</p>
-              <p className="text-2xl font-bold">{tierUsage.usage.services.current} / {tierUsage.usage.services.limit}</p>
+              <p className="text-gray-600 text-sm">Active Services</p>
+              <p className="text-2xl font-bold text-gray-900">{tierUsage.usage.services.current} / {tierUsage.usage.services.limit}</p>
             </div>
             <div>
-              <p className="text-amber-100 text-sm">Active Clients</p>
-              <p className="text-xl font-semibold">{stats.activeClients}</p>
+              <p className="text-gray-600 text-sm">Active Clients</p>
+              <p className="text-xl font-semibold text-gray-900">{stats.activeClients}</p>
             </div>
-            <div className="pt-3 border-t border-amber-400">
+            <div className="pt-3 border-t border-emerald-200">
               <Button 
                 variant="outline" 
                 size="sm"
-                className="w-full bg-white text-amber-600 hover:bg-amber-50 border-0"
+                className="w-full bg-emerald-600 text-white hover:bg-emerald-700 border-0"
                 onClick={() => navigate('/lawyer/service-requests')}
               >
                 View Services
