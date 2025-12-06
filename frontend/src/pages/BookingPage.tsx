@@ -250,7 +250,7 @@ export const BookingPage: React.FC = () => {
               <p className="text-slate-600 mb-6">
                 {lawyerName ? (
                   <>Request a consultation with <span className="font-semibold text-blue-600">{lawyerName}</span>. 
-                  {bookingType === 'immediate' ? ' They will respond within 30 minutes.' : ' They will confirm or suggest alternative times within 24 hours.'}
+                  {bookingType === 'immediate' ? ' They will respond within 30 minutes.' : ' They will confirm or suggest alternative times within 30 minutes.'}
                   </>
                 ) : (
                   `Request a ${bookingType === 'immediate' ? 'immediate' : 'scheduled'} video consultation with a qualified lawyer.`
