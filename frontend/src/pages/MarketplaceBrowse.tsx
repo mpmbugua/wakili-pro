@@ -912,22 +912,22 @@ export const MarketplaceBrowse: React.FC = () => {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 text-white py-12">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-12">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to Access Legal Documents?</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Ready to Access Legal Documents?</h2>
             <p className="text-lg mb-6 text-slate-600">
               Create a free account to purchase documents, save favorites, and get instant downloads.
             </p>
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => navigate('/register', { state: { from: '/marketplace' } })}
-                className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-200 transition"
+                className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
               >
                 Create Free Account
               </button>
               <button
                 onClick={() => navigate('/login', { state: { from: '/marketplace' } })}
-                className="px-8 py-3 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition border-2 border-blue-200"
+                className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition border-2 border-blue-300"
               >
                 Log In
               </button>
@@ -941,7 +941,7 @@ export const MarketplaceBrowse: React.FC = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPreviewDocument(null)}>
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-8 py-6 text-white">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-8 py-6 text-slate-900">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
