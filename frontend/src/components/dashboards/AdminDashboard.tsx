@@ -477,6 +477,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
             <Users className="h-4 w-4 mr-2" />
             Manage Users
           </Button>
+          <Button variant="outline" className="justify-start" onClick={() => navigate('/admin/articles')}>
+            <FileText className="h-4 w-4 mr-2" />
+            Article Management
+          </Button>
           <Button variant="outline" className="justify-start" onClick={() => navigate('/admin/call-logs')}>
             <Phone className="h-4 w-4 mr-2" />
             Call Logs
