@@ -164,7 +164,7 @@ export const LandingPage: React.FC = () => {
                 <Link to="/resources" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
-                      <Book className="h-5 w-5 text-blue-600" />
+                      <FileText className="h-5 w-5 text-blue-600" />
                     </div>
                     <h3 className="text-base font-semibold text-slate-900">Explore Legal Guides</h3>
                   </div>
