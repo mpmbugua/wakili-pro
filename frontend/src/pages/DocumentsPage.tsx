@@ -492,7 +492,7 @@ export const DocumentsPage: React.FC = () => {
                     <Trash2 className="h-4 w-4" />
                     <span className="text-sm font-medium">Delete</span>
                   </button>
-                  {document.status === 'DRAFT' && (
+                  {document.status === 'DRAFT' && user?.role !== 'LAWYER' && (
                     <button 
                       onClick={(e) => {
                         e.preventDefault();
@@ -504,6 +504,11 @@ export const DocumentsPage: React.FC = () => {
                       <FileText className="h-4 w-4" />
                       <span className="text-sm">Request Review</span>
                     </button>
+                  )}
+                  {document.status === 'DRAFT' && user?.role === 'LAWYER' && (
+                    <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                      Lawyers provide reviews, not request them
+                    </div>
                   )}
                 </div>
               </div>

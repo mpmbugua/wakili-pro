@@ -13,6 +13,16 @@ export const BookingPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Redirect lawyers to their dashboard - they cannot book consultations
+  useEffect(() => {
+    if (user?.role === 'LAWYER') {
+      navigate('/dashboard', { 
+        replace: true,
+        state: { message: 'Lawyers cannot book consultations. This feature is for clients only.' }
+      });
+    }
+  }, [user, navigate]);
+
   const [bookingType, setBookingType] = useState<'immediate' | 'scheduled'>('immediate');
   const [formData, setFormData] = useState({
     date: '',

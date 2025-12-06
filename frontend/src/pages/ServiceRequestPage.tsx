@@ -13,6 +13,7 @@ import {
   Shield
 } from 'lucide-react';
 import axiosInstance from '../services/api';
+import { useAuthStore } from '../store/authStore';
 
 interface ServiceRequestForm {
   serviceTitle: string;
@@ -52,6 +53,17 @@ interface ServiceRequestForm {
 export const ServiceRequestPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuthStore();
+
+  // Redirect lawyers - they quote on service requests, they don't submit them
+  useEffect(() => {
+    if (user?.role === 'LAWYER') {
+      navigate('/lawyer/service-requests', { 
+        replace: true,
+        state: { message: 'Lawyers quote on service requests. This page is for clients to submit requests.' }
+      });
+    }
+  }, [user, navigate]);
   const serviceFromState = location.state?.fromService || '';
 
   const [formData, setFormData] = useState<ServiceRequestForm>({

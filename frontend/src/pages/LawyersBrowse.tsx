@@ -229,7 +229,7 @@ const locations = [
 
 export const LawyersBrowse: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [selectedSpecialty, setSelectedSpecialty] = useState('All Specialties');
   const [selectedLocation, setSelectedLocation] = useState('All Locations');
   const [sortBy, setSortBy] = useState<'rating' | 'price' | 'experience'>('rating');
@@ -468,17 +468,23 @@ export const LawyersBrowse: React.FC = () => {
                       <p className="text-lg font-bold text-gray-900">KES {lawyer.hourlyRate.toLocaleString()}</p>
                       <p className="text-xs text-gray-500">per session</p>
                     </div>
-                    <button
-                      onClick={() => handleBookConsultation(lawyer.id, lawyer.name)}
-                      disabled={lawyer.availability === 'Offline'}
-                      className={`px-6 py-3 rounded-lg font-medium transition ${
-                        lawyer.availability === 'Offline'
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      {lawyer.availability === 'Offline' ? 'Unavailable' : 'Book Now'}
-                    </button>
+                    {user?.role !== 'LAWYER' ? (
+                      <button
+                        onClick={() => handleBookConsultation(lawyer.id, lawyer.name)}
+                        disabled={lawyer.availability === 'Offline'}
+                        className={`px-6 py-3 rounded-lg font-medium transition ${
+                          lawyer.availability === 'Offline'
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        {lawyer.availability === 'Offline' ? 'Unavailable' : 'Book Now'}
+                      </button>
+                    ) : (
+                      <div className="px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-xs text-blue-700">Lawyers cannot book</p>
+                      </div>
+                    )}
                   </div>
                   
                   <button

@@ -251,13 +251,21 @@ export const PublicLawyerProfile: React.FC = () => {
                   <p className="text-xs text-slate-500 mt-0.5">per session</p>
                 </div>
 
-                {/* Book Button */}
-                <button
-                  onClick={handleBookConsultation}
-                  className="w-full py-2.5 rounded-lg font-semibold text-sm transition bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  Request Consultation
-                </button>
+                {/* Book Button - Only show for non-lawyer users */}
+                {user?.role !== 'LAWYER' ? (
+                  <button
+                    onClick={handleBookConsultation}
+                    className="w-full py-2.5 rounded-lg font-semibold text-sm transition bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    Request Consultation
+                  </button>
+                ) : (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-700 text-center">
+                      As a fellow lawyer, you can view this profile but cannot book consultations.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             </div>

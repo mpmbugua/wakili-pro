@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Calendar, User, Clock, ArrowRight, Tag, TrendingUp, BookOpen, Mail, Loader, FileText } from 'lucide-react';
 import axiosInstance from '../lib/axios';
+import { useAuthStore } from '../store/authStore';
 
 // Add custom styles for article content
 const articleStyles = `
@@ -233,6 +234,7 @@ const categories = ['All', 'Corporate Law', 'Property Law', 'Employment Law', 'F
 
 export const BlogPage: React.FC = () => {
   const location = useLocation();
+  const { user } = useAuthStore();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [articles, setArticles] = useState<Article[]>([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
@@ -411,12 +413,14 @@ export const BlogPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <p className="text-sm text-slate-600">Need help with this legal matter?</p>
               <div className="flex gap-2">
-                <Link 
-                  to="/lawyers"
-                  className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700"
-                >
-                  Book a Lawyer
-                </Link>
+                {user?.role !== 'LAWYER' && (
+                  <Link 
+                    to="/lawyers"
+                    className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700"
+                  >
+                    Book a Lawyer
+                  </Link>
+                )}
                 <Link 
                   to="/marketplace"
                   className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded hover:bg-blue-200"
@@ -468,14 +472,16 @@ export const BlogPage: React.FC = () => {
               Don't navigate legal matters alone. Get expert help from our verified lawyers, AI assistant, or browse our comprehensive legal services.
             </p>
             <div className="grid md:grid-cols-4 gap-4">
-              <Link 
-                to="/lawyers"
-                className="px-6 py-4 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all shadow-md group"
-              >
-                <User className="h-6 w-6 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                <span className="block font-semibold text-sm">Book a Lawyer</span>
-                <span className="block text-xs text-slate-600 mt-1">Verified experts</span>
-              </Link>
+              {user?.role !== 'LAWYER' && (
+                <Link 
+                  to="/lawyers"
+                  className="px-6 py-4 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all shadow-md group"
+                >
+                  <User className="h-6 w-6 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <span className="block font-semibold text-sm">Book a Lawyer</span>
+                  <span className="block text-xs text-slate-600 mt-1">Verified experts</span>
+                </Link>
+              )}
               <Link 
                 to="/documents"
                 className="px-6 py-4 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all shadow-md group"
