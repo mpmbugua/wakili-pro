@@ -3,6 +3,96 @@ import { Link, useLocation } from 'react-router-dom';
 import { Calendar, User, Clock, ArrowRight, Tag, TrendingUp, BookOpen, Mail, Loader, FileText } from 'lucide-react';
 import axiosInstance from '../lib/axios';
 
+// Add custom styles for article content
+const articleStyles = `
+  .article-content {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .article-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .article-content table tr {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .article-content table tr:last-child {
+    border-bottom: none;
+  }
+  .article-content table td, .article-content table th {
+    padding: 1rem;
+    text-align: left;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  .article-content table th {
+    background: #f8fafc;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  .article-content table td {
+    background: white;
+    color: #475569;
+  }
+  .article-content table td strong {
+    color: #1e293b;
+    font-weight: 600;
+  }
+  .article-content ul:not([style]) {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: #475569;
+  }
+  .article-content ol:not([style]) {
+    list-style: decimal;
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: #475569;
+  }
+  .article-content li:not([style]) {
+    margin-bottom: 0.5rem;
+  }
+  .article-content h2:not([style]) {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+  }
+  .article-content h3:not([style]) {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  .article-content h4:not([style]) {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .article-content p:not([style]) {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: #475569;
+    margin-bottom: 1.25rem;
+  }
+  .article-content strong {
+    font-weight: 600;
+    color: #1e293b;
+  }
+`;
+
 interface Article {
   id: string;
   title: string;
@@ -259,6 +349,7 @@ export const BlogPage: React.FC = () => {
   if (selectedArticle) {
     return (
       <div className="min-h-screen bg-white">
+        <style>{articleStyles}</style>
         {/* Article Header */}
         <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -340,7 +431,7 @@ export const BlogPage: React.FC = () => {
         {/* Article Content */}
         <article className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
           <div 
-            className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-p:text-slate-700 prose-a:text-blue-600 prose-strong:text-slate-900 prose-ul:text-slate-700 prose-ol:text-slate-700"
+            className="article-content"
             dangerouslySetInnerHTML={{ __html: selectedArticle.content.replace(/<!--METADATA:.*?-->/g, '') }}
           />
 
