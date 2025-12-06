@@ -297,7 +297,7 @@ export const LandingPage: React.FC = () => {
                 ].map((service, i) => {
                   const IconComponent = service.icon;
                   return (
-                    <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
+                    <Link key={i} to="/services" className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer block">
                       <div className="flex items-center justify-between mb-2">
                         <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
                           {service.category.split(' & ')[0]}
@@ -314,13 +314,10 @@ export const LandingPage: React.FC = () => {
                         <Clock className="h-3 w-3" />
                         <span>{service.deliveryTime}</span>
                       </div>
-                      <Link 
-                        to="/services" 
-                        className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                      >
+                      <span className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
                         View Details
-                      </Link>
-                    </div>
+                      </span>
+                    </Link>
                   );
                 })}
               </div>
@@ -374,7 +371,7 @@ export const LandingPage: React.FC = () => {
                 ].map((doc, i) => {
                   const IconComponent = doc.icon;
                   return (
-                    <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
+                    <Link key={i} to="/marketplace" className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer block">
                       <div className="flex items-center justify-between mb-2">
                         <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
                           {doc.category}
@@ -391,13 +388,10 @@ export const LandingPage: React.FC = () => {
                         <CheckCircle className="h-3 w-3 text-emerald-600" />
                         <span>Instant Download</span>
                       </div>
-                      <Link 
-                        to="/marketplace" 
-                        className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                      >
+                      <span className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
                         Purchase Now
-                      </Link>
-                    </div>
+                      </span>
+                    </Link>
                   );
                 })}
               </div>
@@ -434,7 +428,7 @@ export const LandingPage: React.FC = () => {
               { name: 'Dr. Mary Wanjiru', specialty: 'Immigration Law', location: 'Nairobi', rating: 4.8, cases: '170+' },
               { name: 'Adv. David Kiprono', specialty: 'Employment Law', location: 'Nakuru', rating: 4.7, cases: '160+' }
               ].map((lawyer, i) => (
-                <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
+                <Link key={i} to="/lawyers" className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer block">
                 <div className="flex items-start space-x-3 mb-3">
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold text-sm">
                     {lawyer.name.split(' ').map(n => n[0]).join('')}
@@ -461,13 +455,10 @@ export const LandingPage: React.FC = () => {
                     {lawyer.cases} cases
                   </div>
                 </div>
-                <Link 
-                  to="/lawyers" 
-                  className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                >
+                <span className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
                   View Profile
-                </Link>
-              </div>
+                </span>
+              </Link>
             ))}
           </div>
           <div className="mt-6 text-center">
