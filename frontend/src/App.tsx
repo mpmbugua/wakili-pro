@@ -48,6 +48,7 @@ import { PerformancePage } from './pages/PerformancePage';
 import { PublicLawyerProfile } from './pages/PublicLawyerProfile';
 import ConsultationsPage from './pages/ConsultationsPage';
 import { NewConsultationPage } from './pages/NewConsultationPage';
+import { CalendarPage } from './pages/CalendarPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import MessagesPage from './pages/MessagesPage';
 import DocumentsPage from './pages/DocumentsPage';
@@ -291,6 +292,14 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <LawyerProfileSettings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/calendar" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <CalendarPage />
                 </ProtectedRoute>
               } 
             />
