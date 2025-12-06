@@ -474,7 +474,7 @@ export const DocumentsPage: React.FC = () => {
                       e.stopPropagation();
                       handleDownload(document);
                     }}
-                    className="px-4 py-2.5 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm" 
+                    className="px-4 py-2.5 text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm" 
                     title="Download"
                   >
                     <Download className="h-4 w-4" />
@@ -486,7 +486,7 @@ export const DocumentsPage: React.FC = () => {
                       e.stopPropagation();
                       handleDelete(document.id);
                     }}
-                    className="px-4 py-2.5 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm" 
+                    className="px-4 py-2.5 text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm" 
                     title="Delete"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -499,7 +499,7 @@ export const DocumentsPage: React.FC = () => {
                         e.stopPropagation();
                         handleRequestReview(document.id, document.title);
                       }}
-                      className="px-4 py-2.5 text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm font-medium"
+                      className="px-4 py-2.5 text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm font-medium"
                     >
                       <FileText className="h-4 w-4" />
                       <span className="text-sm">Request Review</span>
