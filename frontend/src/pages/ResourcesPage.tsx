@@ -110,15 +110,58 @@ export const ResourcesPage: React.FC = () => {
               Try Again
             </button>
           </div>
-        ) : legalGuides.length === 0 ? (
-          <div className="text-center py-12 bg-slate-50 rounded-lg">
-            <Book className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-            <p className="text-sm text-slate-600">No articles available yet.</p>
-            <p className="text-xs text-slate-500 mt-2">Check back soon for legal guides and resources!</p>
-          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {legalGuides.map((guide) => (
+            {(legalGuides.length > 0 ? legalGuides : [
+              {
+                id: 'sample-1',
+                title: 'Understanding the New Data Protection Act in Kenya',
+                description: 'Kenya\'s Data Protection Act, 2019 has transformed how businesses handle personal information. Learn about compliance requirements, penalties for violations, and best practices for protecting customer data in the digital age.',
+                category: 'Corporate Law',
+                readTime: '8 min read',
+                link: '/blog'
+              },
+              {
+                id: 'sample-2',
+                title: 'Land Ownership Rights: What Property Buyers Should Know',
+                description: 'Avoid costly mistakes when purchasing land in Kenya. This comprehensive guide covers title searches, land control board consent, encumbrances, and the complete conveyancing process from offer to registration.',
+                category: 'Property Law',
+                readTime: '10 min read',
+                link: '/blog'
+              },
+              {
+                id: 'sample-3',
+                title: 'Employment Contracts in Kenya: Essential Clauses',
+                description: 'Protect your rights and obligations with a comprehensive employment contract. Learn about statutory requirements under the Employment Act, probation periods, termination clauses, and non-compete agreements.',
+                category: 'Employment Law',
+                readTime: '7 min read',
+                link: '/blog'
+              },
+              {
+                id: 'sample-4',
+                title: 'Company Registration in Kenya: Complete Guide',
+                description: 'Starting a business? Learn the complete process of registering a limited company in Kenya, from name reservation to obtaining your certificate of incorporation and tax compliance certificates.',
+                category: 'Corporate Law',
+                readTime: '9 min read',
+                link: '/blog'
+              },
+              {
+                id: 'sample-5',
+                title: 'Wills and Estate Planning in Kenya',
+                description: 'Don\'t leave your family\'s future to chance. Learn how to draft a valid will, appoint executors, minimize inheritance disputes, and navigate succession law in Kenya.',
+                category: 'Family Law',
+                readTime: '10 min read',
+                link: '/blog'
+              },
+              {
+                id: 'sample-6',
+                title: 'Tenancy Agreements: Rights and Obligations',
+                description: 'Avoid rental disputes by understanding your legal rights. This guide covers deposit protection, rent increases, eviction procedures, and dispute resolution under the Landlord and Tenant Act.',
+                category: 'Property Law',
+                readTime: '8 min read',
+                link: '/blog'
+              }
+            ]).map((guide) => (
               <div key={guide.id} className="bg-white rounded-lg border border-slate-200 hover:shadow-lg transition-shadow">
                 <div className="p-6">
                   <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full mb-3">
