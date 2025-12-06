@@ -523,7 +523,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
       <PageHeader
         title={
           <div className="flex items-center space-x-3">
-            <span>Welcome back, Advocate {user.firstName}!</span>
+            <span className="text-2xl font-semibold tracking-tight">Welcome back, Advocate {user.firstName}!</span>
             <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-semibold ${getTierColor(tierUsage.currentTier)}`}>
               {TierIcon && <TierIcon className="h-4 w-4" />}
               <span>{tierUsage.currentTier} TIER</span>
@@ -546,7 +546,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
               <Button 
                 variant="primary" 
                 onClick={() => navigate('/subscriptions')}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 <Crown className="h-4 w-4 mr-2" />
                 Upgrade
