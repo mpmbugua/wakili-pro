@@ -16,7 +16,9 @@ import {
   Home,
   Briefcase,
   Heart,
-  Clock
+  Clock,
+  Mail,
+  Loader
 } from 'lucide-react';
 import { getFeaturedExamples } from '../data/servicePackageExamples';
 
@@ -32,6 +34,101 @@ interface FeaturedArticle {
     lastName: string;
   };
 }
+
+// Newsletter Subscription Component
+const NewsletterSection: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      setMessage({ type: 'error', text: 'Please enter your email address' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await axiosInstance.post('/newsletter/subscribe', { email });
+      
+      if (response.data.success) {
+        setMessage({ type: 'success', text: 'Successfully subscribed! Check your inbox.' });
+        setEmail('');
+      } else {
+        setMessage({ type: 'error', text: response.data.message || 'Subscription failed' });
+      }
+    } catch (error: any) {
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || 'Failed to subscribe. Please try again.' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="py-12 bg-gradient-to-br from-blue-50 to-indigo-50 border-y border-blue-100">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+        <div className="mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-100 rounded-full mb-4">
+            <Mail className="h-7 w-7 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            Stay Updated with Legal Insights
+          </h2>
+          <p className="text-sm text-slate-600 max-w-2xl mx-auto">
+            Subscribe to our newsletter and receive the latest legal updates, guides, and expert commentary directly to your inbox.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubscribe} className="max-w-md mx-auto mb-4">
+          <div className="flex gap-2">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className="flex-1 px-4 py-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader className="h-4 w-4 animate-spin" />
+                  Subscribing...
+                </>
+              ) : (
+                'Subscribe'
+              )}
+            </button>
+          </div>
+        </form>
+
+        {message && (
+          <div className={`text-sm mb-3 ${message.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
+            {message.text}
+          </div>
+        )}
+
+        <p className="text-xs text-slate-500">
+          No spam. Unsubscribe anytime. Read our{' '}
+          <Link to="/privacy" className="text-blue-600 hover:text-blue-700 underline">
+            Privacy Policy
+          </Link>.
+        </p>
+      </div>
+    </section>
+  );
+};
 
 export const LandingPage: React.FC = () => {
   const [featuredArticles, setFeaturedArticles] = useState<FeaturedArticle[]>([]);
@@ -492,6 +589,9 @@ export const LandingPage: React.FC = () => {
               )}
             </div>
           </section>
+
+          {/* Newsletter Subscription Section */}
+          <NewsletterSection />
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">

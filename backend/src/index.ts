@@ -303,6 +303,10 @@ app.use('/api/admin/cleanup', adminCleanupRouter);
 import callLogRouter from './routes/admin/callLogRoutes';
 app.use('/api/admin/call-logs', callLogRouter);
 
+// Mount newsletter routes
+import newsletterRouter from './routes/newsletterRoutes';
+app.use('/api/newsletter', newsletterRouter);
+
 // Mount AI assistant routes
 import aiRouter from './routes/ai';
 app.use('/api/ai', aiRouter);
