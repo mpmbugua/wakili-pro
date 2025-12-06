@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, X } from 'lucide-react';
+import { Phone, X, Video } from 'lucide-react';
 
 export const EmergencyCallButton: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -11,6 +11,11 @@ export const EmergencyCallButton: React.FC = () => {
 
   const handleCall = (number: string) => {
     window.location.href = `tel:+254${number.slice(1)}`;
+  };
+
+  const handleVoipCall = () => {
+    // Open VOIP call in new window - can integrate with WebRTC or third-party VOIP service
+    window.open('/voip-call', 'VOIPCall', 'width=400,height=600');
   };
 
   return (
@@ -68,6 +73,20 @@ export const EmergencyCallButton: React.FC = () => {
                   </div>
                 </button>
               ))}
+              
+              {/* VOIP Call Option */}
+              <button
+                onClick={handleVoipCall}
+                className="w-full bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border border-blue-300 rounded-lg p-4 transition-all duration-200 hover:shadow-md group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-left">
+                    <p className="text-sm text-blue-700 font-medium">Internet Call (VOIP)</p>
+                    <p className="text-xs text-blue-600">Call via web browser</p>
+                  </div>
+                  <Video className="h-5 w-5 text-blue-600 group-hover:animate-pulse" />
+                </div>
+              </button>
             </div>
 
             {/* Info Text */}

@@ -222,6 +222,7 @@ model User {
   conversationParticipants                                   ConversationParticipant[] @relation("ConversationParticipants")
   directMessages                                             Message[]               @relation("DirectMessagesSent")
   uploadedLegalDocuments                                     LegalDocument[]         @relation("UploadedLegalDocuments")
+  handledCallLogs                                            CallLog[]               @relation("HandledCallLogs")
   onlineStatus                                               String?                 @default("offline")
   lastSeen                                                   DateTime?
 }
@@ -1336,4 +1337,29 @@ model LegalDocument {
   @@index([documentType])
   @@index([category])
   @@index([uploadedAt])
+}
+
+model CallLog {
+  id                   String    @id @default(cuid())
+  callerName           String
+  callerPhone          String
+  callerEmail          String?
+  issueCategory        String    // Property Law, Family Law, etc.
+  issueDescription     String    @db.Text
+  recommendation       String    // DOCUMENT_PURCHASE, LAWYER_SESSION, SERVICE_PACKAGE, DOCUMENT_REVIEW
+  recommendationNotes  String?   @db.Text
+  handledBy            String    // Admin user who handled the call
+  callDuration         Int?      // Duration in minutes
+  followUpRequired     Boolean   @default(false)
+  followUpDate         DateTime?
+  status               String    @default("PENDING") // PENDING, CONTACTED, CONVERTED, CLOSED
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  
+  handler User @relation("HandledCallLogs", fields: [handledBy], references: [id])
+  
+  @@index([recommendation])
+  @@index([status])
+  @@index([createdAt])
+  @@index([handledBy])
 }

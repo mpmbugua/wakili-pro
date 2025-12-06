@@ -299,6 +299,10 @@ app.use('/api/admin/lawyers', adminLawyerRouter);
 import adminCleanupRouter from './routes/admin/cleanupRoutes';
 app.use('/api/admin/cleanup', adminCleanupRouter);
 
+// Mount admin call logs router
+import callLogRouter from './routes/admin/callLogRoutes';
+app.use('/api/admin/call-logs', callLogRouter);
+
 // Mount AI assistant routes
 import aiRouter from './routes/ai';
 app.use('/api/ai', aiRouter);
