@@ -6,6 +6,13 @@ import { useAuthStore } from './store/authStore';
 import { AppShell } from './components/layout/AppShell';
 import { GlobalLayout } from './components/layout/GlobalLayout';
 import { LandingPage } from './pages/LandingPage';
+import { AboutPage } from './pages/AboutPage';
+import { ContactPage } from './pages/ContactPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { FAQPage } from './pages/FAQPage';
+import { BlogPage } from './pages/BlogPage';
+import { SubmitArticlePage } from './pages/SubmitArticlePage';
 import { AIAssistant } from './pages/AIAssistant';
 import { LawyerAIAssistant } from './pages/LawyerAIAssistant';
 import { AdminAIAssistant } from './pages/AdminAIAssistant';
@@ -191,6 +198,12 @@ function App() {
 
           {/* Public Routes - Wrapped in GlobalLayout */}
           <Route path="/" element={<GlobalLayout><LandingPage /></GlobalLayout>} />
+          <Route path="/about" element={<GlobalLayout><AboutPage /></GlobalLayout>} />
+          <Route path="/contact" element={<GlobalLayout><ContactPage /></GlobalLayout>} />
+          <Route path="/privacy" element={<GlobalLayout><PrivacyPolicyPage /></GlobalLayout>} />
+          <Route path="/terms" element={<GlobalLayout><TermsOfServicePage /></GlobalLayout>} />
+          <Route path="/faq" element={<GlobalLayout><FAQPage /></GlobalLayout>} />
+          <Route path="/blog" element={<GlobalLayout><BlogPage /></GlobalLayout>} />
           <Route path="/ai" element={<GlobalLayout><AIAssistant /></GlobalLayout>} />
           <Route path="/lawyers" element={<GlobalLayout><LawyersBrowse /></GlobalLayout>} />
           <Route path="/services" element={<GlobalLayout><LegalServicesPage /></GlobalLayout>} />
@@ -294,6 +307,14 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <HelpPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/submit-article" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <SubmitArticlePage />
                 </ProtectedRoute>
               } 
             />

@@ -13,6 +13,7 @@ export const BookingPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [bookingType, setBookingType] = useState<'immediate' | 'scheduled'>('immediate');
   const [formData, setFormData] = useState({
     date: '',
     time: '',
@@ -67,11 +68,12 @@ export const BookingPage: React.FC = () => {
     try {
       const bookingData = {
         lawyerId,
-        date: formData.date,
-        time: formData.time,
+        date: bookingType === 'immediate' ? new Date().toISOString().split('T')[0] : formData.date,
+        time: bookingType === 'immediate' ? 'ASAP' : formData.time,
         duration: formData.duration,
         consultationType: formData.consultationType,
         description: formData.description,
+        isImmediate: bookingType === 'immediate',
       };
 
       console.log('Sending booking request:', bookingData);
@@ -134,11 +136,12 @@ export const BookingPage: React.FC = () => {
           try {
             const bookingData = {
               lawyerId,
-              date: formData.date,
-              time: formData.time,
+              date: bookingType === 'immediate' ? new Date().toISOString().split('T')[0] : formData.date,
+              time: bookingType === 'immediate' ? 'ASAP' : formData.time,
               duration: formData.duration,
               consultationType: formData.consultationType,
               description: formData.description,
+              isImmediate: bookingType === 'immediate',
             };
             
             console.log('Retrying booking request to /consultations/book');
@@ -246,48 +249,125 @@ export const BookingPage: React.FC = () => {
               
               <p className="text-slate-600 mb-6">
                 {lawyerName ? (
-                  <>Request a consultation with <span className="font-semibold text-blue-600">{lawyerName}</span>. They will confirm or suggest alternative times within 24 hours.</>
+                  <>Request a consultation with <span className="font-semibold text-blue-600">{lawyerName}</span>. 
+                  {bookingType === 'immediate' ? ' They will respond within 30 minutes.' : ' They will confirm or suggest alternative times within 24 hours.'}
+                  </>
                 ) : (
-                  'Request a video consultation with a qualified lawyer. They will confirm or suggest alternative times within 24 hours.'
+                  `Request a ${bookingType === 'immediate' ? 'immediate' : 'scheduled'} video consultation with a qualified lawyer.`
                 )}
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Date */}
-                <div>
-                  <label className="flex items-center text-sm font-semibold text-slate-900 mb-2">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Preferred Date
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    min={new Date().toISOString().split('T')[0]}
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="input-field"
-                    style={{ width: '200px', colorScheme: 'light' }}
-                  />
-                  <p className="text-xs text-slate-500 mt-1">
-                    Select your preferred consultation date
-                  </p>
+              {/* Booking Type Selector */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-slate-900 mb-3">
+                  Booking Type
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setBookingType('immediate')}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      bookingType === 'immediate'
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-slate-200 bg-white hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center mb-2">
+                      <Clock className={`h-5 w-5 ${bookingType === 'immediate' ? 'text-blue-600' : 'text-slate-400'}`} />
+                    </div>
+                    <div className="text-center">
+                      <p className={`font-semibold ${bookingType === 'immediate' ? 'text-blue-900' : 'text-slate-700'}`}>
+                        Immediate Booking
+                      </p>
+                      <p className="text-xs text-slate-600 mt-1">
+                        Lawyer responds within 30 min
+                      </p>
+                    </div>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setBookingType('scheduled')}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      bookingType === 'scheduled'
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-slate-200 bg-white hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center mb-2">
+                      <Calendar className={`h-5 w-5 ${bookingType === 'scheduled' ? 'text-blue-600' : 'text-slate-400'}`} />
+                    </div>
+                    <div className="text-center">
+                      <p className={`font-semibold ${bookingType === 'scheduled' ? 'text-blue-900' : 'text-slate-700'}`}>
+                        Schedule Booking
+                      </p>
+                      <p className="text-xs text-slate-600 mt-1">
+                        Pick your preferred date & time
+                      </p>
+                    </div>
+                  </button>
                 </div>
+              </div>
 
-                {/* Time */}
-                <div>
-                  <label className="flex items-center text-sm font-semibold text-slate-900 mb-2">
-                    <Clock className="h-4 w-4 mr-2" />
-                    Preferred Time
-                  </label>
-                  <input
-                    type="time"
-                    required
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="input-field"
-                    style={{ width: '150px', colorScheme: 'light' }}
-                  />
-                </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Date & Time - Only show for scheduled bookings */}
+                {bookingType === 'scheduled' && (
+                  <>
+                    {/* Date */}
+                    <div>
+                      <label className="flex items-center text-sm font-semibold text-slate-900 mb-2">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Preferred Date
+                      </label>
+                      <input
+                        type="date"
+                        required
+                        min={new Date().toISOString().split('T')[0]}
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        className="input-field"
+                        style={{ width: '200px', colorScheme: 'light' }}
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        Select your preferred consultation date
+                      </p>
+                    </div>
+
+                    {/* Time */}
+                    <div>
+                      <label className="flex items-center text-sm font-semibold text-slate-900 mb-2">
+                        <Clock className="h-4 w-4 mr-2" />
+                        Preferred Time
+                      </label>
+                      <input
+                        type="time"
+                        required
+                        value={formData.time}
+                        onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                        className="input-field"
+                        style={{ width: '150px', colorScheme: 'light' }}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Immediate Booking Info */}
+                {bookingType === 'immediate' && (
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border-2 border-green-200">
+                    <div className="flex items-start">
+                      <Clock className="h-5 w-5 text-green-600 mr-3 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-green-900 mb-1">
+                          Immediate Consultation Request
+                        </p>
+                        <p className="text-xs text-green-800">
+                          The lawyer will receive your request immediately and respond within 30 minutes to confirm availability. 
+                          If they're available, the consultation can start right away via {formData.consultationType === 'video' ? 'video call' : 'phone call'}.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Session Duration & Pricing */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200">
@@ -412,13 +492,24 @@ export const BookingPage: React.FC = () => {
                 <p className="text-sm text-blue-900 mb-2">
                   <strong>How it works:</strong>
                 </p>
-                <ol className="text-sm text-blue-900 space-y-1 list-decimal list-inside">
-                  <li>You pay for the consultation upfront</li>
-                  <li>The lawyer receives your request and reviews your preferred date/time</li>
-                  <li>Within 24 hours, they will either confirm, suggest a different time, or decline</li>
-                  <li>If declined or no response within 24 hours, you receive a full automatic refund</li>
-                  <li>You'll receive email and SMS notifications at each step</li>
-                </ol>
+                {bookingType === 'immediate' ? (
+                  <ol className="text-sm text-blue-900 space-y-1 list-decimal list-inside">
+                    <li>You pay for the consultation upfront</li>
+                    <li>The lawyer receives your immediate request notification</li>
+                    <li>Within 30 minutes, they will confirm availability or suggest the next available time</li>
+                    <li>If confirmed, the consultation starts immediately via {formData.consultationType === 'video' ? 'video call' : 'phone call'}</li>
+                    <li>If the lawyer is unavailable or doesn't respond within 30 minutes, you receive a full automatic refund</li>
+                    <li>You'll receive email and SMS notifications at each step</li>
+                  </ol>
+                ) : (
+                  <ol className="text-sm text-blue-900 space-y-1 list-decimal list-inside">
+                    <li>You pay for the consultation upfront</li>
+                    <li>The lawyer receives your request and reviews your preferred date/time</li>
+                    <li>Within 24 hours, they will either confirm, suggest a different time, or decline</li>
+                    <li>If declined or no response within 24 hours, you receive a full automatic refund</li>
+                    <li>You'll receive email and SMS notifications at each step</li>
+                  </ol>
+                )}
               </div>
             </div>
           </div>

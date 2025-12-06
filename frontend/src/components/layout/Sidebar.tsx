@@ -18,7 +18,8 @@ import {
   Book,
   Award,
   TrendingUp,
-  Stamp
+  Stamp,
+  PenSquare
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { Button } from '../ui/Button';
@@ -64,6 +65,7 @@ const lawyerToolsNavigation: NavItem[] = [
   { name: 'Analytics', href: '/analytics', icon: TrendingUp },
   { name: 'Performance', href: '/performance', icon: Award },
   { name: 'Signature & Stamp', href: '/lawyer/signature-setup', icon: Stamp },
+  { name: 'Submit Article', href: '/submit-article', icon: PenSquare },
 ];
 
 // Admin navigation - main items

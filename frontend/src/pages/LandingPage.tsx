@@ -1,30 +1,69 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axiosInstance from '../lib/axios';
 import { WakiliLogo } from '../components/ui/WakiliLogo';
 import { 
   MessageSquare,
   Scale,
   ShoppingBag,
-  Book,
   ArrowRight, 
   Star, 
   MapPin,
   Shield,
-  Users,
   CheckCircle,
   FileText,
-  TrendingUp,
   Home,
   Briefcase,
   Heart,
-  Gavel,
-  DollarSign,
-  Clock,
-  Copyright
+  Clock
 } from 'lucide-react';
 import { getFeaturedExamples } from '../data/servicePackageExamples';
 
+interface FeaturedArticle {
+  id: string;
+  title: string;
+  content: string;
+  authorId: string;
+  isPremium: boolean;
+  isPublished: boolean;
+  User?: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
 export const LandingPage: React.FC = () => {
+  const [featuredArticles, setFeaturedArticles] = useState<FeaturedArticle[]>([]);
+  const [loadingArticles, setLoadingArticles] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedArticles = async () => {
+      try {
+        const response = await axiosInstance.get('/articles/published?limit=3');
+        setFeaturedArticles(response.data.data.articles || []);
+      } catch (error) {
+        console.error('Failed to fetch featured articles:', error);
+      } finally {
+        setLoadingArticles(false);
+      }
+    };
+
+    fetchFeaturedArticles();
+  }, []);
+
+  const extractMetadata = (content: string) => {
+    const metadataMatch = content.match(/<!--METADATA:(.*?)-->/);
+    if (metadataMatch) {
+      try {
+        return JSON.parse(metadataMatch[1]);
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  };
+
   return (
     <>
           {/* Hero Section with Services */}
@@ -173,14 +212,9 @@ export const LandingPage: React.FC = () => {
                       <p className="text-xs text-slate-600 mb-3">
                         {service.description.split('.')[0]}
                       </p>
-                      <div className="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100">
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <Clock className="h-3 w-3" />
-                          <span>{service.deliveryTime}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-emerald-600 font-semibold">
-                          <span>KES {service.priceRange.min.toLocaleString()}</span>
-                        </div>
+                      <div className="flex items-center gap-1 text-xs mb-3 pb-3 border-b border-slate-100 text-slate-500">
+                        <Clock className="h-3 w-3" />
+                        <span>{service.deliveryTime}</span>
                       </div>
                       <Link 
                         to="/services" 
@@ -255,14 +289,9 @@ export const LandingPage: React.FC = () => {
                       <p className="text-xs text-slate-600 mb-3">
                         {doc.description}
                       </p>
-                      <div className="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100">
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <CheckCircle className="h-3 w-3 text-emerald-600" />
-                          <span>Instant Download</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-emerald-600 font-semibold">
-                          <span>KES {doc.price.toLocaleString()}</span>
-                        </div>
+                      <div className="flex items-center gap-1 text-xs mb-3 pb-3 border-b border-slate-100 text-slate-500">
+                        <CheckCircle className="h-3 w-3 text-emerald-600" />
+                        <span>Instant Download</span>
                       </div>
                       <Link 
                         to="/marketplace" 
@@ -354,99 +383,115 @@ export const LandingPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Legal Resources & Guides Section */}
-          <section id="resources" className="py-8 bg-white border-b border-slate-200">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                  Legal Resources & Guides
-                </h2>
-                <p className="text-xs text-slate-600">
-                  Free information to help you understand Kenyan law
-                </p>
-              </div>
-              <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { title: "Property Law Guide", category: "Real Estate", icon: Book },
-              { title: "Business Registration Steps", category: "Corporate", icon: TrendingUp },
-              { title: "Employment Law Basics", category: "Labour", icon: Users }
-              ].map((resource, i) => (
-                <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
-                    {resource.category}
-                  </span>
-                  <resource.icon className="h-4 w-4 text-slate-400" />
-                </div>
-                <h3 className="text-sm font-semibold text-slate-900 mb-2">
-                  {resource.title}
-                </h3>
-                <Link 
-                  to="/resources" 
-                  className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
-                >
-                  Read guide <ArrowRight className="ml-1 h-3 w-3" />
-                </Link>
-              </div>
-            ))}
-          </div>
-            </div>
-          </section>
-
-          {/* Insights & Analysis (Thought Leadership) */}
+          {/* Legal Guides and Insights */}
           <section id="insights" className="py-8 bg-white border-b border-slate-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                  Insights & Analysis
-                </h2>
-                <p className="text-xs text-slate-600">
-                  Expert commentary on legal developments in Kenya
-                </p>
-              </div>
-              <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { 
-                title: "New Data Protection Regulations: What Businesses Need to Know", 
-                author: "Dr. Sarah Kamau",
-                date: "Nov 20, 2025",
-                category: "Corporate Law"
-              },
-              { 
-                title: "Recent Supreme Court Rulings on Land Ownership Disputes", 
-                author: "Adv. James Mwangi",
-                date: "Nov 18, 2025",
-                category: "Property Law"
-              },
-              { 
-                title: "Understanding the Employment Act Amendments 2025", 
-                author: "Adv. Grace Njeri",
-                date: "Nov 15, 2025",
-                category: "Labour Law"
-              }
-              ].map((article, i) => (
-                <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
-                <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium">
-                  {article.category}
-                </span>
-                <h3 className="text-sm font-semibold text-slate-900 mt-3 mb-2 leading-snug">
-                  {article.title}
-                </h3>
-                <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
-                  <span>{article.author}</span>
-                  <span>{article.date}</span>
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 mb-1">
+                    Legal Guides and Insights
+                  </h2>
+                  <p className="text-xs text-slate-600">
+                    Expert articles and guides to help you understand Kenyan law
+                  </p>
                 </div>
                 <Link 
                   to="/resources" 
-                  className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium inline-flex items-center"
                 >
-                  Read article <ArrowRight className="ml-1 h-3 w-3" />
+                  View all <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              
+              {loadingArticles ? (
+                <div className="grid md:grid-cols-3 gap-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-white rounded border border-slate-300 p-4 animate-pulse">
+                      <div className="h-4 bg-slate-200 rounded w-20 mb-3"></div>
+                      <div className="h-5 bg-slate-200 rounded mb-2"></div>
+                      <div className="h-5 bg-slate-200 rounded mb-3"></div>
+                      <div className="h-3 bg-slate-200 rounded w-32"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : featuredArticles.length > 0 ? (
+                <div className="grid md:grid-cols-3 gap-4">
+                  {featuredArticles.map((article) => {
+                    const metadata = extractMetadata(article.content);
+                    const authorName = article.User 
+                      ? `${article.User.firstName} ${article.User.lastName}`
+                      : 'Wakili Pro Team';
+                    const category = metadata.category || 'Legal Insights';
+                    const readTime = Math.ceil(article.content.length / 1000);
+                    
+                    return (
+                      <div key={article.id} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
+                        <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium">
+                          {category}
+                        </span>
+                        <h3 className="text-sm font-semibold text-slate-900 mt-3 mb-2 leading-snug line-clamp-2">
+                          {article.title}
+                        </h3>
+                        <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
+                          <span>{authorName}</span>
+                          <span>{readTime} min read</span>
+                        </div>
+                        <Link 
+                          to={`/resources/article/${article.id}`}
+                          className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
+                        >
+                          Read article <ArrowRight className="ml-1 h-3 w-3" />
+                        </Link>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-3 gap-4">
+                  {/* Fallback sample articles if no real articles exist */}
+                  {[
+                    { 
+                      title: "New Data Protection Regulations: What Businesses Need to Know", 
+                      author: "Dr. Sarah Kamau",
+                      date: "Nov 20, 2025",
+                      category: "Corporate Law"
+                    },
+                    { 
+                      title: "Recent Supreme Court Rulings on Land Ownership Disputes", 
+                      author: "Adv. James Mwangi",
+                      date: "Nov 18, 2025",
+                      category: "Property Law"
+                    },
+                    { 
+                      title: "Understanding the Employment Act Amendments 2025", 
+                      author: "Adv. Grace Njeri",
+                      date: "Nov 15, 2025",
+                      category: "Labour Law"
+                    }
+                  ].map((article, i) => (
+                    <div key={i} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
+                      <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium">
+                        {article.category}
+                      </span>
+                      <h3 className="text-sm font-semibold text-slate-900 mt-3 mb-2 leading-snug">
+                        {article.title}
+                      </h3>
+                      <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
+                        <span>{article.author}</span>
+                        <span>{article.date}</span>
+                      </div>
+                      <Link 
+                        to="/resources" 
+                        className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
+                      >
+                        Read article <ArrowRight className="ml-1 h-3 w-3" />
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800">
@@ -493,14 +538,14 @@ export const LandingPage: React.FC = () => {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <Link to="/faq" className="hover:text-white transition-colors">
                     FAQs
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <Link to="/blog" className="hover:text-white transition-colors">
                     Blog
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -508,24 +553,24 @@ export const LandingPage: React.FC = () => {
               <h4 className="text-white text-xs font-semibold mb-3">Company</h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <Link to="/about" className="hover:text-white transition-colors">
                     About Us
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <Link to="/contact" className="hover:text-white transition-colors">
                     Contact
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <Link to="/privacy" className="hover:text-white transition-colors">
                     Privacy Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <Link to="/terms" className="hover:text-white transition-colors">
                     Terms of Service
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
