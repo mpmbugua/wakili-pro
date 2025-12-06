@@ -49,6 +49,7 @@ import { PublicLawyerProfile } from './pages/PublicLawyerProfile';
 import ConsultationsPage from './pages/ConsultationsPage';
 import { NewConsultationPage } from './pages/NewConsultationPage';
 import { CalendarPage } from './pages/CalendarPage';
+import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import MessagesPage from './pages/MessagesPage';
 import DocumentsPage from './pages/DocumentsPage';
@@ -300,6 +301,14 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <CalendarPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/subscriptions" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <SubscriptionsPage />
                 </ProtectedRoute>
               } 
             />
