@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useEventTracking } from '../hooks/useAnalytics';
 import axiosInstance from '../lib/axios';
 
 interface Lawyer {
@@ -230,6 +231,7 @@ const locations = [
 export const LawyersBrowse: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
+  const { trackEvent, trackClick } = useEventTracking();
   const [selectedSpecialty, setSelectedSpecialty] = useState('All Specialties');
   const [selectedLocation, setSelectedLocation] = useState('All Locations');
   const [sortBy, setSortBy] = useState<'rating' | 'price' | 'experience'>('rating');
@@ -361,7 +363,17 @@ export const LawyersBrowse: React.FC = () => {
               </label>
               <select
                 value={selectedSpecialty}
-                onChange={(e) => setSelectedSpecialty(e.target.value)}
+                onChange={(e) => {
+                  const specialty = e.target.value;
+                  setSelectedSpecialty(specialty);
+                  // Track specialty filter selection
+                  if (specialty !== 'All Specialties') {
+                    trackEvent('CLICK', 'filter_specialty', { 
+                      page: 'lawyers_browse',
+                      specialty 
+                    });
+                  }
+                }}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 {specialties.map(specialty => (
@@ -377,7 +389,17 @@ export const LawyersBrowse: React.FC = () => {
               </label>
               <select
                 value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
+                onChange={(e) => {
+                  const location = e.target.value;
+                  setSelectedLocation(location);
+                  // Track location filter selection
+                  if (location !== 'All Locations') {
+                    trackEvent('CLICK', 'filter_location', { 
+                      page: 'lawyers_browse',
+                      location 
+                    });
+                  }
+                }}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 {locations.map(location => (
@@ -393,7 +415,15 @@ export const LawyersBrowse: React.FC = () => {
               </label>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'rating' | 'price' | 'experience')}
+                onChange={(e) => {
+                  const sortOption = e.target.value as 'rating' | 'price' | 'experience';
+                  setSortBy(sortOption);
+                  // Track sort selection
+                  trackEvent('CLICK', 'sort_lawyers', { 
+                    page: 'lawyers_browse',
+                    sortBy: sortOption 
+                  });
+                }}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="rating">Highest Rated</option>
@@ -488,7 +518,16 @@ export const LawyersBrowse: React.FC = () => {
                   </div>
                   
                   <button
-                    onClick={() => navigate(`/lawyers/${lawyer.id}`)}
+                    onClick={() => {
+                      // Track lawyer card click
+                      trackClick('lawyer_card', { 
+                        lawyerId: lawyer.userId,
+                        lawyerName: lawyer.name,
+                        specialty: lawyer.specialty,
+                        page: 'lawyers_browse'
+                      });
+                      navigate(`/lawyers/${lawyer.id}`);
+                    }}
                     className="w-full px-4 py-2 border border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition text-sm"
                   >
                     View Full Profile

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import axiosInstance from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import { useEventTracking, useConversionTracking } from '../hooks/useAnalytics';
 
 interface ServiceRequestForm {
   serviceTitle: string;
@@ -54,6 +55,8 @@ export const ServiceRequestPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthStore();
+  const { trackFormStart, trackFormSubmit } = useEventTracking();
+  const { trackConversion } = useConversionTracking();
 
   // Redirect lawyers - they quote on service requests, they don't submit them
   useEffect(() => {
@@ -176,6 +179,13 @@ export const ServiceRequestPage: React.FC = () => {
       return;
     }
 
+    // Track form submission attempt
+    trackFormSubmit('service_request_form', {
+      serviceCategory: derivedCategory,
+      urgency: formData.urgency,
+      hasDocuments: formData.documents.length > 0
+    });
+
     // Get phone number for M-Pesa commitment fee payment
     const phoneNumber = prompt('Enter your M-Pesa phone number for KES 500 commitment fee (format: 254XXXXXXXXX):');
     
@@ -212,6 +222,9 @@ export const ServiceRequestPage: React.FC = () => {
       const createResponse = await axiosInstance.post('/service-requests', requestData);
 
       if (createResponse.data.success) {
+        // Track successful service request conversion
+        trackConversion('SERVICE_REQUEST', 500);
+        
         alert(`Service request submitted!\n\nM-Pesa payment request for KES 500 commitment fee sent to ${phoneNumber}\n\nPlease complete the payment on your phone.\n\nYou will receive 3 quotes from qualified lawyers within 12 hours.`);
         navigate('/dashboard');
       } else {
@@ -370,7 +383,13 @@ export const ServiceRequestPage: React.FC = () => {
                     type="text"
                     required
                     value={formData.serviceTitle}
-                    onChange={(e) => setFormData(prev => ({ ...prev, serviceTitle: e.target.value }))}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, serviceTitle: e.target.value }));
+                      // Track form start on first input
+                      if (!formData.serviceTitle && e.target.value) {
+                        trackFormStart('service_request_form');
+                      }
+                    }}
                     placeholder="e.g., Land Title Transfer, Company Registration, Residential Lease Agreement"
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />

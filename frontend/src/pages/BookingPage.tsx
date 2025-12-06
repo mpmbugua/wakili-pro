@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, Clock, Video, DollarSign, ArrowLeft, Phone } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useEventTracking, useConversionTracking } from '../hooks/useAnalytics';
 import axiosInstance from '../lib/axios';
 
 export const BookingPage: React.FC = () => {
@@ -10,6 +11,8 @@ export const BookingPage: React.FC = () => {
   const location = useLocation();
   const locationState = location.state as { lawyerName?: string; hourlyRate?: number; specialty?: string; profileImage?: string } | null;
   const { isAuthenticated, user, refreshAuth } = useAuthStore();
+  const { trackFormStart, trackFormSubmit } = useEventTracking();
+  const { trackConversion } = useConversionTracking();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,6 +75,14 @@ export const BookingPage: React.FC = () => {
     setLoading(true);
     setError(null);
 
+    // Track form submission
+    trackFormSubmit('booking_form', {
+      bookingType,
+      consultationType: formData.consultationType,
+      lawyerId,
+      lawyerName
+    });
+
     console.log('Form submitted with data:', formData);
     console.log('Lawyer ID:', lawyerId);
 
@@ -117,6 +128,9 @@ export const BookingPage: React.FC = () => {
         });
 
         if (paymentResponse.data.success) {
+          // Track successful booking conversion
+          trackConversion('BOOKING', lawyerRate);
+          
           alert(`Consultation booked successfully!\n\nM-Pesa payment request sent to ${phoneNumber}\n\nPlease complete the payment on your phone.`);
           navigate('/consultations');
         } else {
@@ -275,7 +289,10 @@ export const BookingPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => setBookingType('immediate')}
+                    onClick={() => {
+                      setBookingType('immediate');
+                      trackFormStart('booking_form_immediate');
+                    }}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       bookingType === 'immediate'
                         ? 'border-blue-500 bg-blue-50 shadow-md'
@@ -297,7 +314,10 @@ export const BookingPage: React.FC = () => {
                   
                   <button
                     type="button"
-                    onClick={() => setBookingType('scheduled')}
+                    onClick={() => {
+                      setBookingType('scheduled');
+                      trackFormStart('booking_form_scheduled');
+                    }}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       bookingType === 'scheduled'
                         ? 'border-blue-500 bg-blue-50 shadow-md'

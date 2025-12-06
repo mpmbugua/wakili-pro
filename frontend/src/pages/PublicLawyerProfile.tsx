@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useEventTracking } from '../hooks/useAnalytics';
 import { WakiliLogo } from '../components/ui/WakiliLogo';
 import axiosInstance from '../lib/axios';
 import {
@@ -52,6 +53,7 @@ export const PublicLawyerProfile: React.FC = () => {
   const { lawyerId } = useParams<{ lawyerId: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
+  const { trackLawyerView } = useEventTracking();
   const [lawyer, setLawyer] = useState<PublicLawyerData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -106,6 +108,13 @@ export const PublicLawyerProfile: React.FC = () => {
       fetchLawyer();
     }
   }, [lawyerId]);
+
+  // Track lawyer profile view
+  useEffect(() => {
+    if (lawyer) {
+      trackLawyerView(lawyer.userId, lawyer.name);
+    }
+  }, [lawyer, trackLawyerView]);
 
   const handleBookConsultation = () => {
     if (!lawyer) return;

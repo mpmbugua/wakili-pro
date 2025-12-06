@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { EmergencyCallButton } from './components/EmergencyCallButton';
+import { AnalyticsTracker } from './components/AnalyticsTracker';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuthStore } from './store/authStore';
+import { usePageTracking, useScrollTracking } from './hooks/useAnalytics';
 import { AppShell } from './components/layout/AppShell';
 import { GlobalLayout } from './components/layout/GlobalLayout';
 import { LandingPage } from './pages/LandingPage';
@@ -185,6 +187,7 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Router>
+        <AnalyticsTracker />
         <Routes>
           {/* Admin Login Route - Standalone */}
           <Route 
