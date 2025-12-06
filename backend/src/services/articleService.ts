@@ -122,9 +122,12 @@ export async function getArticles(
         title: article.title,
         content: cleanContent,
         author: article.User,
+        authorId: article.authorId,
         isPremium: article.isPremium,
         isPublished: article.isPublished,
         sourceUrl: article.fileName, // fileName field stores source URL
+        createdAt: new Date().toISOString(), // Fallback for missing timestamp
+        updatedAt: new Date().toISOString(), // Fallback for missing timestamp
         metadata
       };
     });
