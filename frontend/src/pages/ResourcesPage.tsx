@@ -7,6 +7,13 @@ interface Article {
   id: string;
   title: string;
   content: string;
+  authorId: string;
+  User?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   metadata?: {
     aiSummary?: string;
     category?: string;
@@ -52,7 +59,9 @@ export const ResourcesPage: React.FC = () => {
     description: article.metadata?.aiSummary || article.content.substring(0, 150) + '...',
     category: article.metadata?.category || 'Legal',
     readTime: `${Math.ceil(article.content.length / 1000)} min read`,
-    link: `/resources/article/${article.id}`
+    link: `/resources/article/${article.id}`,
+    authorId: article.authorId,
+    authorName: article.User ? `${article.User.firstName} ${article.User.lastName}` : 'Wakili Pro'
   }));
 
   const faqs = [
@@ -170,7 +179,17 @@ export const ResourcesPage: React.FC = () => {
                   <h3 className="text-base font-semibold text-slate-900 mb-2">{guide.title}</h3>
                   <p className="text-sm text-slate-600 mb-4 line-clamp-3">{guide.description}</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">{guide.readTime}</span>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-slate-500">{guide.readTime}</span>
+                      {guide.authorName && guide.authorId && (
+                        <Link 
+                          to={`/lawyers/${guide.authorId}`}
+                          className="text-xs text-blue-600 hover:text-blue-700 mt-1"
+                        >
+                          By {guide.authorName}
+                        </Link>
+                      )}
+                    </div>
                     <Link 
                       to={guide.link} 
                       className="text-blue-600 text-sm font-semibold hover:text-blue-700 inline-flex items-center transition-colors"

@@ -20,7 +20,8 @@
     "seed:users": "ts-node ./prisma/seedUsers.ts",
     "seed:lawyers": "ts-node ./prisma/seedLawyerSubscriptions.ts",
     "seed:docs": "ts-node ./prisma/seedDocumentTemplates.ts",
-    "seed:all": "npm run seed:users && npm run seed:lawyers && npm run seed:docs",
+    "seed:articles": "ts-node ./prisma/seed-articles.ts",
+    "seed:all": "npm run seed:users && npm run seed:lawyers && npm run seed:docs && npm run seed:articles",
     "seed:auto": "ts-node ./prisma/seedAll.ts"
   },
   "prisma": {
