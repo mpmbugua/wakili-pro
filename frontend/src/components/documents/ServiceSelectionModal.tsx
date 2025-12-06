@@ -133,7 +133,7 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
                       step >= num
-                        ? 'bg-blue-600 text-white shadow-lg'
+                        ? 'bg-blue-100 text-blue-700 shadow-lg'
                         : 'bg-slate-200 text-slate-500'
                     }`}
                   >
@@ -146,7 +146,7 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
                 {num < 2 && (
                   <div
                     className={`flex-1 h-1 mx-2 rounded transition-all ${
-                      step > num ? 'bg-blue-600' : 'bg-slate-200'
+                      step > num ? 'bg-blue-100' : 'bg-slate-200'
                     }`}
                   />
                 )}
@@ -268,7 +268,7 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
               <button
                 onClick={handleNext}
                 disabled={step === 1 && !selectedService}
-                className="px-8 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium shadow-lg"
+                className="px-8 py-2.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium shadow-lg"
               >
                 Continue
               </button>

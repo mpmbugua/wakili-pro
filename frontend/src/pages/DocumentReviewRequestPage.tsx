@@ -229,7 +229,7 @@ export const DocumentReviewRequestPage: React.FC = () => {
               } ${tier.recommended ? 'ring-2 ring-blue-200' : ''}`}
             >
               {tier.recommended && (
-                <div className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">
+                <div className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">
                   RECOMMENDED
                 </div>
               )}

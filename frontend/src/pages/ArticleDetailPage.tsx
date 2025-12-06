@@ -77,7 +77,7 @@ export const ArticleDetailPage: React.FC = () => {
             <p className="text-sm text-slate-600 mb-6">{error || 'The article you are looking for does not exist.'}</p>
             <Link 
               to="/resources"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded hover:bg-blue-700"
+              className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded hover:bg-blue-200"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Resources
@@ -205,7 +205,7 @@ export const ArticleDetailPage: React.FC = () => {
           <div className="flex flex-wrap gap-3">
             <Link 
               to="/ai"
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded hover:bg-blue-200"
             >
               Ask AI Assistant
             </Link>

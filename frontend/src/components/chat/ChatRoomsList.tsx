@@ -105,7 +105,7 @@ export const ChatRoomsList: React.FC = () => {
             <p className="text-red-600 mb-4">{error}</p>
             <button
               onClick={loadChatRooms}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-4 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-100"
             >
               Try Again
             </button>
@@ -134,7 +134,7 @@ export const ChatRoomsList: React.FC = () => {
                   <div className="flex items-center space-x-3">
                     {/* Avatar */}
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                         <span className="text-white font-medium text-lg">
                           {otherParticipant.firstName.charAt(0)}{otherParticipant.lastName.charAt(0)}
                         </span>
@@ -149,7 +149,7 @@ export const ChatRoomsList: React.FC = () => {
                         </p>
                         <div className="flex items-center space-x-2">
                           {room.unreadCount > 0 && (
-                            <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
+                            <span className="bg-blue-100 text-blue-700 text-xs rounded-full px-2 py-1">
                               {room.unreadCount}
                             </span>
                           )}
@@ -198,7 +198,7 @@ export const ChatRoomsList: React.FC = () => {
       <div className="p-4 border-t bg-gray-50">
         <button
           onClick={() => createChatRoom('demo_booking_123')}
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          className="w-full px-4 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-100 transition-colors"
         >
           Create Demo Chat Room
         </button>

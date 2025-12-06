@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CreditCard, Receipt, Download, Filter, Calendar, TrendingUp, DollarSign, CheckCircle, Clock, XCircle, Eye } from 'lucide-react';
 
 interface Transaction {
@@ -187,7 +187,7 @@ export const BillingPage: React.FC = () => {
               onClick={() => setFilterStatus('all')}
               className={`px-4 py-2 rounded-lg transition ${
                 filterStatus === 'all'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-100 text-blue-700'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >

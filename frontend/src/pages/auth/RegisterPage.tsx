@@ -39,7 +39,7 @@ export const RegisterPage: React.FC = () => {
           <PasswordPolicyHint />
           <PasswordField label="Password" value={form.password} onChange={handleChange} error={passwordError || undefined} />
           {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Register</button>
+          <button type="submit" className="w-full bg-blue-100 text-blue-700 py-2 rounded hover:bg-blue-200 transition">Register</button>
         </form>
       )}
     </div>

@@ -413,7 +413,7 @@ export default function Dashboard() {
                 {recentActivity.map((activity, index) => (
                   <div key={activity.id} className="flex gap-3">
                     <div className="flex-shrink-0 mt-1">
-                      <div className={`h-2 w-2 rounded-full ${index === 0 ? 'bg-blue-600' : 'bg-slate-300'}`}></div>
+                      <div className={`h-2 w-2 rounded-full ${index === 0 ? 'bg-blue-100' : 'bg-slate-300'}`}></div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-slate-900 leading-relaxed">{activity.action}</p>

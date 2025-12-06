@@ -345,7 +345,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({ lawyer, onSuccess, onC
           <button
             type="submit"
             disabled={!selectedSlot || loading || paymentStatus === 'pending'}
-            className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+            className="flex-1 bg-blue-100 text-blue-700 py-3 px-6 rounded-lg font-semibold hover:bg-blue-200 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
           >
             {loading ? (
               <>

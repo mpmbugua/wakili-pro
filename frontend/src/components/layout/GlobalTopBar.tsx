@@ -49,7 +49,7 @@ export const GlobalTopBar: React.FC<GlobalTopBarProps> = ({ onMenuClick }) => {
                 <span className="text-xs text-slate-700 hidden sm:inline">Hi, {user?.firstName}</span>
                 <Link 
                   to="/dashboard" 
-                  className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  className="px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                 >
                   Dashboard
                 </Link>
@@ -70,7 +70,7 @@ export const GlobalTopBar: React.FC<GlobalTopBarProps> = ({ onMenuClick }) => {
                 </Link>
                 <Link 
                   to="/register" 
-                  className="px-4 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
+                  className="px-4 py-1.5 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors font-medium"
                 >
                   Get Started
                 </Link>

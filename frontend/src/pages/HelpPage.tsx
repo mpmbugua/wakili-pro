@@ -124,7 +124,7 @@ export const HelpPage: React.FC = () => {
                 onClick={() => setActiveCategory(category.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   activeCategory === category.id
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-100 text-blue-700'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
@@ -173,7 +173,7 @@ export const HelpPage: React.FC = () => {
             </p>
             <button 
               onClick={() => window.open('/docs/getting-started.md', '_blank')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
             >
               View Guide
             </button>

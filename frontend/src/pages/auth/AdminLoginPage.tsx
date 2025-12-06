@@ -80,11 +80,11 @@ export const AdminLoginPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-blue-600 p-4 rounded-2xl shadow-lg">
+            <div className="bg-blue-100 p-4 rounded-2xl shadow-lg">
               <Shield className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Admin Portal</h1>
+          <h1 className="text-3xl font-bold text-blue-700 mb-2">Admin Portal</h1>
           <p className="text-blue-200">Wakili Pro Administration</p>
         </div>
 
@@ -163,7 +163,7 @@ export const AdminLoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-4 focus:ring-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-blue-100 text-blue-700 py-3 px-4 rounded-lg font-medium hover:bg-blue-200 focus:ring-4 focus:ring-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -201,7 +201,7 @@ export const AdminLoginPage: React.FC = () => {
         <div className="text-center mt-6">
           <button
             onClick={() => navigate('/')}
-            className="text-blue-200 hover:text-white transition-colors text-sm"
+            className="text-blue-200 hover:text-blue-700 transition-colors text-sm"
           >
             ← Back to Wakili Pro
           </button>

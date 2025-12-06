@@ -289,7 +289,7 @@ export const ArticleManagementPage: React.FC = () => {
                   setEditingArticleId(undefined);
                   setShowEditor(true);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
               >
                 <Plus className="h-5 w-5" />
                 New Article
@@ -303,19 +303,19 @@ export const ArticleManagementPage: React.FC = () => {
               <span className="text-sm text-slate-600">{selectedArticles.length} selected</span>
               <button
                 onClick={() => handleBulkAction('publish')}
-                className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                className="px-3 py-1 text-sm bg-green-600 text-blue-700 rounded hover:bg-green-700"
               >
                 Publish
               </button>
               <button
                 onClick={() => handleBulkAction('unpublish')}
-                className="px-3 py-1 text-sm bg-amber-600 text-white rounded hover:bg-amber-700"
+                className="px-3 py-1 text-sm bg-amber-600 text-blue-700 rounded hover:bg-amber-700"
               >
                 Unpublish
               </button>
               <button
                 onClick={() => handleBulkAction('delete')}
-                className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                className="px-3 py-1 text-sm bg-red-600 text-blue-700 rounded hover:bg-red-700"
               >
                 Delete
               </button>

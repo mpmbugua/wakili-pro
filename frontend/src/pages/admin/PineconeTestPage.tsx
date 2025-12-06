@@ -41,7 +41,7 @@ const Button = ({
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${className}`}
+    className={`px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${className}`}
   >
     {children}
   </button>
@@ -818,15 +818,15 @@ export const PineconeTestPage = () => {
                 
                 <div className="space-y-2 text-sm text-blue-700">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-blue-100 rounded-full animate-pulse"></div>
                     <span>Crawling Kenya Law fileadmin directories...</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                    <div className="w-2 h-2 bg-blue-100 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
                     <span>Discovering PDF documents...</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                    <div className="w-2 h-2 bg-blue-100 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
                     <span>Processing and ingesting files...</span>
                   </div>
                 </div>

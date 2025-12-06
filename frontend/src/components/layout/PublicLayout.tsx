@@ -40,7 +40,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                   </span>
                   <Link 
                     to="/dashboard" 
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
                   >
                     Dashboard
                   </Link>
@@ -61,7 +61,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                   </Link>
                   <Link 
                     to="/register" 
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+                    className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors font-medium"
                   >
                     Get Started
                   </Link>

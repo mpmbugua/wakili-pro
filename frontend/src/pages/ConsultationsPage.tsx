@@ -187,7 +187,7 @@ export const ConsultationsPage: React.FC = () => {
           onClick={() => setFilter('all')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
             filter === 'all'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-blue-100 text-white'
               : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
           }`}
         >
@@ -197,7 +197,7 @@ export const ConsultationsPage: React.FC = () => {
           onClick={() => setFilter('upcoming')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
             filter === 'upcoming'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-blue-100 text-white'
               : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
           }`}
         >
@@ -207,7 +207,7 @@ export const ConsultationsPage: React.FC = () => {
           onClick={() => setFilter('past')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
             filter === 'past'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-blue-100 text-white'
               : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
           }`}
         >
@@ -223,7 +223,7 @@ export const ConsultationsPage: React.FC = () => {
           <p className="text-slate-600 mb-6">You don't have any {filter !== 'all' ? filter : ''} consultations yet.</p>
           <a
             href="/lawyers"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+            className="inline-flex items-center px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-medium"
           >
             Find a Lawyer
           </a>
@@ -284,7 +284,7 @@ export const ConsultationsPage: React.FC = () => {
                     </button>
                     <button 
                       onClick={() => handleConfirmBooking(consultation.id)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium"
+                      className="px-4 py-2 bg-green-600 text-blue-700 rounded-lg hover:bg-green-700 transition text-sm font-medium"
                     >
                       Confirm Booking
                     </button>
@@ -313,7 +313,7 @@ export const ConsultationsPage: React.FC = () => {
                         href={consultation.meetingLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                        className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium"
                       >
                         Join Meeting
                       </a>

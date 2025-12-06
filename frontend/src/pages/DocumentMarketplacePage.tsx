@@ -175,7 +175,7 @@ const DocumentMarketplacePage: React.FC = () => {
               <div className="mb-2 text-sm text-gray-500">Type: {template.type}</div>
               <div className="mb-2 text-sm text-gray-500">Price: KES {template.priceKES}</div>
               <button
-                className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-2 px-4 py-2 bg-blue-100 text-white rounded hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => setSelectedTemplate(template)}
                 aria-label={`Purchase ${template.name}`}
                 disabled={isPurchasing || (paymentInfo && paymentInfo.status === 'PENDING')}

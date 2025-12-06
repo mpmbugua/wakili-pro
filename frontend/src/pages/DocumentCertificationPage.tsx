@@ -254,7 +254,7 @@ const DocumentCertificationPage: React.FC = () => {
                         e.stopPropagation();
                         setSelectedDoc(doc);
                       }}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700"
+                      className="flex-1 px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded-md hover:bg-blue-200"
                     >
                       Review & Certify
                     </button>
@@ -308,7 +308,7 @@ const DocumentCertificationPage: React.FC = () => {
                     <button
                       onClick={() => handleCertify(selectedDoc.id)}
                       disabled={certifying === selectedDoc.id}
-                      className="w-full px-4 py-3 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+                      className="w-full px-4 py-3 bg-blue-100 text-blue-700 text-sm font-semibold rounded-md hover:bg-blue-200 disabled:opacity-50 flex items-center justify-center space-x-2"
                     >
                       {certifying === selectedDoc.id ? (
                         <>

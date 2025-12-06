@@ -215,7 +215,7 @@ export const BookingDetails: React.FC = () => {
             <p className="text-red-800 text-center">{error || 'Booking not found'}</p>
             <button
               onClick={() => navigate('/bookings')}
-              className="mt-4 mx-auto block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+              className="mt-4 mx-auto block bg-blue-100 text-blue-700 px-6 py-2 rounded-lg hover:bg-blue-200"
             >
               Back to Bookings
             </button>

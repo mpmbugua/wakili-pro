@@ -497,7 +497,7 @@ export const AIAssistant: React.FC = () => {
                             </div>
                             <button
                               onClick={() => handleRecommendationClick(rec.type, rec.title)}
-                              className="ml-4 px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition whitespace-nowrap"
+                              className="ml-4 px-4 py-2 bg-blue-100 text-blue-700 text-xs font-medium rounded-lg hover:bg-blue-200 transition whitespace-nowrap"
                             >
                               {rec.cta}
                             </button>

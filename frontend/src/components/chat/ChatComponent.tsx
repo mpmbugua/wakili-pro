@@ -94,7 +94,7 @@ interface ChatComponentProps {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b bg-gray-50">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
             <span className="text-white font-medium">
               {otherParticipant.firstName.charAt(0)}{otherParticipant.lastName.charAt(0)}
             </span>
@@ -139,7 +139,7 @@ interface ChatComponentProps {
               <div
                 className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                   message.senderId === user?.id
-                    ? 'bg-blue-500 text-white'
+                    ? 'bg-blue-100 text-blue-700'
                     : 'bg-gray-200 text-gray-900'
                 }`}
               >
@@ -187,7 +187,7 @@ interface ChatComponentProps {
           <button
             onClick={sendMessage}
             disabled={!newMessage.trim() || !isConnected}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-100 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Send
           </button>

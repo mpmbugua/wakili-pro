@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrendingUp, BarChart3, Users, DollarSign, FileText, Clock, ArrowUp, ArrowDown, Calendar, Loader } from 'lucide-react';
 import axiosInstance from '../lib/axios';
 
@@ -84,7 +84,7 @@ export const AnalyticsPage: React.FC = () => {
                 disabled={loading}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${
                   timeRange === range
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-100 text-blue-700'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >

@@ -188,7 +188,7 @@ const DocumentReviewDashboard: React.FC = () => {
             <p className="text-gray-600 mb-6">Upload a document to get started with AI review or certification</p>
             <button
               onClick={() => navigate('/documents')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
             >
               Upload Document
             </button>
@@ -290,7 +290,7 @@ const DocumentReviewDashboard: React.FC = () => {
                       <a
                         href={review.certificationLetterUrl}
                         download
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center"
+                        className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium flex items-center"
                       >
                         <Download className="h-4 w-4 mr-2" />
                         Download Certificate

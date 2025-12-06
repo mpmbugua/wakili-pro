@@ -366,7 +366,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
               <AlertCircle className="h-5 w-5 text-blue-600" />
               <h3 className="text-lg font-semibold text-gray-900">Active Issues</h3>
             </div>
-            <span className="bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full">
+            <span className="bg-blue-100 text-blue-700 text-sm font-bold px-3 py-1 rounded-full">
               {stats.activeIssues}
             </span>
           </div>
