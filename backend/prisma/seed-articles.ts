@@ -60,44 +60,100 @@ const articles = [
     content: `
 <!--METADATA:{"category":"Corporate Law","tags":["Data Protection","Privacy","Compliance","GDPR","Business"],"aiSummary":"Kenya's Data Protection Act, 2019 has transformed how businesses handle personal information. Learn about compliance requirements, penalties for violations, and best practices for protecting customer data in the digital age.","qualityScore":95,"source":"lawyer","readTime":"12 min read"}-->
 
-<h2>Introduction</h2>
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 3rem 2rem; border-radius: 12px; margin-bottom: 3rem; color: white;">
+  <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; line-height: 1.2;">Understanding Kenya's Data Protection Act, 2019</h1>
+  <p style="font-size: 1.25rem; opacity: 0.95; line-height: 1.6;">A comprehensive guide for businesses navigating data protection compliance</p>
+</div>
 
-<p>Kenya's Data Protection Act, 2019, which came into force in November 2019, has fundamentally changed how businesses and organizations handle personal data. As a corporate lawyer who has advised hundreds of companies on compliance, I've seen firsthand the challenges and opportunities this legislation presents.</p>
+<h2 style="font-size: 2rem; font-weight: 700; color: #1e293b; margin-top: 3rem; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6; padding-left: 1rem;">Introduction</h2>
 
-<p>This comprehensive guide will help you understand your obligations, avoid costly penalties, and build trust with your customers through proper data protection practices.</p>
+<p style="font-size: 1.125rem; line-height: 1.8; color: #334155; margin-bottom: 1.5rem;">Kenya's <strong style="color: #1e40af;">Data Protection Act, 2019</strong>, which came into force in November 2019, has fundamentally changed how businesses and organizations handle personal data. As a corporate lawyer who has advised hundreds of companies on compliance, I've seen firsthand the challenges and opportunities this legislation presents.</p>
 
-<h2>Key Principles of the Data Protection Act</h2>
+<div style="background: #f1f5f9; border-left: 4px solid #3b82f6; padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
+  <p style="font-size: 1.125rem; line-height: 1.8; color: #334155; margin: 0;"><strong>📘 What You'll Learn:</strong> This comprehensive guide will help you understand your obligations, avoid costly penalties, and build trust with your customers through proper data protection practices.</p>
+</div>
 
-<p>The Act is built on several fundamental principles that every business must understand:</p>
+<h2 style="font-size: 2rem; font-weight: 700; color: #1e293b; margin-top: 3rem; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6; padding-left: 1rem;">Key Principles of the Data Protection Act</h2>
 
-<h3>1. Lawfulness, Fairness, and Transparency</h3>
-<p>You must process personal data lawfully, fairly, and in a transparent manner. This means:</p>
-<ul>
-  <li>Having a legitimate legal basis for collecting data</li>
-  <li>Being honest about how you'll use the information</li>
-  <li>Making your privacy policies clear and accessible</li>
-</ul>
+<p style="font-size: 1.125rem; line-height: 1.8; color: #334155; margin-bottom: 2rem;">The Act is built on <strong>six fundamental principles</strong> that every business must understand:</p>
 
-<h3>2. Purpose Limitation</h3>
-<p>Personal data must be collected for specified, explicit, and legitimate purposes. You cannot collect data "just in case" you might need it later. For example, if you collect email addresses for newsletters, you cannot later use them for marketing campaigns without explicit consent.</p>
+<div style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+  <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem; display: flex; align-items: center;">
+    <span style="background: #3b82f6; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 1.25rem;">1</span>
+    Lawfulness, Fairness, and Transparency
+  </h3>
+  <p style="font-size: 1.0625rem; line-height: 1.75; color: #475569; margin-bottom: 1rem;">You must process personal data lawfully, fairly, and in a transparent manner. This means:</p>
+  <ul style="list-style: none; padding-left: 0; margin: 0;">
+    <li style="padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; font-size: 1.0625rem; color: #475569;">✓ Having a legitimate legal basis for collecting data</li>
+    <li style="padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; font-size: 1.0625rem; color: #475569;">✓ Being honest about how you'll use the information</li>
+    <li style="padding: 0.75rem 0; font-size: 1.0625rem; color: #475569;">✓ Making your privacy policies clear and accessible</li>
+  </ul>
+</div>
 
-<h3>3. Data Minimization</h3>
-<p>Only collect data that is adequate, relevant, and limited to what is necessary. Many businesses make the mistake of requesting excessive information. Ask yourself: "Do I really need the customer's date of birth to deliver this service?"</p>
+<div style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+  <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem; display: flex; align-items: center;">
+    <span style="background: #3b82f6; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 1.25rem;">2</span>
+    Purpose Limitation
+  </h3>
+  <p style="font-size: 1.0625rem; line-height: 1.75; color: #475569; margin: 0;">Personal data must be collected for <strong>specified, explicit, and legitimate purposes</strong>. You cannot collect data "just in case" you might need it later.</p>
+  <div style="background: #fef3c7; border-left: 3px solid #f59e0b; padding: 1rem; margin-top: 1rem; border-radius: 6px;">
+    <p style="font-size: 1rem; color: #92400e; margin: 0;"><strong>💡 Example:</strong> If you collect email addresses for newsletters, you cannot later use them for marketing campaigns without explicit consent.</p>
+  </div>
+</div>
 
-<h3>4. Accuracy</h3>
-<p>You must take reasonable steps to ensure personal data is accurate and kept up to date. Implement systems that allow customers to update their information easily.</p>
+<div style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+  <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem; display: flex; align-items: center;">
+    <span style="background: #3b82f6; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 1.25rem;">3</span>
+    Data Minimization
+  </h3>
+  <p style="font-size: 1.0625rem; line-height: 1.75; color: #475569; margin: 0;">Only collect data that is <strong>adequate, relevant, and limited</strong> to what is necessary. Many businesses make the mistake of requesting excessive information.</p>
+  <div style="background: #fef3c7; border-left: 3px solid #f59e0b; padding: 1rem; margin-top: 1rem; border-radius: 6px;">
+    <p style="font-size: 1rem; color: #92400e; margin: 0;"><strong>🤔 Ask yourself:</strong> "Do I really need the customer's date of birth to deliver this service?"</p>
+  </div>
+</div>
 
-<h3>5. Storage Limitation</h3>
-<p>Don't keep personal data longer than necessary. Establish clear data retention policies. For instance, if you only need transaction data for 7 years for tax purposes, delete it after that period.</p>
+<div style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+  <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem; display: flex; align-items: center;">
+    <span style="background: #3b82f6; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 1.25rem;">4</span>
+    Accuracy
+  </h3>
+  <p style="font-size: 1.0625rem; line-height: 1.75; color: #475569; margin: 0;">You must take reasonable steps to ensure personal data is <strong>accurate and kept up to date</strong>. Implement systems that allow customers to update their information easily.</p>
+</div>
 
-<h3>6. Integrity and Confidentiality</h3>
-<p>Implement appropriate security measures to protect data against unauthorized access, loss, or damage. This includes both technical measures (encryption, firewalls) and organizational measures (staff training, access controls).</p>
+<div style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+  <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem; display: flex; align-items: center;">
+    <span style="background: #3b82f6; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 1.25rem;">5</span>
+    Storage Limitation
+  </h3>
+  <p style="font-size: 1.0625rem; line-height: 1.75; color: #475569; margin: 0;">Don't keep personal data longer than necessary. Establish clear <strong>data retention policies</strong>.</p>
+  <div style="background: #fef3c7; border-left: 3px solid #f59e0b; padding: 1rem; margin-top: 1rem; border-radius: 6px;">
+    <p style="font-size: 1rem; color: #92400e; margin: 0;"><strong>💡 Example:</strong> If you only need transaction data for 7 years for tax purposes, delete it after that period.</p>
+  </div>
+</div>
 
-<h2>Who Needs to Register with the Data Commissioner?</h2>
+<div style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+  <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem; display: flex; align-items: center;">
+    <span style="background: #3b82f6; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 1.25rem;">6</span>
+    Integrity and Confidentiality
+  </h3>
+  <p style="font-size: 1.0625rem; line-height: 1.75; color: #475569; margin-bottom: 1rem;">Implement appropriate <strong>security measures</strong> to protect data against unauthorized access, loss, or damage. This includes:</p>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+    <div style="background: #eff6ff; padding: 1rem; border-radius: 8px;">
+      <p style="font-size: 0.9375rem; color: #1e40af; font-weight: 600; margin-bottom: 0.5rem;">🔐 Technical Measures</p>
+      <p style="font-size: 0.9375rem; color: #475569; margin: 0;">Encryption, firewalls, access controls</p>
+    </div>
+    <div style="background: #eff6ff; padding: 1rem; border-radius: 8px;">
+      <p style="font-size: 0.9375rem; color: #1e40af; font-weight: 600; margin-bottom: 0.5rem;">👥 Organizational Measures</p>
+      <p style="font-size: 0.9375rem; color: #475569; margin: 0;">Staff training, security policies</p>
+    </div>
+  </div>
+</div>
 
-<p>Most businesses processing personal data must register with the Office of the Data Protection Commissioner (ODPC). This includes:</p>
+<h2 style="font-size: 2rem; font-weight: 700; color: #1e293b; margin-top: 3rem; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6; padding-left: 1rem;">Who Needs to Register with the Data Commissioner?</h2>
 
-<ul>
+<p style="font-size: 1.125rem; line-height: 1.8; color: #334155; margin-bottom: 1.5rem;">Most businesses processing personal data must register with the <strong>Office of the Data Protection Commissioner (ODPC)</strong>. This includes:</p>
+
+<ul style="font-size: 1.0625rem; line-height: 1.75; color: #475569;">
   <li>Companies with more than 5 employees</li>
   <li>Organizations processing sensitive personal data</li>
   <li>Businesses engaged in large-scale data processing</li>
