@@ -4,9 +4,9 @@ import {
   getCallLogs, 
   updateCallLogStatus,
   getCallLogStats 
-} from '../controllers/callLogController';
-import { authenticateToken } from '../middleware/authMiddleware';
-import { isAdmin } from '../middleware/roleMiddleware';
+} from '../../controllers/callLogController';
+import { authenticateToken } from '../../middleware/authMiddleware';
+import { isAdmin } from '../../middleware/roleMiddleware';
 
 const router = Router();
 
