@@ -18,7 +18,8 @@ import {
   Heart,
   Clock,
   Mail,
-  Loader
+  Loader,
+  BookOpen
 } from 'lucide-react';
 import { getFeaturedExamples } from '../data/servicePackageExamples';
 
@@ -481,22 +482,24 @@ export const LandingPage: React.FC = () => {
           </section>
 
           {/* Legal Guides and Insights */}
-          <section id="insights" className="py-8 bg-white border-b border-slate-200">
+          <section id="insights" className="py-8 bg-gradient-to-br from-blue-50 to-indigo-50 border-b border-blue-100">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
-              <div className="mb-6 flex items-center justify-between">
+              <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                    Legal Insights Blog
+                  <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                    📚 Legal Insights Blog
                   </h2>
-                  <p className="text-xs text-slate-600">
-                    Expert articles and guides written by verified lawyers - read full articles on our blog
+                  <p className="text-sm text-slate-700">
+                    Expert articles written by verified lawyers - comprehensive guides to help you understand Kenyan law
                   </p>
                 </div>
                 <Link 
                   to="/blog" 
-                  className="text-xs bg-blue-100 text-blue-700 px-4 py-2 rounded hover:bg-blue-200 font-semibold inline-flex items-center"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 font-semibold shadow-lg hover:shadow-xl transition-all text-sm"
                 >
-                  Read Our Blog <ArrowRight className="ml-1 h-3 w-3" />
+                  <BookOpen className="h-5 w-5" />
+                  Read Our Blog
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
               
@@ -518,24 +521,37 @@ export const LandingPage: React.FC = () => {
                     const authorName = article.User 
                       ? `${article.User.firstName} ${article.User.lastName}`
                       : 'Wakili Pro Team';
+                    const authorInitials = article.User
+                      ? `${article.User.firstName.charAt(0)}${article.User.lastName.charAt(0)}`
+                      : 'WP';
                     const category = metadata.category || 'Legal Insights';
                     const readTime = Math.ceil(article.content.length / 1000);
                     
                     return (
-                      <div key={article.id} className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-sm transition-all">
-                        <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium">
-                          {category}
-                        </span>
-                        <h3 className="text-sm font-semibold text-slate-900 mt-3 mb-2 leading-snug line-clamp-2">
+                      <div key={article.id} className="bg-white rounded-lg border border-slate-200 p-5 hover:border-blue-400 hover:shadow-md transition-all">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0">
+                            {authorInitials}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-slate-900 truncate">{authorName}</p>
+                            <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                              {category}
+                            </span>
+                          </div>
+                        </div>
+                        <h3 className="text-sm font-bold text-slate-900 mb-2 leading-snug line-clamp-2 hover:text-blue-600 transition-colors">
                           {article.title}
                         </h3>
-                        <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
-                          <span>{authorName}</span>
-                          <span>{readTime} min read</span>
+                        <div className="flex items-center justify-between text-xs text-slate-500 mb-3 pb-3 border-b border-slate-100">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{readTime} min read</span>
+                          </div>
                         </div>
                         <Link 
                           to={`/blog#${article.id}`}
-                          className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
+                          className="text-xs text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded inline-flex items-center font-semibold transition-colors"
                         >
                           Read full article <ArrowRight className="ml-1 h-3 w-3" />
                         </Link>

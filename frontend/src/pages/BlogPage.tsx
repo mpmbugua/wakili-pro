@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, User, Clock, ArrowRight, Tag, TrendingUp, BookOpen, Mail, Loader } from 'lucide-react';
+import { Calendar, User, Clock, ArrowRight, Tag, TrendingUp, BookOpen, Mail, Loader, FileText } from 'lucide-react';
 import axiosInstance from '../lib/axios';
 
 interface Article {
@@ -289,18 +289,53 @@ export const BlogPage: React.FC = () => {
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
-              <div className="flex items-center">
-                <User className="h-4 w-4 mr-1" />
-                {selectedArticle.User ? `${selectedArticle.User.firstName} ${selectedArticle.User.lastName}` : 'Wakili Pro'}
-              </div>
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-1" />
-                {Math.ceil(selectedArticle.content.length / 1000)} min read
-              </div>
+            {/* Author Info with Photo */}
+            <div className="flex items-center gap-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/80">
+              {selectedArticle.User && (
+                <>
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    {selectedArticle.User.firstName.charAt(0)}{selectedArticle.User.lastName.charAt(0)}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-slate-900">
+                      Written by {selectedArticle.User.firstName} {selectedArticle.User.lastName}
+                    </p>
+                    <p className="text-xs text-slate-600">
+                      {selectedArticle.metadata?.category} Specialist
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <Clock className="h-4 w-4" />
+                    {Math.ceil(selectedArticle.content.length / 1000)} min read
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </section>
+
+        {/* Quick Action Bar */}
+        <div className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-600">Need help with this legal matter?</p>
+              <div className="flex gap-2">
+                <Link 
+                  to="/lawyers"
+                  className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700"
+                >
+                  Book a Lawyer
+                </Link>
+                <Link 
+                  to="/documents"
+                  className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded hover:bg-blue-200"
+                >
+                  Get Documents
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Article Content */}
         <article className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
@@ -312,38 +347,67 @@ export const BlogPage: React.FC = () => {
           {/* Author Profile Link */}
           {selectedArticle.User && (
             <div className="mt-12 pt-8 border-t border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">About the Author</h3>
-              <p className="text-slate-600 mb-4">
-                {selectedArticle.User.firstName} {selectedArticle.User.lastName} is a {selectedArticle.metadata?.category} specialist.
-              </p>
-              <Link 
-                to={`/lawyers/${selectedArticle.authorId}`}
-                className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded hover:bg-blue-200"
-              >
-                View Profile & Book Consultation
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+              <div className="flex items-start gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg flex-shrink-0">
+                  {selectedArticle.User.firstName.charAt(0)}{selectedArticle.User.lastName.charAt(0)}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                    {selectedArticle.User.firstName} {selectedArticle.User.lastName}
+                  </h3>
+                  <p className="text-sm text-slate-600 mb-4">
+                    {selectedArticle.metadata?.category} Specialist | Expert legal guidance for your {selectedArticle.metadata?.category?.toLowerCase()} needs
+                  </p>
+                  <Link 
+                    to={`/lawyers/${selectedArticle.authorId}`}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded hover:bg-blue-700 shadow-md"
+                  >
+                    View Profile & Book Consultation
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* CTA Section */}
-          <div className="mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-8 text-center">
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">Need Legal Assistance?</h3>
-            <p className="text-slate-600 mb-6">
-              Our verified lawyers are ready to help you with your legal needs.
+          {/* Enhanced CTA Section */}
+          <div className="mt-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-8 text-center text-white shadow-xl">
+            <h3 className="text-2xl font-bold mb-3">Ready to Take Action?</h3>
+            <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
+              Don't navigate legal matters alone. Get expert help from our verified lawyers, AI assistant, or browse our comprehensive legal services.
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <Link 
-                to="/ai"
-                className="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded hover:bg-blue-200"
-              >
-                Ask AI Assistant
-              </Link>
+            <div className="grid md:grid-cols-4 gap-4">
               <Link 
                 to="/lawyers"
-                className="px-4 py-2 bg-white border border-slate-300 text-slate-700 text-sm font-semibold rounded hover:bg-slate-50"
+                className="px-6 py-4 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all shadow-md group"
               >
-                Find a Lawyer
+                <User className="h-6 w-6 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                <span className="block font-semibold text-sm">Book a Lawyer</span>
+                <span className="block text-xs text-slate-600 mt-1">Verified experts</span>
+              </Link>
+              <Link 
+                to="/documents"
+                className="px-6 py-4 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all shadow-md group"
+              >
+                <BookOpen className="h-6 w-6 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                <span className="block font-semibold text-sm">Document Review</span>
+                <span className="block text-xs text-slate-600 mt-1">AI + Lawyer review</span>
+              </Link>
+              <Link 
+                to="/marketplace"
+                className="px-6 py-4 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all shadow-md group"
+              >
+                <FileText className="h-6 w-6 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                <span className="block font-semibold text-sm">Legal Documents</span>
+                <span className="block text-xs text-slate-600 mt-1">Ready templates</span>
+              </Link>
+              <Link 
+                to="/services"
+                className="px-6 py-4 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all shadow-md group"
+              >
+                <Tag className="h-6 w-6 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                <span className="block font-semibold text-sm">Service Packages</span>
+                <span className="block text-xs text-slate-600 mt-1">Complete solutions</span>
               </Link>
             </div>
           </div>
