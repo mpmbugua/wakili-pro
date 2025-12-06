@@ -26,11 +26,16 @@ const Login: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Get redirect path from location state or default to dashboard
-  // Handle both string format ('/documents') and object format ({ pathname: '/documents' })
-  const fromState = (location.state as { from?: string | { pathname?: string } })?.from;
+  // Safely handle null/undefined location.state
+  const fromState = location.state && typeof location.state === 'object' 
+    ? (location.state as { from?: string | { pathname?: string } }).from 
+    : undefined;
+  
   const from = typeof fromState === 'string' 
     ? fromState 
-    : fromState?.pathname || '/dashboard';
+    : (fromState && typeof fromState === 'object' && 'pathname' in fromState)
+      ? fromState.pathname 
+      : '/dashboard';
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
