@@ -178,7 +178,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick, onToggleCollapse, s
                   </div>
                   
                   <Link
-                    to={user?.role === 'LAWYER' ? '/profile/settings' : '/profile'}
+                    to={user?.role === 'LAWYER' ? '/profile/settings' : '/settings'}
                     className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 
                              hover:bg-slate-50 transition-colors"
                     onClick={() => setShowUserMenu(false)}
