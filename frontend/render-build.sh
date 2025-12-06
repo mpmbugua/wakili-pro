@@ -2,6 +2,8 @@
 # Render build script for frontend only
 
 echo "Building Wakili Pro Frontend..."
+echo "Build timestamp: $(date)"
+echo "Force rebuild: $(date +%s)"
 cd frontend || exit 1
 npm install --legacy-peer-deps
 npm run build
