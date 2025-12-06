@@ -437,8 +437,12 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     lastMonth: { consultations: 0, revenue: 0 },
   };
 
-  const revenueChange = ((performanceData.thisMonth.revenue - performanceData.lastMonth.revenue) / performanceData.lastMonth.revenue * 100).toFixed(1);
-  const consultationChange = ((performanceData.thisMonth.consultations - performanceData.lastMonth.consultations) / performanceData.lastMonth.consultations * 100).toFixed(1);
+  const revenueChange = performanceData.lastMonth.revenue > 0 
+    ? ((performanceData.thisMonth.revenue - performanceData.lastMonth.revenue) / performanceData.lastMonth.revenue * 100).toFixed(1)
+    : '0.0';
+  const consultationChange = performanceData.lastMonth.consultations > 0
+    ? ((performanceData.thisMonth.consultations - performanceData.lastMonth.consultations) / performanceData.lastMonth.consultations * 100).toFixed(1)
+    : '0.0';
 
   const consultationColumns: Column<Consultation>[] = [
     { key: 'clientName', label: 'Client', sortable: true },
