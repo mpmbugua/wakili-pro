@@ -8,6 +8,7 @@ import {
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
 import { TierLimitModal, CertificationBlockedModal, CommissionSavingsModal, UpgradeModal } from '../modals';
+import { LawyerArticlesSection } from './LawyerArticlesSection';
 import type { AuthUser } from '@wakili-pro/shared/src/types/auth';
 import axiosInstance from '../../lib/axios';
 import { walletService } from '../../services/walletService';
@@ -47,6 +48,20 @@ interface Client {
   lastContact: string;
 }
 
+interface Article {
+  id: string;
+  title: string;
+  category?: string;
+  isPremium: boolean;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+  metadata?: {
+    category?: string;
+    tags?: string[];
+  };
+}
+
 export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const navigate = useNavigate();
   const [isVerified, setIsVerified] = useState(false);
@@ -63,6 +78,10 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     pendingConsultations: 0,
     totalDocuments: 0,
   });
+
+  // Articles state
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [articlesLoading, setArticlesLoading] = useState(true);
 
   // Wallet state
   const [walletBalance, setWalletBalance] = useState({
@@ -134,6 +153,31 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     // Check lawyer verification status
     checkVerificationStatus();
   }, []);
+
+  // Fetch lawyer's articles
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        setArticlesLoading(true);
+        const response = await axiosInstance.get('/api/articles', {
+          params: { authorId: user.id }
+        });
+        if (response.data.success && response.data.data) {
+          // If pagination is used, extract articles array
+          const articlesData = response.data.data.articles || response.data.data;
+          setArticles(articlesData);
+        }
+      } catch (error) {
+        console.error('[LawyerDashboard] Failed to fetch articles:', error);
+      } finally {
+        setArticlesLoading(false);
+      }
+    };
+
+    if (user.id) {
+      fetchArticles();
+    }
+  }, [user.id]);
 
   // Fetch real lawyer data on mount
   useEffect(() => {
@@ -936,6 +980,9 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
           </div>
         </div>
       </div>
+
+      {/* My Articles Section */}
+      <LawyerArticlesSection userId={user.id} />
 
       {/* Upcoming Consultations Table */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
