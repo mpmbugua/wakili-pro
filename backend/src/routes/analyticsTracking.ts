@@ -5,6 +5,7 @@ import {
   trackEvent,
   trackSession,
   trackConversion,
+  linkSession,
   getAdminAnalyticsOverview,
   exportAnalyticsData
 } from '../controllers/analyticsTrackingController';
@@ -20,6 +21,9 @@ router.post('/track-page', optionalAuth, trackPageView);
 router.post('/track-event', optionalAuth, trackEvent);
 router.post('/track-session', optionalAuth, trackSession);
 router.post('/track-conversion', optionalAuth, trackConversion);
+
+// Session linking endpoint (requires authentication)
+router.post('/link-session', authenticateToken, linkSession);
 
 // Admin-only analytics endpoints
 router.get('/admin/overview', authenticateToken, authorizeRoles('ADMIN'), getAdminAnalyticsOverview);

@@ -3,8 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middleware/auth';
 import type { ApiResponse, UserRole } from '@wakili-pro/shared';
 import { reviewDocumentWithAI } from '../services/documentAIReview';
-import fs from 'fs/promises';
-import path from 'path';
+import { uploadToCloudinary } from '../services/fileUploadService';
 
 const prisma = new PrismaClient();
 
@@ -53,8 +52,6 @@ export const requestMarketplaceAIReview = async (req: AuthenticatedRequest, res:
     });
 
     if (!purchase) {
-      // Clean up uploaded file
-      await fs.unlink(file.path);
       res.status(403).json({
         success: false,
         message: 'You must purchase this document before requesting a review'
@@ -62,15 +59,14 @@ export const requestMarketplaceAIReview = async (req: AuthenticatedRequest, res:
       return;
     }
 
-    // Move file to permanent storage
-    const uploadsDir = path.join(__dirname, '../../storage/document-reviews');
-    await fs.mkdir(uploadsDir, { recursive: true });
+    // Upload file to Cloudinary
+    const uploadResult = await uploadToCloudinary(
+      file.buffer,
+      file.originalname,
+      'document-reviews'
+    );
 
-    const fileName = `${userId}-${Date.now()}-${file.originalname}`;
-    const filePath = path.join(uploadsDir, fileName);
-    await fs.rename(file.path, filePath);
-
-    const documentUrl = `/uploads/document-reviews/${fileName}`;
+    const documentUrl = uploadResult.url;
 
     // Create document review record
     const documentReview = await prisma.documentReview.create({
@@ -103,14 +99,6 @@ export const requestMarketplaceAIReview = async (req: AuthenticatedRequest, res:
     });
   } catch (error) {
     console.error('Request marketplace AI review error:', error);
-    // Clean up file if exists
-    if (req.file) {
-      try {
-        await fs.unlink(req.file.path);
-      } catch (unlinkError) {
-        console.error('Error deleting file:', unlinkError);
-      }
-    }
     res.status(500).json({
       success: false,
       message: 'Internal server error while processing document review request'
@@ -156,15 +144,14 @@ export const requestExternalAIReview = async (req: AuthenticatedRequest, res: Re
     const urgencyMultiplier = urgency === 'EXPRESS' ? 2 : urgency === 'ECONOMY' ? 0.8 : 1;
     const price = basePrice * urgencyMultiplier;
 
-    // Move file to permanent storage
-    const uploadsDir = path.join(__dirname, '../../storage/document-reviews');
-    await fs.mkdir(uploadsDir, { recursive: true });
+    // Upload file to Cloudinary
+    const uploadResult = await uploadToCloudinary(
+      file.buffer,
+      file.originalname,
+      'document-reviews'
+    );
 
-    const fileName = `${userId}-${Date.now()}-${file.originalname}`;
-    const filePath = path.join(uploadsDir, fileName);
-    await fs.rename(file.path, filePath);
-
-    const documentUrl = `/uploads/document-reviews/${fileName}`;
+    const documentUrl = uploadResult.url;
 
     // Calculate deadline based on urgency
     const hours = urgency === 'EXPRESS' ? 12 : urgency === 'ECONOMY' ? 48 : 24;
@@ -201,14 +188,6 @@ export const requestExternalAIReview = async (req: AuthenticatedRequest, res: Re
     });
   } catch (error) {
     console.error('Request external AI review error:', error);
-    // Clean up file if exists
-    if (req.file) {
-      try {
-        await fs.unlink(req.file.path);
-      } catch (unlinkError) {
-        console.error('Error deleting file:', unlinkError);
-      }
-    }
     res.status(500).json({
       success: false,
       message: 'Internal server error while processing document review request'
@@ -300,15 +279,14 @@ export const requestCertification = async (req: AuthenticatedRequest, res: Respo
         return;
       }
 
-      // Move file to permanent storage
-      const uploadsDir = path.join(__dirname, '../../storage/document-reviews');
-      await fs.mkdir(uploadsDir, { recursive: true });
+      // Upload file to Cloudinary
+      const uploadResult = await uploadToCloudinary(
+        file.buffer,
+        file.originalname,
+        'document-reviews'
+      );
 
-      const fileName = `${userId}-${Date.now()}-${file.originalname}`;
-      const filePath = path.join(uploadsDir, fileName);
-      await fs.rename(file.path, filePath);
-
-      const documentUrl = `/uploads/document-reviews/${fileName}`;
+      const documentUrl = uploadResult.url;
 
       // Calculate pricing
       const certificationPrice = calculateCertificationPrice(documentType, 'EXTERNAL');
@@ -349,14 +327,6 @@ export const requestCertification = async (req: AuthenticatedRequest, res: Respo
     }
   } catch (error) {
     console.error('Request certification error:', error);
-    // Clean up file if exists
-    if (req.file) {
-      try {
-        await fs.unlink(req.file.path);
-      } catch (unlinkError) {
-        console.error('Error deleting file:', unlinkError);
-      }
-    }
     res.status(500).json({
       success: false,
       message: 'Internal server error while processing certification request'

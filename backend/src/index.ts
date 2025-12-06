@@ -12,9 +12,14 @@ const app: Express = express();
 const httpServer = createServer(app);
 const port = parseInt(process.env.PORT || '5000', 10);
 
-// Initialize Socket.IO
+// Initialize Socket.IO for messaging
 import { initializeWebSocket } from './services/socketService';
 const io = initializeWebSocket(httpServer);
+
+// Initialize WebRTC Video Signaling Server
+import { VideoSignalingServer } from './services/videoSignalingService';
+const videoSignaling = new VideoSignalingServer(httpServer);
+console.log('✅ Video signaling server initialized');
 
 // Make io available to routes via middleware
 app.use((req: any, _res, next) => {

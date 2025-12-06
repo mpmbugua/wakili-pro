@@ -1,6 +1,5 @@
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { authenticateToken } from '../middleware/auth';
 import {
@@ -14,19 +13,9 @@ import {
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../storage/temp'));
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${uniqueSuffix}-${file.originalname}`);
-  }
-});
-
+// Configure multer for file uploads (memory storage for Cloudinary)
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(), // Store in memory for Cloudinary upload
   limits: {
     fileSize: 20 * 1024 * 1024 // 20MB limit
   },

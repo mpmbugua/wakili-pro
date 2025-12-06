@@ -20,18 +20,9 @@ import { authenticateToken, authorizeRoles } from '../middleware/auth';
 import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = Router();
 
-// Configure multer for profile photo uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'storage/temp');
-  },
-  filename: (req, file, cb) => {
-    cb(null, `temp-${Date.now()}-${file.originalname}`);
-  }
-});
-
+// Configure multer for profile photo uploads (memory storage for Cloudinary)
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(), // Store in memory for Cloudinary upload
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB
   }

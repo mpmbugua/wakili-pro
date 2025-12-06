@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../utils/database';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { getLocationFromIP } from '../services/geoLocationService';
 
 /**
  * Track page view - works for both anonymous and authenticated users
@@ -29,6 +30,9 @@ export const trackPageView = async (req: Request, res: Response): Promise<void> 
     // Extract IP address (anonymized to country/city level)
     const ipAddress = req.ip || req.socket.remoteAddress || null;
 
+    // Get geographic location from IP
+    const geoData = await getLocationFromIP(ipAddress);
+
     const pageView = await prisma.pageView.create({
       data: {
         sessionId,
@@ -44,7 +48,9 @@ export const trackPageView = async (req: Request, res: Response): Promise<void> 
         screenWidth,
         screenHeight,
         duration,
-        scrollDepth
+        scrollDepth,
+        country: geoData.country,
+        city: geoData.city
       }
     });
 
@@ -154,12 +160,14 @@ export const trackSession = async (req: Request, res: Response): Promise<void> =
       landingPage,
       deviceType,
       browser,
-      os,
-      country,
-      city
+      os
     } = req.body;
 
     const userId = (req as AuthenticatedRequest).user?.id || null;
+
+    // Get IP and geographic location
+    const ipAddress = req.ip || req.socket.remoteAddress || null;
+    const geoData = await getLocationFromIP(ipAddress);
 
     // Try to find existing session
     const existingSession = await prisma.userSession.findUnique({
@@ -179,7 +187,7 @@ export const trackSession = async (req: Request, res: Response): Promise<void> =
 
       res.json({ success: true, data: { sessionId: session.sessionId } });
     } else {
-      // Create new session
+      // Create new session with geolocation
       const session = await prisma.userSession.create({
         data: {
           sessionId,
@@ -191,8 +199,8 @@ export const trackSession = async (req: Request, res: Response): Promise<void> =
           deviceType,
           browser,
           os,
-          country,
-          city
+          country: geoData.country,
+          city: geoData.city
         }
       });
 
@@ -383,20 +391,19 @@ export const getAdminAnalyticsOverview = async (req: AuthenticatedRequest, res: 
     res.json({
       success: true,
       data: {
-        overview: {
-          totalVisitors: totalSessions,
-          totalPageViews,
-          totalEvents,
-          conversions,
-          conversionRate: conversionRate.toFixed(2),
-          totalRevenue: revenueData._sum.conversionValue || 0
-        },
+        totalVisitors: totalSessions,
+        totalPageViews,
+        totalEvents,
+        conversions,
+        conversionRate: parseFloat(conversionRate.toFixed(2)),
+        totalRevenue: revenueData._sum.conversionValue || 0,
         topPages: pageViewsGrouped.map(p => ({ page: p.page, views: p._count.id })),
         topSearches: searchEvents.filter(s => s.searchQuery).map(s => ({ query: s.searchQuery, count: s._count.id })),
-        deviceBreakdown: deviceBreakdown.reduce((acc, d) => {
-          acc[d.deviceType || 'unknown'] = d._count.id;
-          return acc;
-        }, {} as Record<string, number>),
+        deviceBreakdown: {
+          mobile: deviceBreakdown.find(d => d.deviceType === 'mobile')?._count.id || 0,
+          tablet: deviceBreakdown.find(d => d.deviceType === 'tablet')?._count.id || 0,
+          desktop: deviceBreakdown.find(d => d.deviceType === 'desktop')?._count.id || 0
+        },
         geoData: geoData.map(g => ({ country: g.country, city: g.city, visitors: g._count.id })),
         dailyStats
       }
@@ -510,6 +517,71 @@ export const exportAnalyticsData = async (req: AuthenticatedRequest, res: Respon
     res.status(500).json({
       success: false,
       message: 'Failed to export analytics data'
+    });
+  }
+};
+
+/**
+ * Link anonymous session to authenticated user
+ * POST /api/analytics-tracking/link-session
+ * Used when user logs in or signs up to connect their anonymous browsing to their account
+ */
+export const linkSession = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { sessionId } = req.body;
+    const userId = (req as AuthenticatedRequest).user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'User must be authenticated to link session'
+      });
+      return;
+    }
+
+    if (!sessionId) {
+      res.status(400).json({
+        success: false,
+        message: 'Session ID is required'
+      });
+      return;
+    }
+
+    // Update session with user ID
+    await prisma.userSession.updateMany({
+      where: { sessionId },
+      data: { userId }
+    });
+
+    // Update all page views from this session
+    const updatedPageViews = await prisma.pageView.updateMany({
+      where: { sessionId, userId: null },
+      data: { userId }
+    });
+
+    // Update all events from this session
+    const updatedEvents = await prisma.userEvent.updateMany({
+      where: { sessionId, userId: null },
+      data: { userId }
+    });
+
+    console.log(`[Analytics] Linked session ${sessionId} to user ${userId}: ${updatedPageViews.count} page views, ${updatedEvents.count} events`);
+
+    res.json({
+      success: true,
+      data: {
+        sessionId,
+        userId,
+        linkedPageViews: updatedPageViews.count,
+        linkedEvents: updatedEvents.count
+      }
+    });
+
+  } catch (error) {
+    console.error('[Analytics] Session linking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to link session'
     });
   }
 };
