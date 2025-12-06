@@ -486,17 +486,17 @@ export const LandingPage: React.FC = () => {
               <div className="mb-6 flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 mb-1">
-                    Legal Guides and Insights
+                    Legal Insights Blog
                   </h2>
                   <p className="text-xs text-slate-600">
-                    Expert articles and guides to help you understand Kenyan law
+                    Expert articles and guides written by verified lawyers - read full articles on our blog
                   </p>
                 </div>
                 <Link 
-                  to="/resources" 
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium inline-flex items-center"
+                  to="/blog" 
+                  className="text-xs bg-blue-100 text-blue-700 px-4 py-2 rounded hover:bg-blue-200 font-semibold inline-flex items-center"
                 >
-                  View all <ArrowRight className="ml-1 h-3 w-3" />
+                  Read Our Blog <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </div>
               
@@ -534,10 +534,10 @@ export const LandingPage: React.FC = () => {
                           <span>{readTime} min read</span>
                         </div>
                         <Link 
-                          to={`/resources/article/${article.id}`}
+                          to={`/blog#${article.id}`}
                           className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
                         >
-                          Read article <ArrowRight className="ml-1 h-3 w-3" />
+                          Read full article <ArrowRight className="ml-1 h-3 w-3" />
                         </Link>
                       </div>
                     );
@@ -578,7 +578,7 @@ export const LandingPage: React.FC = () => {
                         <span>{article.date}</span>
                       </div>
                       <Link 
-                        to="/resources" 
+                        to="/blog" 
                         className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium"
                       >
                         Read article <ArrowRight className="ml-1 h-3 w-3" />

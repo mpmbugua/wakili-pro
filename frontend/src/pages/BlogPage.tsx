@@ -1,7 +1,26 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Calendar, User, Clock, ArrowRight, Tag, TrendingUp, BookOpen, Mail, Loader } from 'lucide-react';
 import axiosInstance from '../lib/axios';
+
+interface Article {
+  id: string;
+  title: string;
+  content: string;
+  authorId: string;
+  User?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+  metadata?: {
+    aiSummary?: string;
+    category?: string;
+    tags?: string[];
+    qualityScore?: number;
+    source?: string;
+  };
+}
 
 interface BlogPost {
   id: string;
@@ -123,12 +142,81 @@ const blogPosts: BlogPost[] = [
 const categories = ['All', 'Corporate Law', 'Property Law', 'Employment Law', 'Family Law', 'Commercial Law', 'Intellectual Property'];
 
 export const BlogPage: React.FC = () => {
+  const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loadingArticles, setLoadingArticles] = useState(true);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   
   // Newsletter subscription state
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  useEffect(() => {
+    // Handle hash navigation (e.g., /blog#article-id)
+    if (location.hash && articles.length > 0) {
+      const articleId = location.hash.substring(1); // Remove #
+      const article = articles.find(a => a.id === articleId);
+      if (article) {
+        setSelectedArticle(article);
+        // Scroll to top of article
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [location.hash, articles]);
+
+  const fetchArticles = async () => {
+    try {
+      setLoadingArticles(true);
+      const response = await axiosInstance.get('/articles/published?limit=20');
+      
+      if (response.data.success) {
+        setArticles(response.data.data.articles || []);
+      }
+    } catch (err) {
+      console.error('Error fetching articles:', err);
+      setArticles([]);
+    } finally {
+      setLoadingArticles(false);
+    }
+  };
+
+  const blogPosts: BlogPost[] = articles.map(article => ({
+    id: article.id,
+    title: article.title,
+    excerpt: article.metadata?.aiSummary || article.content.substring(0, 150) + '...',
+    author: article.User ? `${article.User.firstName} ${article.User.lastName}` : 'Wakili Pro',
+    authorRole: article.metadata?.category || 'Legal Expert',
+    date: 'December 2025',
+    readTime: `${Math.ceil(article.content.length / 1000)} min read`,
+    category: article.metadata?.category || 'Legal',
+    imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=400&fit=crop'
+  }));
+
+  // Fallback to sample posts if no articles
+  const samplePosts: BlogPost[] = [
+    {
+      id: '1',
+      title: 'Understanding the New Data Protection Regulations in Kenya',
+      excerpt: 'Kenya\'s Data Protection Act, 2019 has transformed how businesses handle personal information.',
+      author: 'Dr. Sarah Kamau',
+      authorRole: 'Corporate Law Expert',
+      date: 'December 1, 2025',
+      readTime: '8 min read',
+      category: 'Corporate Law',
+      imageUrl: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&h=400&fit=crop',
+      featured: true
+    }
+  ];
+
+  const displayPosts = blogPosts.length > 0 ? blogPosts : samplePosts;
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,11 +249,108 @@ export const BlogPage: React.FC = () => {
   };
 
   const filteredPosts = selectedCategory === 'All' 
-    ? blogPosts 
-    : blogPosts.filter(post => post.category === selectedCategory);
+    ? displayPosts 
+    : displayPosts.filter(post => post.category === selectedCategory);
 
-  const featuredPosts = blogPosts.filter(post => post.featured);
+  const featuredPosts = displayPosts.filter(post => post.featured);
   const regularPosts = filteredPosts.filter(post => !post.featured);
+
+  // If viewing a specific article
+  if (selectedArticle) {
+    return (
+      <div className="min-h-screen bg-white">
+        {/* Article Header */}
+        <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6">
+            <button 
+              onClick={() => {
+                setSelectedArticle(null);
+                window.history.pushState({}, '', '/blog');
+              }}
+              className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 mb-4"
+            >
+              <ArrowRight className="mr-1 h-4 w-4 rotate-180" />
+              Back to Blog
+            </button>
+
+            {selectedArticle.metadata?.category && (
+              <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-4">
+                {selectedArticle.metadata.category}
+              </span>
+            )}
+
+            <h1 className="text-3xl font-bold text-slate-900 mb-4">
+              {selectedArticle.title}
+            </h1>
+
+            {selectedArticle.metadata?.aiSummary && (
+              <p className="text-lg text-slate-700 mb-6">
+                {selectedArticle.metadata.aiSummary}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+              <div className="flex items-center">
+                <User className="h-4 w-4 mr-1" />
+                {selectedArticle.User ? `${selectedArticle.User.firstName} ${selectedArticle.User.lastName}` : 'Wakili Pro'}
+              </div>
+              <div className="flex items-center">
+                <Clock className="h-4 w-4 mr-1" />
+                {Math.ceil(selectedArticle.content.length / 1000)} min read
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Article Content */}
+        <article className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+          <div 
+            className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-p:text-slate-700 prose-a:text-blue-600 prose-strong:text-slate-900 prose-ul:text-slate-700 prose-ol:text-slate-700"
+            dangerouslySetInnerHTML={{ __html: selectedArticle.content.replace(/<!--METADATA:.*?-->/g, '') }}
+          />
+
+          {/* Author Profile Link */}
+          {selectedArticle.User && (
+            <div className="mt-12 pt-8 border-t border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">About the Author</h3>
+              <p className="text-slate-600 mb-4">
+                {selectedArticle.User.firstName} {selectedArticle.User.lastName} is a {selectedArticle.metadata?.category} specialist.
+              </p>
+              <Link 
+                to={`/lawyers/${selectedArticle.authorId}`}
+                className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded hover:bg-blue-200"
+              >
+                View Profile & Book Consultation
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+          )}
+
+          {/* CTA Section */}
+          <div className="mt-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-8 text-center">
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">Need Legal Assistance?</h3>
+            <p className="text-slate-600 mb-6">
+              Our verified lawyers are ready to help you with your legal needs.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link 
+                to="/ai"
+                className="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-semibold rounded hover:bg-blue-200"
+              >
+                Ask AI Assistant
+              </Link>
+              <Link 
+                to="/lawyers"
+                className="px-4 py-2 bg-white border border-slate-300 text-slate-700 text-sm font-semibold rounded hover:bg-slate-50"
+              >
+                Find a Lawyer
+              </Link>
+            </div>
+          </div>
+        </article>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-12">
@@ -206,12 +391,19 @@ export const BlogPage: React.FC = () => {
               <h2 className="text-2xl font-bold text-slate-900">Featured Articles</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-8">
-              {featuredPosts.map(post => (
-                <Link
-                  key={post.id}
-                  to={`/blog/${post.id}`}
-                  className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
-                >
+              {featuredPosts.map(post => {
+                const article = articles.find(a => a.id === post.id);
+                return (
+                  <button
+                    key={post.id}
+                    onClick={() => {
+                      if (article) {
+                        setSelectedArticle(article);
+                        window.history.pushState({}, '', `/blog#${article.id}`);
+                      }
+                    }}
+                    className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow text-left w-full"
+                  >
                   <div className="relative h-64 overflow-hidden">
                     <img
                       src={post.imageUrl}
@@ -254,8 +446,9 @@ export const BlogPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                </Link>
-              ))}
+                </button>
+              );
+              })}
             </div>
           </div>
         )}
@@ -266,12 +459,19 @@ export const BlogPage: React.FC = () => {
             <h2 className="text-2xl font-bold text-slate-900 mb-6">{selectedCategory} Articles</h2>
           )}
           <div className="grid md:grid-cols-3 gap-6">
-            {regularPosts.map(post => (
-              <Link
-                key={post.id}
-                to={`/blog/${post.id}`}
-                className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
-              >
+            {regularPosts.map(post => {
+              const article = articles.find(a => a.id === post.id);
+              return (
+                <button
+                  key={post.id}
+                  onClick={() => {
+                    if (article) {
+                      setSelectedArticle(article);
+                      window.history.pushState({}, '', `/blog#${article.id}`);
+                    }
+                  }}
+                  className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow text-left w-full"
+                >
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={post.imageUrl}
@@ -302,8 +502,9 @@ export const BlogPage: React.FC = () => {
                     <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
                   </div>
                 </div>
-              </Link>
-            ))}
+              </button>
+            );
+            })}
           </div>
 
           {filteredPosts.length === 0 && (

@@ -59,7 +59,7 @@ export const ResourcesPage: React.FC = () => {
     description: article.metadata?.aiSummary || article.content.substring(0, 150) + '...',
     category: article.metadata?.category || 'Legal',
     readTime: `${Math.ceil(article.content.length / 1000)} min read`,
-    link: `/resources/article/${article.id}`,
+    link: `/blog#${article.id}`,
     authorId: article.authorId,
     authorName: article.User ? `${article.User.firstName} ${article.User.lastName}` : 'Wakili Pro'
   }));
