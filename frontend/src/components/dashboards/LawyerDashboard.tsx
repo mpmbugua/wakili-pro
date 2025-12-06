@@ -391,10 +391,6 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   
   // Rest of component logic below (no more hooks after this point)
 
-  const handleUpgrade = () => {
-    navigate('/subscriptions');
-  };
-
   const getTierColor = (tier: string) => {
     switch (tier) {
       case 'FREE': return 'text-gray-600 bg-gray-100';
@@ -493,14 +489,14 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         currentTier={tierUsage.currentTier}
         currentUsage={tierUsage.usage[limitModalType].current}
         limit={tierUsage.usage[limitModalType].limit}
-        onUpgrade={handleUpgrade}
+        onUpgrade={() => setShowUpgradeModal(true)}
       />
 
       {/* Certification Blocked Modal */}
       <CertificationBlockedModal
         isOpen={showCertModal}
         onClose={() => setShowCertModal(false)}
-        onUpgrade={handleUpgrade}
+        onUpgrade={() => setShowUpgradeModal(true)}
       />
 
       {/* Commission Savings Modal */}
@@ -509,7 +505,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         onClose={() => setShowSavingsModal(false)}
         currentTier={tierUsage.currentTier}
         monthlyRevenue={stats.revenue}
-        onUpgrade={handleUpgrade}
+        onUpgrade={() => setShowUpgradeModal(true)}
       />
 
       {/* Upgrade Modal */}
@@ -545,7 +541,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
             {tierUsage.currentTier !== 'PRO' && (
               <Button 
                 variant="primary" 
-                onClick={() => navigate('/subscriptions')}
+                onClick={() => setShowUpgradeModal(true)}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 <Crown className="h-4 w-4 mr-2" />
@@ -586,7 +582,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
                 <Button 
                   variant="outline"
                   className="bg-emerald-700 text-white hover:bg-emerald-800 border-0"
-                  onClick={() => navigate('/subscriptions')}
+                  onClick={() => setShowUpgradeModal(true)}
                 >
                   <Crown className="h-4 w-4 mr-2" />
                   Upgrade Now
