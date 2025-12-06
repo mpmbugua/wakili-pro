@@ -496,17 +496,19 @@ export const BookingPage: React.FC = () => {
                   <ol className="text-sm text-blue-900 space-y-1 list-decimal list-inside">
                     <li>You pay for the consultation upfront</li>
                     <li>The lawyer receives your immediate request notification</li>
-                    <li>Within 30 minutes, they will confirm availability or suggest the next available time</li>
+                    <li>Within 30 minutes, they will confirm availability</li>
                     <li>If confirmed, the consultation starts immediately via {formData.consultationType === 'video' ? 'video call' : 'phone call'}</li>
-                    <li>If the lawyer is unavailable or doesn't respond within 30 minutes, you receive a full automatic refund</li>
+                    <li>If the lawyer doesn't respond within 30 minutes, the system automatically recommends 3 alternative lawyers</li>
+                    <li>You can rebook with any recommended lawyer for free (no additional payment)</li>
                     <li>You'll receive email and SMS notifications at each step</li>
                   </ol>
                 ) : (
                   <ol className="text-sm text-blue-900 space-y-1 list-decimal list-inside">
                     <li>You pay for the consultation upfront</li>
                     <li>The lawyer receives your request and reviews your preferred date/time</li>
-                    <li>Within 24 hours, they will either confirm, suggest a different time, or decline</li>
-                    <li>If declined or no response within 24 hours, you receive a full automatic refund</li>
+                    <li>Within 30 minutes, they will confirm or suggest alternative times</li>
+                    <li>If the lawyer doesn't respond within 30 minutes, the system automatically recommends 3 alternative lawyers</li>
+                    <li>You can rebook with any recommended lawyer for free (no additional payment)</li>
                     <li>You'll receive email and SMS notifications at each step</li>
                   </ol>
                 )}

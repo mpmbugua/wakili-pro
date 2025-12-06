@@ -151,7 +151,7 @@ export const TermsOfServicePage: React.FC = () => {
 
             <h3 className="text-xl font-semibold text-slate-900 mt-6 mb-3">6.2 Refund Policy</h3>
             <ul className="list-disc pl-6 text-slate-700 space-y-2">
-              <li><strong>Consultations:</strong> Full refund if lawyer declines or doesn't respond within 24 hours (30 minutes for immediate bookings)</li>
+              <li><strong>Consultations:</strong> If a lawyer doesn't respond within 30 minutes, you'll receive 3 alternative lawyer recommendations and can rebook for free. Refunds available upon request if you prefer not to use recommended alternatives</li>
               <li><strong>Document Reviews:</strong> Refund available before review begins; partial refund if service is unsatisfactory</li>
               <li><strong>Marketplace Documents:</strong> No refunds after download, unless document is defective</li>
               <li><strong>Service Requests:</strong> Commitment fee non-refundable after quotes are received; 30% upfront payment non-refundable after work begins</li>

@@ -56,12 +56,12 @@ const faqs: FAQ[] = [
   {
     category: 'Consultations',
     question: 'What is the difference between immediate and scheduled bookings?',
-    answer: 'Immediate bookings allow you to request a consultation right away—the lawyer responds within 30 minutes to confirm availability. Scheduled bookings let you pick a specific date and time for the consultation, with the lawyer confirming within 24 hours.'
+    answer: 'Immediate bookings allow you to request a consultation right away—the lawyer responds within 30 minutes to confirm availability. Scheduled bookings let you pick a specific date and time for the consultation, with the lawyer also confirming within 30 minutes.'
   },
   {
     category: 'Consultations',
     question: 'What happens if the lawyer doesn\'t confirm my booking?',
-    answer: 'If a lawyer doesn\'t respond within the specified timeframe (30 minutes for immediate, 24 hours for scheduled), you receive an automatic full refund to your M-Pesa account. No questions asked.'
+    answer: 'If a lawyer doesn\'t respond within 30 minutes, our system automatically recommends 3 alternative lawyers with similar expertise and availability. You can select any recommended lawyer and rebook at no additional charge. If you prefer not to rebook, you can request a full refund instead.'
   },
   {
     category: 'Consultations',
