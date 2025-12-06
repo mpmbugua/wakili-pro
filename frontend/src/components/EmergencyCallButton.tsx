@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { Phone, X, Video } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
 
 export const EmergencyCallButton: React.FC = () => {
+  const { user, isAuthenticated } = useAuthStore();
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Hide button for lawyers and admins
+  if (isAuthenticated && (user?.role === 'LAWYER' || user?.role === 'ADMIN')) {
+    return null;
+  }
 
   const emergencyNumbers = [
     { number: '0727114573', label: 'Safaricom' },
