@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, User, Clock, ArrowRight, Tag, TrendingUp, BookOpen } from 'lucide-react';
+import { Calendar, User, Clock, ArrowRight, Tag, TrendingUp, BookOpen, Mail, Loader } from 'lucide-react';
+import axiosInstance from '../lib/axios';
 
 interface BlogPost {
   id: string;
@@ -123,6 +124,41 @@ const categories = ['All', 'Corporate Law', 'Property Law', 'Employment Law', 'F
 
 export const BlogPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
+  
+  // Newsletter subscription state
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      setMessage({ type: 'error', text: 'Please enter your email address' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await axiosInstance.post('/newsletter/subscribe', { email });
+      
+      if (response.data.success) {
+        setMessage({ type: 'success', text: 'Successfully subscribed! Check your inbox.' });
+        setEmail('');
+      } else {
+        setMessage({ type: 'error', text: response.data.message || 'Subscription failed' });
+      }
+    } catch (error: any) {
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || 'Failed to subscribe. Please try again.' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredPosts = selectedCategory === 'All' 
     ? blogPosts 
@@ -284,27 +320,46 @@ export const BlogPage: React.FC = () => {
         </div>
 
         {/* Newsletter CTA */}
-        <div className="mt-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg shadow-lg p-8 text-white">
+        <div className="mt-16 bg-gradient-to-br from-blue-50 to-indigo-50 border-y border-blue-100 rounded-lg shadow-lg p-8">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-4">Stay Updated with Legal Insights</h2>
-            <p className="text-indigo-100 mb-6">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-100 rounded-full mb-4">
+              <Mail className="h-7 w-7 text-blue-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Stay Updated with Legal Insights</h2>
+            <p className="text-sm text-slate-600 mb-6">
               Subscribe to our newsletter and receive the latest legal updates, guides, and expert commentary directly to your inbox.
             </p>
-            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-4">
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-lg text-slate-900 focus:ring-2 focus:ring-white focus:outline-none"
+                className="flex-1 px-4 py-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading}
               />
               <button
                 type="submit"
-                className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-indigo-50 transition-colors"
+                disabled={loading}
+                className="bg-blue-100 text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Subscribe
+                {loading ? (
+                  <>
+                    <Loader className="h-4 w-4 animate-spin" />
+                    Subscribing...
+                  </>
+                ) : (
+                  'Subscribe'
+                )}
               </button>
             </form>
-            <p className="text-xs text-indigo-200 mt-3">
-              No spam. Unsubscribe anytime. Read our <Link to="/privacy" className="underline">Privacy Policy</Link>.
+            {message && (
+              <div className={`text-sm mb-3 ${message.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
+                {message.text}
+              </div>
+            )}
+            <p className="text-xs text-slate-500">
+              No spam. Unsubscribe anytime. Read our <Link to="/privacy" className="text-blue-600 hover:text-blue-700 underline">Privacy Policy</Link>.
             </p>
           </div>
         </div>
