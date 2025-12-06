@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Users, UserCheck, UserX, Shield, FileText, AlertCircle, 
   TrendingUp, DollarSign, BarChart3, Plus, Settings, Eye,
-  CheckCircle, XCircle, Clock, ArrowRight, Search, Database
+  CheckCircle, XCircle, Clock, ArrowRight, Search, Database, Phone
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
@@ -476,6 +476,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
           <Button variant="outline" className="justify-start" onClick={() => navigate('/admin/users')}>
             <Users className="h-4 w-4 mr-2" />
             Manage Users
+          </Button>
+          <Button variant="outline" className="justify-start" onClick={() => navigate('/admin/call-logs')}>
+            <Phone className="h-4 w-4 mr-2" />
+            Call Logs
           </Button>
           <Button variant="outline" className="justify-start" onClick={() => navigate('/admin/analytics')}>
             <BarChart3 className="h-4 w-4 mr-2" />
