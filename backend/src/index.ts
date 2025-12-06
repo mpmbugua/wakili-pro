@@ -447,7 +447,6 @@ httpServer.listen(port, host, () => {
   // });
 
   console.log('⚠️  Automated crawler DISABLED - waiting for bulk seeding. Will run at midnight after re-enabled.');
-  });
 });
 
 export default app;
