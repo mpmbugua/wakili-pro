@@ -5,13 +5,13 @@ import {
   updateCallLogStatus,
   getCallLogStats 
 } from '../../controllers/callLogController';
-import { authenticateToken } from '../../middleware/authMiddleware';
-import { isAdmin } from '../../middleware/roleMiddleware';
+import { authenticateToken, authorizeRoles } from '../../middleware/auth';
 
 const router = Router();
 
 // All routes require admin authentication
-router.use(authenticateToken, isAdmin);
+router.use(authenticateToken);
+router.use(authorizeRoles('ADMIN', 'SUPER_ADMIN'));
 
 router.post('/', createCallLog);
 router.get('/', getCallLogs);
