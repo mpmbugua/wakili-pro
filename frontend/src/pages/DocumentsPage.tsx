@@ -49,7 +49,7 @@ export const DocumentsPage: React.FC = () => {
           </p>
           <button
             onClick={() => navigate('/login', { state: { from: '/documents' } })}
-            className="inline-flex items-center px-6 py-3 bg-blue-100 text-white rounded-lg hover:bg-blue-200 transition font-medium"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
           >
             Log In to Continue
           </button>
