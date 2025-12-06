@@ -393,6 +393,5 @@ export const LawyerProfileSettings: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
