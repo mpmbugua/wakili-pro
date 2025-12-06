@@ -52,6 +52,7 @@ import AdminWithdrawalManagement from './pages/admin/AdminWithdrawalManagement';
 import AdminLegalKnowledgeBase from './pages/admin/AdminLegalKnowledgeBase';
 import { PineconeTestPage } from './pages/admin/PineconeTestPage';
 import { CallLogPage } from './pages/admin/CallLogPage';
+import { VoipCallPage } from './pages/VoipCallPage';
 import { AdminDashboard } from './components/dashboards/AdminDashboard';
 import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard';
 import { AdminLoginPage } from './pages/auth/AdminLoginPage';
@@ -204,6 +205,7 @@ function App() {
           <Route path="/payment-callback" element={<GlobalLayout><PaymentCallbackPage /></GlobalLayout>} />
           <Route path="/verify/:certificateId" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />
           <Route path="/verify" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />
+          <Route path="/voip-call" element={<VoipCallPage />} />
           
           {/* Auth Routes - GlobalLayout */}
           <Route 
