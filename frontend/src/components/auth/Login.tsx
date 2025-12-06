@@ -27,15 +27,26 @@ const Login: React.FC = () => {
 
   // Get redirect path from location state or default to dashboard
   // Safely handle null/undefined location.state
-  const fromState = location.state && typeof location.state === 'object' 
-    ? (location.state as { from?: string | { pathname?: string } }).from 
-    : undefined;
+  const getRedirectPath = (): string => {
+    if (!location.state || typeof location.state !== 'object') {
+      return '/dashboard';
+    }
+    
+    const state = location.state as any;
+    const fromValue = state.from;
+    
+    if (typeof fromValue === 'string') {
+      return fromValue;
+    }
+    
+    if (fromValue && typeof fromValue === 'object' && fromValue.pathname) {
+      return fromValue.pathname;
+    }
+    
+    return '/dashboard';
+  };
   
-  const from = typeof fromState === 'string' 
-    ? fromState 
-    : (fromState && typeof fromState === 'object' && 'pathname' in fromState)
-      ? fromState.pathname 
-      : '/dashboard';
+  const from = getRedirectPath();
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};

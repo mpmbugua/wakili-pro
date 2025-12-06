@@ -21,9 +21,22 @@ export const AdminLoginPage: React.FC = () => {
 
   // Determine redirect path based on where user came from
   // Safely handle null/undefined location.state
-  const from = (location.state && typeof location.state === 'object' && 'from' in location.state)
-    ? ((location.state as any).from?.pathname || '/admin')
-    : '/admin';
+  const getRedirectPath = (): string => {
+    if (!location.state || typeof location.state !== 'object') {
+      return '/admin';
+    }
+    
+    const state = location.state as any;
+    const fromValue = state.from;
+    
+    if (fromValue && typeof fromValue === 'object' && fromValue.pathname) {
+      return fromValue.pathname;
+    }
+    
+    return '/admin';
+  };
+  
+  const from = getRedirectPath();
 
   // If user is already authenticated as admin, redirect
   React.useEffect(() => {
