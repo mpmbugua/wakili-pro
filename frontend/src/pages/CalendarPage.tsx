@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, Video, MapPin, User, Phone, Mail, Plus, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuthStore } from '../store/authStore';
@@ -21,6 +22,7 @@ interface Appointment {
 
 export const CalendarPage: React.FC = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -141,7 +143,7 @@ export const CalendarPage: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900">My Calendar</h1>
             <p className="text-gray-600 mt-1">Manage your consultations and appointments</p>
           </div>
-          <Button variant="default" onClick={() => window.location.href = '/lawyer/consultations'}>
+          <Button variant="default" onClick={() => navigate('/lawyer/consultations')}>
             <Plus className="h-4 w-4 mr-2" />
             New Appointment
           </Button>

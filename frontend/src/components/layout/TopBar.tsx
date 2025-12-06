@@ -22,12 +22,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuClick, onToggleCollapse, s
       console.log('Logging out...');
       await logout();
       console.log('Logout successful, redirecting...');
-      // Force a hard redirect to clear all state
-      window.location.href = '/';
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout failed:', error);
-      // Force redirect anyway
-      window.location.href = '/';
+      navigate('/', { replace: true });
     }
   };
 

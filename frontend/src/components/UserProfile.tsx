@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { User, Mail, Shield, Edit2, Save, X } from 'lucide-react';
 
 export const UserProfile: React.FC = () => {
   const { user, logout, updateProfile } = useAuthStore();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     firstName: user?.firstName || '',
@@ -38,7 +40,7 @@ export const UserProfile: React.FC = () => {
     console.log('Logging out...');
     await logout();
     console.log('Logout successful, redirecting...');
-    window.location.href = '/';
+    navigate('/', { replace: true });
   };
 
   return (

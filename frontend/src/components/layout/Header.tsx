@@ -35,10 +35,10 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
       console.log('Logging out...');
       await logout();
       console.log('Logout successful, redirecting...');
-      window.location.href = '/';
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout failed:', error);
-      window.location.href = '/';
+      navigate('/', { replace: true });
     }
   };
 
