@@ -63,6 +63,7 @@ import AdminWithdrawalManagement from './pages/admin/AdminWithdrawalManagement';
 import AdminLegalKnowledgeBase from './pages/admin/AdminLegalKnowledgeBase';
 import { PineconeTestPage } from './pages/admin/PineconeTestPage';
 import { CallLogPage } from './pages/admin/CallLogPage';
+import { AnalyticsDashboard } from './pages/admin/AnalyticsDashboard';
 import { VoipCallPage } from './pages/VoipCallPage';
 import { AdminDashboard } from './components/dashboards/AdminDashboard';
 import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard';
@@ -498,6 +499,14 @@ function App() {
               element={
                 <AdminRoute hydrated={hydrated}>
                   <AdminDashboardWrapper />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/analytics" 
+              element={
+                <AdminRoute hydrated={hydrated}>
+                  <AnalyticsDashboard />
                 </AdminRoute>
               } 
             />
