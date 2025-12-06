@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useEventTracking } from '../hooks/useAnalytics';
 import { aiService } from '../services/aiService';
 
 interface Message {
@@ -44,6 +45,7 @@ interface Message {
 export const AIAssistant: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
+  const { trackSearch } = useEventTracking();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -82,6 +84,15 @@ export const AIAssistant: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     const currentInput = input;
     const currentFiles = [...attachedFiles];
+    
+    // Track AI query (goldmine for AI training!)
+    if (currentInput.trim()) {
+      trackSearch(currentInput, { 
+        page: 'ai_assistant',
+        hasAttachments: currentFiles.length > 0
+      });
+    }
+    
     setInput('');
     setIsLoading(true);
 

@@ -66,6 +66,7 @@ import { CallLogPage } from './pages/admin/CallLogPage';
 import { AnalyticsDashboard } from './pages/admin/AnalyticsDashboard';
 import { AIDataExportPage } from './pages/admin/AIDataExportPage';
 import { VoipCallPage } from './pages/VoipCallPage';
+import { VideoConsultationPage } from './pages/VideoConsultationPage';
 import { AdminDashboard } from './components/dashboards/AdminDashboard';
 import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard';
 import { AdminLoginPage } from './pages/auth/AdminLoginPage';
@@ -394,6 +395,14 @@ function App() {
               element={
                 <ProtectedRoute hydrated={hydrated}>
                   <NewConsultationPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/consultation/:consultationId/video" 
+              element={
+                <ProtectedRoute hydrated={hydrated}>
+                  <VideoConsultationPage />
                 </ProtectedRoute>
               } 
             />

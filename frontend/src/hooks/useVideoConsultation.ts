@@ -99,7 +99,7 @@ export const useVideoConsultation = (options: UseVideoConsultationOptions) => {
   const connectSocket = useCallback(() => {
     if (!token || socketRef.current) return;
 
-    socketRef.current = io(process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000', {
+    socketRef.current = io(import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000', {
       auth: { token },
       transports: ['websocket', 'polling']
     });

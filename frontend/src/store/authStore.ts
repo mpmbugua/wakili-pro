@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { LoginRequest, RegisterRequest, AuthUser } from '../../../shared/src/types/auth';
 import { authService } from '../services/authService';
+import axiosInstance from '../services/api';
 
 interface AuthState {
   user: AuthUser | null;
@@ -58,6 +59,17 @@ export const useAuthStore = create<AuthStore>()(
               error: null
             });
 
+            // Link anonymous session to user account
+            const sessionId = localStorage.getItem('analytics_session_id');
+            if (sessionId) {
+              try {
+                await axiosInstance.post('/analytics-tracking/link-session', { sessionId });
+                console.log('[AuthStore] Session linked to user account');
+              } catch (error) {
+                console.debug('[AuthStore] Session linking failed (non-critical):', error);
+              }
+            }
+
             return { success: true, user };
           } else {
             console.log('[AuthStore] Login failed:', response.message);
@@ -99,6 +111,17 @@ export const useAuthStore = create<AuthStore>()(
               isLoading: false,
               error: null
             });
+
+            // Link anonymous session to user account
+            const sessionId = localStorage.getItem('analytics_session_id');
+            if (sessionId) {
+              try {
+                await axiosInstance.post('/analytics-tracking/link-session', { sessionId });
+                console.log('[AuthStore] Session linked to user account');
+              } catch (error) {
+                console.debug('[AuthStore] Session linking failed (non-critical):', error);
+              }
+            }
 
             console.log('[AuthStore] Auth state set, isAuthenticated should now be true');
             return true;

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Bell, Search, User, LogOut, Settings } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { useEventTracking } from '../../hooks/useAnalytics';
 import { WakiliLogo } from '../ui/WakiliLogo';
 import { Button } from '../ui/Button';
 
@@ -13,8 +14,19 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = true }) => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { trackSearch } = useEventTracking();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      trackSearch(searchQuery, { page: 'global_header' });
+      // TODO: Implement actual search navigation
+      console.log('Search:', searchQuery);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -68,14 +80,21 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
 
         {/* Center Section - Search */}
         <div className="flex-1 flex justify-center px-6">
-          <div className="relative w-full max-w-md">
+          <form onSubmit={handleSearch} className="relative w-full max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               type="search"
-              placeholder="Search..."
+              placeholder="Search lawyers, documents, legal help..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onBlur={() => {
+                if (searchQuery.trim()) {
+                  trackSearch(searchQuery, { page: 'global_header', trigger: 'blur' });
+                }
+              }}
               className="w-full rounded-xl border-0 bg-gray-100 py-2 pl-10 pr-4 text-sm focus:bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none transition-all duration-200"
             />
-          </div>
+          </form>
         </div>
 
         {/* Right Section */}

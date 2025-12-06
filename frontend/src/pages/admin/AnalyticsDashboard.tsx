@@ -13,6 +13,7 @@ import {
   Tablet,
   Search,
   ArrowLeft,
+  ArrowRight,
   RefreshCw,
   FileText
 } from 'lucide-react';
@@ -170,10 +171,11 @@ export const AnalyticsDashboard: React.FC = () => {
     );
   }
 
+  // Safe to access analytics properties here
   const totalDevices = 
-    analytics.deviceBreakdown.mobile + 
-    analytics.deviceBreakdown.tablet + 
-    analytics.deviceBreakdown.desktop;
+    (analytics.deviceBreakdown?.mobile || 0) + 
+    (analytics.deviceBreakdown?.tablet || 0) + 
+    (analytics.deviceBreakdown?.desktop || 0);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -220,7 +222,7 @@ export const AnalyticsDashboard: React.FC = () => {
             </div>
             <p className="text-slate-600 text-sm mb-1">Total Visitors</p>
             <p className="text-3xl font-bold text-slate-900">
-              {analytics.totalVisitors.toLocaleString()}
+              {(analytics.totalVisitors || 0).toLocaleString()}
             </p>
           </div>
 
@@ -234,7 +236,7 @@ export const AnalyticsDashboard: React.FC = () => {
             </div>
             <p className="text-slate-600 text-sm mb-1">Page Views</p>
             <p className="text-3xl font-bold text-slate-900">
-              {analytics.totalPageViews.toLocaleString()}
+              {(analytics.totalPageViews || 0).toLocaleString()}
             </p>
           </div>
 
@@ -248,7 +250,7 @@ export const AnalyticsDashboard: React.FC = () => {
             </div>
             <p className="text-slate-600 text-sm mb-1">User Events</p>
             <p className="text-3xl font-bold text-slate-900">
-              {analytics.totalEvents.toLocaleString()}
+              {(analytics.totalEvents || 0).toLocaleString()}
             </p>
           </div>
 
@@ -261,10 +263,10 @@ export const AnalyticsDashboard: React.FC = () => {
             </div>
             <p className="text-slate-600 text-sm mb-1">Conversion Rate</p>
             <p className="text-3xl font-bold text-slate-900">
-              {analytics.conversionRate.toFixed(1)}%
+              {(analytics.conversionRate || 0).toFixed(1)}%
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              {analytics.conversions} conversions / KES {analytics.totalRevenue.toLocaleString()}
+              {analytics.conversions || 0} conversions / KES {(analytics.totalRevenue || 0).toLocaleString()}
             </p>
           </div>
         </div>
@@ -278,7 +280,7 @@ export const AnalyticsDashboard: React.FC = () => {
               <FileText className="w-5 h-5 text-slate-400" />
             </div>
             <div className="space-y-3">
-              {analytics.topPages.slice(0, 10).map((page, index) => (
+              {(analytics.topPages || []).slice(0, 10).map((page, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-slate-900 truncate">
@@ -290,17 +292,17 @@ export const AnalyticsDashboard: React.FC = () => {
                       <div
                         className="bg-blue-600 h-2 rounded-full"
                         style={{
-                          width: `${(page.views / analytics.topPages[0].views) * 100}%`
+                          width: `${analytics.topPages?.[0]?.views ? (page.views / analytics.topPages[0].views) * 100 : 0}%`
                         }}
                       />
                     </div>
                     <p className="text-sm font-semibold text-slate-700 w-12 text-right">
-                      {page.views.toLocaleString()}
+                      {(page.views || 0).toLocaleString()}
                     </p>
                   </div>
                 </div>
               ))}
-              {analytics.topPages.length === 0 && (
+              {(!analytics.topPages || analytics.topPages.length === 0) && (
                 <p className="text-slate-500 text-center py-4">No page data available</p>
               )}
             </div>
@@ -313,7 +315,7 @@ export const AnalyticsDashboard: React.FC = () => {
               <Search className="w-5 h-5 text-slate-400" />
             </div>
             <div className="space-y-3">
-              {analytics.topSearches.slice(0, 10).map((search, index) => (
+              {(analytics.topSearches || []).slice(0, 10).map((search, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-slate-900 truncate">
@@ -325,17 +327,17 @@ export const AnalyticsDashboard: React.FC = () => {
                       <div
                         className="bg-purple-600 h-2 rounded-full"
                         style={{
-                          width: `${(search.count / analytics.topSearches[0].count) * 100}%`
+                          width: `${analytics.topSearches?.[0]?.count ? (search.count / analytics.topSearches[0].count) * 100 : 0}%`
                         }}
                       />
                     </div>
                     <p className="text-sm font-semibold text-slate-700 w-12 text-right">
-                      {search.count}
+                      {search.count || 0}
                     </p>
                   </div>
                 </div>
               ))}
-              {analytics.topSearches.length === 0 && (
+              {(!analytics.topSearches || analytics.topSearches.length === 0) && (
                 <p className="text-slate-500 text-center py-4">No search data available</p>
               )}
             </div>
@@ -432,7 +434,7 @@ export const AnalyticsDashboard: React.FC = () => {
               <MapPin className="w-5 h-5 text-slate-400" />
             </div>
             <div className="space-y-3">
-              {analytics.geoData.slice(0, 8).map((location, index) => (
+              {(analytics.geoData || []).slice(0, 8).map((location, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-slate-900">
@@ -440,11 +442,11 @@ export const AnalyticsDashboard: React.FC = () => {
                     </p>
                   </div>
                   <p className="text-sm font-semibold text-slate-700">
-                    {location.visitors.toLocaleString()} visitors
+                    {(location.visitors || 0).toLocaleString()} visitors
                   </p>
                 </div>
               ))}
-              {analytics.geoData.length === 0 && (
+              {(!analytics.geoData || analytics.geoData.length === 0) && (
                 <p className="text-slate-500 text-center py-4">No location data available</p>
               )}
             </div>
@@ -470,7 +472,7 @@ export const AnalyticsDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {analytics.dailyStats.slice(0, 14).map((day, index) => (
+                {(analytics.dailyStats || []).slice(0, 14).map((day, index) => (
                   <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
                     <td className="py-3 px-4 text-sm text-slate-900">
                       {new Date(day.date).toLocaleDateString('en-US', { 
@@ -480,23 +482,23 @@ export const AnalyticsDashboard: React.FC = () => {
                       })}
                     </td>
                     <td className="text-right py-3 px-4 text-sm text-slate-900">
-                      {day.totalVisitors.toLocaleString()}
+                      {(day.totalVisitors || 0).toLocaleString()}
                     </td>
                     <td className="text-right py-3 px-4 text-sm text-slate-900">
-                      {day.totalPageViews.toLocaleString()}
+                      {(day.totalPageViews || 0).toLocaleString()}
                     </td>
                     <td className="text-right py-3 px-4 text-sm text-slate-900">
-                      {day.totalEvents.toLocaleString()}
+                      {(day.totalEvents || 0).toLocaleString()}
                     </td>
                     <td className="text-right py-3 px-4 text-sm text-slate-900">
-                      {day.totalConversions}
+                      {day.totalConversions || 0}
                     </td>
                     <td className="text-right py-3 px-4 text-sm font-semibold text-green-600">
-                      KES {day.totalRevenue.toLocaleString()}
+                      KES {(day.totalRevenue || 0).toLocaleString()}
                     </td>
                   </tr>
                 ))}
-                {analytics.dailyStats.length === 0 && (
+                {(!analytics.dailyStats || analytics.dailyStats.length === 0) && (
                   <tr>
                     <td colSpan={6} className="text-center py-8 text-slate-500">
                       No daily statistics available

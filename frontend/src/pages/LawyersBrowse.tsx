@@ -231,10 +231,11 @@ const locations = [
 export const LawyersBrowse: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
-  const { trackEvent, trackClick } = useEventTracking();
+  const { trackEvent, trackClick, trackSearch } = useEventTracking();
   const [selectedSpecialty, setSelectedSpecialty] = useState('All Specialties');
   const [selectedLocation, setSelectedLocation] = useState('All Locations');
   const [sortBy, setSortBy] = useState<'rating' | 'price' | 'experience'>('rating');
+  const [searchQuery, setSearchQuery] = useState('');
   const [lawyers, setLawyers] = useState<Lawyer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -299,6 +300,20 @@ export const LawyersBrowse: React.FC = () => {
   // Filter and sort lawyers
   const filteredLawyers = lawyers
     .filter(lawyer => {
+      // Check search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = lawyer.name.toLowerCase().includes(query);
+        const matchesSpecialty = lawyer.specializations?.some(spec => 
+          spec.toLowerCase().includes(query)
+        ) || lawyer.specialty.toLowerCase().includes(query);
+        const matchesBio = lawyer.bio?.toLowerCase().includes(query);
+        
+        if (!matchesName && !matchesSpecialty && !matchesBio) {
+          return false;
+        }
+      }
+      
       // Check specialty filter
       const specialtyMatch = selectedSpecialty === 'All Specialties' || 
         SPECIALIZATION_MAP[selectedSpecialty]?.some(spec => 
@@ -355,7 +370,29 @@ export const LawyersBrowse: React.FC = () => {
       {/* Filters Section */}
       <div className="bg-white border-b border-slate-200 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {/* Search Input */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
+                Search
+              </label>
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onBlur={() => {
+                  if (searchQuery.trim()) {
+                    trackSearch(searchQuery, { 
+                      page: 'lawyers_browse',
+                      filters: { specialty: selectedSpecialty, location: selectedLocation }
+                    });
+                  }
+                }}
+                placeholder="Name, specialty, keywords..."
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
+
             {/* Specialty Filter */}
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
