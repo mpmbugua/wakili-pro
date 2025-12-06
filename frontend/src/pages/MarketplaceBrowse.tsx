@@ -841,7 +841,7 @@ export const MarketplaceBrowse: React.FC = () => {
 
                   <button
                     onClick={() => handlePurchaseDocument(doc.id, doc.title)}
-                    className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+                    className="w-full px-6 py-3 bg-blue-100 text-blue-700 font-medium rounded-lg hover:bg-blue-200 transition"
                   >
                     Purchase Document
                   </button>
@@ -863,7 +863,7 @@ export const MarketplaceBrowse: React.FC = () => {
                 setSearchQuery('');
                 setSelectedCategory('All Categories');
               }}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="mt-4 px-6 py-2 bg-blue-100 text-white rounded-lg hover:bg-blue-200 transition"
             >
               Clear Filters
             </button>
@@ -898,8 +898,8 @@ export const MarketplaceBrowse: React.FC = () => {
               <p className="text-sm text-slate-600 leading-relaxed">Every document is reviewed and approved by qualified Kenyan lawyers to ensure full legal compliance.</p>
             </div>
             <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-8 text-center border border-blue-100">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 mb-4">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </div>
@@ -912,22 +912,22 @@ export const MarketplaceBrowse: React.FC = () => {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-12">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 text-white py-12">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold mb-4">Ready to Access Legal Documents?</h2>
-            <p className="text-lg mb-6 text-purple-100">
+            <p className="text-lg mb-6 text-slate-600">
               Create a free account to purchase documents, save favorites, and get instant downloads.
             </p>
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => navigate('/register', { state: { from: '/marketplace' } })}
-                className="px-8 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-gray-100 transition"
+                className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-200 transition"
               >
                 Create Free Account
               </button>
               <button
                 onClick={() => navigate('/login', { state: { from: '/marketplace' } })}
-                className="px-8 py-3 bg-purple-700 text-white font-semibold rounded-lg hover:bg-purple-800 transition border-2 border-white"
+                className="px-8 py-3 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition border-2 border-blue-200"
               >
                 Log In
               </button>
@@ -941,7 +941,7 @@ export const MarketplaceBrowse: React.FC = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPreviewDocument(null)}>
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 text-white">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-8 py-6 text-white">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
@@ -1447,7 +1447,7 @@ export const MarketplaceBrowse: React.FC = () => {
                       setPreviewDocument(null);
                       handlePurchaseDocument(previewDocument.id, previewDocument.title);
                     }}
-                    className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-lg hover:shadow-xl"
+                    className="px-8 py-3 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition shadow-lg hover:shadow-xl"
                   >
                     Purchase Now
                   </button>
