@@ -520,6 +520,30 @@ export const AnalyticsDashboard: React.FC = () => {
             <Download className="w-5 h-5 text-slate-400" />
           </div>
 
+          {/* Advanced AI Tools Button */}
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">Advanced AI Data Tools</h3>
+                  <p className="text-sm text-slate-600">
+                    Query builder, anonymization, and market intelligence reports
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/admin/ai-data-export')}
+                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition flex items-center gap-2"
+              >
+                Open AI Tools
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search Queries Export */}
             <div className="border border-slate-200 rounded-lg p-4">

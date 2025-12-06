@@ -64,6 +64,7 @@ import AdminLegalKnowledgeBase from './pages/admin/AdminLegalKnowledgeBase';
 import { PineconeTestPage } from './pages/admin/PineconeTestPage';
 import { CallLogPage } from './pages/admin/CallLogPage';
 import { AnalyticsDashboard } from './pages/admin/AnalyticsDashboard';
+import { AIDataExportPage } from './pages/admin/AIDataExportPage';
 import { VoipCallPage } from './pages/VoipCallPage';
 import { AdminDashboard } from './components/dashboards/AdminDashboard';
 import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard';
@@ -507,6 +508,14 @@ function App() {
               element={
                 <AdminRoute hydrated={hydrated}>
                   <AnalyticsDashboard />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/ai-data-export" 
+              element={
+                <AdminRoute hydrated={hydrated}>
+                  <AIDataExportPage />
                 </AdminRoute>
               } 
             />
