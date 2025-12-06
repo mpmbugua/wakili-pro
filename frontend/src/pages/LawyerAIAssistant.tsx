@@ -387,29 +387,11 @@ export const LawyerAIAssistant: React.FC = () => {
             <div className="flex justify-center">
               <div className="max-w-2xl bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                 <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                  ⚖️ Legal Research Assistant
+                  🤖 AI Legal Assistant
                 </h2>
                 <p className="text-slate-700 mb-4">
-                  Access comprehensive legal research, case law, and statutes. Get instant answers to legal questions with cited sources from Kenyan law.
+                  Get instant answers to legal questions, draft documents, and access legal guidance powered by AI.
                 </p>
-                <div className="space-y-2 text-sm text-slate-600">
-                  <p className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    Search case law and legal precedents
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    Research specific statutes and regulations
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    Get instant legal citations and references
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="text-blue-600">💼</span>
-                    Professional legal research tool for practitioners
-                  </p>
-                </div>
               </div>
             </div>
           )}
