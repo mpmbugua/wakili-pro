@@ -24,9 +24,10 @@ export async function getAllArticles(req: AuthenticatedRequest, res: Response) {
     const isPremium = req.query.isPremium === 'true' ? true : req.query.isPremium === 'false' ? false : undefined;
     const search = req.query.search as string;
     const category = req.query.category as string;
+    const authorId = req.query.authorId as string;
 
     const result = await articleService.getArticles(
-      { isPublished, isPremium, search, category },
+      { isPublished, isPremium, search, category, authorId },
       page,
       limit
     );

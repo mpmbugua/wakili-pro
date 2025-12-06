@@ -57,13 +57,20 @@ export const ArticleManagementPage: React.FC = () => {
 
       const response = await axiosInstance.get(endpoint);
       if (response.data.success && response.data.data) {
-        let articlesList = response.data.data;
+        // Handle paginated response - extract articles array
+        let articlesList = response.data.data.articles || response.data.data;
+        
+        // Ensure articlesList is an array
+        if (!Array.isArray(articlesList)) {
+          articlesList = [];
+        }
         
         // Filter by category if selected
         if (filterCategory !== 'all') {
           articlesList = articlesList.filter((a: Article) => a.category === filterCategory);
         }
         
+        console.log('[ArticleManagementPage] Loaded articles:', articlesList);
         setArticles(articlesList);
       }
     } catch (error) {
@@ -81,13 +88,24 @@ export const ArticleManagementPage: React.FC = () => {
         axiosInstance.get('/api/articles/admin/pending')
       ]);
 
-      const allArticles = allRes.data.data || [];
+      // Extract articles arrays from paginated responses
+      const allArticles = allRes.data.data?.articles || allRes.data.data || [];
+      const publishedArticles = publishedRes.data.data?.articles || publishedRes.data.data || [];
+      const pendingArticles = pendingRes.data.data?.articles || pendingRes.data.data || [];
+      
       const aiGenerated = allArticles.filter((a: Article) => a.aiScore !== undefined && a.aiScore !== null);
+
+      console.log('[ArticleManagementPage] Stats:', {
+        total: allArticles.length,
+        published: publishedArticles.length,
+        pending: pendingArticles.length,
+        aiGenerated: aiGenerated.length
+      });
 
       setStats({
         total: allArticles.length,
-        published: publishedRes.data.data?.length || 0,
-        pending: pendingRes.data.data?.length || 0,
+        published: publishedArticles.length,
+        pending: pendingArticles.length,
         aiGenerated: aiGenerated.length
       });
     } catch (error) {
