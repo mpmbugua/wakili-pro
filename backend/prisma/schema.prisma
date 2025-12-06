@@ -223,6 +223,9 @@ model User {
   directMessages                                             Message[]               @relation("DirectMessagesSent")
   uploadedLegalDocuments                                     LegalDocument[]         @relation("UploadedLegalDocuments")
   handledCallLogs                                            CallLog[]               @relation("HandledCallLogs")
+  pageViews                                                  PageView[]              @relation("UserPageViews")
+  events                                                     UserEvent[]             @relation("UserEvents")
+  sessions                                                   UserSession[]           @relation("UserSessions")
   onlineStatus                                               String?                 @default("offline")
   lastSeen                                                   DateTime?
 }
@@ -1363,3 +1366,125 @@ model CallLog {
   @@index([createdAt])
   @@index([handledBy])
 }
+
+// ===========================
+// ANALYTICS & DATA COLLECTION
+// ===========================
+
+model PageView {
+  id            String    @id @default(cuid())
+  sessionId     String    // Anonymous session identifier (cookie-based)
+  userId        String?   // Null for anonymous visitors
+  page          String    // Page URL or route
+  pageName      String?   // Friendly page name (e.g., "Lawyer Profile", "Marketplace")
+  referrer      String?   // Previous page or external source
+  userAgent     String?   // Browser and device info
+  ipAddress     String?   // IP address (anonymized for privacy)
+  country       String?   // Geographic location
+  city          String?   // City from IP geolocation
+  deviceType    String?   // mobile, tablet, desktop
+  browser       String?   // Chrome, Safari, etc.
+  os            String?   // Windows, iOS, Android, etc.
+  screenWidth   Int?      // Screen resolution width
+  screenHeight  Int?      // Screen resolution height
+  duration      Int?      // Time spent on page (seconds)
+  scrollDepth   Int?      // Percentage of page scrolled (0-100)
+  exitPage      Boolean   @default(false) // True if user left site from this page
+  createdAt     DateTime  @default(now())
+  
+  user User? @relation("UserPageViews", fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([sessionId, createdAt])
+  @@index([userId, createdAt])
+  @@index([page])
+  @@index([createdAt])
+  @@index([country, city])
+}
+
+model UserEvent {
+  id            String   @id @default(cuid())
+  sessionId     String   // Anonymous session identifier
+  userId        String?  // Null for anonymous visitors
+  eventType     String   // CLICK, SEARCH, FORM_START, FORM_SUBMIT, DOWNLOAD, etc.
+  eventCategory String   // USER_ACTION, CONVERSION, ENGAGEMENT
+  eventName     String   // Descriptive name (e.g., "clicked_book_lawyer", "searched_employment_law")
+  page          String   // Page where event occurred
+  targetElement String?  // Button/link clicked (e.g., "book-consultation-btn")
+  eventValue    Float?   // Numeric value (e.g., price of item viewed)
+  metadata      Json?    // Additional structured data
+  
+  // Specific tracking fields
+  searchQuery   String?  // For search events
+  lawyerId      String?  // For lawyer interactions
+  serviceType   String?  // For service browsing
+  documentId    String?  // For document interactions
+  
+  createdAt DateTime @default(now())
+  
+  user User? @relation("UserEvents", fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([sessionId, createdAt])
+  @@index([userId, createdAt])
+  @@index([eventType, eventName])
+  @@index([searchQuery])
+  @@index([lawyerId])
+  @@index([createdAt])
+}
+
+model UserSession {
+  id                String    @id @default(cuid())
+  sessionId         String    @unique // Browser session ID (cookie)
+  userId            String?   // Null for anonymous visitors
+  startedAt         DateTime  @default(now())
+  endedAt           DateTime? // When session ended (user left site)
+  duration          Int?      // Total session duration in seconds
+  pageViewsCount    Int       @default(0) // Number of pages viewed
+  eventsCount       Int       @default(0) // Number of interactions
+  referralSource    String?   // Where user came from (Google, Facebook, Direct, etc.)
+  referralCampaign  String?   // UTM campaign parameter
+  referralMedium    String?   // UTM medium (organic, cpc, email, etc.)
+  landingPage       String?   // First page visited
+  exitPage          String?   // Last page before leaving
+  converted         Boolean   @default(false) // True if user completed a goal (signup, purchase, etc.)
+  conversionType    String?   // SIGNUP, BOOKING, PURCHASE, etc.
+  conversionValue   Float?    // Value of conversion (payment amount)
+  deviceType        String?   // mobile, tablet, desktop
+  browser           String?
+  os                String?
+  country           String?
+  city              String?
+  updatedAt         DateTime  @updatedAt
+  
+  user User? @relation("UserSessions", fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([sessionId])
+  @@index([userId, startedAt])
+  @@index([converted, conversionType])
+  @@index([referralSource, referralMedium])
+  @@index([startedAt])
+}
+
+model AnalyticsSummary {
+  id                  String   @id @default(cuid())
+  date                DateTime @unique @db.Date // Daily summary
+  totalVisitors       Int      @default(0) // Unique sessions
+  totalPageViews      Int      @default(0)
+  totalEvents         Int      @default(0)
+  newUsers            Int      @default(0) // First-time visitors who signed up
+  returningUsers      Int      @default(0) // Existing users who visited
+  averageSessionTime  Int      @default(0) // Average duration in seconds
+  bounceRate          Float    @default(0) // Percentage of single-page sessions
+  conversionRate      Float    @default(0) // Percentage of sessions that converted
+  totalConversions    Int      @default(0)
+  totalRevenue        Float    @default(0) // Sum of all payments
+  topPages            Json?    // Array of {page, views} objects
+  topSearches         Json?    // Array of {query, count} objects
+  topReferrers        Json?    // Array of {source, count} objects
+  deviceBreakdown     Json?    // {mobile: X, tablet: Y, desktop: Z}
+  geographicData      Json?    // {country: {city: count}}
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@index([date])
+}
+

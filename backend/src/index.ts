@@ -331,6 +331,10 @@ app.use('/api/users', usersRouter);
 import analyticsRouter from './routes/analytics';
 app.use('/api/analytics', analyticsRouter);
 
+// Mount analytics tracking routes (visitor data collection)
+import analyticsTrackingRouter from './routes/analyticsTracking';
+app.use('/api/analytics-tracking', analyticsTrackingRouter);
+
 // Mount subscription routes (Three-Tier Monetization)
 import subscriptionRouter from './routes/subscriptions';
 app.use('/api/subscriptions', subscriptionRouter);
