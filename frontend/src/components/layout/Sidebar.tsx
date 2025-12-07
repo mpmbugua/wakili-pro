@@ -19,11 +19,14 @@ import {
   Award,
   TrendingUp,
   Stamp,
-  PenSquare
+  PenSquare,
+  Lock
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
+import { useState, useEffect } from 'react';
+import axiosInstance from '../../lib/axios';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -36,6 +39,7 @@ interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   roles?: string[];
+  requiresVerification?: boolean; // Requires lawyer verification
 }
 
 // Public user navigation (clients)
@@ -49,23 +53,23 @@ const publicNavigation: NavItem[] = [
 
 // Lawyer navigation - main items
 const lawyerMainNavigation: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Consultations', href: '/consultations', icon: Video },
-  { name: 'Appointments', href: '/appointments', icon: Calendar },
-  { name: 'Messages', href: '/messages', icon: MessageSquare },
-  { name: 'Document Reviews', href: '/document-reviews', icon: FileText },
-  { name: 'Smart AI Kenyan Lawyer', href: '/lawyer/ai', icon: Book },
+  { name: 'Dashboard', href: '/dashboard', icon: Home }, // Always accessible
+  { name: 'Consultations', href: '/consultations', icon: Video, requiresVerification: true },
+  { name: 'Appointments', href: '/appointments', icon: Calendar, requiresVerification: true },
+  { name: 'Messages', href: '/messages', icon: MessageSquare, requiresVerification: true },
+  { name: 'Document Reviews', href: '/document-reviews', icon: FileText, requiresVerification: true },
+  { name: 'Smart AI Kenyan Lawyer', href: '/lawyer/ai', icon: Book, requiresVerification: true },
 ];
 
 // Lawyer tools navigation
 const lawyerToolsNavigation: NavItem[] = [
-  { name: 'My Clients', href: '/clients', icon: Users },
-  { name: 'Services', href: '/my-services', icon: Briefcase },
-  { name: 'Billing', href: '/billing', icon: CreditCard },
-  { name: 'Analytics', href: '/analytics', icon: TrendingUp },
-  { name: 'Performance', href: '/performance', icon: Award },
-  { name: 'Signature & Stamp', href: '/lawyer/signature-setup', icon: Stamp },
-  { name: 'Submit Article', href: '/submit-article', icon: PenSquare },
+  { name: 'My Clients', href: '/clients', icon: Users, requiresVerification: true },
+  { name: 'Services', href: '/my-services', icon: Briefcase, requiresVerification: true },
+  { name: 'Billing', href: '/billing', icon: CreditCard, requiresVerification: true },
+  { name: 'Analytics', href: '/analytics', icon: TrendingUp, requiresVerification: true },
+  { name: 'Performance', href: '/performance', icon: Award, requiresVerification: true },
+  { name: 'Signature & Stamp', href: '/lawyer/signature-setup', icon: Stamp }, // Accessible before verification
+  { name: 'Submit Article', href: '/submit-article', icon: PenSquare, requiresVerification: true },
 ];
 
 // Admin navigation - main items
@@ -95,22 +99,73 @@ const superAdminNavigation: NavItem[] = [
 ];
 
 const bottomNavigation: NavItem[] = [
-  { name: 'Settings', href: '/settings', icon: Settings },
-  { name: 'Help & Support', href: '/help', icon: HelpCircle },
+  { name: 'Settings', href: '/settings', icon: Settings, requiresVerification: true },
+  { name: 'Help & Support', href: '/help', icon: HelpCircle, requiresVerification: true },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, collapsed, onClose }) => {
   const location = useLocation();
   const { user } = useAuthStore();
+  const [isVerified, setIsVerified] = useState(false);
+  const [checkingVerification, setCheckingVerification] = useState(true);
 
   const isPublic = user?.role === 'PUBLIC';
   const isLawyer = user?.role === 'LAWYER';
   const isAdmin = user?.role === 'ADMIN';
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
+  // Check lawyer verification status
+  useEffect(() => {
+    const checkVerification = async () => {
+      if (!isLawyer) {
+        setCheckingVerification(false);
+        setIsVerified(true); // Non-lawyers don't need verification
+        return;
+      }
+
+      try {
+        const response = await axiosInstance.get('/users/profile');
+        const lawyerProfile = response.data?.data?.lawyerProfile;
+        setIsVerified(lawyerProfile?.isVerified === true);
+      } catch (error) {
+        console.error('[Sidebar] Verification check failed:', error);
+        setIsVerified(false);
+      } finally {
+        setCheckingVerification(false);
+      }
+    };
+
+    checkVerification();
+  }, [isLawyer]);
+
   const NavLink: React.FC<{ item: NavItem }> = ({ item }) => {
     const isActive = location.pathname === item.href || 
                     (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+    
+    // Check if item is locked (requires verification but user isn't verified)
+    const isLocked = isLawyer && item.requiresVerification && !isVerified;
+    
+    // If locked, render as disabled button instead of link
+    if (isLocked) {
+      return (
+        <div
+          className={cn(
+            "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-not-allowed opacity-60",
+            collapsed ? "justify-center" : "space-x-3",
+            "text-slate-400 bg-slate-50 border-l-4 border-slate-200"
+          )}
+          title={collapsed ? `${item.name} - Verification Required` : undefined}
+        >
+          <Lock className="h-5 w-5 flex-shrink-0 text-slate-400" />
+          {!collapsed && (
+            <div className="flex items-center justify-between flex-1">
+              <span>{item.name}</span>
+              <Lock className="h-4 w-4 text-slate-400" />
+            </div>
+          )}
+        </div>
+      );
+    }
     
     return (
       <Link
