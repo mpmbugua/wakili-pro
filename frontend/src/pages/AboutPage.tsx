@@ -6,11 +6,11 @@ export const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-20">
+      <section className="bg-gradient-to-r from-blue-100 to-blue-100 text-slate-900 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">About Wakili Pro</h1>
-            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto">
               Democratizing access to legal services across Kenya through technology and innovation
             </p>
           </div>
@@ -116,25 +116,25 @@ export const AboutPage: React.FC = () => {
       </section>
 
       {/* Key Achievements */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+      <section className="py-16 bg-gradient-to-r from-blue-100 to-blue-100 text-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-12">Our Impact</h2>
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold mb-2">500+</div>
-              <div className="text-blue-100">Verified Lawyers</div>
+              <div className="text-slate-700">Verified Lawyers</div>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">10,000+</div>
-              <div className="text-blue-100">Consultations Completed</div>
+              <div className="text-slate-700">Consultations Completed</div>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">50,000+</div>
-              <div className="text-blue-100">Legal Documents Provided</div>
+              <div className="text-slate-700">Legal Documents Provided</div>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">47</div>
-              <div className="text-blue-100">Counties Served</div>
+              <div className="text-slate-700">Counties Served</div>
             </div>
           </div>
         </div>
