@@ -168,7 +168,7 @@ export const LawyerProfile: React.FC = () => {
     );
   }
 
-  // Add null check before destructuring
+  // Add null check before destructuring to prevent crash
   if (!profile) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-8">
