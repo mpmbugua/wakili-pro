@@ -275,20 +275,6 @@ export const LawyerAIAssistant: React.FC = () => {
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Chat Container */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
-          {/* Welcome Message - Shows when no messages */}
-          {messages.length === 0 && (
-            <div className="flex justify-center">
-              <div className="max-w-2xl bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">
-                  🤖 AI Legal Assistant
-                </h2>
-                <p className="text-slate-700 mb-4">
-                  Get instant answers to legal questions, draft documents, and access legal guidance powered by AI.
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* Messages Display */}
           {messages.map((message) => (
               <div
@@ -427,6 +413,7 @@ export const LawyerAIAssistant: React.FC = () => {
 
           {/* Input Area */}
           <div className="border-t border-slate-200 p-2 sm:p-4 bg-slate-50">
+            <p className="text-sm text-slate-600 mb-2">📎 Attach document for AI review</p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3">
               <textarea
                 value={input}
