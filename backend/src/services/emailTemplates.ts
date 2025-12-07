@@ -830,3 +830,85 @@ export async function sendPaymentReleasedEmail(
 
   await sendEmail({ to: lawyerEmail, subject, html });
 }
+
+// ========================================
+// PASSWORD RESET EMAIL TEMPLATE
+// ========================================
+
+export async function sendPasswordResetEmail(
+  userEmail: string,
+  userName: string,
+  resetToken: string
+): Promise<void> {
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+  const subject = '🔐 Password Reset Request - Wakili Pro';
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .content { padding: 30px; }
+        .reset-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
+        .button { display: inline-block; background: #667eea; color: white !important; padding: 15px 40px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; font-size: 16px; }
+        .warning { background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; background: #f9f9f9; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🔐 Password Reset</h1>
+        </div>
+        <div class="content">
+          <p>Hello ${userName},</p>
+          
+          <p>We received a request to reset your password for your Wakili Pro account.</p>
+          
+          <div class="reset-box">
+            <p><strong>Click the button below to reset your password:</strong></p>
+            
+            <div style="text-align: center;">
+              <a href="${resetUrl}" class="button">Reset Password</a>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 12px; color: #666;">
+              Or copy and paste this link into your browser:<br>
+              <a href="${resetUrl}" style="color: #667eea; word-break: break-all;">${resetUrl}</a>
+            </p>
+          </div>
+          
+          <div class="warning">
+            <strong>⏰ Important:</strong> This link will expire in <strong>1 hour</strong> for security reasons.
+          </div>
+          
+          <p style="padding: 15px; background: #e7f3ff; border-radius: 5px; border-left: 4px solid #2196f3;">
+            <strong>🔒 Security Tips:</strong><br>
+            • Never share your password with anyone<br>
+            • Use a strong, unique password<br>
+            • If you didn't request this reset, please ignore this email
+          </p>
+          
+          <p style="margin-top: 30px; color: #666;">
+            If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+          </p>
+          
+          <p>Best regards,<br><strong>Wakili Pro Security Team</strong></p>
+        </div>
+        <div class="footer">
+          © ${new Date().getFullYear()} Wakili Pro. All rights reserved.<br>
+          This is an automated email. Please do not reply.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  await sendEmail({ to: userEmail, subject, html });
+}

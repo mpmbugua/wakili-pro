@@ -508,6 +508,7 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response): 
 
 import { ForgotPasswordSchema, ResetPasswordSchema } from '@wakili-pro/shared';
 import crypto from 'crypto';
+import { sendPasswordResetEmail } from '../services/emailTemplates';
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -527,7 +528,8 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     const { email } = validationResult.data;
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      // Don't reveal that user doesn't exist for security
+      res.json({ success: true, message: 'If an account exists with this email, you will receive password reset instructions.' });
       return;
     }
 
@@ -535,7 +537,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    // Store token in DB (add passwordResetToken/passwordResetExpires fields to user model if not present)
+    // Store token in DB
     await prisma.user.update({
       where: { email },
       data: {
@@ -544,9 +546,19 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       }
     });
 
-    // TODO: Send email with resetToken (implement email sending logic)
+    // Send email with reset link
+    try {
+      await sendPasswordResetEmail(
+        user.email,
+        `${user.firstName} ${user.lastName}`,
+        resetToken
+      );
+    } catch (emailError) {
+      console.error('[ForgotPassword] Email sending failed:', emailError);
+      // Don't fail the request if email fails - token is still valid
+    }
 
-    res.json({ success: true, message: 'Password reset link sent to email.' });
+    res.json({ success: true, message: 'If an account exists with this email, you will receive password reset instructions.' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ success: false, message: 'Internal server error during forgot password' });

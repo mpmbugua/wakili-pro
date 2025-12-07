@@ -72,6 +72,8 @@ import { SuperAdminDashboard } from './components/dashboards/SuperAdminDashboard
 import { AdminLoginPage } from './pages/auth/AdminLoginPage';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
 import Dashboard from './components/Dashboard';
 import { MyBookings } from './components/MyBookings';
 import { BookingDetails } from './components/BookingDetails';
@@ -237,6 +239,14 @@ function App() {
           <Route 
             path="/register" 
             element={isAuthenticated ? <Navigate to="/dashboard" /> : <GlobalLayout><Register /></GlobalLayout>} 
+          />
+          <Route 
+            path="/forgot-password" 
+            element={<GlobalLayout><ForgotPassword /></GlobalLayout>} 
+          />
+          <Route 
+            path="/reset-password" 
+            element={<GlobalLayout><ResetPassword /></GlobalLayout>} 
           />
 
           {/* Protected Routes - Wrapped in AppShell */}
