@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Video, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Video, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle, Loader } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import axiosInstance from '../lib/axios';
 
@@ -21,11 +21,35 @@ export const ConsultationsPage: React.FC = () => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
   const isLawyer = user?.role === 'LAWYER';
 
+  // Check lawyer verification status
   useEffect(() => {
-    fetchConsultations();
-  }, []);
+    const checkVerification = async () => {
+      if (!isLawyer) {
+        setIsVerified(true); // Clients don't need verification
+        return;
+      }
+
+      try {
+        const response = await axiosInstance.get('/users/profile');
+        const lawyerProfile = response.data?.data?.lawyerProfile;
+        setIsVerified(lawyerProfile?.isVerified === true);
+      } catch (error) {
+        console.error('[ConsultationsPage] Verification check failed:', error);
+        setIsVerified(false);
+      }
+    };
+
+    checkVerification();
+  }, [isLawyer]);
+
+  useEffect(() => {
+    if (isVerified) {
+      fetchConsultations();
+    }
+  }, [isVerified]);
 
   const fetchConsultations = async () => {
     try {
@@ -163,6 +187,38 @@ export const ConsultationsPage: React.FC = () => {
     }
     return true;
   });
+
+  // Show verification check loading
+  if (isVerified === null) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader className="h-8 w-8 animate-spin mx-auto text-blue-600 mb-2" />
+          <p className="text-sm text-slate-600">Checking verification status...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show verification required for unverified lawyers
+  if (isLawyer && !isVerified) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-16">
+        <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-8 text-center">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Clock className="h-8 w-8 text-amber-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Verification Required</h2>
+          <p className="text-gray-700 mb-4">
+            You must be a verified lawyer to access consultations. Your profile is currently under admin review.
+          </p>
+          <p className="text-sm text-gray-600">
+            You'll receive an email notification once approved (typically 24-48 hours).
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

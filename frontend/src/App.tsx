@@ -75,6 +75,7 @@ import Register from './components/auth/Register';
 import Dashboard from './components/Dashboard';
 import { MyBookings } from './components/MyBookings';
 import { BookingDetails } from './components/BookingDetails';
+import { VerifiedLawyerRoute } from './components/VerifiedLawyerRoute';
 
 const GOOGLE_CLIENT_ID = '635497798070-n4kun3d5m7af6k4cbcmvoeehlp3igh68.apps.googleusercontent.com';
 
@@ -457,9 +458,9 @@ function App() {
             <Route 
               path="/document-reviews" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
+                <VerifiedLawyerRoute>
                   <DocumentReviewDashboard />
-                </ProtectedRoute>
+                </VerifiedLawyerRoute>
               } 
             />
             <Route 
@@ -481,25 +482,25 @@ function App() {
             <Route 
               path="/lawyer/signature-setup" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
+                <VerifiedLawyerRoute>
                   <LawyerSignatureSetup />
-                </ProtectedRoute>
+                </VerifiedLawyerRoute>
               } 
             />
             <Route 
               path="/lawyer/certifications" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
+                <VerifiedLawyerRoute>
                   <DocumentCertificationPage />
-                </ProtectedRoute>
+                </VerifiedLawyerRoute>
               } 
             />
             <Route 
               path="/lawyer/wallet" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
+                <VerifiedLawyerRoute>
                   <LawyerWalletPage />
-                </ProtectedRoute>
+                </VerifiedLawyerRoute>
               } 
             />
             

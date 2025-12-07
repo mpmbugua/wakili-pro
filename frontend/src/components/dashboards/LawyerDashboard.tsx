@@ -139,10 +139,9 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
       setIsVerified(verified);
     } catch (error) {
       console.error('[LawyerDashboard] Failed to check verification status:', error);
-      // On error, assume profile exists and is verified to avoid blocking UI
-      // This is temporary - you can change this behavior
-      setHasProfile(true);
-      setIsVerified(true);
+      // On error, deny access (fail closed for security)
+      setHasProfile(false);
+      setIsVerified(false);
     } finally {
       setLoading(false);
       setChecking(false);
