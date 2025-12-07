@@ -11,6 +11,7 @@ const ForgotPassword: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,8 +23,14 @@ const ForgotPassword: React.FC = () => {
       
       if (response.data.success) {
         setSuccess(true);
+        // Store debug info if available (development mode)
+        if (response.data.debug) {
+          setDebugInfo(response.data.debug);
+          console.log('Password reset debug info:', response.data.debug);
+        }
       }
     } catch (err: any) {
+      console.error('Forgot password error:', err);
       setError(err.response?.data?.message || 'Failed to send reset email. Please try again.');
     } finally {
       setIsLoading(false);
@@ -49,6 +56,20 @@ const ForgotPassword: React.FC = () => {
                 <p className="text-xs text-gray-500 mb-6">
                   Didn't receive the email? Check your spam folder or try again in a few minutes.
                 </p>
+                
+                {/* Debug info for development */}
+                {debugInfo && (
+                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-left">
+                    <p className="text-xs font-semibold text-yellow-800 mb-2">Development Mode - Reset Link:</p>
+                    <a 
+                      href={debugInfo.resetUrl}
+                      className="text-xs text-blue-600 hover:underline break-all"
+                    >
+                      {debugInfo.resetUrl}
+                    </a>
+                  </div>
+                )}
+                
                 <Link
                   to="/login"
                   className="inline-flex items-center text-sm font-medium text-sky-600 hover:text-sky-500 transition-colors"

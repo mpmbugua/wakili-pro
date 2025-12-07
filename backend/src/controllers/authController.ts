@@ -548,17 +548,31 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
     // Send email with reset link
     try {
+      console.log(`[ForgotPassword] Attempting to send reset email to: ${user.email}`);
       await sendPasswordResetEmail(
         user.email,
         `${user.firstName} ${user.lastName}`,
         resetToken
       );
+      console.log(`[ForgotPassword] Password reset email sent successfully to: ${user.email}`);
     } catch (emailError) {
       console.error('[ForgotPassword] Email sending failed:', emailError);
+      console.error('[ForgotPassword] Email config check - HOST:', process.env.EMAIL_HOST, 'USER:', process.env.EMAIL_USER);
       // Don't fail the request if email fails - token is still valid
+      // User can still use the reset link if they have it
     }
 
-    res.json({ success: true, message: 'If an account exists with this email, you will receive password reset instructions.' });
+    res.json({ 
+      success: true, 
+      message: 'If an account exists with this email, you will receive password reset instructions.',
+      // Add debug info in development
+      ...(process.env.NODE_ENV === 'development' && { 
+        debug: { 
+          resetToken, 
+          resetUrl: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}` 
+        } 
+      })
+    });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ success: false, message: 'Internal server error during forgot password' });
