@@ -32,6 +32,27 @@ export default defineConfig({
       '@shared': path.resolve(__dirname, '../shared/src')
     }
   },
+  define: {
+    'global': 'globalThis',
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis'
+      }
+    }
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: undefined
+      }
+    },
+    commonjsOptions: {
+      transformMixedEsModules: true
+    }
+  },
   server: {
     port: 3000,
     host: '0.0.0.0', // Enable access from mobile devices on same network
