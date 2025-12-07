@@ -9,14 +9,15 @@ interface VerifiedLawyerRouteProps {
 }
 
 export const VerifiedLawyerRoute: React.FC<VerifiedLawyerRouteProps> = ({ children }) => {
-  const { isAuthenticated, user } = useAuthStore();
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const user = useAuthStore(state => state.user);
   const [loading, setLoading] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
 
   useEffect(() => {
     const checkVerification = async () => {
-      if (!isAuthenticated || user?.role !== 'LAWYER') {
+      if (!isAuthenticated || !user || user.role !== 'LAWYER') {
         setLoading(false);
         return;
       }
@@ -50,7 +51,7 @@ export const VerifiedLawyerRoute: React.FC<VerifiedLawyerRouteProps> = ({ childr
   }
 
   // Not a lawyer - redirect to client dashboard
-  if (user?.role !== 'LAWYER') {
+  if (!user || user.role !== 'LAWYER') {
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -179,6 +179,23 @@ export const LawyerProfile: React.FC = () => {
     );
   }
 
+  // Ensure user object exists in profile
+  if (!profile.user) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-8">
+          <p className="text-red-700">Profile data incomplete. Please try logging in again.</p>
+          <button 
+            onClick={() => navigate('/login')}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const { user, lawyerProfile } = profile;
   const location = lawyerProfile?.location 
     ? (typeof lawyerProfile.location === 'string' 
