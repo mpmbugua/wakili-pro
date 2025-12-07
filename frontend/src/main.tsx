@@ -1,3 +1,11 @@
+// Polyfill Buffer for browser environment
+import { Buffer } from 'buffer'
+if (typeof window !== 'undefined') {
+  window.Buffer = Buffer
+  // @ts-ignore
+  window.global = window
+}
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'

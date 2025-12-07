@@ -26,14 +26,17 @@ export default defineConfig({
       }
     }
   ],
+  define: {
+    'global': 'globalThis',
+    'process.env': {},
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@shared': path.resolve(__dirname, '../shared/src')
+      '@shared': path.resolve(__dirname, '../shared/src'),
+      buffer: 'buffer/',
+      process: 'process/browser',
     }
-  },
-  define: {
-    'global': 'globalThis',
   },
   optimizeDeps: {
     esbuildOptions: {
