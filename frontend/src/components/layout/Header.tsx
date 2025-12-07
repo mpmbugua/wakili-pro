@@ -162,7 +162,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
                 <div className="absolute right-0 top-full mt-2 w-48 z-50">
                   <div className="bg-white rounded-xl border border-gray-200 shadow-lg py-1">
                     {/* My Profile - Locked for unverified lawyers */}
-                    {isLawyer && !isVerified ? (
+                    {isLawyer && (!isVerified || checkingVerification) ? (
                       <div className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed opacity-60">
                         <User className="h-4 w-4" />
                         <span>My Profile</span>
@@ -180,7 +180,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
                     )}
 
                     {/* Settings - Locked for unverified lawyers */}
-                    {isLawyer && !isVerified ? (
+                    {isLawyer && (!isVerified || checkingVerification) ? (
                       <div className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed opacity-60">
                         <Settings className="h-4 w-4" />
                         <span>Settings</span>
