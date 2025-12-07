@@ -68,7 +68,7 @@ const lawyerToolsNavigation: NavItem[] = [
   { name: 'Billing', href: '/billing', icon: CreditCard, requiresVerification: true },
   { name: 'Analytics', href: '/analytics', icon: TrendingUp, requiresVerification: true },
   { name: 'Performance', href: '/performance', icon: Award, requiresVerification: true },
-  { name: 'Signature & Stamp', href: '/lawyer/signature-setup', icon: Stamp }, // Accessible before verification
+  { name: 'Signature & Stamp', href: '/lawyer/signature-setup', icon: Stamp, requiresVerification: true },
   { name: 'Submit Article', href: '/submit-article', icon: PenSquare, requiresVerification: true },
 ];
 
