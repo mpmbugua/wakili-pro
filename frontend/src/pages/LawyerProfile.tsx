@@ -168,6 +168,17 @@ export const LawyerProfile: React.FC = () => {
     );
   }
 
+  // Add null check before destructuring
+  if (!profile) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <p className="text-gray-500">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   const { user, lawyerProfile } = profile;
   const location = lawyerProfile?.location 
     ? (typeof lawyerProfile.location === 'string' 
