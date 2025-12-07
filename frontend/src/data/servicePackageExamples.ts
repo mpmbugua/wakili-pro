@@ -439,14 +439,16 @@ export const getExamplesByCategory = (category: string): ServicePackageExample[]
 };
 
 export const getFeaturedExamples = (): ServicePackageExample[] => {
-  return [
-    servicePackageExamples.find(e => e.id === 'land-conveyancing')!,
-    servicePackageExamples.find(e => e.id === 'company-registration')!,
-    servicePackageExamples.find(e => e.id === 'divorce-uncontested')!,
-    servicePackageExamples.find(e => e.id === 'employment-contract-review')!,
-    servicePackageExamples.find(e => e.id === 'trademark-registration')!,
-    servicePackageExamples.find(e => e.id === 'debt-recovery')!,
-    servicePackageExamples.find(e => e.id === 'work-permit')!,
-    servicePackageExamples.find(e => e.id === 'lease-agreement')!,
-  ];
+  const examples = [
+    servicePackageExamples.find(e => e.id === 'land-conveyancing'),
+    servicePackageExamples.find(e => e.id === 'company-registration'),
+    servicePackageExamples.find(e => e.id === 'divorce-uncontested'),
+    servicePackageExamples.find(e => e.id === 'employment-contract-review'),
+    servicePackageExamples.find(e => e.id === 'trademark-registration'),
+    servicePackageExamples.find(e => e.id === 'debt-recovery'),
+    servicePackageExamples.find(e => e.id === 'work-permit'),
+    servicePackageExamples.find(e => e.id === 'lease-agreement'),
+  ].filter((e): e is ServicePackageExample => e !== undefined);
+  
+  return examples;
 };

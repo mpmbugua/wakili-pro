@@ -107,7 +107,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = (
   }
   
   if (!isAuthenticated || !user) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+    return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
   }
   
   if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
@@ -128,7 +128,7 @@ const SuperAdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }
   }
   
   if (!isAuthenticated || !user) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+    return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
   }
   
   if (user.role !== 'SUPER_ADMIN') {
