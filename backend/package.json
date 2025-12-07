@@ -14,7 +14,7 @@
     "lint": "echo 'Backend linting skipped - no ESLint config present. Will add proper linting later.'",
     "test": "node --max-old-space-size=4096 ./node_modules/.bin/jest",
     "postinstall": "npm run db:prepare",
-    "db:prepare": "prisma generate && prisma db push --skip-generate --accept-data-loss || true",
+    "db:prepare": "prisma generate && prisma migrate deploy || echo 'Migration warnings - continuing'",
     "db:migrate": "prisma migrate deploy",
     "seed": "ts-node ./prisma/seed.ts",
     "seed:users": "ts-node ./prisma/seedUsers.ts",
