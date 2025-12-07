@@ -503,7 +503,6 @@ export const LandingPage: React.FC = () => {
                   </Link>
                 </div>
               )}
-              </div>
             </div>
           </section>
 
