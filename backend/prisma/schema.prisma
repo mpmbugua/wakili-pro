@@ -1430,3 +1430,26 @@ enum WithdrawalStatus {
   FAILED
   CANCELLED
 }
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String   @db.Text
+  status    ContactStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ContactStatus {
+  PENDING
+  RESPONDED
+  RESOLVED
+  CLOSED
+}

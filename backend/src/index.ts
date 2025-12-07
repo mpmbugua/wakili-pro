@@ -377,6 +377,10 @@ import messagesRouter from './routes/messages';
 import devRouter from './routes/dev';
 app.use('/api/messages', messagesRouter);
 
+// Mount contact routes (Contact form submissions)
+import contactRouter from './routes/contact';
+app.use('/api/contact', contactRouter);
+
 // Mount dev routes (Development utilities - only in dev/staging)
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api/dev', devRouter);
