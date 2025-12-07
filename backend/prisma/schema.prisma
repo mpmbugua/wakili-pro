@@ -36,12 +36,12 @@ model DocumentTemplate {
   format             String?
   recordingStartedAt DateTime?
   DocumentPurchase   DocumentPurchase[]
+  DocumentReview     DocumentReview[]
   DocumentVersion    DocumentVersion[]
   Payment            Payment[]
   PurchaseLimit      PurchaseLimit[]
-  VideoConsultation  VideoConsultation[]
-  DocumentReview     DocumentReview[]
   userDocuments      UserDocument[]      @relation("DocumentFromTemplate")
+  VideoConsultation  VideoConsultation[]
 }
 
 model DocumentPurchase {
@@ -107,57 +107,51 @@ model RefreshToken {
 }
 
 model LawyerProfile {
-  id                String      @id @default(cuid())
-  providerId        String      @unique
-  userId            String      @unique
-  licenseNumber     String?     @unique
-  tier              LawyerTier? @default(FREE)
-  specializations   String[]
-  phoneNumber       String?
-  yearOfAdmission   Int?
-  location          String?
-  linkedInProfile   String?
-  profileImageUrl   String?
-  bio               String?
-  yearsOfExperience Int?
-  availability      Json?
-  isVerified        Boolean     @default(false)
-  rating            Float?      @default(0)
-  reviewCount       Int?        @default(0)
-  isFeatured        Boolean     @default(false)
-  featuredUntil     DateTime?
-  status            String?     @default("ACTIVE")
-
-  // Consultation Booking Fields
-  hourlyRate        Decimal? @db.Decimal(10, 2)
-  offPeakHourlyRate Decimal? @db.Decimal(10, 2)
-  available24_7     Boolean  @default(false)
-  workingHours      Json?
-  blockedSlots      Json?
-
-  // Calendar Integration
-  googleCalendarConnected  Boolean   @default(false)
-  googleCalendarId         String?
-  outlookCalendarConnected Boolean   @default(false)
-  outlookCalendarId        String?
-  calendarSyncEnabled      Boolean   @default(false)
-  lastCalendarSync         DateTime?
-
+  id                                  String              @id @default(cuid())
+  providerId                          String              @unique
+  userId                              String              @unique
+  licenseNumber                       String?             @unique
+  tier                                LawyerTier?         @default(FREE)
+  specializations                     String[]
+  phoneNumber                         String?
+  yearOfAdmission                     Int?
+  location                            String?
+  linkedInProfile                     String?
+  profileImageUrl                     String?
+  bio                                 String?
+  yearsOfExperience                   Int?
+  availability                        Json?
+  isVerified                          Boolean             @default(false)
+  rating                              Float?              @default(0)
+  reviewCount                         Int?                @default(0)
+  isFeatured                          Boolean             @default(false)
+  featuredUntil                       DateTime?
+  status                              String?             @default("ACTIVE")
+  hourlyRate                          Decimal?            @db.Decimal(10, 2)
+  offPeakHourlyRate                   Decimal?            @db.Decimal(10, 2)
+  available24_7                       Boolean             @default(false)
+  workingHours                        Json?
+  blockedSlots                        Json?
+  googleCalendarConnected             Boolean             @default(false)
+  googleCalendarId                    String?
+  outlookCalendarConnected            Boolean             @default(false)
+  outlookCalendarId                   String?
+  calendarSyncEnabled                 Boolean             @default(false)
+  lastCalendarSync                    DateTime?
   createdAt                           DateTime            @default(now())
   updatedAt                           DateTime            @updatedAt
   User_LawyerProfile_providerIdToUser User                @relation("LawyerProfile_providerIdToUser", fields: [providerId], references: [id])
   user                                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ServiceBooking                      ServiceBooking[]
-  User_LawyerProfileUser              User[]              @relation("LawyerProfileUser")
   wallet                              LawyerWallet?
+  ServiceBooking                      ServiceBooking[]
   withdrawalRequests                  WithdrawalRequest[]
 }
 
 model User {
-  id                                                         String                  @id @default(cuid())
-  createdAt                                                  DateTime                @default(now())
-  email                                                      String                  @unique
-  emailVerified                                              Boolean                 @default(false)
+  id                                                         String                    @id @default(cuid())
+  createdAt                                                  DateTime                  @default(now())
+  email                                                      String                    @unique
+  emailVerified                                              Boolean                   @default(false)
   firstName                                                  String
   lastName                                                   String
   password                                                   String?
@@ -166,114 +160,101 @@ model User {
   phoneNumber                                                String?
   profileImageUrl                                            String?
   role                                                       String
-  updatedAt                                                  DateTime                @updatedAt
-  verificationStatus                                         String?                 @default("PENDING")
-  aiQueries                                                  AIQuery[]               @relation("UserAIQueries")
+  updatedAt                                                  DateTime                  @updatedAt
+  verificationStatus                                         String?                   @default("PENDING")
+  onlineStatus                                               String?                   @default("offline")
+  lastSeen                                                   DateTime?
+  aiQueries                                                  AIQuery[]                 @relation("UserAIQueries")
   Article                                                    Article[]
   AuditLog                                                   AuditLog[]
   Badge                                                      Badge[]
-  ChatMessage_ChatMessage_clientIdToUser                     ChatMessage[]           @relation("ChatMessage_clientIdToUser")
-  messagesSent                                               ChatMessage[]           @relation("MessageSender")
-  chatRoomsAsClient                                          ChatRoom[]              @relation("ChatClient")
-  chatRoomsAsLawyer                                          ChatRoom[]              @relation("ChatLawyer")
-  ConsultationRecording_ConsultationRecording_clientIdToUser ConsultationRecording[] @relation("ConsultationRecording_clientIdToUser")
-  ConsultationRecording_ConsultationRecording_lawyerIdToUser ConsultationRecording[] @relation("ConsultationRecording_lawyerIdToUser")
+  handledCallLogs                                            CallLog[]                 @relation("HandledCallLogs")
+  ChatMessage_ChatMessage_clientIdToUser                     ChatMessage[]             @relation("ChatMessage_clientIdToUser")
+  messagesSent                                               ChatMessage[]             @relation("MessageSender")
+  chatRoomsAsClient                                          ChatRoom[]                @relation("ChatClient")
+  chatRoomsAsLawyer                                          ChatRoom[]                @relation("ChatLawyer")
+  consultationBookingsAsClient                               ConsultationBooking[]     @relation("ClientConsultationBookings")
+  consultationBookingsAsLawyer                               ConsultationBooking[]     @relation("LawyerConsultationBookings")
+  ConsultationRecording_ConsultationRecording_clientIdToUser ConsultationRecording[]   @relation("ConsultationRecording_clientIdToUser")
+  ConsultationRecording_ConsultationRecording_lawyerIdToUser ConsultationRecording[]   @relation("ConsultationRecording_lawyerIdToUser")
+  conversationParticipants                                   ConversationParticipant[] @relation("ConversationParticipants")
   deviceRegistrations                                        DeviceRegistration[]
-  documentPurchases                                          DocumentPurchase[]      @relation("UserDocumentPurchases")
+  documentPurchases                                          DocumentPurchase[]        @relation("UserDocumentPurchases")
+  documentReviewsAsLawyer                                    DocumentReview[]          @relation("DocumentReviewLawyer")
+  documentReviewsAsQC                                        DocumentReview[]          @relation("DocumentReviewQC")
+  documentReviewsAsUser                                      DocumentReview[]          @relation("DocumentReviewUser")
   Favorite                                                   Favorite[]
   FeatureEvent                                               FeatureEvent[]
-  LawyerProfile_LawyerProfile_providerIdToUser               LawyerProfile?          @relation("LawyerProfile_providerIdToUser")
+  letterheadApprovals                                        LawyerLetterhead[]        @relation("LetterheadApprover")
+  lawyerLetterhead                                           LawyerLetterhead?         @relation("LawyerLetterhead")
+  LawyerProfile_LawyerProfile_providerIdToUser               LawyerProfile?            @relation("LawyerProfile_providerIdToUser")
   lawyerProfile                                              LawyerProfile?
+  lawyerQuotes                                               LawyerQuote[]             @relation("LawyerQuotes")
   LawyerSubscription                                         LawyerSubscription[]
+  uploadedLegalDocuments                                     LegalDocument[]           @relation("UploadedLegalDocuments")
   LoyaltyPoint                                               LoyaltyPoint[]
-  servicesOffered                                            MarketplaceService[]    @relation("ServiceProvider")
+  servicesOffered                                            MarketplaceService[]      @relation("ServiceProvider")
+  directMessages                                             Message[]                 @relation("DirectMessagesSent")
   notifications                                              Notification[]
   payments                                                   Payment[]
   PurchaseLimit                                              PurchaseLimit[]
-  Referral_Referral_refereeIdToUser                          Referral[]              @relation("Referral_refereeIdToUser")
-  Referral_Referral_referrerIdToUser                         Referral[]              @relation("Referral_referrerIdToUser")
+  Referral_Referral_refereeIdToUser                          Referral[]                @relation("Referral_refereeIdToUser")
+  Referral_Referral_referrerIdToUser                         Referral[]                @relation("Referral_referrerIdToUser")
   refreshTokens                                              RefreshToken[]
   refundsRequested                                           Refund[]
-  bookingsAsClient                                           ServiceBooking[]        @relation("ServiceClient")
-  ServiceBooking_ServiceBooking_lawyerIdToUser               ServiceBooking[]        @relation("ServiceBooking_lawyerIdToUser")
-  bookingsAsProvider                                         ServiceBooking[]        @relation("ServiceProvider")
-  ServiceBooking_ServiceBooking_userIdToUser                 ServiceBooking[]        @relation("ServiceBooking_userIdToUser")
-  reviewsGiven                                               ServiceReview[]         @relation("ReviewAuthor")
-  reviewsReceived                                            ServiceReview[]         @relation("ReviewTarget")
+  bookingsAsClient                                           ServiceBooking[]          @relation("ServiceClient")
+  bookingsAsProvider                                         ServiceBooking[]          @relation("ServiceProvider")
+  ServiceBooking_ServiceBooking_userIdToUser                 ServiceBooking[]          @relation("ServiceBooking_userIdToUser")
+  selectedLawyerRequests                                     ServiceRequest[]          @relation("SelectedLawyerRequests")
+  clientServiceRequests                                      ServiceRequest[]          @relation("ClientServiceRequests")
+  reviewsGiven                                               ServiceReview[]           @relation("ReviewAuthor")
+  reviewsReceived                                            ServiceReview[]           @relation("ReviewTarget")
+  documents                                                  UserDocument[]            @relation("UserDocuments")
   profile                                                    UserProfile?
-  clientConsultations                                        VideoConsultation[]     @relation("ClientConsultations")
-  lawyerConsultations                                        VideoConsultation[]     @relation("LawyerConsultations")
-  VideoConsultation_VideoConsultation_providerIdToUser       VideoConsultation[]     @relation("VideoConsultation_providerIdToUser")
-  VideoConsultation_VideoConsultation_userIdToUser           VideoConsultation[]     @relation("VideoConsultation_userIdToUser")
+  clientConsultations                                        VideoConsultation[]       @relation("ClientConsultations")
+  lawyerConsultations                                        VideoConsultation[]       @relation("LawyerConsultations")
+  VideoConsultation_VideoConsultation_providerIdToUser       VideoConsultation[]       @relation("VideoConsultation_providerIdToUser")
+  VideoConsultation_VideoConsultation_userIdToUser           VideoConsultation[]       @relation("VideoConsultation_userIdToUser")
   videoParticipants                                          VideoParticipant[]
   walletTransactions                                         WalletTransaction[]
-  LawyerProfile_LawyerProfileUser                            LawyerProfile[]         @relation("LawyerProfileUser")
-  documentReviewsAsUser                                      DocumentReview[]        @relation("DocumentReviewUser")
-  documentReviewsAsLawyer                                    DocumentReview[]        @relation("DocumentReviewLawyer")
-  documentReviewsAsQC                                        DocumentReview[]        @relation("DocumentReviewQC")
-  lawyerLetterhead                                           LawyerLetterhead?       @relation("LawyerLetterhead")
-  letterheadApprovals                                        LawyerLetterhead[]      @relation("LetterheadApprover")
-  clientServiceRequests                                      ServiceRequest[]        @relation("ClientServiceRequests")
-  selectedLawyerRequests                                     ServiceRequest[]        @relation("SelectedLawyerRequests")
-  lawyerQuotes                                               LawyerQuote[]           @relation("LawyerQuotes")
-  consultationBookingsAsClient                               ConsultationBooking[]   @relation("ClientConsultationBookings")
-  consultationBookingsAsLawyer                               ConsultationBooking[]   @relation("LawyerConsultationBookings")
-  documents                                                  UserDocument[]          @relation("UserDocuments")
-  conversationParticipants                                   ConversationParticipant[] @relation("ConversationParticipants")
-  directMessages                                             Message[]               @relation("DirectMessagesSent")
-  uploadedLegalDocuments                                     LegalDocument[]         @relation("UploadedLegalDocuments")
-  handledCallLogs                                            CallLog[]               @relation("HandledCallLogs")
-  pageViews                                                  PageView[]              @relation("UserPageViews")
-  events                                                     UserEvent[]             @relation("UserEvents")
-  sessions                                                   UserSession[]           @relation("UserSessions")
-  onlineStatus                                               String?                 @default("offline")
-  lastSeen                                                   DateTime?
 }
 
 model UserProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  
-  // Notification preferences
-  emailNotifications           Boolean @default(true)
-  smsNotifications             Boolean @default(true)
-  pushNotifications            Boolean @default(true)
-  consultationReminders        Boolean @default(true)
-  
-  // Privacy settings
-  profileVisibility            Boolean @default(true)
-  showActivityStatus           Boolean @default(true)
-  dataAnalytics                Boolean @default(true)
-  
-  // Language & Region
-  language                     String  @default("en")
-  timezone                     String  @default("Africa/Nairobi")
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  emailNotifications    Boolean  @default(true)
+  smsNotifications      Boolean  @default(true)
+  pushNotifications     Boolean  @default(true)
+  consultationReminders Boolean  @default(true)
+  profileVisibility     Boolean  @default(true)
+  showActivityStatus    Boolean  @default(true)
+  dataAnalytics         Boolean  @default(true)
+  language              String   @default("en")
+  timezone              String   @default("Africa/Nairobi")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserDocument {
-  id          String         @id @default(cuid())
-  userId      String
-  title       String
-  type        DocumentType
-  category    String?
-  fileUrl     String
-  fileSize    Int
-  fileName    String
-  mimeType    String
-  status      DocumentStatus
-  source      DocumentSource
-  templateId  String?
-  uploadedAt  DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  deletedAt   DateTime?
-  
-  user        User              @relation("UserDocuments", fields: [userId], references: [id], onDelete: Cascade)
-  template    DocumentTemplate? @relation("DocumentFromTemplate", fields: [templateId], references: [id])
-  reviews     DocumentReview[]  @relation("UserDocumentReviews")
+  id         String            @id @default(cuid())
+  userId     String
+  title      String
+  type       DocumentType
+  category   String?
+  fileUrl    String
+  fileSize   Int
+  fileName   String
+  mimeType   String
+  status     DocumentStatus
+  source     DocumentSource
+  templateId String?
+  uploadedAt DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  deletedAt  DateTime?
+  reviews    DocumentReview[]  @relation("UserDocumentReviews")
+  template   DocumentTemplate? @relation("DocumentFromTemplate", fields: [templateId], references: [id])
+  user       User              @relation("UserDocuments", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -317,32 +298,31 @@ model MarketplaceService {
 }
 
 model ServiceBooking {
-  id                                 String               @id @default(cuid())
-  userId                             String
-  lawyerId                           String
-  clientId                           String?
-  providerId                         String
-  serviceId                          String
-  status                             ServiceBookingStatus
-  scheduledAt                        DateTime
-  completedAt                        DateTime?
-  createdAt                          DateTime             @default(now())
-  updatedAt                          DateTime             @updatedAt
-  totalAmountKES                     Int?
-  paymentStatus                      PaymentStatus?
-  clientRequirements                 String?
-  providerNotes                      String?
-  chatRooms                          ChatRoom[]
-  DocumentPurchase                   DocumentPurchase[]
-  payments                           Payment[]
-  client                             User?                @relation("ServiceClient", fields: [clientId], references: [id])
-  User_ServiceBooking_lawyerIdToUser User                 @relation("ServiceBooking_lawyerIdToUser", fields: [lawyerId], references: [id], onDelete: Cascade)
-  LawyerProfile                      LawyerProfile        @relation(fields: [lawyerId], references: [providerId], map: "ServiceBooking_lawyerProfileId_fkey")
-  provider                           User                 @relation("ServiceProvider", fields: [providerId], references: [id])
-  service                            MarketplaceService   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  User_ServiceBooking_userIdToUser   User                 @relation("ServiceBooking_userIdToUser", fields: [userId], references: [id], onDelete: Cascade)
-  videoConsultation                  VideoConsultation[]
-  WalletTransaction                  WalletTransaction[]
+  id                               String               @id @default(cuid())
+  userId                           String
+  lawyerId                         String
+  clientId                         String?
+  providerId                       String
+  serviceId                        String
+  status                           ServiceBookingStatus
+  scheduledAt                      DateTime
+  completedAt                      DateTime?
+  createdAt                        DateTime             @default(now())
+  updatedAt                        DateTime             @updatedAt
+  totalAmountKES                   Int?
+  paymentStatus                    PaymentStatus?
+  clientRequirements               String?
+  providerNotes                    String?
+  chatRooms                        ChatRoom[]
+  DocumentPurchase                 DocumentPurchase[]
+  payments                         Payment[]
+  client                           User?                @relation("ServiceClient", fields: [clientId], references: [id])
+  lawyerProfile                    LawyerProfile        @relation(fields: [lawyerId], references: [providerId], map: "ServiceBooking_lawyerProfileId_fkey")
+  provider                         User                 @relation("ServiceProvider", fields: [providerId], references: [id])
+  service                          MarketplaceService   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  User_ServiceBooking_userIdToUser User                 @relation("ServiceBooking_userIdToUser", fields: [userId], references: [id], onDelete: Cascade)
+  videoConsultation                VideoConsultation[]
+  WalletTransaction                WalletTransaction[]
 }
 
 model ServiceReview {
@@ -355,8 +335,8 @@ model ServiceReview {
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
   author    User               @relation("ReviewAuthor", fields: [authorId], references: [id])
-  target    User               @relation("ReviewTarget", fields: [targetId], references: [id])
   service   MarketplaceService @relation(fields: [serviceId], references: [id])
+  target    User               @relation("ReviewTarget", fields: [targetId], references: [id])
 }
 
 model Payment {
@@ -519,7 +499,7 @@ model Article {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   User         User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
+
   @@index([authorId])
   @@index([isPublished])
   @@index([createdAt])
@@ -608,6 +588,509 @@ model Referral {
   refereeId                      String
   User_Referral_refereeIdToUser  User   @relation("Referral_refereeIdToUser", fields: [refereeId], references: [id])
   User_Referral_referrerIdToUser User   @relation("Referral_referrerIdToUser", fields: [referrerId], references: [id])
+}
+
+model DocumentReview {
+  id                     String                @id @default(cuid())
+  userId                 String
+  lawyerId               String?
+  documentSource         DocumentOrigin
+  marketplaceDocumentId  String?
+  userDocumentId         String?
+  uploadedDocumentUrl    String?
+  originalFileName       String?
+  documentType           String
+  documentCategory       DocumentCategory?
+  reviewType             ReviewType
+  aiReviewStatus         AIReviewStatus        @default(PENDING)
+  aiReviewResults        Json?
+  aiReviewCompletedAt    DateTime?
+  certificationStatus    CertificationStatus?
+  certificationPrice     Float?
+  certifiedDocumentUrl   String?
+  certificationLetterUrl String?
+  lawyerNotes            String?
+  certificateId          String?               @unique
+  verificationQRCodeUrl  String?
+  signedAt               DateTime?
+  signatureApplied       Boolean               @default(false)
+  stampApplied           Boolean               @default(false)
+  letterheadApplied      Boolean               @default(false)
+  questionnaire          Json?
+  urgency                UrgencyLevel          @default(STANDARD)
+  deadline               DateTime
+  price                  Float
+  paymentId              String?
+  paidAt                 DateTime?
+  status                 String                @default("pending_payment")
+  assignedAt             DateTime?
+  estimatedDeliveryDate  DateTime?
+  qualityControlStatus   QualityControlStatus?
+  qualityControlNotes    String?
+  qualityCheckedBy       String?
+  qualityCheckedAt       DateTime?
+  completedAt            DateTime?
+  deliveredAt            DateTime?
+  clientRating           Int?
+  clientFeedback         String?
+  revisionCount          Int                   @default(0)
+  revisionRequested      Boolean               @default(false)
+  revisionNotes          String?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  lawyer                 User?                 @relation("DocumentReviewLawyer", fields: [lawyerId], references: [id])
+  marketplaceDocument    DocumentTemplate?     @relation(fields: [marketplaceDocumentId], references: [id])
+  qualityController      User?                 @relation("DocumentReviewQC", fields: [qualityCheckedBy], references: [id])
+  userDocument           UserDocument?         @relation("UserDocumentReviews", fields: [userDocumentId], references: [id])
+  user                   User                  @relation("DocumentReviewUser", fields: [userId], references: [id])
+  payments               Payment[]
+
+  @@index([userId])
+  @@index([lawyerId])
+  @@index([aiReviewStatus])
+  @@index([certificationStatus])
+  @@index([qualityControlStatus])
+  @@index([status])
+}
+
+model LawyerLetterhead {
+  id                    String    @id @default(cuid())
+  lawyerId              String    @unique
+  letterheadUrl         String
+  stampUrl              String?
+  signatureUrl          String?
+  certificatePrefix     String    @default("WP")
+  useCustomLetterhead   Boolean   @default(false)
+  customLetterheadUrl   String?
+  scannedLetterheadUrl  String?
+  letterheadTemplateUrl String?
+  headerHeight          Int?
+  footerHeight          Int?
+  contentAreaX          Int?
+  contentAreaY          Int?
+  contentAreaWidth      Int?
+  contentAreaHeight     Int?
+  boundariesManuallySet Boolean   @default(false)
+  firmName              String
+  firmAddress           String?
+  firmPhone             String?
+  firmEmail             String?
+  licenseNumber         String
+  isApproved            Boolean   @default(false)
+  approvedBy            String?
+  approvedAt            DateTime?
+  isActive              Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  approver              User?     @relation("LetterheadApprover", fields: [approvedBy], references: [id])
+  lawyer                User      @relation("LawyerLetterhead", fields: [lawyerId], references: [id])
+}
+
+model ServiceRequest {
+  id                  String        @id @default(cuid())
+  userId              String
+  serviceCategory     String
+  serviceTitle        String
+  description         String
+  estimatedBudget     Int
+  estimatedFee        Int
+  tier                String
+  urgency             String
+  phoneNumber         String
+  email               String
+  transactionValue    Int?
+  dealValue           Int?
+  claimAmount         Int?
+  businessType        String?
+  complexity          String?
+  commitmentFeePaid   Boolean       @default(false)
+  commitmentFeeAmount Int           @default(500)
+  commitmentFeeTxId   String?
+  status              RequestStatus @default(PENDING)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  selectedLawyerId    String?
+  completedAt         DateTime?
+  confirmedAt         DateTime?
+  rating              Int?
+  feedback            String?
+  quotes              LawyerQuote[]
+  selectedLawyer      User?         @relation("SelectedLawyerRequests", fields: [selectedLawyerId], references: [id])
+  user                User          @relation("ClientServiceRequests", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([tier])
+}
+
+model LawyerQuote {
+  id                  String         @id @default(cuid())
+  serviceRequestId    String
+  lawyerId            String
+  connectionFeePaid   Boolean        @default(false)
+  connectionFeeAmount Int
+  connectionFeeTxId   String?
+  proposedFee         Int
+  proposedTimeline    String
+  approach            String
+  offersMilestones    Boolean        @default(false)
+  milestones          Json?
+  submittedAt         DateTime       @default(now())
+  isSelected          Boolean        @default(false)
+  lawyer              User           @relation("LawyerQuotes", fields: [lawyerId], references: [id])
+  serviceRequest      ServiceRequest @relation(fields: [serviceRequestId], references: [id])
+
+  @@index([serviceRequestId])
+  @@index([lawyerId])
+}
+
+model LawyerWallet {
+  id               String                    @id @default(cuid())
+  lawyerId         String                    @unique
+  balance          Decimal                   @default(0) @db.Decimal(10, 2)
+  pendingBalance   Decimal                   @default(0) @db.Decimal(10, 2)
+  availableBalance Decimal                   @default(0) @db.Decimal(10, 2)
+  currency         String                    @default("KES")
+  isActive         Boolean                   @default(true)
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  lawyer           LawyerProfile             @relation(fields: [lawyerId], references: [id])
+  transactions     LawyerWalletTransaction[]
+
+  @@index([lawyerId])
+}
+
+model LawyerWalletTransaction {
+  id                    String                @id @default(cuid())
+  walletId              String
+  type                  WalletTransactionType
+  amount                Decimal               @db.Decimal(10, 2)
+  balanceBefore         Decimal               @db.Decimal(10, 2)
+  balanceAfter          Decimal               @db.Decimal(10, 2)
+  status                TransactionStatus     @default(PENDING)
+  paymentMethod         String?
+  mpesaTransactionId    String?
+  mpesaReceiptNumber    String?
+  consultationBookingId String?
+  marketplaceBookingId  String?
+  description           String?
+  metadata              Json?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  consultationBooking   ConsultationBooking?  @relation(fields: [consultationBookingId], references: [id])
+  wallet                LawyerWallet          @relation(fields: [walletId], references: [id])
+
+  @@index([walletId, createdAt])
+  @@index([type, status])
+}
+
+model ConsultationBooking {
+  id                     String                    @id @default(cuid())
+  clientId               String
+  lawyerId               String
+  scheduledStartTime     DateTime
+  scheduledEndTime       DateTime
+  duration               Int
+  consultationType       ConsultationType
+  clientPaymentAmount    Decimal                   @db.Decimal(10, 2)
+  platformCommissionRate Decimal                   @db.Decimal(5, 2)
+  platformCommission     Decimal                   @db.Decimal(10, 2)
+  lawyerPayout           Decimal                   @db.Decimal(10, 2)
+  clientPaymentStatus    PaymentStatus             @default(PENDING)
+  mpesaTransactionId     String?
+  mpesaReceiptNumber     String?
+  clientPaidAt           DateTime?
+  status                 ConsultationBookingStatus @default(PENDING_PAYMENT)
+  actualStartTime        DateTime?
+  actualEndTime          DateTime?
+  lawyerConfirmed        Boolean                   @default(false)
+  clientConfirmed        Boolean                   @default(false)
+  lawyerConfirmedAt      DateTime?
+  clientConfirmedAt      DateTime?
+  payoutStatus           PayoutStatus              @default(PENDING)
+  payoutTransactionId    String?
+  paidToLawyerAt         DateTime?
+  isEmergency            Boolean                   @default(false)
+  emergencyNotes         String?
+  createdByReceptionist  Boolean                   @default(false)
+  receptionistId         String?
+  callSid                String?
+  callDuration           Int?
+  callRecordingUrl       String?
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  client                 User                      @relation("ClientConsultationBookings", fields: [clientId], references: [id])
+  lawyer                 User                      @relation("LawyerConsultationBookings", fields: [lawyerId], references: [id])
+  review                 ConsultationReview?
+  walletTransactions     LawyerWalletTransaction[]
+
+  @@index([lawyerId, scheduledStartTime])
+  @@index([clientId, status])
+  @@index([status, clientPaymentStatus])
+}
+
+model ConsultationReview {
+  id             String              @id @default(cuid())
+  bookingId      String              @unique
+  rating         Int
+  comment        String?
+  wouldRecommend Boolean
+  createdAt      DateTime            @default(now())
+  booking        ConsultationBooking @relation(fields: [bookingId], references: [id])
+}
+
+model WithdrawalRequest {
+  id                 String           @id @default(cuid())
+  lawyerId           String
+  amount             Decimal          @db.Decimal(10, 2)
+  withdrawalMethod   WithdrawalMethod
+  mpesaPhoneNumber   String?
+  mpesaName          String?
+  bankName           String?
+  accountNumber      String?
+  accountName        String?
+  branchCode         String?
+  status             WithdrawalStatus @default(PENDING)
+  requestedAt        DateTime         @default(now())
+  processedAt        DateTime?
+  completedAt        DateTime?
+  rejectionReason    String?
+  processedBy        String?
+  transactionId      String?
+  mpesaTransactionId String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  lawyer             LawyerProfile    @relation(fields: [lawyerId], references: [id])
+
+  @@index([lawyerId, status])
+  @@index([status, requestedAt])
+}
+
+model EmergencyContact {
+  id           String   @id @default(cuid())
+  phoneNumber  String
+  label        String
+  isActive     Boolean  @default(true)
+  displayOrder Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, displayOrder])
+}
+
+model Conversation {
+  id           String                    @id @default(cuid())
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime     @default(now())
+  leftAt         DateTime?
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation("ConversationParticipants", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String              @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  read           Boolean             @default(false)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  deletedAt      DateTime?
+  conversation   Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User                @relation("DirectMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  attachments    MessageAttachment[]
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+}
+
+model MessageAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  fileName  String
+  fileUrl   String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+}
+
+model LegalDocument {
+  id            String    @id @default(cuid())
+  title         String
+  documentType  String
+  category      String
+  citation      String?
+  sourceUrl     String?
+  effectiveDate DateTime?
+  filePath      String
+  fileName      String
+  fileSize      Int
+  chunksCount   Int       @default(0)
+  vectorsCount  Int       @default(0)
+  uploadedBy    String
+  uploadedAt    DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  uploader      User      @relation("UploadedLegalDocuments", fields: [uploadedBy], references: [id])
+
+  @@index([documentType])
+  @@index([category])
+  @@index([uploadedAt])
+}
+
+model CallLog {
+  id                  String    @id @default(cuid())
+  callerName          String
+  callerPhone         String
+  callerEmail         String?
+  issueCategory       String
+  issueDescription    String
+  recommendation      String
+  recommendationNotes String?
+  handledBy           String
+  callDuration        Int?
+  followUpRequired    Boolean   @default(false)
+  followUpDate        DateTime?
+  status              String    @default("PENDING")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  handler             User      @relation("HandledCallLogs", fields: [handledBy], references: [id])
+
+  @@index([recommendation])
+  @@index([status])
+  @@index([createdAt])
+  @@index([handledBy])
+}
+
+model PageView {
+  id           String   @id @default(cuid())
+  sessionId    String
+  userId       String?
+  page         String
+  pageName     String?
+  referrer     String?
+  userAgent    String?
+  ipAddress    String?
+  country      String?
+  city         String?
+  deviceType   String?
+  browser      String?
+  os           String?
+  screenWidth  Int?
+  screenHeight Int?
+  duration     Int?
+  scrollDepth  Int?
+  exitPage     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([sessionId, createdAt])
+  @@index([userId, createdAt])
+  @@index([page])
+  @@index([createdAt])
+  @@index([country, city])
+}
+
+model UserEvent {
+  id            String   @id @default(cuid())
+  sessionId     String
+  userId        String?
+  eventType     String
+  eventCategory String
+  eventName     String
+  page          String
+  targetElement String?
+  eventValue    Float?
+  metadata      Json?
+  searchQuery   String?
+  lawyerId      String?
+  serviceType   String?
+  documentId    String?
+  createdAt     DateTime @default(now())
+
+  @@index([sessionId, createdAt])
+  @@index([userId, createdAt])
+  @@index([eventType, eventName])
+  @@index([searchQuery])
+  @@index([lawyerId])
+  @@index([createdAt])
+}
+
+model UserSession {
+  id               String    @id @default(cuid())
+  sessionId        String    @unique
+  userId           String?
+  startedAt        DateTime  @default(now())
+  endedAt          DateTime?
+  duration         Int?
+  pageViewsCount   Int       @default(0)
+  eventsCount      Int       @default(0)
+  referralSource   String?
+  referralCampaign String?
+  referralMedium   String?
+  landingPage      String?
+  exitPage         String?
+  converted        Boolean   @default(false)
+  conversionType   String?
+  conversionValue  Float?
+  deviceType       String?
+  browser          String?
+  os               String?
+  country          String?
+  city             String?
+  updatedAt        DateTime  @updatedAt
+
+  @@index([sessionId])
+  @@index([userId, startedAt])
+  @@index([converted, conversionType])
+  @@index([referralSource, referralMedium])
+  @@index([startedAt])
+}
+
+model AnalyticsSummary {
+  id                 String   @id @default(cuid())
+  date               DateTime @unique @db.Date
+  totalVisitors      Int      @default(0)
+  totalPageViews     Int      @default(0)
+  totalEvents        Int      @default(0)
+  newUsers           Int      @default(0)
+  returningUsers     Int      @default(0)
+  averageSessionTime Int      @default(0)
+  bounceRate         Float    @default(0)
+  conversionRate     Float    @default(0)
+  totalConversions   Int      @default(0)
+  totalRevenue       Float    @default(0)
+  topPages           Json?
+  topSearches        Json?
+  topReferrers       Json?
+  deviceBreakdown    Json?
+  geographicData     Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([date])
+}
+
+model LawyerProfileUser {
+  A String
+  B String
+
+  @@unique([A, B], map: "_LawyerProfileUser_AB_unique")
+  @@index([B], map: "_LawyerProfileUser_B_index")
+  @@map("_LawyerProfileUser")
 }
 
 enum UserRole {
@@ -844,123 +1327,6 @@ enum VideoConsultationType {
   CASE_ANALYSIS
 }
 
-model DocumentReview {
-  id                    String            @id @default(cuid())
-  userId                String
-  lawyerId              String?
-  documentSource        DocumentOrigin
-  marketplaceDocumentId String?
-  userDocumentId        String?
-  uploadedDocumentUrl   String?
-  originalFileName      String?
-  documentType          String
-  documentCategory      DocumentCategory?
-
-  reviewType          ReviewType
-  aiReviewStatus      AIReviewStatus @default(PENDING)
-  aiReviewResults     Json?
-  aiReviewCompletedAt DateTime?
-
-  certificationStatus    CertificationStatus?
-  certificationPrice     Float?
-  certifiedDocumentUrl   String?
-  certificationLetterUrl String?
-  lawyerNotes            String?
-
-  // Digital Certification Fields
-  certificateId         String?   @unique // Unique verification ID (e.g., "WP-2024-ABC123")
-  verificationQRCodeUrl String? // QR code image for verification
-  signedAt              DateTime? // When lawyer signed the document
-  signatureApplied      Boolean   @default(false)
-  stampApplied          Boolean   @default(false)
-  letterheadApplied     Boolean   @default(false)
-
-  questionnaire Json?
-  urgency       UrgencyLevel @default(STANDARD)
-  deadline      DateTime
-
-  price     Float
-  paymentId String?
-  paidAt    DateTime?
-
-  // Status tracking
-  status                String    @default("pending_payment") // pending_payment, pending_lawyer_assignment, assigned, in_progress, in_qc, completed, failed
-  assignedAt            DateTime?
-  estimatedDeliveryDate DateTime?
-
-  qualityControlStatus QualityControlStatus?
-  qualityControlNotes  String?
-  qualityCheckedBy     String?
-  qualityCheckedAt     DateTime?
-
-  completedAt    DateTime?
-  deliveredAt    DateTime?
-  clientRating   Int?
-  clientFeedback String?
-
-  revisionCount     Int     @default(0)
-  revisionRequested Boolean @default(false)
-  revisionNotes     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user                User              @relation("DocumentReviewUser", fields: [userId], references: [id])
-  lawyer              User?             @relation("DocumentReviewLawyer", fields: [lawyerId], references: [id])
-  marketplaceDocument DocumentTemplate? @relation(fields: [marketplaceDocumentId], references: [id])
-  qualityController   User?             @relation("DocumentReviewQC", fields: [qualityCheckedBy], references: [id])
-  userDocument        UserDocument?     @relation("UserDocumentReviews", fields: [userDocumentId], references: [id])
-  payments            Payment[]
-
-  @@index([userId])
-  @@index([lawyerId])
-  @@index([aiReviewStatus])
-  @@index([certificationStatus])
-  @@index([qualityControlStatus])
-  @@index([status])
-}
-
-model LawyerLetterhead {
-  id                String  @id @default(cuid())
-  lawyerId          String  @unique
-  letterheadUrl     String
-  stampUrl          String?
-  signatureUrl      String? // Digital signature image
-  certificatePrefix String  @default("WP") // Prefix for certificate IDs (e.g., "WP", "LSK")
-  
-  // Letterhead preference
-  useCustomLetterhead Boolean @default(false) // If true, use uploaded template; if false, use system-generated
-  customLetterheadUrl String? // Custom uploaded letterhead template (PDF/image)
-  
-  // Scanned Letterhead Fields
-  scannedLetterheadUrl  String?  // Original uploaded letterhead file (PDF/PNG/JPG)
-  letterheadTemplateUrl String?  // Processed PDF template ready for merging
-  headerHeight          Int?     // Header boundary in pixels from top
-  footerHeight          Int?     // Footer boundary in pixels from bottom
-  contentAreaX          Int?     // Safe content area X coordinate
-  contentAreaY          Int?     // Safe content area Y coordinate
-  contentAreaWidth      Int?     // Safe content area width
-  contentAreaHeight     Int?     // Safe content area height
-  boundariesManuallySet Boolean  @default(false) // True if lawyer manually adjusted boundaries
-  
-  firmName          String
-  firmAddress       String?
-  firmPhone         String?
-  firmEmail         String?
-  licenseNumber     String
-
-  isApproved Boolean   @default(false)
-  approvedBy String?
-  approvedAt DateTime?
-
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  lawyer   User  @relation("LawyerLetterhead", fields: [lawyerId], references: [id])
-  approver User? @relation("LetterheadApprover", fields: [approvedBy], references: [id])
-}
-
 enum DocumentOrigin {
   MARKETPLACE
   EXTERNAL
@@ -1017,64 +1383,6 @@ enum UrgencyLevel {
   ECONOMY
 }
 
-model ServiceRequest {
-  id                  String        @id @default(cuid())
-  userId              String
-  serviceCategory     String
-  serviceTitle        String
-  description         String
-  estimatedBudget     Int
-  estimatedFee        Int
-  tier                String
-  urgency             String
-  phoneNumber         String
-  email               String
-  transactionValue    Int?
-  dealValue           Int?
-  claimAmount         Int?
-  businessType        String?
-  complexity          String?
-  commitmentFeePaid   Boolean       @default(false)
-  commitmentFeeAmount Int           @default(500)
-  commitmentFeeTxId   String?
-  status              RequestStatus @default(PENDING)
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  selectedLawyerId    String?
-  user                User          @relation("ClientServiceRequests", fields: [userId], references: [id])
-  selectedLawyer      User?         @relation("SelectedLawyerRequests", fields: [selectedLawyerId], references: [id])
-  quotes              LawyerQuote[]
-  completedAt         DateTime?
-  confirmedAt         DateTime?
-  rating              Int?
-  feedback            String?
-
-  @@index([userId])
-  @@index([status])
-  @@index([tier])
-}
-
-model LawyerQuote {
-  id                  String         @id @default(cuid())
-  serviceRequestId    String
-  lawyerId            String
-  connectionFeePaid   Boolean        @default(false)
-  connectionFeeAmount Int
-  connectionFeeTxId   String?
-  proposedFee         Int
-  proposedTimeline    String
-  approach            String
-  offersMilestones    Boolean        @default(false)
-  milestones          Json?
-  submittedAt         DateTime       @default(now())
-  isSelected          Boolean        @default(false)
-  serviceRequest      ServiceRequest @relation(fields: [serviceRequestId], references: [id])
-  lawyer              User           @relation("LawyerQuotes", fields: [lawyerId], references: [id])
-
-  @@index([serviceRequestId])
-  @@index([lawyerId])
-}
-
 enum RequestStatus {
   PENDING
   QUOTES_RECEIVED
@@ -1083,149 +1391,6 @@ enum RequestStatus {
   COMPLETED
   CONFIRMED
   CANCELLED
-}
-
-// ===========================
-// CONSULTATION BOOKING SYSTEM
-// ===========================
-
-model LawyerWallet {
-  id               String   @id @default(cuid())
-  lawyerId         String   @unique
-  balance          Decimal  @default(0) @db.Decimal(10, 2)
-  pendingBalance   Decimal  @default(0) @db.Decimal(10, 2)
-  availableBalance Decimal  @default(0) @db.Decimal(10, 2)
-  currency         String   @default("KES")
-  isActive         Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  lawyer       LawyerProfile             @relation(fields: [lawyerId], references: [id])
-  transactions LawyerWalletTransaction[]
-
-  @@index([lawyerId])
-}
-
-model LawyerWalletTransaction {
-  id                    String                @id @default(cuid())
-  walletId              String
-  type                  WalletTransactionType
-  amount                Decimal               @db.Decimal(10, 2)
-  balanceBefore         Decimal               @db.Decimal(10, 2)
-  balanceAfter          Decimal               @db.Decimal(10, 2)
-  status                TransactionStatus     @default(PENDING)
-  paymentMethod         String?
-  mpesaTransactionId    String?
-  mpesaReceiptNumber    String?
-  consultationBookingId String?
-  marketplaceBookingId  String?
-  description           String?
-  metadata              Json?
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-
-  wallet              LawyerWallet         @relation(fields: [walletId], references: [id])
-  consultationBooking ConsultationBooking? @relation(fields: [consultationBookingId], references: [id])
-
-  @@index([walletId, createdAt])
-  @@index([type, status])
-}
-
-model ConsultationBooking {
-  id                     String                    @id @default(cuid())
-  clientId               String
-  lawyerId               String
-  scheduledStartTime     DateTime
-  scheduledEndTime       DateTime
-  duration               Int
-  consultationType       ConsultationType
-  clientPaymentAmount    Decimal                   @db.Decimal(10, 2)
-  platformCommissionRate Decimal                   @db.Decimal(5, 2)
-  platformCommission     Decimal                   @db.Decimal(10, 2)
-  lawyerPayout           Decimal                   @db.Decimal(10, 2)
-  clientPaymentStatus    PaymentStatus             @default(PENDING)
-  mpesaTransactionId     String?
-  mpesaReceiptNumber     String?
-  clientPaidAt           DateTime?
-  status                 ConsultationBookingStatus @default(PENDING_PAYMENT)
-  actualStartTime        DateTime?
-  actualEndTime          DateTime?
-  lawyerConfirmed        Boolean                   @default(false)
-  clientConfirmed        Boolean                   @default(false)
-  lawyerConfirmedAt      DateTime?
-  clientConfirmedAt      DateTime?
-  payoutStatus           PayoutStatus              @default(PENDING)
-  payoutTransactionId    String?
-  paidToLawyerAt         DateTime?
-  isEmergency            Boolean                   @default(false)
-  emergencyNotes         String?
-  createdByReceptionist  Boolean                   @default(false)
-  receptionistId         String?
-  callSid                String?
-  callDuration           Int?
-  callRecordingUrl       String?
-  createdAt              DateTime                  @default(now())
-  updatedAt              DateTime                  @updatedAt
-
-  client             User                      @relation("ClientConsultationBookings", fields: [clientId], references: [id])
-  lawyer             User                      @relation("LawyerConsultationBookings", fields: [lawyerId], references: [id])
-  review             ConsultationReview?
-  walletTransactions LawyerWalletTransaction[]
-
-  @@index([lawyerId, scheduledStartTime])
-  @@index([clientId, status])
-  @@index([status, clientPaymentStatus])
-}
-
-model ConsultationReview {
-  id             String   @id @default(cuid())
-  bookingId      String   @unique
-  rating         Int
-  comment        String?
-  wouldRecommend Boolean
-  createdAt      DateTime @default(now())
-
-  booking ConsultationBooking @relation(fields: [bookingId], references: [id])
-}
-
-model WithdrawalRequest {
-  id                 String           @id @default(cuid())
-  lawyerId           String
-  amount             Decimal          @db.Decimal(10, 2)
-  withdrawalMethod   WithdrawalMethod
-  mpesaPhoneNumber   String?
-  mpesaName          String?
-  bankName           String?
-  accountNumber      String?
-  accountName        String?
-  branchCode         String?
-  status             WithdrawalStatus @default(PENDING)
-  requestedAt        DateTime         @default(now())
-  processedAt        DateTime?
-  completedAt        DateTime?
-  rejectionReason    String?
-  processedBy        String?
-  transactionId      String?
-  mpesaTransactionId String?
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-
-  lawyer LawyerProfile @relation(fields: [lawyerId], references: [id])
-
-  @@index([lawyerId, status])
-  @@index([status, requestedAt])
-}
-
-model EmergencyContact {
-  id           String   @id @default(cuid())
-  phoneNumber  String
-  label        String
-  isActive     Boolean  @default(true)
-  displayOrder Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([isActive, displayOrder])
 }
 
 enum ConsultationType {
@@ -1265,232 +1430,3 @@ enum WithdrawalStatus {
   FAILED
   CANCELLED
 }
-
-// ===========================
-// MESSAGING SYSTEM
-// ===========================
-
-model Conversation {
-  id           String                  @id @default(cuid())
-  createdAt    DateTime                @default(now())
-  updatedAt    DateTime                @updatedAt
-  participants ConversationParticipant[]
-  messages     Message[]
-}
-
-model ConversationParticipant {
-  id             String       @id @default(cuid())
-  conversationId String
-  userId         String
-  joinedAt       DateTime     @default(now())
-  leftAt         DateTime?
-  
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  user         User         @relation("ConversationParticipants", fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([conversationId, userId])
-  @@index([userId])
-}
-
-model Message {
-  id             String              @id @default(cuid())
-  conversationId String
-  senderId       String
-  content        String
-  read           Boolean             @default(false)
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
-  deletedAt      DateTime?
-  
-  conversation Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender       User                @relation("DirectMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
-  attachments  MessageAttachment[]
-  
-  @@index([conversationId, createdAt])
-  @@index([senderId])
-}
-
-model MessageAttachment {
-  id        String   @id @default(cuid())
-  messageId String
-  fileName  String
-  fileUrl   String
-  fileSize  Int
-  mimeType  String
-  createdAt DateTime @default(now())
-  
-  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  
-  @@index([messageId])
-}
-
-model LegalDocument {
-  id            String    @id @default(cuid())
-  title         String
-  documentType  String    // LEGISLATION, CASE_LAW, STATUTORY_INSTRUMENT, GAZETTE_NOTICE, etc.
-  category      String    // Constitutional Law, Criminal Law, etc.
-  citation      String?   // Legal citation (e.g., [2010] eKLR)
-  sourceUrl     String?   // Original source URL
-  effectiveDate DateTime? // When the law/document became effective
-  filePath      String    // Path to uploaded file
-  fileName      String    // Original filename
-  fileSize      Int       // File size in bytes
-  chunksCount   Int       @default(0) // Number of text chunks processed
-  vectorsCount  Int       @default(0) // Number of vectors stored in Pinecone
-  uploadedBy    String    // Admin user who uploaded
-  uploadedAt    DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  uploader User @relation("UploadedLegalDocuments", fields: [uploadedBy], references: [id])
-  
-  @@index([documentType])
-  @@index([category])
-  @@index([uploadedAt])
-}
-
-model CallLog {
-  id                   String    @id @default(cuid())
-  callerName           String
-  callerPhone          String
-  callerEmail          String?
-  issueCategory        String    // Property Law, Family Law, etc.
-  issueDescription     String    @db.Text
-  recommendation       String    // DOCUMENT_PURCHASE, LAWYER_SESSION, SERVICE_PACKAGE, DOCUMENT_REVIEW
-  recommendationNotes  String?   @db.Text
-  handledBy            String    // Admin user who handled the call
-  callDuration         Int?      // Duration in minutes
-  followUpRequired     Boolean   @default(false)
-  followUpDate         DateTime?
-  status               String    @default("PENDING") // PENDING, CONTACTED, CONVERTED, CLOSED
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  
-  handler User @relation("HandledCallLogs", fields: [handledBy], references: [id])
-  
-  @@index([recommendation])
-  @@index([status])
-  @@index([createdAt])
-  @@index([handledBy])
-}
-
-// ===========================
-// ANALYTICS & DATA COLLECTION
-// ===========================
-
-model PageView {
-  id            String    @id @default(cuid())
-  sessionId     String    // Anonymous session identifier (cookie-based)
-  userId        String?   // Null for anonymous visitors
-  page          String    // Page URL or route
-  pageName      String?   // Friendly page name (e.g., "Lawyer Profile", "Marketplace")
-  referrer      String?   // Previous page or external source
-  userAgent     String?   // Browser and device info
-  ipAddress     String?   // IP address (anonymized for privacy)
-  country       String?   // Geographic location
-  city          String?   // City from IP geolocation
-  deviceType    String?   // mobile, tablet, desktop
-  browser       String?   // Chrome, Safari, etc.
-  os            String?   // Windows, iOS, Android, etc.
-  screenWidth   Int?      // Screen resolution width
-  screenHeight  Int?      // Screen resolution height
-  duration      Int?      // Time spent on page (seconds)
-  scrollDepth   Int?      // Percentage of page scrolled (0-100)
-  exitPage      Boolean   @default(false) // True if user left site from this page
-  createdAt     DateTime  @default(now())
-  
-  user User? @relation("UserPageViews", fields: [userId], references: [id], onDelete: SetNull)
-  
-  @@index([sessionId, createdAt])
-  @@index([userId, createdAt])
-  @@index([page])
-  @@index([createdAt])
-  @@index([country, city])
-}
-
-model UserEvent {
-  id            String   @id @default(cuid())
-  sessionId     String   // Anonymous session identifier
-  userId        String?  // Null for anonymous visitors
-  eventType     String   // CLICK, SEARCH, FORM_START, FORM_SUBMIT, DOWNLOAD, etc.
-  eventCategory String   // USER_ACTION, CONVERSION, ENGAGEMENT
-  eventName     String   // Descriptive name (e.g., "clicked_book_lawyer", "searched_employment_law")
-  page          String   // Page where event occurred
-  targetElement String?  // Button/link clicked (e.g., "book-consultation-btn")
-  eventValue    Float?   // Numeric value (e.g., price of item viewed)
-  metadata      Json?    // Additional structured data
-  
-  // Specific tracking fields
-  searchQuery   String?  // For search events
-  lawyerId      String?  // For lawyer interactions
-  serviceType   String?  // For service browsing
-  documentId    String?  // For document interactions
-  
-  createdAt DateTime @default(now())
-  
-  user User? @relation("UserEvents", fields: [userId], references: [id], onDelete: SetNull)
-  
-  @@index([sessionId, createdAt])
-  @@index([userId, createdAt])
-  @@index([eventType, eventName])
-  @@index([searchQuery])
-  @@index([lawyerId])
-  @@index([createdAt])
-}
-
-model UserSession {
-  id                String    @id @default(cuid())
-  sessionId         String    @unique // Browser session ID (cookie)
-  userId            String?   // Null for anonymous visitors
-  startedAt         DateTime  @default(now())
-  endedAt           DateTime? // When session ended (user left site)
-  duration          Int?      // Total session duration in seconds
-  pageViewsCount    Int       @default(0) // Number of pages viewed
-  eventsCount       Int       @default(0) // Number of interactions
-  referralSource    String?   // Where user came from (Google, Facebook, Direct, etc.)
-  referralCampaign  String?   // UTM campaign parameter
-  referralMedium    String?   // UTM medium (organic, cpc, email, etc.)
-  landingPage       String?   // First page visited
-  exitPage          String?   // Last page before leaving
-  converted         Boolean   @default(false) // True if user completed a goal (signup, purchase, etc.)
-  conversionType    String?   // SIGNUP, BOOKING, PURCHASE, etc.
-  conversionValue   Float?    // Value of conversion (payment amount)
-  deviceType        String?   // mobile, tablet, desktop
-  browser           String?
-  os                String?
-  country           String?
-  city              String?
-  updatedAt         DateTime  @updatedAt
-  
-  user User? @relation("UserSessions", fields: [userId], references: [id], onDelete: SetNull)
-  
-  @@index([sessionId])
-  @@index([userId, startedAt])
-  @@index([converted, conversionType])
-  @@index([referralSource, referralMedium])
-  @@index([startedAt])
-}
-
-model AnalyticsSummary {
-  id                  String   @id @default(cuid())
-  date                DateTime @unique @db.Date // Daily summary
-  totalVisitors       Int      @default(0) // Unique sessions
-  totalPageViews      Int      @default(0)
-  totalEvents         Int      @default(0)
-  newUsers            Int      @default(0) // First-time visitors who signed up
-  returningUsers      Int      @default(0) // Existing users who visited
-  averageSessionTime  Int      @default(0) // Average duration in seconds
-  bounceRate          Float    @default(0) // Percentage of single-page sessions
-  conversionRate      Float    @default(0) // Percentage of sessions that converted
-  totalConversions    Int      @default(0)
-  totalRevenue        Float    @default(0) // Sum of all payments
-  topPages            Json?    // Array of {page, views} objects
-  topSearches         Json?    // Array of {query, count} objects
-  topReferrers        Json?    // Array of {source, count} objects
-  deviceBreakdown     Json?    // {mobile: X, tablet: Y, desktop: Z}
-  geographicData      Json?    // {country: {city: count}}
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  
-  @@index([date])
-}
-
