@@ -197,6 +197,24 @@ export const LawyerProfile: React.FC = () => {
   }
 
   const { user, lawyerProfile } = profile;
+  
+  // Additional safety check
+  if (!user || !lawyerProfile) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-8">
+          <p className="text-red-700">Profile data incomplete. Please try logging in again.</p>
+          <button 
+            onClick={() => navigate('/login')}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   const location = lawyerProfile?.location 
     ? (typeof lawyerProfile.location === 'string' 
         ? JSON.parse(lawyerProfile.location) 
@@ -220,7 +238,7 @@ export const LawyerProfile: React.FC = () => {
         <div className="px-8 pb-8">
           <div className="flex flex-col md:flex-row items-start md:items-end -mt-16 mb-4">
             <div className="relative">
-              {user.profileImageUrl ? (
+              {user?.profileImageUrl ? (
                 <img
                   src={user.profileImageUrl}
                   alt={`${user.firstName} ${user.lastName}`}
@@ -242,7 +260,7 @@ export const LawyerProfile: React.FC = () => {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">
-                    {user.firstName} {user.lastName}
+                    {user?.firstName} {user?.lastName}
                   </h1>
                   <div className="flex items-center gap-3 mt-2">
                     <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${tierInfo.color}`}>
@@ -405,7 +423,7 @@ export const LawyerProfile: React.FC = () => {
                 <Mail className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Email</p>
-                  <p className="text-gray-900 font-medium">{user.email}</p>
+                  <p className="text-gray-900 font-medium">{user?.email}</p>
                 </div>
               </div>
               
