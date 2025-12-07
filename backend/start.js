@@ -1,26 +1,8 @@
 #!/usr/bin/env node
-// v2.0 - Database migrations moved to runtime startup
-// Startup wrapper to ensure correct working directory and run migrations
+
+// Startup wrapper to ensure correct working directory
 const path = require('path');
 const fs = require('fs');
-const { execSync } = require('child_process');
-
-console.log('[Startup] Wakili Pro Backend v2.0 Starting...');
-
-// Run database migrations if in production
-if (process.env.NODE_ENV === 'production') {
-  console.log('[Startup] Running database migrations...');
-  try {
-    execSync('npx prisma migrate deploy', { 
-      stdio: 'inherit',
-      cwd: __dirname 
-    });
-    console.log('[Startup] Migrations completed successfully');
-  } catch (error) {
-    console.warn('[Startup] Migration failed, but continuing startup:', error.message);
-    // Don't exit - server can still start without migrations if schema already matches
-  }
-}
 
 // Determine correct path to index.js
 const possiblePaths = [

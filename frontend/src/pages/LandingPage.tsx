@@ -290,9 +290,12 @@ export const LandingPage: React.FC = () => {
               </div>
               
               <div className="grid md:grid-cols-3 gap-4">
-                {getFeaturedExamples().slice(0, 3).map((service, i) => {
-                  const icons = [Home, Briefcase, Heart];
-                  const IconComponent = icons[i] || Home;
+                {[
+                  { ...getFeaturedExamples()[0], icon: Home },
+                  { ...getFeaturedExamples()[1], icon: Briefcase },
+                  { ...getFeaturedExamples()[2], icon: Heart }
+                ].map((service, i) => {
+                  const IconComponent = service.icon;
                   return (
                     <Link key={i} to="/services" className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer block">
                       <div className="flex items-center justify-between mb-2">
