@@ -68,7 +68,7 @@ export const WithdrawalStatsCards: React.FC<WithdrawalStatsCardsProps> = ({
           <div>
             <p className="text-sm text-gray-600 mb-1">Success Rate</p>
             <p className="text-2xl font-bold text-gray-800">
-              {stats.successRate.toFixed(1)}%
+              {stats.successRate ? stats.successRate.toFixed(1) : '0.0'}%
             </p>
           </div>
           <div className="relative">

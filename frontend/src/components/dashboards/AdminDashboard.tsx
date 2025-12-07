@@ -315,7 +315,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
         />
         <StatCard
           title="Platform Revenue"
-          value={`KES ${(stats.platformRevenue / 1000000).toFixed(1)}M`}
+          value={`KES ${stats.platformRevenue ? (stats.platformRevenue / 1000000).toFixed(1) : '0.0'}M`}
           change={`+${growthData.revenue.change}%`}
           trend="up"
           icon={DollarSign}
@@ -394,7 +394,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
               <p className="text-blue-100 text-sm">Revenue Growth</p>
               <DollarSign className="h-5 w-5" />
             </div>
-            <p className="text-3xl font-bold">KES {(stats.platformRevenue / 1000000).toFixed(1)}M</p>
+            <p className="text-3xl font-bold">KES {stats.platformRevenue ? (stats.platformRevenue / 1000000).toFixed(1) : '0.0'}M</p>
             <p className="text-sm text-blue-100 mt-1">+{growthData.revenue.change}% increase</p>
           </div>
           <div className="bg-white/10 backdrop-blur rounded-lg p-4">

@@ -241,7 +241,7 @@ export const PublicLawyerProfile: React.FC = () => {
                 <div className="flex items-center mb-4 pb-4 border-b border-slate-200">
                   <div className="flex items-center space-x-1">
                     <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-base font-bold">{lawyer.rating.toFixed(1)}</span>
+                    <span className="text-base font-bold">{lawyer.rating ? lawyer.rating.toFixed(1) : '0.0'}</span>
                   </div>
                   <span className="text-slate-600 text-xs ml-2">
                     ({lawyer.reviewCount} {lawyer.reviewCount === 1 ? 'review' : 'reviews'})

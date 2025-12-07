@@ -303,7 +303,7 @@ export default function Dashboard() {
                 <div className="text-right">
                   <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700">
                     <TrendingUp className="h-3 w-3" />
-                    +{((performanceData.thisWeek.consultations - performanceData.lastWeek.consultations) / performanceData.lastWeek.consultations * 100).toFixed(0)}%
+                    +{performanceData.lastWeek.consultations > 0 ? ((performanceData.thisWeek.consultations - performanceData.lastWeek.consultations) / performanceData.lastWeek.consultations * 100).toFixed(0) : '0'}%
                   </div>
                 </div>
               </div>
@@ -315,7 +315,7 @@ export default function Dashboard() {
                 <div className="text-right">
                   <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700">
                     <TrendingUp className="h-3 w-3" />
-                    +{((performanceData.thisWeek.revenue - performanceData.lastWeek.revenue) / performanceData.lastWeek.revenue * 100).toFixed(0)}%
+                    +{performanceData.lastWeek.revenue > 0 ? ((performanceData.thisWeek.revenue - performanceData.lastWeek.revenue) / performanceData.lastWeek.revenue * 100).toFixed(0) : '0'}%
                   </div>
                 </div>
               </div>

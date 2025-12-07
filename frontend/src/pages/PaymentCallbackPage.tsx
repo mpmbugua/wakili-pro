@@ -112,7 +112,7 @@ export const PaymentCallbackPage: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-slate-600">Amount:</span>
                     <span className="font-semibold text-slate-900">
-                      KES {paymentDetails.amount.toFixed(2)}
+                      KES {paymentDetails.amount ? paymentDetails.amount.toFixed(2) : '0.00'}
                     </span>
                   </div>
                   <div className="flex justify-between">

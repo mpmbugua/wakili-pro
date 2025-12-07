@@ -37,7 +37,7 @@ export const CalendarPage: React.FC = () => {
     try {
       setLoading(true);
       // Fetch consultations/bookings for the current month
-      const response = await axiosInstance.get('/api/consultations', {
+      const response = await axiosInstance.get('/consultations', {
         params: {
           month: currentDate.getMonth() + 1,
           year: currentDate.getFullYear()

@@ -159,7 +159,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     const fetchArticles = async () => {
       try {
         setArticlesLoading(true);
-        const response = await axiosInstance.get('/api/articles', {
+        const response = await axiosInstance.get('/articles', {
           params: { authorId: user.id }
         });
         if (response.data.success && response.data.data) {

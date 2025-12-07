@@ -83,9 +83,9 @@ export const ArticleManagementPage: React.FC = () => {
   const loadStats = async () => {
     try {
       const [allRes, publishedRes, pendingRes] = await Promise.all([
-        axiosInstance.get('/api/articles'),
-        axiosInstance.get('/api/articles/published'),
-        axiosInstance.get('/api/articles/admin/pending')
+        axiosInstance.get('/articles'),
+        axiosInstance.get('/articles/published'),
+        axiosInstance.get('/articles/admin/pending')
       ]);
 
       // Extract articles arrays from paginated responses

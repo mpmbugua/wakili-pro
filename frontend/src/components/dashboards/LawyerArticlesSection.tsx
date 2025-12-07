@@ -31,7 +31,7 @@ export const LawyerArticlesSection: React.FC<LawyerArticlesSectionProps> = ({ us
     const fetchArticles = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get('/api/articles', {
+        const response = await axiosInstance.get('/articles', {
           params: { authorId: userId }
         });
         
