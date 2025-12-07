@@ -57,3 +57,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </ErrorBoundary>
 );
+
+// Debug logging
+console.log('✅ Wakili Pro Frontend Mounted');
+console.log('Build timestamp:', new Date().toISOString());
+console.log('Root element:', document.getElementById('root'));
