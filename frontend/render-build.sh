@@ -1,10 +1,17 @@
 #!/bin/bash
 # Render build script for frontend only
+# CACHE BUSTER: 2025-12-07-07:20:00-UTC
 
 echo "Building Wakili Pro Frontend..."
 echo "Build timestamp: $(date)"
 echo "Force rebuild: $(date +%s)"
+echo "Cache buster active - clean build"
 cd frontend || exit 1
+
+# Clear any existing build artifacts
+echo "Cleaning old build artifacts..."
+rm -rf dist node_modules/.vite
+
 npm install --legacy-peer-deps
 npm run build
 
