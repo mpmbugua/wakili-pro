@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Bell, Search, User, LogOut, Settings } from 'lucide-react';
+import { Menu, Bell, Search, User, LogOut, Settings, Lock } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useEventTracking } from '../../hooks/useAnalytics';
 import { WakiliLogo } from '../ui/WakiliLogo';
 import { Button } from '../ui/Button';
+import axiosInstance from '../../lib/axios';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -17,7 +18,35 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
   const { trackSearch } = useEventTracking();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isVerified, setIsVerified] = useState(false);
+  const [checkingVerification, setCheckingVerification] = useState(true);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  const isLawyer = user?.role === 'LAWYER';
+
+  // Check lawyer verification status
+  useEffect(() => {
+    const checkVerification = async () => {
+      if (!isLawyer) {
+        setCheckingVerification(false);
+        setIsVerified(true); // Non-lawyers don't need verification
+        return;
+      }
+
+      try {
+        const response = await axiosInstance.get('/users/profile');
+        const lawyerProfile = response.data?.data?.lawyerProfile;
+        setIsVerified(lawyerProfile?.isVerified === true);
+      } catch (error) {
+        console.error('[Header] Verification check failed:', error);
+        setIsVerified(false);
+      } finally {
+        setCheckingVerification(false);
+      }
+    };
+
+    checkVerification();
+  }, [isLawyer]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,22 +161,42 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton = tr
               {isProfileMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-48 z-50">
                   <div className="bg-white rounded-xl border border-gray-200 shadow-lg py-1">
-                    <Link
-                      to="/profile"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <User className="h-4 w-4" />
-                      <span>My Profile</span>
-                    </Link>
-                    <Link
-                      to="/settings"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span>Settings</span>
-                    </Link>
+                    {/* My Profile - Locked for unverified lawyers */}
+                    {isLawyer && !isVerified ? (
+                      <div className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed opacity-60">
+                        <User className="h-4 w-4" />
+                        <span>My Profile</span>
+                        <Lock className="h-3 w-3 ml-auto" />
+                      </div>
+                    ) : (
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <User className="h-4 w-4" />
+                        <span>My Profile</span>
+                      </Link>
+                    )}
+
+                    {/* Settings - Locked for unverified lawyers */}
+                    {isLawyer && !isVerified ? (
+                      <div className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed opacity-60">
+                        <Settings className="h-4 w-4" />
+                        <span>Settings</span>
+                        <Lock className="h-3 w-3 ml-auto" />
+                      </div>
+                    ) : (
+                      <Link
+                        to="/settings"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <Settings className="h-4 w-4" />
+                        <span>Settings</span>
+                      </Link>
+                    )}
+
                     <hr className="my-1" />
                     <button
                       onClick={() => {
