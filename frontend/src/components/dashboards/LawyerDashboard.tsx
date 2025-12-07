@@ -279,7 +279,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   }
 
   // Show pending verification message for unverified lawyers
-  if (!isVerified) {
+  if (!isVerified || !hasProfile) {
     // No profile exists - show complete profile setup
     if (!hasProfile) {
       return (
@@ -329,7 +329,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
       );
     }
     
-    // Profile exists but not verified - show pending verification
+    // Profile exists but not verified - show pending verification (THIS IS THE ONLY UI FOR UNVERIFIED)
     return (
       <div className="max-w-4xl mx-auto px-4 py-16">
         <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-8 text-center">
