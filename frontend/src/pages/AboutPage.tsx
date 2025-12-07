@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Shield, Users, Target, Heart, Award, TrendingUp } from 'lucide-react';
 
 export const AboutPage: React.FC = () => {
@@ -191,18 +192,18 @@ export const AboutPage: React.FC = () => {
             Experience the future of legal services in Kenya today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/lawyers"
+            <Link
+              to="/lawyers"
               className="btn-primary px-8 py-3 text-lg inline-block"
             >
               Find a Lawyer
-            </a>
-            <a
-              href="/ai"
+            </Link>
+            <Link
+              to="/ai"
               className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors inline-block"
             >
               Try AI Assistant
-            </a>
+            </Link>
           </div>
         </div>
       </section>
