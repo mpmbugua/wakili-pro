@@ -9,10 +9,11 @@ const prisma = new PrismaClient();
 const CreateConsultationSchema = z.object({
   lawyerId: z.string().min(1, 'Lawyer ID is required'),
   date: z.string().min(1, 'Date is required'),
-  time: z.string().min(1, 'Time is required'),
+  time: z.string().min(1, 'Time is required'), // Can be 'ASAP' or 'HH:MM' format
   duration: z.string().default('60'),
   consultationType: z.enum(['video', 'phone', 'in-person']),
   description: z.string().min(10, 'Please provide a brief description of your legal matter'),
+  isImmediate: z.boolean().optional(), // Flag for immediate consultations
 });
 
 /**
@@ -61,7 +62,23 @@ export const createConsultation = async (req: AuthenticatedRequest, res: Respons
     }
 
     // Combine date and time into DateTime
-    const scheduledDateTime = new Date(`${validatedData.date}T${validatedData.time}:00`);
+    // Handle immediate bookings (ASAP) vs scheduled bookings
+    let scheduledDateTime: Date;
+    if (validatedData.time === 'ASAP' || req.body.isImmediate) {
+      // For immediate bookings, use current time
+      scheduledDateTime = new Date();
+    } else {
+      // For scheduled bookings, parse date and time
+      scheduledDateTime = new Date(`${validatedData.date}T${validatedData.time}:00`);
+      
+      // Validate the parsed date
+      if (isNaN(scheduledDateTime.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid date or time format. Please use valid date (YYYY-MM-DD) and time (HH:MM) formats.'
+        });
+      }
+    }
 
     // Find or create a consultation service for this lawyer
     let consultationService = await prisma.marketplaceService.findFirst({
