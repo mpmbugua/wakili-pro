@@ -42,13 +42,10 @@ services:
         value: public, max-age=31536000, immutable
     routes:
       - type: rewrite
-        source: /(.*).js
-        destination: /$1.js
+        source: /assets/*
+        destination: /assets/:splat
       - type: rewrite
-        source: /(.*).css
-        destination: /$1.css
-      - type: rewrite
-        source: /(.*)
+        source: /*
         destination: /index.html
 
 databases:
