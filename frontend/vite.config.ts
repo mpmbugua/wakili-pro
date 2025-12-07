@@ -6,6 +6,7 @@ import { copyFileSync } from 'fs'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/',
   plugins: [
     react(),
     {
@@ -22,6 +23,12 @@ export default defineConfig({
           console.log('✓ Copied _headers to dist/')
         } catch (err) {
           console.warn('Could not copy _headers:', err)
+        }
+        try {
+          copyFileSync(path.resolve(__dirname, 'public/404.html'), path.resolve(__dirname, 'dist/404.html'))
+          console.log('✓ Copied 404.html to dist/')
+        } catch (err) {
+          console.warn('Could not copy 404.html:', err)
         }
       }
     }

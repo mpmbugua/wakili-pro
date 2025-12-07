@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <base href="/" />
+    <meta http-equiv="refresh" content="0;url=/" />
+    <title>Redirecting...</title>
+    <script>
+      // Store the path for client-side routing
+      sessionStorage.setItem('redirectPath', window.location.pathname + window.location.search + window.location.hash);
+      window.location.replace('/');
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to app...</p>
+  </body>
+</html>
