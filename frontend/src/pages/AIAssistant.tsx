@@ -51,10 +51,6 @@ export const AIAssistant: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   // Redirect lawyers to their professional AI Assistant
   useEffect(() => {
@@ -66,30 +62,22 @@ export const AIAssistant: React.FC = () => {
 
   // AI Response handlers - using backend API
   const handleSendMessage = async () => {
-    if (!input.trim() && attachedFiles.length === 0) return;
+    if (!input.trim()) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input || '📎 Sent attachments',
-      timestamp: new Date(),
-      attachments: attachedFiles.map((file, idx) => ({
-        type: file.type.startsWith('image/') ? 'image' : 'document',
-        name: file.name,
-        url: previewUrls[idx] || '',
-        size: file.size
-      }))
+      content: input,
+      timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
     const currentInput = input;
-    const currentFiles = [...attachedFiles];
     
     // Track AI query (goldmine for AI training!)
     if (currentInput.trim()) {
       trackSearch(currentInput, { 
-        page: 'ai_assistant',
-        hasAttachments: currentFiles.length > 0
+        page: 'ai_assistant'
       });
     }
     
@@ -97,14 +85,9 @@ export const AIAssistant: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Send to backend using FormData for file uploads
+      // Send to backend
       const formData = new FormData();
       formData.append('question', currentInput);
-      
-      // Add attachments (backend expects 'attachments' field)
-      currentFiles.forEach(file => {
-        formData.append('attachments', file);
-      });
 
       // Use full backend URL in production
       const apiUrl = import.meta.env.VITE_API_URL || 'https://wakili-pro.onrender.com/api';
@@ -182,8 +165,6 @@ export const AIAssistant: React.FC = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      setAttachedFiles([]);
-      setPreviewUrls([]);
     }
   };
 
@@ -305,99 +286,12 @@ export const AIAssistant: React.FC = () => {
     }
   };
 
-  // File upload handlers
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
 
-    const fileArray = Array.from(files);
-    const validFiles = fileArray.filter(file => {
-      const validTypes = [
-        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-        'application/pdf', 'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      ];
-      const maxSize = 10 * 1024 * 1024; // 10MB
-
-      if (!validTypes.includes(file.type)) {
-        alert(`${file.name}: Unsupported file type. Please upload images or documents (PDF, DOC, DOCX).`);
-        return false;
-      }
-      if (file.size > maxSize) {
-        alert(`${file.name}: File too large. Maximum size is 10MB.`);
-        return false;
-      }
-      return true;
-    });
-
-    if (validFiles.length === 0) return;
-
-    setAttachedFiles(prev => [...prev, ...validFiles]);
-
-    // Create preview URLs for images
-    validFiles.forEach(file => {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setPreviewUrls(prev => [...prev, e.target?.result as string]);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        setPreviewUrls(prev => [...prev, '']);
-      }
-    });
-  };
-
-  const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    const file = files[0];
-    setAttachedFiles(prev => [...prev, file]);
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrls(prev => [...prev, e.target?.result as string]);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const openFileSelector = () => {
-    fileInputRef.current?.click();
-  };
-
-  const openCamera = () => {
-    cameraInputRef.current?.click();
-  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Chat Container */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
-          {/* Hidden file inputs */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,.pdf,.doc,.docx"
-            multiple
-            onChange={handleFileSelect}
-            style={{ display: 'none' }}
-          />
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleCameraCapture}
-            style={{ display: 'none' }}
-          />
-
           {/* Messages Display */}
           {messages.map((message) => (
               <div
@@ -534,68 +428,6 @@ export const AIAssistant: React.FC = () => {
             )}
           </div>
 
-          {/* Attachment Preview */}
-          {attachedFiles.length > 0 && (
-            <div className="border-t border-gray-200 p-4 bg-white">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-700">
-                  Attachments ({attachedFiles.length})
-                </p>
-                <button
-                  onClick={() => {
-                    setAttachedFiles([]);
-                    setPreviewUrls([]);
-                  }}
-                  className="text-xs text-red-600 hover:text-red-700"
-                >
-                  Clear all
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {attachedFiles.map((file, idx) => (
-                  <div key={idx} className="relative group">
-                    {file.type.startsWith('image/') ? (
-                      <div className="relative">
-                        <img
-                          src={previewUrls[idx]}
-                          alt={file.name}
-                          className="w-20 h-20 object-cover rounded-lg border border-gray-300"
-                        />
-                        <button
-                          onClick={() => removeAttachment(idx)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="relative">
-                        <div className="w-20 h-20 bg-gray-100 rounded-lg border border-gray-300 flex flex-col items-center justify-center p-2">
-                          <svg className="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <p className="text-xs text-gray-600 text-center truncate w-full">
-                            {file.name.length > 10 ? file.name.substring(0, 10) + '...' : file.name}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => removeAttachment(idx)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Input Area */}
           <div className="border-t border-slate-200 p-2 sm:p-4 bg-slate-50">
             <p className="text-xs text-slate-500 mb-2">👋 Your Smart AI Kenyan Lawyer</p>
@@ -617,58 +449,6 @@ export const AIAssistant: React.FC = () => {
               
               {/* Action Buttons Row */}
               <div className="flex items-center gap-2 justify-end sm:justify-start">
-                {/* File Upload Button */}
-                <button
-                  onClick={openFileSelector}
-                  disabled={isLoading || isRecording}
-                  className="btn-ghost p-2 sm:p-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Upload image or document"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 sm:h-6 sm:w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                    />
-                  </svg>
-                </button>
-
-                {/* Camera Button */}
-                <button
-                  onClick={openCamera}
-                  disabled={isLoading || isRecording}
-                  className="btn-ghost p-2 sm:p-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Take photo"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 sm:h-6 sm:w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </button>
-                
                 {/* Microphone Button */}
                 <button
                   onClick={toggleRecording}
@@ -717,9 +497,7 @@ export const AIAssistant: React.FC = () => {
             <p className="text-xs text-slate-500 mt-2">
               💡 {isRecording 
                 ? '🎤 Recording... Click the microphone again to stop and send' 
-                : attachedFiles.length > 0
-                  ? `📎 ${attachedFiles.length} file(s) attached. Type a message or click Send.`
-                  : 'Type your question, upload documents/images, use camera, or click the microphone to speak.'}
+                : 'Type your question or click the microphone to speak. Need document review? Visit Documents page for AI analysis or lawyer certification.'}
             </p>
           </div>
       </div>
