@@ -54,19 +54,28 @@ interface ServiceRequestForm {
 export const ServiceRequestPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { trackFormStart, trackFormSubmit } = useEventTracking();
   const { trackConversion } = useConversionTracking();
 
-  // Redirect lawyers - they quote on service requests, they don't submit them
+  // Redirect guest users to login - must be authenticated to submit service requests
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login', { 
+        replace: true,
+        state: { from: '/service-request', message: 'Please login or register to submit a service request.' }
+      });
+      return;
+    }
+
+    // Redirect lawyers - they quote on service requests, they don't submit them
     if (user?.role === 'LAWYER') {
       navigate('/lawyer/service-requests', { 
         replace: true,
         state: { message: 'Lawyers quote on service requests. This page is for clients to submit requests.' }
       });
     }
-  }, [user, navigate]);
+  }, [user, isAuthenticated, navigate]);
   const serviceFromState = location.state?.fromService || '';
 
   const [formData, setFormData] = useState<ServiceRequestForm>({
@@ -326,6 +335,18 @@ export const ServiceRequestPage: React.FC = () => {
       </div>
     );
   };
+
+  // Show loading state while checking authentication
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
