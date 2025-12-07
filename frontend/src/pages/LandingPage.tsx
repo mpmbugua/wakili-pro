@@ -134,6 +134,8 @@ const NewsletterSection: React.FC = () => {
 export const LandingPage: React.FC = () => {
   const [featuredArticles, setFeaturedArticles] = useState<FeaturedArticle[]>([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
+  const [featuredLawyers, setFeaturedLawyers] = useState<any[]>([]);
+  const [loadingLawyers, setLoadingLawyers] = useState(true);
 
   useEffect(() => {
     const fetchFeaturedArticles = async () => {
@@ -147,7 +149,21 @@ export const LandingPage: React.FC = () => {
       }
     };
 
+    const fetchFeaturedLawyers = async () => {
+      try {
+        const response = await axiosInstance.get('/lawyers?limit=6');
+        if (response.data.success && response.data.data) {
+          setFeaturedLawyers(response.data.data.lawyers || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch featured lawyers:', error);
+      } finally {
+        setLoadingLawyers(false);
+      }
+    };
+
     fetchFeaturedArticles();
+    fetchFeaturedLawyers();
   }, []);
 
   const extractMetadata = (content: string) => {
@@ -418,56 +434,75 @@ export const LandingPage: React.FC = () => {
                   Connect with verified legal experts across Kenya
                 </p>
               </div>
-              <div className="grid md:grid-cols-3 gap-4">
-            {/* Sample Lawyer Cards */}
-            {[
-              { name: 'Dr. Sarah Kamau', specialty: 'Corporate Law', location: 'Nairobi', rating: 4.9, cases: '200+' },
-              { name: 'Adv. James Mwangi', specialty: 'Family Law', location: 'Mombasa', rating: 4.8, cases: '150+' },
-              { name: 'Adv. Grace Njeri', specialty: 'Real Estate Law', location: 'Nairobi', rating: 4.7, cases: '180+' },
-              { name: 'Adv. Peter Ochieng', specialty: 'Criminal Law', location: 'Kisumu', rating: 4.9, cases: '220+' },
-              { name: 'Dr. Mary Wanjiru', specialty: 'Immigration Law', location: 'Nairobi', rating: 4.8, cases: '170+' },
-              { name: 'Adv. David Kiprono', specialty: 'Employment Law', location: 'Nakuru', rating: 4.7, cases: '160+' }
-              ].map((lawyer, i) => (
-                <Link key={i} to="/lawyers" className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer block">
-                <div className="flex items-start space-x-3 mb-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold text-sm">
-                    {lawyer.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-slate-900">{lawyer.name}</h3>
-                    <p className="text-xs text-slate-600">{lawyer.specialty}</p>
-                    <div className="flex items-center text-xs text-slate-500 mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {lawyer.location}
-                    </div>
-                  </div>
-                  <div className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded flex items-center space-x-1">
-                    <Star className="h-3 w-3 fill-current" />
-                    <span className="text-xs font-medium">{lawyer.rating}</span>
-                  </div>
+              {loadingLawyers ? (
+                <div className="text-center py-8">
+                  <Loader className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+                  <p className="text-sm text-slate-600 mt-2">Loading lawyers...</p>
                 </div>
-                <div className="flex items-center justify-between text-xs mb-3">
-                  <div className="flex items-center text-slate-600">
-                    <CheckCircle className="h-3 w-3 mr-1 text-emerald-600" />
-                    Verified
+              ) : featuredLawyers.length > 0 ? (
+                <>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {featuredLawyers.map((lawyer) => (
+                      <Link 
+                        key={lawyer.id} 
+                        to={`/lawyers/${lawyer.id}`} 
+                        className="bg-white rounded border border-slate-300 p-4 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer block"
+                      >
+                        <div className="flex items-start space-x-3 mb-3">
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-semibold text-sm">
+                            {lawyer.user?.firstName?.[0]}{lawyer.user?.lastName?.[0]}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-sm font-semibold text-slate-900">
+                              {lawyer.user?.firstName} {lawyer.user?.lastName}
+                            </h3>
+                            <p className="text-xs text-slate-600">
+                              {lawyer.specializations?.[0] || 'General Practice'}
+                            </p>
+                            <div className="flex items-center text-xs text-slate-500 mt-1">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              {typeof lawyer.location === 'string' 
+                                ? JSON.parse(lawyer.location).city || 'Kenya'
+                                : lawyer.location?.city || 'Kenya'}
+                            </div>
+                          </div>
+                          <div className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded flex items-center space-x-1">
+                            <Star className="h-3 w-3 fill-current" />
+                            <span className="text-xs font-medium">{lawyer.rating?.toFixed(1) || '5.0'}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs mb-3">
+                          <div className="flex items-center text-slate-600">
+                            <CheckCircle className="h-3 w-3 mr-1 text-emerald-600" />
+                            {lawyer.isVerified ? 'Verified' : 'Pending'}
+                          </div>
+                          <div className="text-slate-500">
+                            {lawyer.yearsOfExperience || 0}+ years
+                          </div>
+                        </div>
+                        <span className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
+                          View Profile
+                        </span>
+                      </Link>
+                    ))}
                   </div>
-                  <div className="text-slate-500">
-                    {lawyer.cases} cases
+                  <div className="mt-6 text-center">
+                    <Link 
+                      to="/lawyers" 
+                      className="inline-flex items-center text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      View all lawyers <ArrowRight className="ml-1 h-3 w-3" />
+                    </Link>
                   </div>
+                </>
+              ) : (
+                <div className="text-center py-8 text-slate-600">
+                  <p className="text-sm">No lawyers available at the moment.</p>
+                  <Link to="/lawyer/onboarding" className="text-blue-600 hover:text-blue-700 text-sm mt-2 inline-block">
+                    Become a verified lawyer →
+                  </Link>
                 </div>
-                <span className="block w-full text-center px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors">
-                  View Profile
-                </span>
-              </Link>
-            ))}
-          </div>
-          <div className="mt-6 text-center">
-            <Link 
-              to="/lawyers" 
-              className="inline-flex items-center text-xs text-blue-600 hover:text-blue-700 font-medium"
-            >
-              View all 500+ lawyers <ArrowRight className="ml-1 h-3 w-3" />
-            </Link>
+              )}
               </div>
             </div>
           </section>
