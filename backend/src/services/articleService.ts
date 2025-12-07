@@ -126,8 +126,8 @@ export async function getArticles(
         isPremium: article.isPremium,
         isPublished: article.isPublished,
         sourceUrl: article.fileName, // fileName field stores source URL
-        createdAt: new Date().toISOString(), // Fallback for missing timestamp
-        updatedAt: new Date().toISOString(), // Fallback for missing timestamp
+        createdAt: article.createdAt?.toISOString() || new Date().toISOString(),
+        updatedAt: article.updatedAt?.toISOString() || new Date().toISOString(),
         metadata
       };
     });
@@ -182,9 +182,12 @@ export async function getArticleById(id: string) {
       title: article.title,
       content: cleanContent,
       author: article.User,
+      authorId: article.authorId,
       isPremium: article.isPremium,
       isPublished: article.isPublished,
       sourceUrl: article.fileName,
+      createdAt: article.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: article.updatedAt?.toISOString() || new Date().toISOString(),
       metadata
     };
 
