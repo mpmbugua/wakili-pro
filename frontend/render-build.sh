@@ -1,6 +1,6 @@
 #!/bin/bash
 # Render build script for frontend only
-# CACHE BUSTER: 2025-12-07-07:20:00-UTC
+# CACHE BUSTER: 2025-12-07-16:30:00-UTC
 
 echo "Building Wakili Pro Frontend..."
 echo "Build timestamp: $(date)"

@@ -1,3 +1,8 @@
 # SPA fallback - all routes go to index.html for client-side routing
-/*    /index.html   200
+# Specific admin routes
+/admin              /index.html   200
+/admin/*            /index.html   200
+
+# Catch-all for all other routes
+/*                  /index.html   200
 
