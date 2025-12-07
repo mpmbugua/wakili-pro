@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-
+// v2.0 - Database migrations moved to runtime startup
 // Startup wrapper to ensure correct working directory and run migrations
 const path = require('path');
 const fs = require('fs');
 const { execSync } = require('child_process');
 
-console.log('[Startup] Wakili Pro Backend Starting...');
+console.log('[Startup] Wakili Pro Backend v2.0 Starting...');
 
 // Run database migrations if in production
 if (process.env.NODE_ENV === 'production') {
