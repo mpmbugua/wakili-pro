@@ -251,7 +251,7 @@ export const LandingPage: React.FC = () => {
                     <h3 className="text-base font-semibold text-slate-900">Book Legal Service Package</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
-                    Fixed-price packages for common legal needs. Property, business, family law, and more.
+                    Professional packages for common legal needs. Property, business, family law, and more.
                   </p>
                   <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
                     View services <ArrowRight className="ml-1 h-3 w-3" />
@@ -285,7 +285,7 @@ export const LandingPage: React.FC = () => {
                   Legal Service Packages
                 </h2>
                 <p className="text-xs text-slate-600">
-                  Fixed-price legal services by verified lawyers. Transparent pricing, clear deliverables, professional results.
+                  Professional legal services by verified lawyers. Clear deliverables, quality results.
                 </p>
               </div>
               

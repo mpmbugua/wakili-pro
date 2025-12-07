@@ -8,6 +8,7 @@ const router = express.Router();
 /**
  * GET /api/admin/crawler/status
  * Get crawler scheduler status
+ * Admin-only endpoint for monitoring crawler operations
  */
 router.get('/status', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), (req, res) => {
   try {
