@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Clock, Send, MessageSquare, HelpCircle } from 'lucide-react';
 
 export const ContactPage: React.FC = () => {
@@ -214,7 +215,7 @@ export const ContactPage: React.FC = () => {
         <div className="mt-16">
           <h2 className="text-3xl font-bold text-center text-slate-900 mb-8">Quick Help</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-slate-200">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                 <HelpCircle className="h-6 w-6 text-blue-600" />
               </div>
@@ -222,12 +223,12 @@ export const ContactPage: React.FC = () => {
               <p className="text-slate-600 text-sm mb-4">
                 Find answers to commonly asked questions about our services, pricing, and processes.
               </p>
-              <a href="/resources" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+              <Link to="/resources" className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm hover:underline">
                 Browse FAQs →
-              </a>
+              </Link>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-slate-200">
               <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
                 <MessageSquare className="h-6 w-6 text-indigo-600" />
               </div>
@@ -235,12 +236,12 @@ export const ContactPage: React.FC = () => {
               <p className="text-slate-600 text-sm mb-4">
                 Get instant answers to basic legal questions from our AI-powered legal assistant.
               </p>
-              <a href="/ai" className="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+              <Link to="/ai" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium text-sm hover:underline">
                 Chat with AI →
-              </a>
+              </Link>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-slate-200">
               <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
                 <Phone className="h-6 w-6 text-emerald-600" />
               </div>
@@ -248,9 +249,9 @@ export const ContactPage: React.FC = () => {
               <p className="text-slate-600 text-sm mb-4">
                 Need personalized legal advice? Book a consultation with a verified lawyer today.
               </p>
-              <a href="/lawyers" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+              <Link to="/lawyers" className="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-medium text-sm hover:underline">
                 Find a Lawyer →
-              </a>
+              </Link>
             </div>
           </div>
         </div>
