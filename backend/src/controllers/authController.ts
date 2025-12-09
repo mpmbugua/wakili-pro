@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import { 
   generateAccessToken, 
@@ -9,7 +10,7 @@ import {
   JWTPayload
 } from '../middleware/auth';
 import type { ApiResponse, UserRole } from '@wakili-pro/shared';
-import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema } from '@wakili-pro/shared';
+import { LoginSchema, RegisterSchema, RefreshTokenSchema, ChangePasswordSchema, ForgotPasswordSchema, ResetPasswordSchema } from '@wakili-pro/shared';
 import { validatePassword } from '../services/security/passwordPolicyService';
 import { 
   verifyGoogleToken, 
@@ -17,6 +18,7 @@ import {
   findOrCreateGoogleUser, 
   findOrCreateFacebookUser 
 } from '../services/oauthService';
+import { sendPasswordResetEmail } from '../services/emailTemplates';
 
 const prisma = new PrismaClient();
 
@@ -505,10 +507,6 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response): 
     });
   }
 };
-
-import { ForgotPasswordSchema, ResetPasswordSchema } from '@wakili-pro/shared';
-import crypto from 'crypto';
-import { sendPasswordResetEmail } from '../services/emailTemplates';
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   try {
