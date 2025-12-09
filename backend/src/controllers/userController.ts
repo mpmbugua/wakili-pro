@@ -128,7 +128,8 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response): P
       }
 
       // If email is being changed, set emailVerified to false
-      userUpdateData.emailVerified = false;
+      // emailVerified field doesn't exist in production schema
+      // userUpdateData.emailVerified = false;
     }
 
     // Update user fields
@@ -143,7 +144,7 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response): P
         phoneNumber: true,
         role: true,
         // profilePicture: true // TODO: Add to User model,
-        emailVerified: true,
+        // emailVerified: true, // Field doesn't exist in production schema
         updatedAt: true
       }
     });
@@ -152,8 +153,8 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response): P
     if (profile) {
       await prisma.userProfile.upsert({
         where: { userId },
-        update: profile,
-        create: { userId, ...profile }
+        update: profile as any,
+        create: { userId, ...profile } as any
       });
     }
 

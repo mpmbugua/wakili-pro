@@ -46,10 +46,10 @@ export const suggestPhoneVerification = (
 ): void => {
   const user = req.user;
 
-  if (user && user.role === 'LAWYER' && !user.phoneVerified) {
-    // Add header suggesting verification
-    res.setHeader('X-Phone-Verification-Suggested', 'true');
-  }
+  // phoneVerified field doesn't exist in production schema
+  // if (user && user.role === 'LAWYER' && !user.phoneVerified) {
+  //   res.setHeader('X-Phone-Verification-Suggested', 'true');
+  // }
 
   next();
 };

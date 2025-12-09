@@ -96,7 +96,7 @@ Be conversational but professional, accurate but accessible to laypeople.
       return this.processLegalQueryFallback(request);
 
       // Conversation history disabled until ConversationHistory model is added to schema
-      // const conversationHistory: Array<{ role: string; content: string }> = [];
+      const conversationHistory: Array<{ role: string; content: string }> = [];
 
       // Use RAG service to get answer with legal document context
       const ragResponse = await ragService.query(request.query, conversationHistory);

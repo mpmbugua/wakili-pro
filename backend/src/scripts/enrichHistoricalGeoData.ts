@@ -84,7 +84,7 @@ async function enrichHistoricalData() {
         const firstPageView = await prisma.pageView.findFirst({
           where: { sessionId: session.sessionId },
           select: { ipAddress: true },
-          orderBy: { viewedAt: 'asc' }
+          orderBy: { createdAt: 'asc' } // Fixed: viewedAt doesn't exist
         });
 
         if (firstPageView?.ipAddress) {

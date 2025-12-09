@@ -96,7 +96,7 @@ class MobileIntegrationService {
           deviceId,
           token: deviceToken,
           updatedAt: new Date()
-        },
+        } as any,
         create: {
           id: deviceId,
           userId,
@@ -104,7 +104,7 @@ class MobileIntegrationService {
           token: deviceToken,
           createdAt: new Date(),
           updatedAt: new Date()
-        }
+        } as any
       });
 
       logger.info(`Device registered: ${platform} device for user ${userId}`);

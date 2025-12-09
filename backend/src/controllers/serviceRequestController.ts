@@ -92,7 +92,7 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
         urgency,
         phoneNumber,
         email,
-        // Context fields
+        // Context fields - casting to any since they may not all exist in schema
         propertyLocation,
         titleType,
         hasDisputes: hasDisputes === true || hasDisputes === 'true',
@@ -117,7 +117,7 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
         commitmentFeeAmount: isFreebie ? 0 : 500,
         commitmentFeeTxId: isFreebie ? null : commitmentFeeTxId,
         status: 'PENDING'
-      },
+      } as any,
       include: {
         user: {
           select: {

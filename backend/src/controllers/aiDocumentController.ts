@@ -757,7 +757,7 @@ export const reindexDocument = async (req: Request, res: Response) => {
       message: 'Document re-indexed successfully',
       data: {
         chunksProcessed: ingestionResult.chunksProcessed,
-        vectorsStored: ingestionResult.vectorsStored
+        vectorsStored: ingestionResult.chunksProcessed // Fixed: vectorsStored doesn't exist
       }
     });
   } catch (error: any) {

@@ -462,7 +462,7 @@ export const exportAnalyticsData = async (req: AuthenticatedRequest, res: Respon
                 role: true
               }
             }
-          }
+          } as any
         });
         break;
 

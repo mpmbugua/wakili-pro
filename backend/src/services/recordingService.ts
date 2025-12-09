@@ -333,8 +333,8 @@ export class RecordingService {
           consultationId,
           url: file.path,
           startedAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date()
+          // updatedAt removed - doesn't exist in schema
         }
       });
 

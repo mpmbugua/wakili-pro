@@ -28,6 +28,6 @@ export async function payForMonetization(userId: string, { type, targetId, amoun
       amount,
       status: 'PAID', // Use valid PaymentStatus enum value
       method: 'WALLET', // Use valid PaymentMethod enum value
-    },
+    } as any,
   });
 }

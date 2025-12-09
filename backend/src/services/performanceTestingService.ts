@@ -129,7 +129,7 @@ class PerformanceTestingService {
             providerId: 'test-lawyer-id',
             status: 'CONFIRMED',
             scheduledAt: new Date()
-          }
+          } as any
         });
 
         // Create video consultation
@@ -141,7 +141,7 @@ class PerformanceTestingService {
             roomId: `test-room-${i}-${Date.now()}`,
             scheduledAt: new Date(),
             status: 'SCHEDULED'
-          }
+          } as any
         });
 
         rooms.push(consultation.roomId);

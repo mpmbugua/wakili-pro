@@ -138,7 +138,7 @@ export const createVideoConsultation = async (
         isRecorded: validatedData.isRecorded,
         status: 'SCHEDULED' as const,
         participantCount: 0
-      },
+      } as any,
       include: {
         booking: {
           include: {

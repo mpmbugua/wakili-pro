@@ -16,7 +16,7 @@ const prisma = new PrismaClient();
 
 interface DocumentMetadata {
   title: string;
-  documentType: LegalDocumentType;
+  documentType: string; // Was LegalDocumentType - enum doesn't exist in schema
   category: string;
   citation?: string;
   sourceUrl?: string;

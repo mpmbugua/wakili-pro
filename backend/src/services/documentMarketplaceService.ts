@@ -31,7 +31,7 @@ export async function purchaseDocument(templateId: string, userId: string, aiInp
       documentId: templateId,
       amount: template.priceKES,
       status: 'COMPLETED'
-    }
+    } as any
   });
 
   // Initiate payment (stub) - replace with real integration

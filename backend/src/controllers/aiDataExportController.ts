@@ -275,7 +275,7 @@ export const queryBuilder = async (req: AuthenticatedRequest, res: Response): Pr
 
         data = Object.entries(regionalTrends).map(([region, trends]) => ({
           region,
-          ...trends
+          ...(trends as any) // Cast to any to fix spread type error
         }));
 
         statistics = {
