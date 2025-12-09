@@ -1,5 +1,6 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { authenticateToken, authorizeRoles } from '../../middleware/auth';
+import { AuthRequest } from '../../types/auth';
 import { crawlerScheduler } from '../../services/crawlerScheduler';
 import { logger } from '../../utils/logger';
 
