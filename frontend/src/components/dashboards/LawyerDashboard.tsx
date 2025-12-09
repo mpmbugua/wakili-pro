@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
-import { TierLimitModal, CertificationBlockedModal, CommissionSavingsModal, UpgradeModal } from '../modals';
+import { TierLimitModal, CertificationBlockedModal, CommissionSavingsModal } from '../modals';
 import { LawyerArticlesSection } from './LawyerArticlesSection';
 import type { AuthUser } from '@wakili-pro/shared/src/types/auth';
 import axiosInstance from '../../lib/axios';
@@ -109,7 +109,6 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const [limitModalType, setLimitModalType] = useState<'bookings' | 'certifications' | 'services'>('bookings');
   const [showCertModal, setShowCertModal] = useState(false);
   const [showSavingsModal, setShowSavingsModal] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const checkVerificationStatus = async () => {
     try {
@@ -488,14 +487,14 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         currentTier={tierUsage.currentTier}
         currentUsage={tierUsage.usage[limitModalType].current}
         limit={tierUsage.usage[limitModalType].limit}
-        onUpgrade={() => setShowUpgradeModal(true)}
+        onUpgrade={() => navigate('/lawyer/upgrade')}
       />
 
       {/* Certification Blocked Modal */}
       <CertificationBlockedModal
         isOpen={showCertModal}
         onClose={() => setShowCertModal(false)}
-        onUpgrade={() => setShowUpgradeModal(true)}
+        onUpgrade={() => navigate('/lawyer/upgrade')}
       />
 
       {/* Commission Savings Modal */}
@@ -504,14 +503,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         onClose={() => setShowSavingsModal(false)}
         currentTier={tierUsage.currentTier}
         monthlyRevenue={stats.revenue}
-        onUpgrade={() => setShowUpgradeModal(true)}
-      />
-
-      {/* Upgrade Modal */}
-      <UpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        currentTier={tierUsage.currentTier}
+        onUpgrade={() => navigate('/lawyer/upgrade')}
       />
 
       {/* Page Header with Tier Badge */}
@@ -540,7 +532,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
             {tierUsage.currentTier !== 'PRO' && (
               <Button 
                 variant="primary" 
-                onClick={() => setShowUpgradeModal(true)}
+                onClick={() => navigate('/lawyer/upgrade')}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 <Crown className="h-4 w-4 mr-2" />
@@ -581,7 +573,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
                 <Button 
                   variant="outline"
                   className="bg-emerald-700 text-white hover:bg-emerald-800 border-0"
-                  onClick={() => setShowUpgradeModal(true)}
+                  onClick={() => navigate('/lawyer/upgrade')}
                 >
                   <Crown className="h-4 w-4 mr-2" />
                   Upgrade Now
@@ -759,7 +751,7 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
                   <p className="text-xs text-blue-100">Upgrade to LITE or PRO for unlimited access to all features</p>
                 </div>
                 <button
-                  onClick={() => setShowUpgradeModal(true)}
+                  onClick={() => navigate('/lawyer/upgrade')}
                   className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors whitespace-nowrap"
                 >
                   Upgrade Now

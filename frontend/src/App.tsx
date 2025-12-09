@@ -36,6 +36,7 @@ import DocumentCertificationPage from './pages/DocumentCertificationPage';
 import VerifyCertificate from './pages/VerifyCertificate';
 import ServiceRequestPage from './pages/ServiceRequestPage';
 import LawyerWalletPage from './pages/LawyerWalletPage';
+import UpgradePage from './pages/UpgradePage';
 import LawyerQuoteSubmissionPage from './pages/LawyerQuoteSubmissionPage';
 import QuoteComparisonPage from './pages/QuoteComparisonPage';
 import ServiceTrackingPage from './pages/ServiceTrackingPage';
@@ -573,6 +574,16 @@ function App() {
                 <AppShell>
                   <VerifiedLawyerRoute>
                     <LawyerWalletPage />
+                  </VerifiedLawyerRoute>
+                </AppShell>
+              } 
+            />
+            <Route 
+              path="/lawyer/upgrade" 
+              element={
+                <AppShell>
+                  <VerifiedLawyerRoute>
+                    <UpgradePage />
                   </VerifiedLawyerRoute>
                 </AppShell>
               } 
