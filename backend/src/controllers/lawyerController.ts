@@ -321,7 +321,6 @@ export const getPublicLawyerProfile = async (req: Request, res: Response): Promi
       linkedInProfile: lawyerProfile.linkedInProfile,
       profileImageUrl: lawyerProfile.profileImageUrl,
       hourlyRate: lawyerProfile.hourlyRate,
-      consultationFee: lawyerProfile.consultationFee,
       isAvailable: true // Could be determined by checking availability schedule
     };
 
