@@ -12,7 +12,7 @@ const router = Router();
  * @desc    Test Pinecone connection and configuration
  * @access  Admin only
  */
-router.get('/test-connection', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req: AuthRequest, res: Response) => {
+router.get('/test-connection', authenticateToken, authorizeRoles('ADMIN', 'ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
     logger.info('[Pinecone Test] Starting connection test...');
 
@@ -166,7 +166,7 @@ router.get('/test-connection', authenticateToken, authorizeRoles('ADMIN', 'SUPER
  * @desc    Test document upload with minimal PDF
  * @access  Admin only
  */
-router.post('/test-upload', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req: AuthRequest, res: Response) => {
+router.post('/test-upload', authenticateToken, authorizeRoles('ADMIN', 'ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
     const { documentIngestionService } = await import('../../services/ai/documentIngestionService');
     
@@ -223,7 +223,7 @@ router.post('/test-upload', authenticateToken, authorizeRoles('ADMIN', 'SUPER_AD
  * @desc    Sync database metadata from Pinecone vectors
  * @access  Admin only
  */
-router.post('/sync-metadata', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req: AuthRequest, res: Response) => {
+router.post('/sync-metadata', authenticateToken, authorizeRoles('ADMIN', 'ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
     logger.info('[Metadata Sync] Starting sync from Pinecone to database...');
 
@@ -252,3 +252,4 @@ router.post('/sync-metadata', authenticateToken, authorizeRoles('ADMIN', 'SUPER_
 });
 
 export default router;
+

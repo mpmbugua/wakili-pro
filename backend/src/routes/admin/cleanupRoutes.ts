@@ -12,7 +12,7 @@ const router = Router();
 
 // All routes require admin authentication
 router.use(authenticateToken);
-router.use(authorizeRoles('ADMIN', 'SUPER_ADMIN'));
+router.use(authorizeRoles('ADMIN', 'ADMIN'));
 
 /**
  * @route   DELETE /api/admin/cleanup/duplicates
@@ -43,3 +43,4 @@ router.delete('/zero-vectors', removeZeroVectorDocuments);
 router.delete('/all', fullCleanup);
 
 export default router;
+
