@@ -207,10 +207,43 @@ router.post('/test-upload', authenticateToken, authorizeRoles('ADMIN', 'SUPER_AD
     });
 
   } catch (error: any) {
-    logger.error('[Test Upload] Error:', error);
+    logger.error('[Test Upload] Error:', error);     
     return res.status(500).json({
       success: false,
       message: 'Test upload failed',
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
+
+/**
+ * @route   POST /api/admin/pinecone/sync-metadata
+ * @desc    Sync database metadata from Pinecone vectors
+ * @access  Admin only
+ */
+router.post('/sync-metadata', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
+  try {
+    logger.info('[Metadata Sync] Starting sync from Pinecone to database...');
+
+    // Import the sync function
+    const { syncMetadataFromPinecone } = await import('../../scripts/syncPineconeMetadata');
+
+    // Run the sync
+    await syncMetadataFromPinecone();
+
+    logger.info('[Metadata Sync] ✅ Sync completed successfully');
+
+    return res.json({
+      success: true,
+      message: 'Metadata synced successfully from Pinecone to database'
+    });
+
+  } catch (error: any) {
+    logger.error('[Metadata Sync] Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Metadata sync failed',
       error: error.message,
       stack: error.stack
     });

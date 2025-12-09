@@ -97,6 +97,28 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
     }
   };
 
+  const handleSyncMetadata = async () => {
+    if (!confirm('Sync database metadata from Pinecone? This will recreate document records from existing vectors.')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await axiosInstance.post('/admin/pinecone/sync-metadata');
+      
+      if (response.data.success) {
+        alert('Metadata synced successfully! Refreshing...');
+        await fetchDocuments();
+        await fetchStats();
+      }
+    } catch (error: any) {
+      console.error('Error syncing metadata:', error);
+      alert(`Sync failed: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFileUpload = async () => {
     if (!selectedFile) {
       alert('Please select a file');
@@ -199,13 +221,23 @@ export const AdminLegalKnowledgeBase: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Legal Knowledge Base</h1>
             <p className="text-gray-600">Upload legal documents and train AI with Kenyan law</p>
           </div>
-          <button
-            onClick={() => navigate('/admin/pinecone-test')}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 shadow-sm"
-          >
-            <TestTube className="h-4 w-4" />
-            Pinecone Diagnostics
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleSyncMetadata}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Sync from Pinecone
+            </button>
+            <button
+              onClick={() => navigate('/admin/pinecone-test')}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 shadow-sm"
+            >
+              <TestTube className="h-4 w-4" />
+              Pinecone Diagnostics
+            </button>
+          </div>
         </div>
       </div>
 
