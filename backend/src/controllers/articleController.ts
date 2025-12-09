@@ -78,8 +78,8 @@ export async function getPublishedArticles(req: Request, res: Response) {
  */
 export async function getPendingArticles(req: AuthenticatedRequest, res: Response) {
   try {
-    // Check if user is admin
-    if (req.user?.role !== 'ADMIN') {
+    // Check if user is admin or super admin
+    if (req.user?.role !== 'ADMIN' && req.user?.role !== 'SUPER_ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized: Admin access required'

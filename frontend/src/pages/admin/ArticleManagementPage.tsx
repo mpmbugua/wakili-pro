@@ -48,11 +48,11 @@ export const ArticleManagementPage: React.FC = () => {
   const loadArticles = async () => {
     setLoading(true);
     try {
-      let endpoint = '/api/articles';
+      let endpoint = '/articles';
       if (filterStatus === 'published') {
-        endpoint = '/api/articles/published';
+        endpoint = '/articles/published';
       } else if (filterStatus === 'pending') {
-        endpoint = '/api/articles/admin/pending';
+        endpoint = '/articles/admin/pending';
       }
 
       const response = await axiosInstance.get(endpoint);
@@ -117,7 +117,7 @@ export const ArticleManagementPage: React.FC = () => {
     if (!confirm('Are you sure you want to delete this article?')) return;
 
     try {
-      const response = await axiosInstance.delete(`/api/articles/${id}`);
+      const response = await axiosInstance.delete(`/articles/${id}`);
       if (response.data.success) {
         alert('Article deleted successfully');
         loadArticles();
@@ -131,7 +131,7 @@ export const ArticleManagementPage: React.FC = () => {
 
   const handlePublish = async (id: string) => {
     try {
-      const response = await axiosInstance.put(`/api/articles/${id}`, { isPublished: true });
+      const response = await axiosInstance.put(`/articles/${id}`, { isPublished: true });
       if (response.data.success) {
         alert('Article published successfully');
         loadArticles();
@@ -145,7 +145,7 @@ export const ArticleManagementPage: React.FC = () => {
 
   const handleUnpublish = async (id: string) => {
     try {
-      const response = await axiosInstance.put(`/api/articles/${id}`, { isPublished: false });
+      const response = await axiosInstance.put(`/articles/${id}`, { isPublished: false });
       if (response.data.success) {
         alert('Article unpublished successfully');
         loadArticles();
@@ -170,9 +170,9 @@ export const ArticleManagementPage: React.FC = () => {
     try {
       for (const id of selectedArticles) {
         if (action === 'delete') {
-          await axiosInstance.delete(`/api/articles/${id}`);
+          await axiosInstance.delete(`/articles/${id}`);
         } else {
-          await axiosInstance.put(`/api/articles/${id}`, { 
+          await axiosInstance.put(`/articles/${id}`, { 
             isPublished: action === 'publish' 
           });
         }
