@@ -207,19 +207,21 @@ export const ServiceRequestPage: React.FC = () => {
       });
 
       // If successful, it was a freebie!
-      if (testResponse.data.success && testResponse.data.isFreebie) {
-        trackConversion('SERVICE_REQUEST_FREEBIE', 500);
-        trackFreebieUsage('first_service_request', {
-          serviceCategory: derivedCategory,
-          savings: 500
-        }).catch(err => console.warn('[Analytics] Failed to track freebie:', err));
-        alert(`🎉 FREE service request submitted!\n\n${testResponse.data.message}\n\nYou saved KES 500 on your first service request!`);
-        navigate('/dashboard');
-        return;
+      if (testResponse.data.success) {
+        if (testResponse.data.data?.isFreebie || testResponse.data.isFreebie) {
+          trackConversion('SERVICE_REQUEST_FREEBIE', 500);
+          trackFreebieUsage('first_service_request', {
+            serviceCategory: derivedCategory,
+            savings: 500
+          }).catch(err => console.warn('[Analytics] Failed to track freebie:', err));
+          alert(`🎉 FREE service request submitted!\n\nYou saved KES 500 on your first service request!\n\nYou will receive 3 quotes from qualified lawyers within 24-48 hours.`);
+          navigate('/dashboard');
+          return;
+        }
       }
     } catch (freebieError: any) {
       // Freebie not available, proceed with payment
-      console.log('[ServiceRequest] Freebie not available, requiring payment');
+      console.log('[ServiceRequest] Freebie not available:', freebieError.response?.data || freebieError.message);
     }
 
     try {

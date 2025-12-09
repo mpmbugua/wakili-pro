@@ -121,7 +121,15 @@ export const DocumentReviewRequestPage: React.FC = () => {
         return;
       }
 
-      const { reviewId, amount } = createResponse.data.data;
+      const { reviewId, amount, isFreebie, savings } = createResponse.data.data;
+
+      // Check if this is a freebie (first AI review)
+      if (isFreebie) {
+        setIsProcessing(false);
+        alert(`🎉 First AI Review FREE! You saved KES ${savings.toLocaleString()}! Results ready in 2 hours.`);
+        navigate('/documents');
+        return;
+      }
 
       console.log('[DocumentReviewRequest] Review created, initiating payment:', {
         reviewId,
@@ -129,7 +137,7 @@ export const DocumentReviewRequestPage: React.FC = () => {
         phoneNumber
       });
 
-      // Step 2: Initiate M-Pesa payment
+      // Step 2: Initiate M-Pesa payment (only for non-freebies)
       const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
         phoneNumber,
         amount,

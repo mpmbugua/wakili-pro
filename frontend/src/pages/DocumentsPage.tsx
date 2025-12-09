@@ -499,10 +499,15 @@ export const DocumentsPage: React.FC = () => {
                         e.stopPropagation();
                         handleRequestReview(document.id, document.title);
                       }}
-                      className="px-4 py-2.5 text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm font-medium"
+                      className="relative px-4 py-2.5 text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-all hover:scale-105 flex items-center gap-2 shadow-sm font-medium"
                     >
                       <FileText className="h-4 w-4" />
                       <span className="text-sm">Request Review</span>
+                      {!user?.hasUsedFreeReview && (
+                        <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                          FREE
+                        </span>
+                      )}
                     </button>
                   )}
                   {document.status === 'DRAFT' && user?.role === 'LAWYER' && (

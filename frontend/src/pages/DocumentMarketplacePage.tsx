@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchDocumentTemplates, purchaseDocumentTemplate, getPurchaseStatus, downloadDocument, PurchaseResult } from '../services/documentMarketplace';
 import DocumentPurchaseModal from '../components/marketplace/DocumentPurchaseModal';
 import { toast } from 'react-hot-toast';
+import axiosInstance from '../services/api';
 
 
 const DocumentMarketplacePage: React.FC = () => {
@@ -57,20 +58,34 @@ const DocumentMarketplacePage: React.FC = () => {
       const result = await purchaseDocumentTemplate(template.id, aiInput);
       toast.dismiss();
       
-      // Redirect to payment page with document purchase details
-      // Show success message instead of navigating to deleted payment page
-      alert(`Purchase initiated! Document will be available after payment integration is complete.`);
-      navigate('/documents');
-      /*navigate(`/payment/document/${result.purchase.id}`, {
-        state: {
-          reviewId: result.purchase.id,
-          documentType: template.name,
-          serviceType: 'marketplace-purchase',
-          price: result.purchase.price || template.price || 1000,
-          fileName: template.name,
-          templateId: template.id
-        }
+      // Check if purchase was free (first PDF download freebie)
+      if (result.isFreebie) {
+        alert(`🎉 FREE document download!\n\nYou saved KES ${template.price || 1000} on your first PDF download!\n\nYour document is ready in the Documents page.`);
+        navigate('/documents');
+        return;
+      }
+
+      // Not a freebie - initiate M-Pesa payment
+      const phoneNumber = prompt('Enter M-Pesa phone number (254XXXXXXXXX):');
+      if (!phoneNumber) {
+        alert('Phone number required for payment');
+        setIsPurchasing(false);
+        return;
+      }
+
+      const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
+        phoneNumber,
+        amount: template.price || 1000,
+        purchaseId: result.purchase.id,
+        paymentType: 'MARKETPLACE_PURCHASE'
       });
+
+      if (paymentResponse.data.success) {
+        alert(`M-Pesa payment request sent to ${phoneNumber}. Complete payment on your phone to download the document.`);
+        navigate('/documents');
+      } else {
+        throw new Error(paymentResponse.data.message || 'Payment initiation failed');
+      }
     } catch (e) {
       toast.dismiss();
       let msg = 'Failed to initiate purchase.';
