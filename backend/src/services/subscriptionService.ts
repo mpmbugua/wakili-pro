@@ -1,12 +1,12 @@
-import { PrismaClient, LawyerTier, SubscriptionStatus } from '@prisma/client';
+import { PrismaClient, LawyerTier, SubscriptionStatus, SubscriptionPlan } from '@prisma/client';
 import { mpesaService } from './mpesaDarajaService';
 
 const prisma = new PrismaClient();
 
 const SUBSCRIPTION_FEES = {
   FREE: 0,
-  LITE: 2999, // KES per month (updated from 1999)
-  PRO: 6999,  // KES per month (updated from 4999)
+  LITE: 2999, // KES per month
+  PRO: 4999,  // KES per month
 };
 
 // Billing cycle discounts
@@ -64,12 +64,12 @@ const TIER_LIMITS = {
  * Initiate subscription upgrade
  */
 export const createSubscription = async (
-  lawyerId: string,
+  userId: string,
   targetTier: LawyerTier,
   billingCycle: BillingCycle = 'monthly'
 ): Promise<{ subscriptionId: string; paymentRequired: boolean; checkoutUrl?: string }> => {
   const lawyer = await prisma.lawyerProfile.findUnique({
-    where: { userId: lawyerId },
+    where: { userId },
     include: { subscriptions: { where: { status: 'ACTIVE' } } },
   });
 
@@ -79,7 +79,7 @@ export const createSubscription = async (
 
   // Check if downgrade
   const currentTier = lawyer.tier;
-  const isDowngrade = getTierLevel(targetTier) < getTierLevel(currentTier);
+  const isDowngrade = getTierLevel(targetTier) < getTierLevel(currentTier || 'FREE');
 
   if (isDowngrade) {
     throw new Error('Downgrades must be handled separately');
@@ -87,35 +87,35 @@ export const createSubscription = async (
 
   // Calculate billing dates
   const now = new Date();
-  const currentPeriodStart = now;
-  const currentPeriodEnd = new Date(now);
   const duration = getBillingCycleDuration(billingCycle);
-  currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + duration);
+  const endDate = new Date(now);
+  endDate.setMonth(endDate.getMonth() + duration);
 
   const totalAmount = calculateSubscriptionAmount(targetTier, billingCycle);
-  const monthlyFee = SUBSCRIPTION_FEES[targetTier];
-  const discount = BILLING_CYCLE_DISCOUNTS[billingCycle];
-  const discountedMonthlyFee = Math.round(monthlyFee * (1 - discount));
+  
+  // Map billingCycle to SubscriptionPlan
+  const plan: SubscriptionPlan = billingCycle === 'yearly' || billingCycle === '6months' || billingCycle === '3months' ? 'YEARLY' : 'MONTHLY';
 
-  // Create subscription
+  // Create subscription using actual schema fields only
   const subscription = await prisma.lawyerSubscription.create({
     data: {
-      lawyerId,
-      tier: targetTier,
+      id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      userId,
+      lawyerProfileId: lawyer.id,
+      plan,
       status: totalAmount === 0 ? 'ACTIVE' : 'PENDING',
-      currentPeriodStart,
-      currentPeriodEnd,
-      monthlyFee: discountedMonthlyFee,
-      paymentMethod: 'MPESA',
-      nextBillingDate: currentPeriodEnd,
-      upgradesFrom: currentTier,
-      metadata: {
+      priceKES: totalAmount,
+      startDate: now,
+      endDate,
+      updatedAt: now,
+      paymentInfo: {
         billingCycle,
-        baseFee: monthlyFee,
-        discount: discount * 100,
+        baseFee: SUBSCRIPTION_FEES[targetTier],
+        discount: BILLING_CYCLE_DISCOUNTS[billingCycle] * 100,
         totalAmount,
-        duration
-      } as any,
+        duration,
+        tier: targetTier
+      },
     },
   });
 
@@ -143,14 +143,15 @@ export const createSubscription = async (
       transactionDesc: `Wakili Pro ${targetTier} - ${cycleName}`,
     });
 
-    // Store M-Pesa request IDs in subscription metadata
+    // Store M-Pesa request IDs in subscription paymentInfo
     await prisma.lawyerSubscription.update({
       where: { id: subscription.id },
       data: {
-        metadata: {
+        paymentInfo: {
+          ...subscription.paymentInfo as any,
           merchantRequestID: mpesaResponse.MerchantRequestID,
           checkoutRequestID: mpesaResponse.CheckoutRequestID,
-        } as any,
+        },
       },
     });
 
@@ -185,7 +186,10 @@ export const confirmSubscriptionPayment = async (
     where: { id: subscriptionId },
     data: {
       status: 'ACTIVE',
-      lastPaymentId: transactionId,
+      paymentInfo: {
+        ...subscription.paymentInfo as any,
+        lastPaymentId: transactionId
+      }
     },
   });
 
@@ -199,19 +203,26 @@ export const confirmSubscriptionPayment = async (
 async function activateSubscription(subscriptionId: string): Promise<void> {
   const subscription = await prisma.lawyerSubscription.findUnique({
     where: { id: subscriptionId },
+    include: { lawyerProfile: true }
   });
 
-  if (!subscription) {
+  if (!subscription || !subscription.lawyerProfile) {
     throw new Error('Subscription not found');
   }
 
-  const tierLimits = TIER_LIMITS[subscription.tier];
+  // Map SubscriptionPlan to LawyerTier
+  const tierMap: Record<string, LawyerTier> = {
+    'LITE': 'LITE' as LawyerTier,
+    'PRO': 'PRO' as LawyerTier
+  };
+  const tier = tierMap[subscription.plan] || 'FREE' as LawyerTier;
+  const tierLimits = TIER_LIMITS[tier];
 
   // Update lawyer profile with new tier
   await prisma.lawyerProfile.update({
-    where: { userId: subscription.lawyerId },
+    where: { id: subscription.lawyerProfileId! },
     data: {
-      tier: subscription.tier,
+      tier,
       maxSpecializations: tierLimits.maxSpecializations
     },
   });
@@ -219,13 +230,12 @@ async function activateSubscription(subscriptionId: string): Promise<void> {
   // Cancel any previous active subscriptions
   await prisma.lawyerSubscription.updateMany({
     where: {
-      lawyerId: subscription.lawyerId,
+      userId: subscription.userId,
       status: 'ACTIVE',
       id: { not: subscriptionId },
     },
     data: {
       status: 'CANCELLED',
-      cancelledAt: new Date(),
     },
   });
 }
@@ -233,24 +243,25 @@ async function activateSubscription(subscriptionId: string): Promise<void> {
 /**
  * Cancel subscription
  */
-export const cancelSubscription = async (lawyerId: string): Promise<void> => {
+export const cancelSubscription = async (userId: string): Promise<void> => {
   const activeSubscription = await prisma.lawyerSubscription.findFirst({
-    where: { lawyerId, status: 'ACTIVE' },
+    where: { userId, status: 'ACTIVE' },
   });
 
   if (!activeSubscription) {
     throw new Error('No active subscription found');
   }
 
-  // Set to cancel at end of current period
+  // Mark as cancelled (will downgrade to FREE at end of period)
   await prisma.lawyerSubscription.update({
     where: { id: activeSubscription.id },
     data: {
-      cancelAt: activeSubscription.currentPeriodEnd,
+      status: 'CANCELLED'
     },
   });
 
-  // Will downgrade to FREE at end of period
+  // Downgrade to FREE immediately
+  await downgradeToFree(userId);
 };
 
 /**
@@ -259,61 +270,54 @@ export const cancelSubscription = async (lawyerId: string): Promise<void> => {
 export const processSubscriptionRenewals = async (): Promise<void> => {
   const now = new Date();
 
-  // Find subscriptions that need renewal
+  // Find subscriptions that need renewal (ended)
   const dueSubscriptions = await prisma.lawyerSubscription.findMany({
     where: {
       status: 'ACTIVE',
-      nextBillingDate: { lte: now },
-      tier: { in: [LawyerTier.LITE, LawyerTier.PRO] }, // Only paid tiers
+      endDate: { lte: now },
     },
     include: {
-      lawyer: true,
+      lawyerProfile: true,
+      User: true
     },
   });
 
   for (const subscription of dueSubscriptions) {
     try {
-      // Check if subscription is set to cancel
-      if (subscription.cancelAt && subscription.cancelAt <= now) {
-        await downgradeToFree(subscription.lawyerId);
-        continue;
-      }
-
-      // Attempt renewal payment
-      const phoneNumber = subscription.lawyer.phoneNumber;
+      const phoneNumber = subscription.lawyerProfile?.phoneNumber;
       if (!phoneNumber) {
-        console.error(`No phone number for lawyer ${subscription.lawyerId}`);
+        console.error(`No phone number for user ${subscription.userId}`);
         continue;
       }
 
       const mpesaResponse = await mpesaService.initiateSTKPush({
         phoneNumber,
-        amount: subscription.monthlyFee,
+        amount: subscription.priceKES,
         accountReference: `RENEW-${subscription.id.substring(0, 8)}`,
-        transactionDesc: `Wakili Pro ${subscription.tier} Renewal`,
+        transactionDesc: `Wakili Pro ${subscription.plan} Renewal`,
       });
 
-      // Store M-Pesa request IDs in subscription metadata
+      // Store M-Pesa request IDs in subscription paymentInfo
       await prisma.lawyerSubscription.update({
         where: { id: subscription.id },
         data: {
-          metadata: {
+          paymentInfo: {
+            ...subscription.paymentInfo as any,
             merchantRequestID: mpesaResponse.MerchantRequestID,
             checkoutRequestID: mpesaResponse.CheckoutRequestID,
-          } as any,
+          },
         },
       });
 
-      // Update next billing date
-      const nextBillingDate = new Date(now);
-      nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+      // Update renewal dates
+      const newEndDate = new Date(now);
+      newEndDate.setMonth(newEndDate.getMonth() + 1);
 
       await prisma.lawyerSubscription.update({
         where: { id: subscription.id },
         data: {
-          currentPeriodStart: now,
-          currentPeriodEnd: nextBillingDate,
-          nextBillingDate,
+          startDate: now,
+          endDate: newEndDate,
         },
       });
     } catch (error) {
@@ -326,9 +330,9 @@ export const processSubscriptionRenewals = async (): Promise<void> => {
 /**
  * Downgrade lawyer to FREE tier
  */
-async function downgradeToFree(lawyerId: string): Promise<void> {
+async function downgradeToFree(userId: string): Promise<void> {
   const lawyer = await prisma.lawyerProfile.findUnique({
-    where: { userId: lawyerId },
+    where: { userId },
   });
 
   if (!lawyer) return;
@@ -336,7 +340,7 @@ async function downgradeToFree(lawyerId: string): Promise<void> {
   const tierLimits = TIER_LIMITS.FREE;
 
   await prisma.lawyerProfile.update({
-    where: { userId: lawyerId },
+    where: { userId },
     data: {
       tier: LawyerTier.FREE,
       maxSpecializations: tierLimits.maxSpecializations
@@ -344,28 +348,9 @@ async function downgradeToFree(lawyerId: string): Promise<void> {
   });
 
   await prisma.lawyerSubscription.updateMany({
-    where: { lawyerId, status: 'ACTIVE' },
+    where: { userId, status: 'ACTIVE' },
     data: {
       status: 'CANCELLED',
-      cancelledAt: new Date(),
-    },
-  });
-
-  // Create FREE subscription record
-  const now = new Date();
-  const currentPeriodEnd = new Date(now);
-  currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
-
-  await prisma.lawyerSubscription.create({
-    data: {
-      lawyerId,
-      tier: LawyerTier.FREE,
-      status: 'ACTIVE',
-      currentPeriodStart: now,
-      currentPeriodEnd,
-      monthlyFee: 0,
-      paymentMethod: 'MPESA',
-      downgradesFrom: lawyer.tier,
     },
   });
 }
@@ -425,9 +410,9 @@ export const getTierComparison = () => {
 /**
  * Helper to compare tier levels
  */
-function getTierLevel(tier: LawyerTier): number {
-  const levels = { FREE: 0, LITE: 1, PRO: 2 };
-  return levels[tier];
+function getTierLevel(tier: LawyerTier | string): number {
+  const levels: Record<string, number> = { FREE: 0, LITE: 1, PRO: 2 };
+  return levels[tier] || 0;
 }
 
 export default {
