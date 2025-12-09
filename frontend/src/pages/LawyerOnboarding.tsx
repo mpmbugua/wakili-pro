@@ -196,7 +196,7 @@ export const LawyerOnboarding: React.FC = () => {
         return formData.specializations.length > 0;
       case 3:
         return formData.location.city.length > 0 && formData.location.address.length > 0;
-      case 2:
+      case 4:
         return formData.bio.trim().length > 0 && formData.yearsOfExperience >= 0;
       case 5:
         return (formData.hourlyRate !== undefined && formData.hourlyRate > 0);
