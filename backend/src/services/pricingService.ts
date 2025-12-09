@@ -274,10 +274,6 @@ export const recordPayment = async (
       bookingId,
       serviceType,
       amount: pricingData.grossAmount,
-      platformCommission: pricingData.platformCommission,
-      lawyerShareBeforeWHT: pricingData.lawyerShareBeforeWHT,
-      whtAmount: pricingData.whtAmount,
-      lawyerNetPayout: pricingData.lawyerNetPayout,
       status: 'PAID',
       method: paymentMethod,
       externalTransactionId,
@@ -312,7 +308,6 @@ export const generateMonthlyWHTReport = async (month: number, year: number, gene
     data: {
       month,
       year,
-      totalPayments: payments.length,
       paymentIds,
       generatedBy,
     },
