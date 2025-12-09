@@ -6,6 +6,7 @@ import { promises as fsPromises } from 'fs';
 import { prisma } from '../lib/prisma';
 import { logger } from '../utils/logger';
 import { documentIngestionService } from '../services/ai/documentIngestionService';
+import { Pinecone } from '@pinecone-database/pinecone';
 
 // Configure multer for document uploads
 const storage = multer.diskStorage({
@@ -576,7 +577,8 @@ export const getIndexedDocuments = async (req: Request, res: Response) => {
  */
 export const getIngestionStats = async (req: Request, res: Response) => {
   try {
-    const stats = await prisma.legalDocument.aggregate({
+    // Get database stats
+    const dbStats = await prisma.legalDocument.aggregate({
       _count: { id: true },
       _sum: { chunksCount: true, vectorsCount: true }
     });
@@ -586,13 +588,32 @@ export const getIngestionStats = async (req: Request, res: Response) => {
       select: { uploadedAt: true }
     });
 
+    // Get Pinecone stats (actual vector count)
+    let pineconeVectorCount = 0;
+    try {
+      const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
+      const index = pinecone.index(process.env.PINECONE_INDEX_NAME!);
+      const indexStats = await index.describeIndexStats();
+      pineconeVectorCount = indexStats.totalRecordCount || 0;
+    } catch (pineconeError) {
+      logger.warn('[AI] Could not fetch Pinecone stats:', pineconeError);
+      // Fall back to database count if Pinecone fails
+      pineconeVectorCount = dbStats._sum.vectorsCount || 0;
+    }
+
     return res.json({
       success: true,
       data: {
-        totalDocuments: stats._count.id || 0,
-        totalChunks: stats._sum.chunksCount || 0,
-        totalVectors: stats._sum.vectorsCount || 0,
-        lastUpdated: lastDocument?.uploadedAt || new Date()
+        totalDocuments: dbStats._count.id || 0,
+        totalChunks: dbStats._sum.chunksCount || 0,
+        totalVectors: pineconeVectorCount, // Use actual Pinecone count
+        lastUpdated: lastDocument?.uploadedAt || new Date(),
+        // Include both for debugging
+        debug: {
+          dbVectors: dbStats._sum.vectorsCount || 0,
+          pineconeVectors: pineconeVectorCount,
+          mismatch: (dbStats._sum.vectorsCount || 0) !== pineconeVectorCount
+        }
       }
     });
   } catch (error: any) {
