@@ -605,12 +605,15 @@ export const getIngestionStats = async (req: Request, res: Response) => {
       success: true,
       data: {
         totalDocuments: dbStats._count.id || 0,
-        totalChunks: dbStats._sum.chunksCount || 0,
+        // If DB is empty but Pinecone has vectors, use Pinecone count for chunks too
+        // (since each vector represents a text chunk)
+        totalChunks: dbStats._sum.chunksCount || pineconeVectorCount,
         totalVectors: pineconeVectorCount, // Use actual Pinecone count
         lastUpdated: lastDocument?.uploadedAt || new Date(),
         // Include both for debugging
         debug: {
           dbVectors: dbStats._sum.vectorsCount || 0,
+          dbChunks: dbStats._sum.chunksCount || 0,
           pineconeVectors: pineconeVectorCount,
           mismatch: (dbStats._sum.vectorsCount || 0) !== pineconeVectorCount
         }
