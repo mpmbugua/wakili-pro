@@ -1,12 +1,21 @@
 import { Request, Response } from 'express';
 import * as quotaService from '../services/quotaService';
+import { prisma } from '../utils/database';
 import { logger } from '../utils/logger';
+
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
 
 /**
  * Get current quota status for lawyer
  * GET /api/quotas/status
  */
-export const getQuotaStatus = async (req: Request, res: Response) => {
+export const getQuotaStatus = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
 
@@ -18,7 +27,7 @@ export const getQuotaStatus = async (req: Request, res: Response) => {
     }
 
     // Check if user is a lawyer
-    const user = await quotaService.prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true }
     });
