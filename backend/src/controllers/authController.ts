@@ -512,8 +512,11 @@ import { sendPasswordResetEmail } from '../services/emailTemplates';
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('[ForgotPassword] Request received:', { body: req.body });
+    
     const validationResult = ForgotPasswordSchema.safeParse(req.body);
     if (!validationResult.success) {
+      console.log('[ForgotPassword] Validation failed:', validationResult.error);
       res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -526,18 +529,23 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     }
 
     const { email } = validationResult.data;
+    console.log('[ForgotPassword] Looking up user:', email);
+    
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
+      console.log('[ForgotPassword] User not found, returning success (security)');
       // Don't reveal that user doesn't exist for security
       res.json({ success: true, message: 'If an account exists with this email, you will receive password reset instructions.' });
       return;
     }
 
+    console.log('[ForgotPassword] User found, generating reset token');
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     // Store token in DB
+    console.log('[ForgotPassword] Storing reset token in database');
     await prisma.user.update({
       where: { email },
       data: {
@@ -545,6 +553,8 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
         passwordResetExpires: expiresAt
       }
     });
+
+    console.log('[ForgotPassword] Token stored successfully');
 
     // Send email with reset link
     try {
@@ -562,6 +572,9 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       // User can still use the reset link if they have it
     }
 
+    const frontendUrl = process.env.FRONTEND_URL || 'https://wakili-pro-1.onrender.com';
+    console.log('[ForgotPassword] Sending success response');
+    
     res.json({ 
       success: true, 
       message: 'If an account exists with this email, you will receive password reset instructions.',
@@ -569,12 +582,13 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       ...(process.env.NODE_ENV === 'development' && { 
         debug: { 
           resetToken, 
-          resetUrl: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}` 
+          resetUrl: `${frontendUrl}/reset-password?token=${resetToken}` 
         } 
       })
     });
   } catch (error) {
-    console.error('Forgot password error:', error);
+    console.error('[ForgotPassword] Unexpected error:', error);
+    console.error('[ForgotPassword] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     res.status(500).json({ success: false, message: 'Internal server error during forgot password' });
   }
 };
