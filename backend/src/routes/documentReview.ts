@@ -135,11 +135,10 @@ router.post('/create', authenticateToken, requirePhoneVerification, detectAbuseP
         userId,
         documentSource: 'EXTERNAL', // Use EXTERNAL for user-uploaded documents
         userDocumentId: documentId,
-        uploadedDocumentUrl: document.filePath,
+        uploadedDocumentUrl: document.fileUrl,
         documentType: document.type, // Use document type from UserDocument
         reviewType: reviewType || 'AI_ONLY',
         status: isFreebie ? 'PENDING' : 'PENDING_PAYMENT', // Skip payment for freebies
-        urgencyLevel: 'STANDARD', // All services are standard 2-hour delivery
         price: amount, // Add price
         deadline: deadline // Add deadline (2 hours from now)
       }
@@ -157,7 +156,7 @@ router.post('/create', authenticateToken, requirePhoneVerification, detectAbuseP
       // Trigger AI review immediately (asynchronous)
       reviewDocumentWithAI(
         review.id,
-        document.filePath,
+        document.fileUrl,
         document.type,
         null
       ).catch(err => console.error('[DocumentReview] AI review error:', err));
@@ -172,7 +171,6 @@ router.post('/create', authenticateToken, requirePhoneVerification, detectAbuseP
           amount: 0,
           savings: amount,
           reviewType: review.reviewType,
-          urgencyLevel: review.urgencyLevel,
           status: 'PROCESSING'
         }
       });
@@ -206,8 +204,7 @@ router.post('/create', authenticateToken, requirePhoneVerification, detectAbuseP
       data: {
         reviewId: review.id,
         amount,
-        reviewType: review.reviewType,
-        urgencyLevel: review.urgencyLevel
+        reviewType: review.reviewType
       }
     });
 
