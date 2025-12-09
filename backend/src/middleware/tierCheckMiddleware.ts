@@ -61,26 +61,25 @@ export const loadLawyerProfile = async (
       return res.status(404).json({ error: 'Lawyer profile not found' });
     }
 
+    // TODO: Re-enable when usage tracking fields added to schema
     // Reset monthly counters if usage period has expired
-    const now = new Date();
-    if (profile.usageResetAt && profile.usageResetAt < now) {
-      const nextReset = new Date(now);
-      nextReset.setMonth(nextReset.getMonth() + 1);
-
-      await prisma.lawyerProfile.update({
-        where: { id: profile.id },
-        data: {
-          monthlyBookings: 0,
-          monthlyCertifications: 0,
-          monthlyServices: 0,
-          usageResetAt: nextReset,
-        },
-      });
-
-      profile.monthlyBookings = 0;
-      profile.monthlyCertifications = 0;
-      profile.monthlyServices = 0;
-    }
+    // const now = new Date();
+    // if (profile.usageResetAt && profile.usageResetAt < now) {
+    //   const nextReset = new Date(now);
+    //   nextReset.setMonth(nextReset.getMonth() + 1);
+    //   await prisma.lawyerProfile.update({
+    //     where: { id: profile.id },
+    //     data: {
+    //       monthlyBookings: 0,
+    //       monthlyCertifications: 0,
+    //       monthlyServices: 0,
+    //       usageResetAt: nextReset,
+    //     },
+    //   });
+    //   profile.monthlyBookings = 0;
+    //   profile.monthlyCertifications = 0;
+    //   profile.monthlyServices = 0;
+    // }
 
     req.lawyerProfile = profile;
     next();
