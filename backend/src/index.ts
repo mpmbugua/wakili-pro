@@ -397,32 +397,65 @@ app.use('/api/setup', setupRouter);
 // Auth routes (real implementation)
 app.use('/api/auth', authRoutes);
 
-// Root API endpoint
-app.use('*', (_req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    message: 'Endpoint not found',
-    availableEndpoints: [
-      '/health',
-      '/api',
-      '/api/setup/*',
-      '/api/auth/*',
-      '/api/ai/*',
-      '/api/lawyers/*',
-      '/api/admin/lawyers/*',
-      '/api/marketplace/*',
-      '/api/video/*',
-      '/api/users/*',
-      '/api/analytics/*',
-      '/api/payments/*',
-      '/api/documents/*',
-      '/api/notifications/*',
-      '/api/subscriptions/*',
-      '/api/certifications/*',
-      '/api/consultations/*'
-    ]
+// Serve static files from frontend build (in production)
+if (process.env.NODE_ENV === 'production') {
+  const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+  
+  // Serve static assets
+  app.use(express.static(frontendDistPath, {
+    maxAge: '1y',
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+      // Cache static assets aggressively
+      if (filePath.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+      // Don't cache HTML files
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    }
+  }));
+
+  // SPA fallback - serve index.html for all non-API routes
+  app.get('*', (_req: Request, res: Response) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'), {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
   });
-});
+} else {
+  // Development - API 404 handler
+  app.use('*', (_req: Request, res: Response) => {
+    res.status(404).json({
+      success: false,
+      message: 'Endpoint not found',
+      availableEndpoints: [
+        '/health',
+        '/api',
+        '/api/setup/*',
+        '/api/auth/*',
+        '/api/ai/*',
+        '/api/lawyers/*',
+        '/api/admin/lawyers/*',
+        '/api/marketplace/*',
+        '/api/video/*',
+        '/api/users/*',
+        '/api/analytics/*',
+        '/api/payments/*',
+        '/api/documents/*',
+        '/api/notifications/*',
+        '/api/subscriptions/*',
+        '/api/certifications/*',
+        '/api/consultations/*'
+      ]
+    });
+  });
+}
 
 // Periodic memory usage logging (best practice for diagnostics)
 setInterval(() => {
