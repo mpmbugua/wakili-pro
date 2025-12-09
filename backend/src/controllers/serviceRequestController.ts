@@ -183,9 +183,22 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Track freebie usage if applicable
+    if (isFreebie) {
+      await analyticsService.trackFreebieUsage(userId, 'first_service_request', {
+        serviceRequestId: serviceRequest.id,
+        serviceCategory,
+        savings: 500
+      });
+    }
+
     res.status(201).json({
       success: true,
-      data: serviceRequest,
+      data: {
+        ...serviceRequest,
+        isFreebie,
+        savings: isFreebie ? 500 : 0
+      },
       matchedLawyers: matchedLawyers.length,
       message: `Service request created successfully. ${matchedLawyers.length} qualified lawyers notified. You will receive up to 3 quotes within 24-48 hours.`
     });
