@@ -215,7 +215,6 @@ router.get('/my-certifications', loadLawyerProfile, async (req: any, res) => {
     const certifications = await prisma.documentPurchase.findMany({
       where,
       include: {
-        template: true,
         user: {
           select: {
             firstName: true,
@@ -224,7 +223,7 @@ router.get('/my-certifications', loadLawyerProfile, async (req: any, res) => {
           },
         },
       },
-      orderBy: { purchasedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       skip: (Number(page) - 1) * Number(limit),
       take: Number(limit),
     });

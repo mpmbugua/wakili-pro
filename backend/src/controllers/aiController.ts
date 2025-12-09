@@ -10,7 +10,6 @@ import { speechService } from '../services/speechService';
 import { kenyanLawService } from '../services/kenyanLawService';
 import { documentIngestionService } from '../services/ai/documentIngestionService';
 import { vectorDbService } from '../services/ai/vectorDatabaseService';
-import { LegalDocumentType } from '@prisma/client';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -518,7 +517,7 @@ export const ingestLegalDocument = async (req: AuthenticatedRequest, res: Respon
         citation,
         sourceUrl,
         effectiveDate: effectiveDate ? new Date(effectiveDate) : undefined
-      }
+      } as any
     );
 
     res.json({

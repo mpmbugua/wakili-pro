@@ -495,7 +495,7 @@ async function createDocumentReviewRequest(payment: any): Promise<void> {
         paidAt: new Date(),
         deadline: deliveryEstimate.estimatedDate,
         estimatedDeliveryDate: deliveryEstimate.estimatedDate,
-        uploadedDocumentUrl: userDocument.uploadUrl,
+        uploadedDocumentUrl: userDocument.fileUrl,
         originalFileName: userDocument.title
       }
     });
@@ -509,8 +509,8 @@ async function createDocumentReviewRequest(payment: any): Promise<void> {
       // Trigger asynchronously - don't wait for completion
       reviewDocumentWithAI(
         documentReview.id,
-        userDocument.uploadUrl,
-        userDocument.documentType || 'GENERAL',
+        userDocument.fileUrl,
+        userDocument.type || 'GENERAL',
         null
       ).catch(err => console.error('[DocumentPayment] AI review trigger error:', err));
     }
