@@ -445,7 +445,11 @@ export const mpesaCallback = async (req: Request, res: Response) => {
         // Update subscription status to ACTIVE
         const subscription = await prisma.lawyerSubscription.findUnique({
           where: { id: metadata.subscriptionId },
-          include: { lawyerProfile: true },
+          include: { 
+            lawyerProfile: {
+              include: { user: true }
+            }
+          },
         });
         
         if (subscription && subscription.lawyerProfile) {
@@ -480,10 +484,11 @@ export const mpesaCallback = async (req: Request, res: Response) => {
           });
 
           // Send subscription activation notifications
-          if (subscription.lawyer?.email) {
-            const lawyerName = `${subscription.lawyer.firstName} ${subscription.lawyer.lastName}`;
+          const lawyer = subscription.lawyerProfile.user;
+          if (lawyer?.email) {
+            const lawyerName = `${lawyer.firstName} ${lawyer.lastName}`;
             sendPaymentConfirmationEmail(
-              subscription.lawyer.email,
+              lawyer.email,
               lawyerName,
               {
                 bookingId: metadata.subscriptionId,
@@ -493,10 +498,10 @@ export const mpesaCallback = async (req: Request, res: Response) => {
               }
             ).catch(err => logger.error('[Subscription] Email notification error:', err));
           }
-          if (subscription.lawyer?.phoneNumber) {
-            const tierName = subscription.tier === 'LITE' ? 'LITE (KES 2,999)' : 'PRO (KES 6,999)';
+          if (lawyer?.phoneNumber) {
+            const tierName = subscription.plan === 'LITE' ? 'LITE (KES 2,999)' : 'PRO (KES 6,999)';
             const smsMessage = `Wakili Pro: ${tierName} subscription activated! Enjoy premium features. Ref: ${callbackResult.transactionId}`;
-            sendSMS(subscription.lawyer.phoneNumber, smsMessage).catch(err => logger.error('[Subscription] SMS notification error:', err));
+            sendSMS(lawyer.phoneNumber, smsMessage).catch(err => logger.error('[Subscription] SMS notification error:', err));
           }
         }
       } else if (metadata?.resourceType === 'SERVICE_REQUEST_COMMITMENT' && metadata?.serviceRequestId) {
