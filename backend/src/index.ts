@@ -399,35 +399,67 @@ app.use('/api/auth', authRoutes);
 
 // Serve static files from frontend build (in production)
 if (process.env.NODE_ENV === 'production') {
-  const frontendDistPath = path.join(__dirname, '../../frontend/dist');
-  
-  // Serve static assets
-  app.use(express.static(frontendDistPath, {
-    maxAge: '1y',
-    etag: true,
-    lastModified: true,
-    setHeaders: (res, filePath) => {
-      // Cache static assets aggressively
-      if (filePath.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
-        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-      }
-      // Don't cache HTML files
-      if (filePath.endsWith('.html')) {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      }
-    }
-  }));
+  // Try multiple possible paths for the frontend dist folder
+  const possiblePaths = [
+    path.join(__dirname, '../../frontend/dist'),  // If backend is in backend/dist
+    path.join(__dirname, '../frontend/dist'),     // If backend is in backend
+    path.join(process.cwd(), 'frontend/dist'),     // Relative to cwd
+    path.join(process.cwd(), '../frontend/dist')   // If cwd is backend folder
+  ];
 
-  // SPA fallback - serve index.html for all non-API routes
-  app.get('*', (_req: Request, res: Response) => {
-    res.sendFile(path.join(frontendDistPath, 'index.html'), {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+  let frontendDistPath: string | null = null;
+  const fs = require('fs');
+  
+  for (const testPath of possiblePaths) {
+    if (fs.existsSync(testPath)) {
+      frontendDistPath = testPath;
+      console.log(`✅ Found frontend dist at: ${frontendDistPath}`);
+      break;
+    }
+  }
+
+  if (frontendDistPath) {
+    // Serve static assets
+    app.use(express.static(frontendDistPath, {
+      maxAge: '1y',
+      etag: true,
+      lastModified: true,
+      setHeaders: (res, filePath) => {
+        // Cache static assets aggressively
+        if (filePath.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+        // Don't cache HTML files
+        if (filePath.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        }
       }
+    }));
+
+    // SPA fallback - serve index.html for all non-API routes
+    app.get('*', (_req: Request, res: Response) => {
+      res.sendFile(path.join(frontendDistPath!, 'index.html'), {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
     });
-  });
+  } else {
+    console.warn('⚠️  Frontend dist folder not found. Checked paths:');
+    possiblePaths.forEach(p => console.warn(`   - ${p}`));
+    console.warn('   Frontend routes will not work. API-only mode.');
+    
+    // Fallback to API 404 handler
+    app.use('*', (_req: Request, res: Response) => {
+      res.status(404).json({
+        success: false,
+        message: 'Frontend not built. API-only mode.',
+        note: 'Deploy frontend separately or build it during backend deployment'
+      });
+    });
+  }
 } else {
   // Development - API 404 handler
   app.use('*', (_req: Request, res: Response) => {

@@ -4,7 +4,7 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: cd frontend && npm install && VITE_API_URL=/api npm run build && cd ../backend && npm install && cd ../shared && npm install && npm run build && cd ../backend && npm run build
+    buildCommand: bash build-all.sh
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
