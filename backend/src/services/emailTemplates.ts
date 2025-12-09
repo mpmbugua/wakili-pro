@@ -840,7 +840,8 @@ export async function sendPasswordResetEmail(
   userName: string,
   resetToken: string
 ): Promise<void> {
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'https://wakili-pro-1.onrender.com';
+  const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
   const subject = '🔐 Password Reset Request - Wakili Pro';
   
   const html = `
