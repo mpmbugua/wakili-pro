@@ -121,7 +121,7 @@ export async function getArticles(
         id: article.id,
         title: article.title,
         content: cleanContent,
-        author: article.User,
+        User: article.User, // Changed from 'author' to match frontend interface
         authorId: article.authorId,
         isPremium: article.isPremium,
         isPublished: article.isPublished,
