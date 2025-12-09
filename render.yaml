@@ -21,30 +21,6 @@ services:
         generateValue: true
     healthCheckPath: /api/health
 
-  - type: web
-    name: wakili-pro-frontend
-    runtime: static
-    region: oregon
-    plan: free
-    buildCommand: bash frontend/render-build.sh
-    staticPublishPath: frontend/dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://wakili-pro.onrender.com/api
-      - key: NODE_ENV
-        value: production
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: no-cache, no-store, must-revalidate
-      - path: /assets/*
-        name: Cache-Control
-        value: public, max-age=31536000, immutable
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-
 databases:
   - name: wakili-pro-db
     databaseName: wakili_pro
