@@ -94,7 +94,7 @@ ${message}
               create: {
                 senderId: admin.id, // Message appears as system message
                 content: messageContent,
-                isRead: false
+                read: false
               }
             }
           }

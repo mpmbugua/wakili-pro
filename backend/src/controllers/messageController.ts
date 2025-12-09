@@ -41,7 +41,7 @@ export const getConversations = async (req: AuthenticatedRequest, res: Response)
                 role: true,
                 lawyerProfile: {
                   select: {
-                    specialization: true,
+                    specializations: true,
                     bio: true
                   }
                 }

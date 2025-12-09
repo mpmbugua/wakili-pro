@@ -357,11 +357,11 @@ export const rejectConsultation = async (req: AuthenticatedRequest, res: Respons
       });
     }
 
-    // Update status to REJECTED
+    // Update status to CANCELLED (REJECTED doesn't exist in enum)
     const updatedBooking = await prisma.serviceBooking.update({
       where: { id: consultationId },
       data: { 
-        status: 'REJECTED',
+        status: 'CANCELLED',
         rejectionReason: reason
       }
     });
@@ -370,7 +370,7 @@ export const rejectConsultation = async (req: AuthenticatedRequest, res: Respons
     await prisma.notification.create({
       data: {
         userId: booking.clientId,
-        type: 'BOOKING_REJECTED',
+        type: 'BOOKING_CANCELLED',
         title: 'Consultation Declined',
         message: `${booking.provider.firstName} ${booking.provider.lastName} has declined your consultation request. ${reason ? `Reason: ${reason}` : ''} You will receive a full refund within 3-5 business days.`
       }
@@ -439,7 +439,7 @@ export const requestReschedule = async (req: AuthenticatedRequest, res: Response
     await prisma.notification.create({
       data: {
         userId: booking.clientId,
-        type: 'RESCHEDULE_REQUESTED',
+        type: 'BOOKING_CONFIRMED', // Using closest enum value for reschedule
         title: 'Reschedule Requested',
         message: `${booking.provider.firstName} ${booking.provider.lastName} has suggested a new time for your consultation: ${newScheduledAt.toLocaleString()}. ${message || ''} Please log in to approve or decline.`
       }
