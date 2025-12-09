@@ -92,7 +92,6 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
         urgency,
         phoneNumber,
         email,
-        additionalNotes,
         // Context fields
         propertyLocation,
         titleType,

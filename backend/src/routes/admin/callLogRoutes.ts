@@ -12,7 +12,7 @@ const router = Router();
 
 // All routes require admin authentication
 router.use(authenticateToken);
-router.use(authorizeRoles('ADMIN', 'SUPER_ADMIN'));
+router.use(authorizeRoles('ADMIN'));
 
 router.post('/', createCallLog);
 router.get('/', getCallLogs);

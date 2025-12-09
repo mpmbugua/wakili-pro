@@ -544,7 +544,7 @@ export const getKnowledgeBase = async (req: AuthenticatedRequest, res: Response)
     const { documentType, category, limit } = req.query;
 
     const documents = await documentIngestionService.listDocuments({
-      documentType: documentType as LegalDocumentType | undefined,
+      documentType: documentType as any | undefined,
       category: category as string | undefined,
       limit: limit ? parseInt(limit as string) : 50
     });

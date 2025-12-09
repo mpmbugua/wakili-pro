@@ -5,7 +5,7 @@
 
 import mammoth from 'mammoth';
 import * as cheerio from 'cheerio';
-import { PrismaClient, LegalDocumentType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { embeddingService } from './embeddingService';
 import { vectorDbService } from './vectorDatabaseService';
 import { logger } from '../../utils/logger';

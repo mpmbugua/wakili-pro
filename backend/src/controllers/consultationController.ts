@@ -361,8 +361,7 @@ export const rejectConsultation = async (req: AuthenticatedRequest, res: Respons
     const updatedBooking = await prisma.serviceBooking.update({
       where: { id: consultationId },
       data: { 
-        status: 'CANCELLED',
-        rejectionReason: reason
+        status: 'CANCELLED'
       }
     });
 

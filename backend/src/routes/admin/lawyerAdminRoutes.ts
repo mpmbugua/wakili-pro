@@ -14,7 +14,7 @@ const router = Router();
 
 // All routes require ADMIN role
 router.use(authenticateToken);
-router.use(authorizeRoles('ADMIN', 'SUPER_ADMIN'));
+router.use(authorizeRoles('ADMIN'));
 
 /**
  * @route   GET /api/admin/lawyers/stats

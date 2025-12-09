@@ -499,7 +499,7 @@ export const mpesaCallback = async (req: Request, res: Response) => {
             ).catch(err => logger.error('[Subscription] Email notification error:', err));
           }
           if (lawyer?.phoneNumber) {
-            const tierName = subscription.plan === 'LITE' ? 'LITE (KES 2,999)' : 'PRO (KES 6,999)';
+            const tierName = subscription.plan === 'MONTHLY' ? 'LITE (KES 2,999)' : 'PRO (KES 6,999)';
             const smsMessage = `Wakili Pro: ${tierName} subscription activated! Enjoy premium features. Ref: ${callbackResult.transactionId}`;
             sendSMS(lawyer.phoneNumber, smsMessage).catch(err => logger.error('[Subscription] SMS notification error:', err));
           }

@@ -23,7 +23,7 @@ export const getNotifications = async (req: AuthRequest, res: Response) => {
     const where = { userId, ...(unreadOnly ? { isRead: false } : {}) };
     const notifications = await prisma.notification.findMany({
       where,
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit,
     });
