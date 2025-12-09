@@ -479,11 +479,12 @@ export const ingestLegalDocument = async (req: AuthenticatedRequest, res: Respon
       return;
     }
 
-    // Validate document type
-    if (!Object.values(LegalDocumentType).includes(documentType)) {
+    // Validate document type (using string validation since LegalDocumentType doesn't exist)
+    const validTypes = ['LEGISLATION', 'CASE_LAW', 'GENERAL', 'CONTRACT', 'POLICY'];
+    if (!validTypes.includes(documentType)) {
       res.status(400).json({
         success: false,
-        message: `Invalid document type. Must be one of: ${Object.values(LegalDocumentType).join(', ')}`
+        message: `Invalid document type. Must be one of: ${validTypes.join(', ')}`
       });
       return;
     }

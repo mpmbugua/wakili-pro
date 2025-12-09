@@ -7,7 +7,7 @@ import { runIntelligentCrawler } from './intelligentLegalCrawler';
  * Runs daily at 5:00 PM to discover and ingest new legal documents
  */
 export class CrawlerScheduler {
-  private cronJob: cron.ScheduledTask | null = null;
+  private cronJob: any | null = null;
 
   /**
    * Start automated daily crawling at midnight
@@ -43,7 +43,6 @@ export class CrawlerScheduler {
         // });
       }
     }, {
-      scheduled: true,
       timezone: 'Africa/Nairobi' // East Africa Time (EAT)
     });
 

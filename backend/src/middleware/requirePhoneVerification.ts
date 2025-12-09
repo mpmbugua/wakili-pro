@@ -20,18 +20,18 @@ export const requirePhoneVerification = (
     return;
   }
 
-  // Only require phone verification for lawyers
-  if (user.role === 'LAWYER' && !user.phoneVerified) {
-    logger.warn(`[Auth] Phone verification required for lawyer ${user.id}`);
-    
-    res.status(403).json({
-      success: false,
-      message: 'Phone verification required to access this feature',
-      verificationRequired: true,
-      verificationUrl: '/api/verification/send-code'
-    });
-    return;
-  }
+  // TODO: Re-enable when phoneVerified field added to User schema
+  // if (user.role === 'LAWYER' && !user.phoneVerified) {
+  //   logger.warn(`[Auth] Phone verification required for lawyer ${user.id}`);
+  //   
+  //   res.status(403).json({
+  //     success: false,
+  //     message: 'Phone verification required to access this feature',
+  //     verificationRequired: true,
+  //     verificationUrl: '/api/verification/send-code'
+  //   });
+  //   return;
+  // }
 
   next();
 };

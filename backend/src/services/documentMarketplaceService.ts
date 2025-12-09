@@ -27,7 +27,10 @@ export async function purchaseDocument(templateId: string, userId: string, aiInp
   const purchase = await prisma.documentPurchase.create({
     data: {
       userId,
-      templateId
+      // templateId doesn't exist in schema - DocumentPurchase uses different fields
+      documentId: templateId,
+      amount: template.priceKES,
+      status: 'COMPLETED'
     }
   });
 

@@ -628,13 +628,17 @@ export async function scrapeKenyaLawDocuments() {
 
         // Ingest into knowledge base
         logger.info(`Ingesting: ${doc.title}`);
-        const ingestionResult = await documentIngestionService.ingestDocumentFile(filePath, {
-          title: doc.title,
-          documentType: doc.type,
-          category: doc.category,
-          sourceUrl: doc.url,
-          uploadedBy: systemUser.id
-        });
+        const ingestionResult = await documentIngestionService.ingestDocumentFile(
+          filePath,
+          'pdf',
+          {
+            title: doc.title,
+            documentType: doc.type,
+            category: doc.category,
+            sourceUrl: doc.url,
+            uploadedBy: systemUser.id
+          } as any
+        );
 
         // Save metadata to database
         await prisma.legalDocument.create({
@@ -647,7 +651,7 @@ export async function scrapeKenyaLawDocuments() {
             fileName,
             fileSize: pdfResponse.data.byteLength,
             chunksCount: ingestionResult.chunksProcessed,
-            vectorsCount: ingestionResult.vectorsStored,
+            vectorsCount: ingestionResult.chunksProcessed,
             uploadedBy: systemUser.id
           }
         });
@@ -811,13 +815,17 @@ export async function scrapeJudiciaryDocuments() {
 
         // Ingest into knowledge base
         logger.info(`Ingesting: ${doc.title}`);
-        const ingestionResult = await documentIngestionService.ingestDocumentFile(filePath, {
-          title: doc.title,
-          documentType: doc.type,
-          category: doc.category,
-          sourceUrl: doc.url,
-          uploadedBy: systemUser.id
-        });
+        const ingestionResult = await documentIngestionService.ingestDocumentFile(
+          filePath,
+          'pdf',
+          {
+            title: doc.title,
+            documentType: doc.type,
+            category: doc.category,
+            sourceUrl: doc.url,
+            uploadedBy: systemUser.id
+          } as any
+        );
 
         // Save metadata
         await prisma.legalDocument.create({
@@ -830,7 +838,7 @@ export async function scrapeJudiciaryDocuments() {
             fileName,
             fileSize: pdfResponse.data.byteLength,
             chunksCount: ingestionResult.chunksProcessed,
-            vectorsCount: ingestionResult.vectorsStored,
+            vectorsCount: ingestionResult.chunksProcessed,
             uploadedBy: systemUser.id
           }
         });

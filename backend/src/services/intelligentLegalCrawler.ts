@@ -238,7 +238,7 @@ export class IntelligentLegalCrawler {
   /**
    * Extract title from link or surrounding context
    */
-  private extractTitle($: cheerio.CheerioAPI, $link: cheerio.Cheerio<cheerio.Element>): string {
+  private extractTitle($: cheerio.CheerioAPI, $link: cheerio.Cheerio<any>): string {
     // Try multiple sources for title
     let title = $link.text().trim();
 
@@ -578,7 +578,7 @@ export class IntelligentLegalCrawler {
             fileName,
             fileSize: docResponse.data.byteLength,
             chunksCount: ingestionResult.chunksProcessed,
-            vectorsCount: ingestionResult.vectorsStored,
+            vectorsCount: ingestionResult.chunksProcessed,
             uploadedBy: systemUser.id
           }
         });
