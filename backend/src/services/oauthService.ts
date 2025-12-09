@@ -115,7 +115,6 @@ export async function findOrCreateGoogleUser(payload: GoogleTokenPayload) {
       where: { id: user.id },
       data: {
         googleId: payload.sub,
-        provider: 'google',
         avatar: payload.picture,
         emailVerified: true,
       },
@@ -129,7 +128,6 @@ export async function findOrCreateGoogleUser(payload: GoogleTokenPayload) {
     data: {
       email: payload.email,
       googleId: payload.sub,
-      provider: 'google',
       avatar: payload.picture,
       firstName: payload.given_name || payload.name.split(' ')[0] || 'User',
       lastName: payload.family_name || payload.name.split(' ').slice(1).join(' ') || '',
@@ -179,7 +177,6 @@ export async function findOrCreateFacebookUser(fbData: FacebookUserData) {
       where: { id: user.id },
       data: {
         facebookId: fbData.id,
-        provider: 'facebook',
         avatar: fbData.picture?.data?.url,
         emailVerified: true,
       },
@@ -193,7 +190,6 @@ export async function findOrCreateFacebookUser(fbData: FacebookUserData) {
     data: {
       email: fbData.email,
       facebookId: fbData.id,
-      provider: 'facebook',
       avatar: fbData.picture?.data?.url,
       firstName: fbData.first_name || fbData.name.split(' ')[0] || 'User',
       lastName: fbData.last_name || fbData.name.split(' ').slice(1).join(' ') || '',

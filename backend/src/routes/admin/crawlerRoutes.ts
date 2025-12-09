@@ -11,7 +11,7 @@ const router = express.Router();
  * Get crawler scheduler status
  * Admin-only endpoint for monitoring crawler operations
  */
-router.get('/status', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), (req, res) => {
+router.get('/status', authenticateToken, authorizeRoles('ADMIN'), (req: AuthRequest, res: Response) => {
   try {
     const isRunning = crawlerScheduler.isRunning();
     const nextRun = crawlerScheduler.getNextRunTime();
@@ -43,7 +43,7 @@ router.get('/status', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'),
  * POST /api/admin/crawler/trigger
  * Manually trigger an immediate crawl
  */
-router.post('/trigger', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
+router.post('/trigger', authenticateToken, authorizeRoles('ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
     logger.info(`[Crawler API] Manual crawl triggered by user: ${req.user?.email}`);
 
@@ -76,7 +76,7 @@ router.post('/trigger', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'
  * POST /api/admin/crawler/seed-real-pdfs
  * Download and ingest real PDFs from Kenya Law (direct URLs)
  */
-router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
+router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
     logger.info(`[Crawler API] Real PDF seeding triggered by user: ${req.user?.email}`);
     
@@ -169,7 +169,7 @@ router.post('/seed-real-pdfs', authenticateToken, authorizeRoles('ADMIN', 'SUPER
  * POST /api/admin/crawler/seed-sample-data
  * Add sample legal documents for testing (bypasses actual crawling)
  */
-router.post('/seed-sample-data', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
+router.post('/seed-sample-data', authenticateToken, authorizeRoles('ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
     logger.info(`[Crawler API] Sample data seeding triggered by user: ${req.user?.email}`);
     
@@ -269,7 +269,7 @@ router.post('/seed-sample-data', authenticateToken, authorizeRoles('ADMIN', 'SUP
  * POST /api/admin/crawler/start
  * Start the automated crawler scheduler
  */
-router.post('/start', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), (req, res) => {
+router.post('/start', authenticateToken, authorizeRoles('ADMIN'), (req: AuthRequest, res: Response) => {
   try {
     crawlerScheduler.start();
     const nextRun = crawlerScheduler.getNextRunTime();
@@ -298,7 +298,7 @@ router.post('/start', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'),
  * POST /api/admin/crawler/stop
  * Stop the automated crawler scheduler
  */
-router.post('/stop', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), (req, res) => {
+router.post('/stop', authenticateToken, authorizeRoles('ADMIN'), (req: AuthRequest, res: Response) => {
   try {
     crawlerScheduler.stop();
 
@@ -322,7 +322,7 @@ router.post('/stop', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), 
  * GET /api/admin/crawler/test
  * Test crawler on a single Kenya Law URL to verify it's finding documents
  */
-router.get('/test', authenticateToken, authorizeRoles('ADMIN', 'SUPER_ADMIN'), async (req, res) => {
+router.get('/test', authenticateToken, authorizeRoles('ADMIN'), async (req: AuthRequest, res: Response) => {
   try {
     const { IntelligentLegalCrawler } = await import('../../services/intelligentLegalCrawler');
     
