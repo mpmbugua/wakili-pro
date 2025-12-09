@@ -422,11 +422,11 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
     const booking = await prisma.serviceBooking.create({
       data: {
         serviceId: validatedData.serviceId,
+        userId: userId,
         clientId: userId,
         providerId: service.providerId,
-  scheduledAt: validatedData.scheduledAt ? new Date(validatedData.scheduledAt) : null,
-        // clientRequirements: validatedData.clientRequirements, // Removed: not in schema
-        // totalAmountKES: service.priceKES, // Removed: not in schema
+        lawyerId: service.providerId,
+        scheduledAt: validatedData.scheduledAt ? new Date(validatedData.scheduledAt) : new Date(),
         status: 'PENDING'
       }
     });
