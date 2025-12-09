@@ -22,13 +22,20 @@ export const AdminLoginPage: React.FC = () => {
   // Determine redirect path based on where user came from
   const from = ((location.state as { from?: { pathname?: string } } | null)?.from?.pathname) || '/admin';
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[AdminLoginPage] Mounted', { isAuthenticated, userRole: user?.role, from });
+  }, []);
+
   // If user is already authenticated as admin, redirect
   React.useEffect(() => {
     if (isAuthenticated && user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')) {
+      console.log('[AdminLoginPage] User is admin, redirecting to', from);
       navigate(from, { replace: true });
     }
     // If user is authenticated but not admin, logout
     if (isAuthenticated && user && user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+      console.log('[AdminLoginPage] User is not admin, logging out');
       logout();
     }
   }, [isAuthenticated, user, navigate, from, logout]);
@@ -80,11 +87,11 @@ export const AdminLoginPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-blue-100 p-4 rounded-2xl shadow-lg">
+            <div className="bg-blue-600 p-4 rounded-2xl shadow-lg">
               <Shield className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-blue-700 mb-2">Admin Portal</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Portal</h1>
           <p className="text-blue-200">Wakili Pro Administration</p>
         </div>
 

@@ -105,18 +105,31 @@ const AdminRoute: React.FC<{ children: React.ReactNode; hydrated: boolean }> = (
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[AdminRoute]', { 
+      path: location.pathname,
+      hydrated, 
+      isAuthenticated, 
+      userRole: user?.role 
+    });
+  }, [location.pathname, hydrated, isAuthenticated, user?.role]);
+  
   if (!hydrated) {
     return null;
   }
   
   if (!isAuthenticated || !user) {
+    console.log('[AdminRoute] Not authenticated, redirecting to /admin/login');
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
   
   if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    console.log('[AdminRoute] User role not admin:', user.role, 'redirecting to /dashboard');
     return <Navigate to="/dashboard" replace />;
   }
   
+  console.log('[AdminRoute] Access granted for', user.role);
   return <>{children}</>;
 };
 
