@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { listDocumentTemplates, generateDocument, purchaseDocument, downloadDocument, initiateMarketplacePurchase } from '../controllers/documentMarketplaceController';
 import { authenticateToken } from '../middleware/authMiddleware';
+import { requirePhoneVerification } from '../middleware/requirePhoneVerification';
+import { detectAbusePatterns } from '../middleware/abusePreventionMiddleware';
 
 const router = Router();
 
@@ -11,7 +13,7 @@ router.get('/templates', listDocumentTemplates);
 router.post('/generate', authenticateToken, generateDocument);
 
 // Initiate marketplace template purchase (creates purchase record before payment)
-router.post('/marketplace/purchase', authenticateToken, initiateMarketplacePurchase);
+router.post('/marketplace/purchase', authenticateToken, requirePhoneVerification, detectAbusePatterns, initiateMarketplacePurchase);
 
 // Purchase a generated document
 router.post('/purchase', authenticateToken, purchaseDocument);

@@ -265,6 +265,18 @@ app.get('/api', (_req: Request, res: Response) => {
 import paymentsRouter from './routes/payments';
 app.use('/api/payments', paymentsRouter);
 
+// Mount verification router (phone verification)
+import verificationRoutes from './routes/verificationRoutes';
+app.use('/api/verification', verificationRoutes);
+
+// Initialize quota reset cron job
+import { initializeQuotaResetCron } from './cron/quotaResetCron';
+initializeQuotaResetCron();
+
+// Mount quotas router (lawyer monthly quotas)
+import quotasRouter from './routes/quotas';
+app.use('/api/quotas', quotasRouter);
+
 // Mount lawyer subscriptions router
 // Deprecated: lawyerSubscriptionsRouter removed
 

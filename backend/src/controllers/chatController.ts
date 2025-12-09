@@ -160,55 +160,57 @@ export const getChatMessages = async (req: AuthRequest, res: Response) => {
     }
     const { roomId } = req.params;
     const { page = 1, limit = 50 } = req.query;
-    // Verify user has access to this chat room (extract booking ID from room ID)
-    const bookingId = roomId.replace('chat_', '');
-    const booking = await prisma.serviceBooking.findUnique({ where: { id: bookingId } });
-    if (!booking) {
-      return res.status(404).json({ success: false, message: 'Chat room not found' });
-    }
-    if (booking.clientId !== userId && booking.providerId !== userId) {
-      return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-    // Mock messages for now
-    const mockMessages = [
-      {
-        id: 'msg_1',
-        roomId: roomId,
-        senderId: booking.clientId,
-        content: 'Hello, I would like to discuss my legal matter.',
-        messageType: 'TEXT',
-        isRead: true,
-        createdAt: new Date(Date.now() - 3600000), // 1 hour ago
-        sender: {
-          firstName: 'John',
-          lastName: 'Doe',
-          profilePicture: null
-        }
-      },
-      {
-        id: 'msg_2',
-        roomId: roomId,
-        senderId: booking.providerId,
-        content: 'Of course! I\'d be happy to help. Could you provide more details about your case?',
-        messageType: 'TEXT',
-        isRead: true,
-        createdAt: new Date(Date.now() - 3500000), // 55 minutes ago
-        sender: {
-          firstName: 'Jane',
-          lastName: 'Smith',
-          profilePicture: null
+    
+    // Verify chat room exists and user has access
+    const chatRoom = await prisma.chatRoom.findUnique({
+      where: { id: roomId },
+      include: {
+        booking: {
+          select: {
+            clientId: true,
+            providerId: true
+          }
         }
       }
-    ];
+    });
+    
+    if (!chatRoom) {
+      return res.status(404).json({ success: false, message: 'Chat room not found' });
+    }
+    
+    if (chatRoom.clientId !== userId && chatRoom.lawyerId !== userId) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+    
+    // Fetch messages from database
+    const messages = await prisma.chatMessage.findMany({
+      where: { roomId },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'asc' },
+      take: Number(limit),
+      skip: (Number(page) - 1) * Number(limit)
+    });
+    
+    const totalMessages = await prisma.chatMessage.count({ where: { roomId } });
+    
     res.json({
       success: true,
       data: {
-        messages: mockMessages,
+        messages,
         pagination: {
           page: Number(page),
           limit: Number(limit),
-          total: mockMessages.length,
-          hasMore: false
+          total: totalMessages,
+          hasMore: totalMessages > Number(page) * Number(limit)
         }
       }
     });

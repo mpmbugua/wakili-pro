@@ -15,6 +15,7 @@ import {
 import axiosInstance from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { useEventTracking, useConversionTracking } from '../hooks/useAnalytics';
+import { trackFreebieUsage } from '../services/analyticsService';
 
 interface ServiceRequestForm {
   serviceTitle: string;
@@ -195,17 +196,41 @@ export const ServiceRequestPage: React.FC = () => {
       hasDocuments: formData.documents.length > 0
     });
 
-    // Get phone number for M-Pesa commitment fee payment
-    const phoneNumber = prompt('Enter your M-Pesa phone number for KES 500 commitment fee (format: 254XXXXXXXXX):');
-    
-    if (!phoneNumber) {
-      alert('Phone number is required for commitment fee payment');
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
+      // Check if user has used freebie (attempt to create without payment)
+      console.log('[ServiceRequest] Attempting to create service request...');
+      const testResponse = await axiosInstance.post('/service-requests', {
+        ...formData,
+        commitmentFeeTxId: null
+      });
+
+      // If successful, it was a freebie!
+      if (testResponse.data.success && testResponse.data.isFreebie) {
+        trackConversion('SERVICE_REQUEST_FREEBIE', 500);
+        trackFreebieUsage('first_service_request', {
+          serviceCategory: derivedCategory,
+          savings: 500
+        }).catch(err => console.warn('[Analytics] Failed to track freebie:', err));
+        alert(`🎉 FREE service request submitted!\n\n${testResponse.data.message}\n\nYou saved KES 500 on your first service request!`);
+        navigate('/dashboard');
+        return;
+      }
+    } catch (freebieError: any) {
+      // Freebie not available, proceed with payment
+      console.log('[ServiceRequest] Freebie not available, requiring payment');
+    }
+
+    try {
+      // Get phone number for M-Pesa commitment fee payment
+      const phoneNumber = prompt('Enter your M-Pesa phone number for KES 500 commitment fee (format: 254XXXXXXXXX):');
+      
+      if (!phoneNumber) {
+        alert('Phone number is required for commitment fee payment');
+        setIsSubmitting(false);
+        return;
+      }
       // Step 1: Initiate M-Pesa payment for commitment fee
       console.log('[ServiceRequest] Initiating commitment fee payment...');
       const paymentResponse = await axiosInstance.post('/payments/mpesa/initiate', {
@@ -369,6 +394,25 @@ export const ServiceRequestPage: React.FC = () => {
             </p>
           </div>
 
+          {/* FREE Banner for First-Time Users */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 rounded-lg p-6 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-green-900">First Request FREE! 🎉</h3>
+                  <p className="text-sm text-green-700">Get 3 lawyer quotes without paying KES 500 commitment fee</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-green-600">KES 0</p>
+                <p className="text-xs text-green-700 line-through">KES 500</p>
+              </div>
+            </div>
+          </div>
+
           {/* How It Works Info */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
             <div className="flex items-start space-x-3">
@@ -376,7 +420,7 @@ export const ServiceRequestPage: React.FC = () => {
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">How It Works</h3>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-slate-700">
-                  <li>Pay KES 500 commitment fee to submit your request</li>
+                  <li><strong className="text-green-600">First request FREE!</strong> (Then KES 500 commitment fee for future requests)</li>
                   <li>Receive up to 3 quotes from qualified lawyers within 12 hours</li>
                   <li>Select your preferred lawyer based on their quote and profile</li>
                   <li><strong>Pay 30% upfront</strong> of quoted amount</li>

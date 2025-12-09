@@ -16,6 +16,7 @@ import {
   confirmPayment,
 } from '../controllers/consultationBookingController';
 import { authenticateToken } from '../middleware/auth';
+import { detectAbusePatterns } from '../middleware/abusePreventionMiddleware';
 
 import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = express.Router();
@@ -30,7 +31,7 @@ router.get('/my-consultations', authenticateToken, getMyConsultations);
  * @desc    Create a new consultation booking with M-Pesa payment
  * @access  Private (authenticated users)
  */
-router.post('/create', authenticateToken, createBooking);
+router.post('/create', authenticateToken, detectAbusePatterns, createBooking);
 
 /**
  * @route   GET /api/consultations/my-bookings

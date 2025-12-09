@@ -1,157 +1,178 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, Search, User, Paperclip, MoreVertical } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import axiosInstance from '../lib/axios';
 
 interface Message {
   id: string;
   senderId: string;
   content: string;
-  timestamp: string;
-  read: boolean;
+  createdAt: string;
+  isRead: boolean;
+  messageType: string;
+  sender?: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
-interface Conversation {
+interface ChatRoom {
   id: string;
-  lawyerId?: string;
-  clientId?: string;
-  lawyerName?: string;
-  clientName?: string;
-  lawyerImage?: string;
-  clientImage?: string;
-  specialty: string;
-  lastMessage: string;
-  lastMessageTime: string;
+  bookingId: string;
+  clientId: string;
+  lawyerId: string;
+  status: string;
+  lastActivity: string;
+  service?: {
+    title: string;
+    type: string;
+  };
+  client?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  lawyer?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   unreadCount: number;
-  messages: Message[];
+  lastMessage?: {
+    content: string;
+    createdAt: string;
+  };
 }
 
 export const MessagesPage: React.FC = () => {
   const { user } = useAuthStore();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const isLawyer = user?.role === 'LAWYER';
 
   useEffect(() => {
-    fetchConversations();
+    fetchChatRooms();
   }, []);
 
-  const fetchConversations = async () => {
+  useEffect(() => {
+    if (selectedRoom) {
+      fetchMessages(selectedRoom.id);
+    }
+  }, [selectedRoom]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const fetchChatRooms = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API endpoint
-      // const response = await axiosInstance.get('/messages/conversations');
-      // setConversations(response.data.data);
+      const response = await axiosInstance.get('/chat/rooms');
       
-      // Mock data - different for lawyers vs clients
-      let mockConversations: Conversation[];
-      
-      if (user?.role === 'LAWYER') {
-        // Lawyers see conversations with clients
-        mockConversations = [
-          {
-            id: '1',
-            clientId: 'client1',
-            clientName: 'James Omondi',
-            specialty: 'Corporate Law',
-            lastMessage: 'Thank you for your help with my contract!',
-            lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            unreadCount: 1,
-            messages: [
-              {
-                id: 'm1',
-                senderId: 'client1',
-                content: 'Hello, I need help with my employment contract.',
-                timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-                read: true,
-              },
-              {
-                id: 'm2',
-                senderId: user?.id || 'lawyer',
-                content: 'Hello! I\'d be happy to help. Please send me the contract.',
-                timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-                read: true,
-              },
-            ],
-          },
-        ];
-      } else {
-        // Clients see conversations with lawyers
-        mockConversations = [
-          {
-            id: '1',
-            lawyerId: 'lawyer1',
-            lawyerName: 'Sarah Mwangi',
-            specialty: 'Corporate Law',
-            lastMessage: 'I have reviewed your contract and have some suggestions.',
-            lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            unreadCount: 2,
-            messages: [
-              {
-                id: 'm1',
-                senderId: user?.id || 'user',
-                content: 'Hello, I need help with my employment contract.',
-                timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-                read: true,
-              },
-              {
-                id: 'm2',
-                senderId: 'lawyer1',
-                content: 'Hello! I\'d be happy to help. Please send me the contract.',
-                timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-                read: true,
-              },
-            ],
-          },
-        ];
+      if (response.data.success) {
+        setChatRooms(response.data.data);
+        if (response.data.data.length > 0) {
+          setSelectedRoom(response.data.data[0]);
+        }
       }
-      
-      setConversations(mockConversations);
-      if (mockConversations.length > 0) {
-        setSelectedConversation(mockConversations[0]);
+    } catch (error: any) {
+      console.error('Error fetching chat rooms:', error);
+      if (error.response?.status === 404 || error.response?.data?.message?.includes('No bookings')) {
+        // User has no bookings/chats yet - this is normal
+        setChatRooms([]);
       }
-    } catch (error) {
-      console.error('Error fetching conversations:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation) return;
+  const fetchMessages = async (roomId: string) => {
+    try {
+      setLoadingMessages(true);
+      const response = await axiosInstance.get(`/chat/rooms/${roomId}/messages`);
+      
+      if (response.data.success) {
+        setMessages(response.data.data.messages || []);
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setMessages([]);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
 
-    const message: Message = {
-      id: `m${Date.now()}`,
-      senderId: user?.id || 'user',
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedRoom) return;
+
+    const tempMessage: Message = {
+      id: `temp_${Date.now()}`,
+      senderId: user?.id || '',
       content: newMessage,
-      timestamp: new Date().toISOString(),
-      read: false,
+      createdAt: new Date().toISOString(),
+      isRead: false,
+      messageType: 'TEXT',
+      sender: {
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || ''
+      }
     };
 
-    // Update local state
-    setConversations(prev =>
-      prev.map(conv =>
-        conv.id === selectedConversation.id
-          ? {
-              ...conv,
-              messages: [...conv.messages, message],
-              lastMessage: newMessage,
-              lastMessageTime: message.timestamp,
-            }
-          : conv
-      )
-    );
-
-    setSelectedConversation(prev =>
-      prev ? { ...prev, messages: [...prev.messages, message] } : null
-    );
-
+    // Optimistically add message to UI
+    setMessages(prev => [...prev, tempMessage]);
+    const messageContent = newMessage;
     setNewMessage('');
 
-    // TODO: Send to API
-    // await axiosInstance.post(`/messages/${selectedConversation.id}`, { content: newMessage });
+    try {
+      const response = await axiosInstance.post('/chat/messages', {
+        roomId: selectedRoom.id,
+        content: messageContent,
+        messageType: 'TEXT'
+      });
+
+      if (response.data.success) {
+        // Replace temp message with real one
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === tempMessage.id ? response.data.data : msg
+          )
+        );
+
+        // Update chat room last message
+        setChatRooms(prev =>
+          prev.map(room =>
+            room.id === selectedRoom.id
+              ? {
+                  ...room,
+                  lastMessage: {
+                    content: messageContent,
+                    createdAt: new Date().toISOString()
+                  },
+                  lastActivity: new Date().toISOString()
+                }
+              : room
+          )
+        );
+      }
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      alert(error.response?.data?.message || 'Failed to send message');
+      // Remove temp message on error
+      setMessages(prev => prev.filter(msg => msg.id !== tempMessage.id));
+      setNewMessage(messageContent); // Restore message text
+    }
   };
 
   const formatTime = (timestamp: string) => {
@@ -168,11 +189,28 @@ export const MessagesPage: React.FC = () => {
     }
   };
 
-  const filteredConversations = conversations.filter(conv =>
-    (conv.lawyerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     conv.clientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     conv.specialty.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const getOtherParticipant = (room: ChatRoom) => {
+    if (isLawyer) {
+      return {
+        name: `${room.client?.firstName} ${room.client?.lastName}`,
+        email: room.client?.email
+      };
+    } else {
+      return {
+        name: `${room.lawyer?.firstName} ${room.lawyer?.lastName}`,
+        email: room.lawyer?.email
+      };
+    }
+  };
+
+  const filteredRooms = chatRooms.filter(room => {
+    const participant = getOtherParticipant(room);
+    const serviceName = room.service?.title || '';
+    return (
+      participant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      serviceName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   if (loading) {
     return (
@@ -184,7 +222,7 @@ export const MessagesPage: React.FC = () => {
 
   return (
     <div className="h-[calc(100vh-8rem)] flex bg-white rounded-lg border border-slate-200 overflow-hidden">
-      {/* Conversations List */}
+      {/* Chat Rooms List */}
       <div className="w-full md:w-96 border-r border-slate-200 flex flex-col">
         {/* Search */}
         <div className="p-4 border-b border-slate-200">
@@ -200,48 +238,61 @@ export const MessagesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Conversation List */}
+        {/* Chat Room List */}
         <div className="flex-1 overflow-y-auto">
-          {filteredConversations.length === 0 ? (
+          {filteredRooms.length === 0 ? (
             <div className="p-8 text-center">
               <MessageSquare className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-              <p className="text-slate-600">No conversations yet</p>
+              <p className="text-slate-900 font-medium mb-2">No conversations yet</p>
+              <p className="text-sm text-slate-600">
+                {isLawyer 
+                  ? 'Conversations will appear here when clients book your services'
+                  : 'Book a consultation to start chatting with a lawyer'
+                }
+              </p>
             </div>
           ) : (
-            filteredConversations.map((conversation) => (
-              <button
-                key={conversation.id}
-                onClick={() => setSelectedConversation(conversation)}
-                className={`w-full p-4 flex items-start space-x-3 hover:bg-slate-50 transition border-b border-slate-100 ${
-                  selectedConversation?.id === conversation.id ? 'bg-blue-50' : ''
-                }`}
-              >
-                <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <User className="h-6 w-6 text-blue-600" />
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-slate-900 truncate">
-                      {isLawyer ? conversation.clientName : conversation.lawyerName}
-                    </h3>
-                    <span className="text-xs text-slate-500">{formatTime(conversation.lastMessageTime)}</span>
+            filteredRooms.map((room) => {
+              const participant = getOtherParticipant(room);
+              return (
+                <button
+                  key={room.id}
+                  onClick={() => setSelectedRoom(room)}
+                  className={`w-full p-4 flex items-start space-x-3 hover:bg-slate-50 transition border-b border-slate-100 ${
+                    selectedRoom?.id === room.id ? 'bg-blue-50' : ''
+                  }`}
+                >
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <User className="h-6 w-6 text-blue-600" />
                   </div>
-                  <p className="text-xs text-slate-600 mb-1">{conversation.specialty}</p>
-                  <p className="text-sm text-slate-700 truncate">{conversation.lastMessage}</p>
-                </div>
-                {conversation.unreadCount > 0 && (
-                  <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
-                    {conversation.unreadCount}
-                  </span>
-                )}
-              </button>
-            ))
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-semibold text-slate-900 truncate">
+                        {participant.name}
+                      </h3>
+                      <span className="text-xs text-slate-500">
+                        {room.lastMessage?.createdAt ? formatTime(room.lastMessage.createdAt) : ''}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 mb-1">{room.service?.title || 'Consultation'}</p>
+                    <p className="text-sm text-slate-700 truncate">
+                      {room.lastMessage?.content || 'No messages yet'}
+                    </p>
+                  </div>
+                  {room.unreadCount > 0 && (
+                    <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+                      {room.unreadCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })
           )}
         </div>
       </div>
 
       {/* Message Thread */}
-      {selectedConversation ? (
+      {selectedRoom ? (
         <div className="flex-1 flex flex-col">
           {/* Header */}
           <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
@@ -251,39 +302,61 @@ export const MessagesPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-slate-900">
-                  {isLawyer ? selectedConversation.clientName : selectedConversation.lawyerName}
+                  {getOtherParticipant(selectedRoom).name}
                 </h3>
-                <p className="text-xs text-slate-600">{selectedConversation.specialty}</p>
+                <p className="text-xs text-slate-600">{selectedRoom.service?.title || 'Consultation'}</p>
               </div>
             </div>
-            <button className="p-2 hover:bg-slate-100 rounded-lg">
-              <MoreVertical className="h-5 w-5 text-slate-600" />
-            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                Paid Booking
+              </span>
+              <button className="p-2 hover:bg-slate-100 rounded-lg">
+                <MoreVertical className="h-5 w-5 text-slate-600" />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
-            {selectedConversation.messages.map((message) => {
-              const isOwn = message.senderId === user?.id;
-              return (
-                <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-md px-4 py-2 rounded-lg ${
-                    isOwn ? 'bg-blue-600 text-white' : 'bg-white text-slate-900 border border-slate-200'
-                  }`}>
-                    <p className="text-sm">{message.content}</p>
-                    <p className={`text-xs mt-1 ${isOwn ? 'text-blue-100' : 'text-slate-500'}`}>
-                      {formatTime(message.timestamp)}
-                    </p>
-                  </div>
+            {loadingMessages ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <MessageSquare className="h-12 w-12 text-slate-400 mx-auto mb-2" />
+                  <p className="text-slate-600">No messages yet. Start the conversation!</p>
                 </div>
-              );
-            })}
+              </div>
+            ) : (
+              messages.map((message) => {
+                const isOwn = message.senderId === user?.id;
+                return (
+                  <div key={message.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-md px-4 py-2 rounded-lg ${
+                      isOwn ? 'bg-blue-600 text-white' : 'bg-white text-slate-900 border border-slate-200'
+                    }`}>
+                      <p className="text-sm">{message.content}</p>
+                      <p className={`text-xs mt-1 ${isOwn ? 'text-blue-100' : 'text-slate-500'}`}>
+                        {formatTime(message.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
           <div className="p-4 border-t border-slate-200 bg-white">
             <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-600">
+              <button 
+                className="p-2 hover:bg-slate-100 rounded-lg text-slate-600"
+                title="File attachments coming soon"
+              >
                 <Paperclip className="h-5 w-5" />
               </button>
               <input
@@ -308,8 +381,17 @@ export const MessagesPage: React.FC = () => {
         <div className="flex-1 flex items-center justify-center bg-slate-50">
           <div className="text-center">
             <MessageSquare className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">Select a conversation</h3>
-            <p className="text-slate-600">Choose a conversation from the list to start messaging</p>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">
+              {chatRooms.length === 0 ? 'No conversations yet' : 'Select a conversation'}
+            </h3>
+            <p className="text-slate-600">
+              {chatRooms.length === 0 
+                ? isLawyer 
+                  ? 'Chats will appear when clients book your services'
+                  : 'Book a consultation to start chatting'
+                : 'Choose a conversation from the list to start messaging'
+              }
+            </p>
           </div>
         </div>
       )}

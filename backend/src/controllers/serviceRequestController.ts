@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { notifyMatchedLawyers } from '../services/lawyerNotificationService';
+import * as analyticsService from '../services/analyticsService';
 
 const prisma = new PrismaClient();
 
@@ -56,11 +57,27 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
       commitmentFeeTxId
     } = req.body;
 
-    // Validate commitment fee payment ID
-    if (!commitmentFeeTxId) {
+    // Check for first-time service request freebie
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { freeServiceRequestUsed: true }
+    });
+
+    const isFreebie = !user?.freeServiceRequestUsed;
+
+    // For freebie, skip payment validation
+    if (!isFreebie && !commitmentFeeTxId) {
       return res.status(400).json({ 
         error: 'Commitment fee payment required',
         commitmentFeeAmount: 500
+      });
+    }
+
+    // Mark freebie as used if applicable
+    if (isFreebie) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { freeServiceRequestUsed: true }
       });
     }
 
@@ -98,9 +115,9 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
         hasProperty: hasProperty === true || hasProperty === 'true',
         needsCustody: needsCustody === true || needsCustody === 'true',
         // Payment tracking
-        commitmentFeePaid: false, // Will be updated by M-Pesa callback
-        commitmentFeeAmount: 500,
-        commitmentFeeTxId,
+        commitmentFeePaid: isFreebie ? true : false, // Freebies skip payment
+        commitmentFeeAmount: isFreebie ? 0 : 500,
+        commitmentFeeTxId: isFreebie ? null : commitmentFeeTxId,
         status: 'PENDING'
       },
       include: {

@@ -8,6 +8,7 @@ import {
 import { Button } from '../ui/Button';
 import { PageHeader, StatCard, DataTable, Column } from '../ui';
 import { TierLimitModal, CertificationBlockedModal, CommissionSavingsModal } from '../modals';
+import { UpgradePromptModal } from '../UpgradePromptModal';
 import { LawyerArticlesSection } from './LawyerArticlesSection';
 import type { AuthUser } from '@wakili-pro/shared/src/types/auth';
 import axiosInstance from '../../lib/axios';
@@ -91,6 +92,19 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
     loading: true,
   });
 
+  // Quota state
+  const [quotaData, setQuotaData] = useState<{
+    aiReviews: { limit: number; used: number; remaining: number; resetsAt: string; isUnlimited: boolean };
+    pdfDownloads: { limit: number; used: number; remaining: number; resetsAt: string; isUnlimited: boolean };
+    tier: string;
+    loading: boolean;
+  }>({
+    aiReviews: { limit: 0, used: 0, remaining: 0, resetsAt: '', isUnlimited: false },
+    pdfDownloads: { limit: 0, used: 0, remaining: 0, resetsAt: '', isUnlimited: false },
+    tier: 'FREE',
+    loading: true
+  });
+
   // Tier usage state (fetched from lawyer profile)
   const [tierUsage, setTierUsage] = useState<TierUsage>({
     currentTier: 'FREE',
@@ -109,6 +123,8 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
   const [limitModalType, setLimitModalType] = useState<'bookings' | 'certifications' | 'services'>('bookings');
   const [showCertModal, setShowCertModal] = useState(false);
   const [showSavingsModal, setShowSavingsModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeModalQuotaType, setUpgradeModalQuotaType] = useState<'ai_review' | 'pdf_download' | undefined>(undefined);
 
   const checkVerificationStatus = async () => {
     try {
@@ -259,9 +275,25 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
       }
     };
     
+    const fetchQuotaStatus = async () => {
+      try {
+        const response = await axiosInstance.get('/quotas/status');
+        if (response.data.success) {
+          setQuotaData({
+            ...response.data.data,
+            loading: false
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch quota status:', error);
+        setQuotaData(prev => ({ ...prev, loading: false }));
+      }
+    };
+    
     if (isVerified) {
       fetchLawyerData();
       fetchWalletBalance();
+      fetchQuotaStatus();
     } else {
       // Set loading to false if not verified
       setWalletBalance(prev => ({ ...prev, loading: false }));
@@ -504,6 +536,19 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
         currentTier={tierUsage.currentTier}
         monthlyRevenue={stats.revenue}
         onUpgrade={() => navigate('/lawyer/upgrade')}
+      />
+
+      {/* Upgrade Prompt Modal */}
+      <UpgradePromptModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        currentTier={tierUsage.currentTier}
+        quotaType={upgradeModalQuotaType}
+        onUpgrade={(tier: 'LITE' | 'PRO') => {
+          setShowUpgradeModal(false);
+          // Navigate to upgrade page with pre-selected tier
+          navigate(`/lawyer/upgrade?tier=${tier}`);
+        }}
       />
 
       {/* Page Header with Tier Badge */}
@@ -913,6 +958,106 @@ export const LawyerDashboard: React.FC<LawyerDashboardProps> = ({ user }) => {
               </Button>
             </div>
           </div>
+        </div>
+
+        {/* Monthly Quotas Card */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Monthly Quotas</h3>
+            <Zap className="h-5 w-5 text-blue-600" />
+          </div>
+          {quotaData.loading ? (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* AI Reviews Quota */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-gray-600 text-sm">AI Reviews</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {quotaData.aiReviews.isUnlimited ? 'Unlimited' : `${quotaData.aiReviews.remaining} left`}
+                  </p>
+                </div>
+                {!quotaData.aiReviews.isUnlimited && (
+                  <>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                      <div
+                        className={`h-2 rounded-full transition-all ${
+                          quotaData.aiReviews.remaining === 0
+                            ? 'bg-red-600'
+                            : quotaData.aiReviews.remaining <= 2
+                            ? 'bg-amber-600'
+                            : 'bg-blue-600'
+                        }`}
+                        style={{ 
+                          width: `${((quotaData.aiReviews.limit - quotaData.aiReviews.remaining) / quotaData.aiReviews.limit) * 100}%` 
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {quotaData.aiReviews.used}/{quotaData.aiReviews.limit} used
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* PDF Downloads Quota */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-gray-600 text-sm">PDF Downloads</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {quotaData.pdfDownloads.isUnlimited ? 'Unlimited' : `${quotaData.pdfDownloads.remaining} left`}
+                  </p>
+                </div>
+                {!quotaData.pdfDownloads.isUnlimited && (
+                  <>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                      <div
+                        className={`h-2 rounded-full transition-all ${
+                          quotaData.pdfDownloads.remaining === 0
+                            ? 'bg-red-600'
+                            : quotaData.pdfDownloads.remaining <= 1
+                            ? 'bg-amber-600'
+                            : 'bg-purple-600'
+                        }`}
+                        style={{ 
+                          width: `${((quotaData.pdfDownloads.limit - quotaData.pdfDownloads.remaining) / quotaData.pdfDownloads.limit) * 100}%` 
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {quotaData.pdfDownloads.used}/{quotaData.pdfDownloads.limit} used
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* Reset Info */}
+              <div className="pt-3 border-t border-blue-200">
+                <p className="text-xs text-gray-600 mb-2">
+                  Resets: {new Date(quotaData.aiReviews.resetsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </p>
+                {(quotaData.aiReviews.remaining === 0 || quotaData.pdfDownloads.remaining === 0) && quotaData.tier !== 'PRO' && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="w-full bg-blue-600 text-white hover:bg-blue-700 border-0"
+                    onClick={() => {
+                      setUpgradeModalQuotaType(
+                        quotaData.aiReviews.remaining === 0 ? 'ai_review' : 'pdf_download'
+                      );
+                      setShowUpgradeModal(true);
+                    }}
+                  >
+                    <Crown className="h-3 w-3 mr-2" />
+                    Upgrade for More
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Documents & Certifications Card */}

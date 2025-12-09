@@ -167,15 +167,22 @@ export const ServiceSelectionModal: React.FC<ServiceSelectionModalProps> = ({
                 <button
                   key={service.id}
                   onClick={() => setSelectedService(service)}
-                  className={`w-full text-left p-6 rounded-xl border-2 transition-all ${
+                  className={`w-full text-left p-6 rounded-xl border-2 transition-all relative ${
                     selectedService?.id === service.id
                       ? 'border-blue-600 bg-blue-50 shadow-lg'
                       : 'border-slate-200 hover:border-blue-300 hover:shadow-md'
-                  } ${service.recommended ? 'relative' : ''}`}
+                  }`}
                 >
                   {service.recommended && (
                     <span className="absolute -top-3 left-6 px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold rounded-full shadow-lg">
                       RECOMMENDED
+                    </span>
+                  )}
+                  
+                  {/* FREE Badge for AI Review Only */}
+                  {service.id === 'AI_ONLY' && (
+                    <span className="absolute -top-3 right-6 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg">
+                      FREE for first-time users
                     </span>
                   )}
                   

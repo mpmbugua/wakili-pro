@@ -2,6 +2,7 @@ import { PrismaClient, ConsultationBookingStatus, ConsultationType, PayoutStatus
 import { getAvailableSlots } from './availabilityService';
 import EscrowService from './escrowService';
 import Decimal from 'decimal.js';
+import * as analyticsService from './analyticsService';
 
 const prisma = new PrismaClient();
 
@@ -114,7 +115,42 @@ export const createConsultationBooking = async (
     const durationMinutes =
       (data.scheduledEnd.getTime() - data.scheduledStart.getTime()) / (1000 * 60);
     const durationHours = durationMinutes / 60;
-    const clientPaymentAmount = Number(lawyer.hourlyRate) * durationHours;
+    let clientPaymentAmount = Number(lawyer.hourlyRate) * durationHours;
+    
+    // Check for first consultation 50% discount
+    const clientUser = await prisma.user.findUnique({
+      where: { id: data.clientId },
+      select: { hasUsedFirstConsultDiscount: true }
+    });
+
+    const lawyerWithOptIn = await prisma.lawyerProfile.findUnique({
+      where: { userId: data.lawyerId },
+      select: { allowsFirstConsultDiscount: true }
+    });
+
+    const originalAmount = clientPaymentAmount;
+    let isFirstConsultDiscount = false;
+    
+    if (!clientUser?.hasUsedFirstConsultDiscount && lawyerWithOptIn?.allowsFirstConsultDiscount !== false) {
+      // Apply 50% discount (lawyer absorbs the cost)
+      clientPaymentAmount = clientPaymentAmount * 0.5;
+      isFirstConsultDiscount = true;
+      
+      // Mark discount as used
+      await prisma.user.update({
+        where: { id: data.clientId },
+        data: { hasUsedFirstConsultDiscount: true }
+      });
+
+      // Track freebie usage
+      await analyticsService.trackFreebieUsage(data.clientId, 'first_consult_discount', {
+        originalAmount,
+        discountedAmount: clientPaymentAmount,
+        savingsAmount: originalAmount - clientPaymentAmount,
+        lawyerId: data.lawyerId
+      });
+    }
+    
     const platformCommissionRate = 0.10; // 10%
     const platformCommission = clientPaymentAmount * platformCommissionRate;
     const lawyerPayout = clientPaymentAmount - platformCommission;

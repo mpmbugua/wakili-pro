@@ -243,6 +243,25 @@ export const BookingPage: React.FC = () => {
         </button>
 
         <div className="max-w-2xl mx-auto">
+          {/* First Consultation Discount Banner */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 rounded-lg p-6 mb-6 shadow-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-green-900">First Consultation 50% OFF! 🎉</h3>
+                  <p className="text-sm text-green-700">Save on your first lawyer consultation</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-green-600">50% OFF</p>
+                <p className="text-xs text-green-700">First-time discount</p>
+              </div>
+            </div>
+          </div>
+
           <div className="card">
             <div className="p-8">
               <h1 className="text-2xl font-semibold text-slate-900 mb-2">

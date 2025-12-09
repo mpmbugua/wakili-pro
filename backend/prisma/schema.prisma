@@ -120,6 +120,7 @@ model LawyerProfile {
   phoneNumber                         String?
   yearOfAdmission                     Int?
   location                            String?
+  allowsFirstConsultDiscount          Boolean             @default(true)
   linkedInProfile                     String?
   profileImageUrl                     String?
   bio                                 String?
@@ -177,6 +178,27 @@ model User {
   facebookId                                                 String?                   @unique
   name                                                       String?
   isVerified                                                 Boolean?                  @default(false)
+  
+  // Freebie tracking (one-time for regular users)
+  hasUsedFreeReview                                          Boolean                   @default(false)
+  freeServiceRequestUsed                                     Boolean                   @default(false)
+  hasUsedFirstConsultDiscount                                Boolean                   @default(false)
+  freePDFDownloadUsed                                        Boolean                   @default(false)
+  
+  // Monthly quotas (for lawyers)
+  freeAIReviewsUsed                                          Int                       @default(0)
+  freeAIReviewsLimit                                         Int                       @default(1)
+  freePDFDownloadsUsed                                       Int                       @default(0)
+  freePDFDownloadsLimit                                      Int                       @default(0)
+  lastQuotaReset                                             DateTime?
+  
+  // Abuse prevention
+  phoneVerified                                              Boolean                   @default(false)
+  phoneVerifiedAt                                            DateTime?
+  lastLoginIP                                                String?
+  deviceFingerprint                                          String?
+  suspiciousActivityFlag                                     Boolean                   @default(false)
+  
   aiQueries                                                  AIQuery[]                 @relation("UserAIQueries")
   Article                                                    Article[]
   AuditLog                                                   AuditLog[]
@@ -1133,6 +1155,40 @@ enum PricingTier {
   STANDARD
   PREMIUM
   ELITE
+}
+
+model AnalyticsEvent {
+  id            String   @id @default(cuid())
+  userId        String?
+  eventName     String
+  eventType     String
+  properties    Json?
+  sessionId     String?
+  deviceInfo    Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+  
+  @@index([userId, eventName])
+  @@index([createdAt])
+  @@index([eventName, createdAt])
+}
+
+model AnalyticsEventArchive {
+  id            String   @id @default(cuid())
+  userId        String?
+  eventName     String
+  eventType     String
+  properties    Json?
+  sessionId     String?
+  deviceInfo    Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime
+  archivedAt    DateTime @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
 }
 
 enum DocumentTier {

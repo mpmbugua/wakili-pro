@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
+import { detectAbusePatterns } from '../middleware/abusePreventionMiddleware';
 import {
   createServiceRequest,
   getServiceRequest,
@@ -18,7 +19,7 @@ const router = Router();
 router.use(authenticateToken);
 
 // Client routes
-router.post('/', createServiceRequest); // Create new service request
+router.post('/', detectAbusePatterns, createServiceRequest); // Create new service request
 router.get('/my-requests', getMyRequests); // Get client's own requests
 router.get('/:id/quotes', getQuotesForRequest); // Get all quotes for a request
 router.post('/:id/select', selectLawyer); // Select lawyer from quotes

@@ -2,6 +2,8 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '../types/express';
 import * as documentMarketplaceService from '../services/documentMarketplaceService';
 import { prisma } from '../utils/database';
+import * as quotaService from '../services/quotaService';
+import * as analyticsService from '../services/analyticsService';
 
 // List all available document templates
 export async function listDocumentTemplates(req: AuthenticatedRequest, res: Response) {
@@ -49,20 +51,101 @@ export async function initiateMarketplacePurchase(req: AuthenticatedRequest, res
       });
     }
 
-    // Create a pending purchase record
+    // Check for freebies and quotas
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        freePDFDownloadUsed: true,
+        role: true,
+        lawyerProfile: {
+          select: { tier: true }
+        }
+      }
+    });
+
+    let isFreebie = false;
+    let freebieReason = '';
+
+    // Check one-time freebie for regular users
+    if (!user?.freePDFDownloadUsed) {
+      isFreebie = true;
+      freebieReason = 'first_pdf_download';
+      
+      // Mark freebie as used
+      await prisma.user.update({
+        where: { id: userId },
+        data: { freePDFDownloadUsed: true }
+      });
+    }
+    // Check lawyer monthly quotas
+    else if (user?.role === 'LAWYER') {
+      const allowed = await quotaService.checkAndConsumePDFDownload(userId);
+      if (allowed) {
+        isFreebie = true;
+        freebieReason = 'lawyer_quota';
+      }
+    }
+
+    // Create purchase record
     const purchase = await prisma.documentPurchase.create({
       data: {
         userId,
         documentId: template.id,
-        amount: price,
+        amount: isFreebie ? 0 : price,
         type: template.type || 'marketplace-template',
-        content: '', // Empty content, will be generated after payment
+        content: '', // Empty content, will be generated
         description: documentTitle,
         template: template.template || '',
-        status: 'PENDING', // Will be updated to COMPLETED after payment
+        status: isFreebie ? 'COMPLETED' : 'PENDING',
         updatedAt: new Date()
       }
     });
+
+    // If freebie, process immediately
+    if (isFreebie) {
+      // Track freebie usage
+      await analyticsService.trackFreebieUsage(userId, freebieReason, {
+        purchaseId: purchase.id,
+        templateId,
+        savings: price
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'FREE PDF download! Document ready for download.',
+        data: {
+          purchaseId: purchase.id,
+          isFreebie: true,
+          freebieReason,
+          amount: 0,
+          savings: price,
+          downloadReady: true
+        }
+      });
+    }
+
+    // If not freebie or quota exhausted, check if we should show upgrade prompt
+    if (user?.role === 'LAWYER') {
+      const quota = await quotaService.getPDFDownloadQuota(userId);
+      if (quota.remaining === 0) {
+        // Track quota exhaustion
+        await analyticsService.trackQuotaExhaustion(userId, 'pdf_download', quota.tier || 'FREE');
+        
+        return res.status(402).json({
+          success: false,
+          message: 'PDF download quota exhausted',
+          quotaExhausted: true,
+          currentTier: quota.tier,
+          upgradePrompt: {
+            message: `You've used all ${quota.limit} PDF downloads this month`,
+            upgradeTo: quota.tier === 'FREE' ? 'LITE' : 'PRO',
+            upgradeFeatures: quota.tier === 'FREE' 
+              ? { aiReviews: 15, pdfDownloads: 10, price: 2999 }
+              : { aiReviews: 'unlimited', pdfDownloads: 'unlimited', price: 4999 }
+          }
+        });
+      }
+    }
 
     return res.status(200).json({
       success: true,

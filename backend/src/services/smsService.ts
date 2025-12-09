@@ -1,29 +1,26 @@
 /**
  * SMS service for sending transactional SMS messages
- * Uses AfricasTalking API for production SMS delivery
+ * Uses Olympus SMS API for production SMS delivery
  * Logs to console in development mode
  */
 
 import axios from 'axios';
 
-const AFRICASTALKING_API_URL = 'https://api.sandbox.africastalking.com/version1/messaging';
-const AFRICASTALKING_PROD_URL = 'https://api.africastalking.com/version1/messaging';
+const OLYMPUS_SMS_API_URL = 'https://sms.ots.co.ke/api/v3/';
 
-interface AfricasTalkingResponse {
-  SMSMessageData: {
-    Message: string;
-    Recipients: Array<{
-      statusCode: number;
-      number: string;
-      status: string;
-      cost: string;
-      messageId: string;
-    }>;
+interface OlympusSMSResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    messageId: string;
+    cost: number;
+    balance: number;
   };
+  error?: string;
 }
 
 /**
- * Send an SMS message via AfricasTalking API
+ * Send an SMS message via Olympus SMS API
  * 
  * @param phoneNumber - Phone number in format +254XXXXXXXXX or 254XXXXXXXXX
  * @param message - SMS message (max 160 characters recommended)
@@ -44,12 +41,12 @@ export async function sendSMS(phoneNumber: string, message: string): Promise<voi
     return;
   }
 
-  // Check if AfricasTalking credentials are configured
-  const apiKey = process.env.AFRICASTALKING_API_KEY;
-  const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
+  // Check if Olympus SMS credentials are configured
+  const apiKey = process.env.OLYMPUS_SMS_API_KEY;
+  const senderId = process.env.SMS_SENDER_ID || 'WAKILIPRO';
 
   if (!apiKey) {
-    console.warn('⚠️ AfricasTalking API key not configured. SMS would be sent:', {
+    console.warn('⚠️ Olympus SMS API key not configured. SMS would be sent:', {
       to: normalizedPhone,
       message: message.substring(0, 50) + (message.length > 50 ? '...' : '')
     });
@@ -57,47 +54,41 @@ export async function sendSMS(phoneNumber: string, message: string): Promise<voi
   }
 
   try {
-    // Determine API URL based on username
-    const apiUrl = username === 'sandbox' ? AFRICASTALKING_API_URL : AFRICASTALKING_PROD_URL;
-
-    // Send SMS via AfricasTalking API
-    const response = await axios.post<AfricasTalkingResponse>(
-      apiUrl,
-      new URLSearchParams({
-        username: username,
+    // Send SMS via Olympus SMS API
+    const response = await axios.post<OlympusSMSResponse>(
+      `${OLYMPUS_SMS_API_URL}sms/send`,
+      {
         to: normalizedPhone,
         message: message,
-        from: process.env.SMS_SENDER_ID || 'WAKILIPRO'
-      }).toString(),
+        sender_id: senderId
+      },
       {
         headers: {
-          'apiKey': apiKey,
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
       }
     );
 
     const result = response.data;
-    const recipient = result.SMSMessageData.Recipients[0];
 
-    if (recipient.statusCode === 101) {
+    if (result.success) {
       console.log('✅ SMS sent successfully:', {
         to: normalizedPhone,
-        status: recipient.status,
-        messageId: recipient.messageId,
-        cost: recipient.cost
+        messageId: result.data?.messageId,
+        cost: result.data?.cost,
+        balance: result.data?.balance
       });
     } else {
       console.error('❌ SMS delivery failed:', {
         to: normalizedPhone,
-        status: recipient.status,
-        statusCode: recipient.statusCode
+        error: result.error || result.message
       });
-      throw new Error(`SMS delivery failed: ${recipient.status}`);
+      throw new Error(`SMS delivery failed: ${result.error || result.message}`);
     }
   } catch (error: any) {
-    console.error('❌ AfricasTalking SMS error:', {
+    console.error('❌ Olympus SMS error:', {
       message: error.message,
       response: error.response?.data,
       to: normalizedPhone
@@ -166,6 +157,12 @@ export async function sendAppointmentReminder(
  */
 export async function sendBulkSMS(
   phoneNumbers: string[],
+/**
+ * Bulk SMS - send same message to multiple recipients
+ * Useful for announcements or batch notifications
+ */
+export async function sendBulkSMS(
+  phoneNumbers: string[],
   message: string
 ): Promise<void> {
   // In development mode
@@ -176,8 +173,8 @@ export async function sendBulkSMS(
     return;
   }
 
-  const apiKey = process.env.AFRICASTALKING_API_KEY;
-  const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
+  const apiKey = process.env.OLYMPUS_SMS_API_KEY;
+  const senderId = process.env.SMS_SENDER_ID || 'WAKILIPRO';
 
   if (!apiKey) {
     console.warn(`⚠️ Bulk SMS not sent (no API key) to ${phoneNumbers.length} recipients`);
@@ -185,47 +182,40 @@ export async function sendBulkSMS(
   }
 
   try {
-    const apiUrl = username === 'sandbox' ? AFRICASTALKING_API_URL : AFRICASTALKING_PROD_URL;
     const normalizedPhones = phoneNumbers.map(normalizePhoneNumber);
 
-    const response = await axios.post<AfricasTalkingResponse>(
-      apiUrl,
-      new URLSearchParams({
-        username: username,
-        to: normalizedPhones.join(','), // Comma-separated for bulk
+    // Olympus SMS API may support bulk sending
+    // If not, send individually (check API documentation)
+    const response = await axios.post<OlympusSMSResponse>(
+      `${OLYMPUS_SMS_API_URL}sms/send-bulk`,
+      {
+        recipients: normalizedPhones,
         message: message,
-        from: process.env.SMS_SENDER_ID || 'WAKILIPRO'
-      }).toString(),
+        sender_id: senderId
+      },
       {
         headers: {
-          'apiKey': apiKey,
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
       }
     );
 
     const result = response.data;
-    const successful = result.SMSMessageData.Recipients.filter(r => r.statusCode === 101);
-    const failed = result.SMSMessageData.Recipients.filter(r => r.statusCode !== 101);
 
-    console.log(`✅ Bulk SMS: ${successful.length} sent, ${failed.length} failed`);
-    
-    if (failed.length > 0) {
-      console.warn('Failed recipients:', failed.map(r => ({ number: r.number, status: r.status })));
+    if (result.success) {
+      console.log(`✅ Bulk SMS sent to ${phoneNumbers.length} recipients`);
+    } else {
+      console.warn('⚠️ Bulk SMS failed:', result.error || result.message);
     }
   } catch (error: any) {
-    console.error('❌ Bulk SMS error:', error.message);
-  }
-}
-
 /**
  * Fetch SMS delivery reports
  * Check status of previously sent messages
  */
 export async function fetchDeliveryReports(messageId?: string): Promise<any> {
-  const apiKey = process.env.AFRICASTALKING_API_KEY;
-  const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
+  const apiKey = process.env.OLYMPUS_SMS_API_KEY;
 
   if (!apiKey) {
     console.warn('⚠️ Cannot fetch delivery reports: API key not configured');
@@ -233,19 +223,13 @@ export async function fetchDeliveryReports(messageId?: string): Promise<any> {
   }
 
   try {
-    const baseUrl = username === 'sandbox' 
-      ? 'https://api.sandbox.africastalking.com/version1/messaging'
-      : 'https://api.africastalking.com/version1/messaging';
+    const url = messageId 
+      ? `${OLYMPUS_SMS_API_URL}sms/status/${messageId}`
+      : `${OLYMPUS_SMS_API_URL}sms/reports`;
 
-    const params: any = { username };
-    if (messageId) {
-      params.messageId = messageId;
-    }
-
-    const response = await axios.get(`${baseUrl}`, {
-      params,
+    const response = await axios.get(url, {
       headers: {
-        'apiKey': apiKey,
+        'Authorization': `Bearer ${apiKey}`,
         'Accept': 'application/json'
       }
     });
@@ -256,6 +240,8 @@ export async function fetchDeliveryReports(messageId?: string): Promise<any> {
     console.error('❌ Error fetching delivery reports:', error.message);
     return null;
   }
+}   return null;
+  }
 }
 
 /**
@@ -263,7 +249,11 @@ export async function fetchDeliveryReports(messageId?: string): Promise<any> {
  */
 export async function checkBalance(): Promise<{ balance: string; currency: string } | null> {
   const apiKey = process.env.AFRICASTALKING_API_KEY;
-  const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
+/**
+ * Check account balance (SMS credits remaining)
+ */
+export async function checkBalance(): Promise<{ balance: string; currency: string } | null> {
+  const apiKey = process.env.OLYMPUS_SMS_API_KEY;
 
   if (!apiKey) {
     console.warn('⚠️ Cannot check balance: API key not configured');
@@ -271,23 +261,19 @@ export async function checkBalance(): Promise<{ balance: string; currency: strin
   }
 
   try {
-    const baseUrl = username === 'sandbox'
-      ? 'https://api.sandbox.africastalking.com/version1/user'
-      : 'https://api.africastalking.com/version1/user';
-
-    const response = await axios.get(`${baseUrl}?username=${username}`, {
+    const response = await axios.get(`${OLYMPUS_SMS_API_URL}account/balance`, {
       headers: {
-        'apiKey': apiKey,
+        'Authorization': `Bearer ${apiKey}`,
         'Accept': 'application/json'
       }
     });
 
-    const balanceData = response.data.UserData.balance;
-    console.log(`💰 AfricasTalking Balance: ${balanceData}`);
+    const balanceData = response.data;
+    console.log(`💰 Olympus SMS Balance:`, balanceData);
     
     return {
-      balance: balanceData.split(' ')[0],
-      currency: balanceData.split(' ')[1] || 'KES'
+      balance: balanceData.balance || balanceData.data?.balance || '0',
+      currency: balanceData.currency || 'KES'
     };
   } catch (error: any) {
     console.error('❌ Error checking balance:', error.message);

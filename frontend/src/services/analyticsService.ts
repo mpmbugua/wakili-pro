@@ -1,4 +1,5 @@
 import { ApiResponse } from '@shared/types';
+import axiosInstance from '../lib/axios';
 
 const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -10,6 +11,135 @@ async function makeRequest<T = unknown>(path: string, options?: RequestInit): Pr
   if (!res.ok) throw new Error('Network error');
   return res.json();
 }
+
+interface EventProperties {
+  [key: string]: any;
+}
+
+/**
+ * Track analytics event (new freebie tracking system)
+ */
+export const trackEvent = async (
+  eventName: string,
+  properties: EventProperties = {}
+): Promise<void> => {
+  try {
+    await axiosInstance.post('/analytics/track', {
+      eventName,
+      properties,
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      screenResolution: `${window.screen.width}x${window.screen.height}`
+    });
+  } catch (error) {
+    // Non-blocking - log but don't throw
+    console.warn('[Analytics] Failed to track event:', eventName, error);
+  }
+};
+
+/**
+ * Track freebie usage
+ */
+export const trackFreebieUsage = async (
+  freebieType: 'first_ai_review' | 'first_service_request' | 'first_consult_discount' | 'first_pdf_download' | 'lawyer_quota',
+  properties: EventProperties = {}
+): Promise<void> => {
+  await trackEvent('freebie_used', {
+    freebieType,
+    ...properties
+  });
+};
+
+/**
+ * Track quota exhaustion
+ */
+export const trackQuotaExhaustion = async (
+  quotaType: 'ai_review' | 'pdf_download',
+  tier: string,
+  properties: EventProperties = {}
+): Promise<void> => {
+  await trackEvent('quota_exhausted', {
+    quotaType,
+    tier,
+    ...properties
+  });
+};
+
+/**
+ * Track upgrade prompt shown
+ */
+export const trackUpgradePromptShown = async (
+  currentTier: string,
+  quotaType?: string,
+  properties: EventProperties = {}
+): Promise<void> => {
+  await trackEvent('upgrade_prompt_shown', {
+    currentTier,
+    quotaType,
+    ...properties
+  });
+};
+
+/**
+ * Track upgrade prompt dismissed
+ */
+export const trackUpgradePromptDismissed = async (
+  currentTier: string,
+  quotaType?: string,
+  properties: EventProperties = {}
+): Promise<void> => {
+  await trackEvent('upgrade_prompt_dismissed', {
+    currentTier,
+    quotaType,
+    ...properties
+  });
+};
+
+/**
+ * Track upgrade conversion
+ */
+export const trackUpgradeConversion = async (
+  fromTier: string,
+  toTier: string,
+  trigger: string,
+  properties: EventProperties = {}
+): Promise<void> => {
+  await trackEvent('upgrade_conversion', {
+    fromTier,
+    toTier,
+    trigger,
+    ...properties
+  });
+};
+
+/**
+ * Track page view
+ */
+export const trackPageView = async (
+  pageName: string,
+  properties: EventProperties = {}
+): Promise<void> => {
+  await trackEvent('page_view', {
+    pageName,
+    ...properties
+  });
+};
+
+/**
+ * Track button click
+ */
+export const trackButtonClick = async (
+  buttonName: string,
+  location: string,
+  properties: EventProperties = {}
+): Promise<void> => {
+  await trackEvent('button_click', {
+    buttonName,
+    location,
+    ...properties
+  });
+};
 
 export const analyticsService = {
   async fetchFeatureEventStats(): Promise<ApiResponse<EventStats>> {

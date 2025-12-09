@@ -243,7 +243,11 @@ export const LandingPage: React.FC = () => {
                 </Link>
 
                 {/* Document Review - Case Analysis */}
-                <Link to="/documents" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block">
+                <Link to="/documents" className="bg-white rounded border border-slate-300 p-5 hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer block relative overflow-hidden">
+                  {/* FREE Badge */}
+                  <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                    FREE
+                  </div>
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="bg-blue-50 p-2 rounded">
                       <FileText className="h-5 w-5 text-blue-600" />
@@ -251,7 +255,7 @@ export const LandingPage: React.FC = () => {
                     <h3 className="text-base font-semibold text-slate-900">Case Analysis & Advice</h3>
                   </div>
                   <p className="text-xs text-slate-600 mb-4">
-                    Upload documents for AI analysis (KES 500) or lawyer certification (from KES 2,000). 24-hour turnaround.
+                    First AI Review FREE! Upload documents for AI analysis (KES 500) or lawyer certification (from KES 2,000).
                   </p>
                   <span className="text-xs text-blue-600 hover:text-blue-700 inline-flex items-center font-medium">
                     Upload document <ArrowRight className="ml-1 h-3 w-3" />

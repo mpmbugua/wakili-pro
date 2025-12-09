@@ -152,6 +152,28 @@ const DocumentMarketplacePage: React.FC = () => {
     <div className="min-h-screen bg-[#e7f3ff] py-8">
       <div className="max-w-4xl mx-auto p-8">
         <h1 className="text-2xl font-bold mb-6">AI Document Marketplace</h1>
+        
+        {/* FREE First Download Banner */}
+        <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-green-900">Choose 1 FREE Template! 🎉</h3>
+                <p className="text-sm text-green-700">Download your first legal document template at no cost</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold text-green-600">FREE</p>
+              <p className="text-xs text-green-700">First-time download</p>
+            </div>
+          </div>
+        </div>
+        
         {paymentInfo && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded" role="status" aria-live="polite">
             <div className="font-bold mb-2">Payment Initiated</div>
