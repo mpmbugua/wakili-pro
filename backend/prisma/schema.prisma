@@ -22,6 +22,8 @@ model DocumentTemplate {
   description        String
   template           String
   priceKES           Int?
+  basePrice          Int?
+  smartFillPrice     Int?
   isActive           Boolean?            @default(true)
   isPublic           Boolean?            @default(false)
   createdAt          DateTime            @default(now())
@@ -73,6 +75,7 @@ model ConsultationRecording {
   lawyerId                                  String
   uploadedAt                                DateTime?
   createdAt                                 DateTime          @default(now())
+  startedAt                                 DateTime?
   duration                                  Int?
   fileSize                                  Int?
   format                                    String?
@@ -88,6 +91,7 @@ model DeviceRegistration {
   userId      String
   deviceId    String
   deviceToken String?
+  token       String?
   platform    String
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
@@ -138,6 +142,10 @@ model LawyerProfile {
   outlookCalendarId                   String?
   calendarSyncEnabled                 Boolean             @default(false)
   lastCalendarSync                    DateTime?
+  certificationCount                  Int?                @default(0)
+  certificationCompletionRate         Float?              @default(0)
+  pricingTier                         PricingTier?        @default(STANDARD)
+  maxSpecializations                  Int?                @default(3)
   createdAt                           DateTime            @default(now())
   updatedAt                           DateTime            @updatedAt
   User_LawyerProfile_providerIdToUser User                @relation("LawyerProfile_providerIdToUser", fields: [providerId], references: [id])
@@ -145,6 +153,7 @@ model LawyerProfile {
   wallet                              LawyerWallet?
   ServiceBooking                      ServiceBooking[]
   withdrawalRequests                  WithdrawalRequest[]
+  subscriptions                       LawyerSubscription[]
 }
 
 model User {
@@ -164,6 +173,10 @@ model User {
   verificationStatus                                         String?                   @default("PENDING")
   onlineStatus                                               String?                   @default("offline")
   lastSeen                                                   DateTime?
+  googleId                                                   String?                   @unique
+  facebookId                                                 String?                   @unique
+  name                                                       String?
+  isVerified                                                 Boolean?                  @default(false)
   aiQueries                                                  AIQuery[]                 @relation("UserAIQueries")
   Article                                                    Article[]
   AuditLog                                                   AuditLog[]
@@ -362,6 +375,8 @@ model Payment {
   verifiedAt            DateTime?
   errorMessage          String?
   metadata              Json?
+  serviceType           String?
+  whtAmount             Int?               @default(0)
   EscrowTransaction     EscrowTransaction?
   booking               ServiceBooking?    @relation(fields: [bookingId], references: [id])
   DocumentTemplate      DocumentTemplate?  @relation(fields: [documentId], references: [id])
@@ -552,16 +567,18 @@ model FeatureEvent {
 }
 
 model LawyerSubscription {
-  id          String             @id
-  userId      String
-  plan        SubscriptionPlan
-  status      SubscriptionStatus @default(PENDING)
-  priceKES    Int
-  startDate   DateTime
-  endDate     DateTime
-  paymentInfo Json?
-  updatedAt   DateTime
-  User        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String             @id
+  userId          String
+  lawyerProfileId String?
+  plan            SubscriptionPlan
+  status          SubscriptionStatus @default(PENDING)
+  priceKES        Int
+  startDate       DateTime
+  endDate         DateTime
+  paymentInfo     Json?
+  updatedAt       DateTime
+  User            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lawyerProfile   LawyerProfile?     @relation(fields: [lawyerProfileId], references: [id])
 }
 
 model LoyaltyPoint {
@@ -1452,4 +1469,39 @@ enum ContactStatus {
   RESPONDED
   RESOLVED
   CLOSED
+}
+
+model LegalEvent {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  eventType   String
+  eventDate   DateTime
+  source      String
+  sourceUrl   String?
+  location    String?
+  category    String?
+  tags        String[]
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventDate])
+  @@index([eventType])
+  @@index([category])
+}
+
+model MonthlyWHTReport {
+  id              String   @id @default(cuid())
+  month           Int
+  year            Int
+  totalWHT        Int
+  paymentCount    Int
+  generatedAt     DateTime @default(now())
+  submittedToKRA  Boolean  @default(false)
+  submissionDate  DateTime?
+  metadata        Json?
+
+  @@unique([month, year])
+  @@index([year, month])
 }

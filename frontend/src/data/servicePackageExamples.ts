@@ -20,7 +20,7 @@ export const servicePackageExamples: ServicePackageExample[] = [
     category: 'Property & Conveyancing',
     subcategory: 'Land Transfer',
     description: 'Complete land transfer service from search to registration. Includes title search, due diligence, consent processing, and final registration.',
-    priceRange: { min: 40000, max: 60000 },
+    priceRange: { min: 0, max: 0 },
     deliveryTime: '14-21 days',
     type: 'DOCUMENT_DRAFTING',
     whatIncluded: [
@@ -86,7 +86,7 @@ export const servicePackageExamples: ServicePackageExample[] = [
     category: 'Business & Corporate',
     subcategory: 'Incorporation',
     description: 'End-to-end company incorporation package. Name search, BRS registration, KRA PIN, and all compliance documents.',
-    priceRange: { min: 20000, max: 30000 },
+    priceRange: { min: 0, max: 0 },
     deliveryTime: '7-10 days',
     type: 'DOCUMENT_DRAFTING',
     whatIncluded: [
@@ -154,7 +154,7 @@ export const servicePackageExamples: ServicePackageExample[] = [
     category: 'Family Law',
     subcategory: 'Divorce',
     description: 'Streamlined divorce process for mutual consent cases. Includes petition drafting, filing, and decree finalization.',
-    priceRange: { min: 30000, max: 50000 },
+    priceRange: { min: 0, max: 0 },
     deliveryTime: '30-60 days',
     type: 'DOCUMENT_DRAFTING',
     whatIncluded: [
