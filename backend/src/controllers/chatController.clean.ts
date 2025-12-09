@@ -59,7 +59,8 @@ export const createChatRoom = async (req: AuthRequest, res: Response) => {
           bookingId,
           clientId: booking.clientId,
           lawyerId: booking.providerId,
-          status: 'ACTIVE' as const,
+          name: `Consultation - ${booking.id.substring(0, 8)}`,
+          status: 'ACTIVE',
         },
       });
     }
@@ -228,6 +229,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       data: {
         roomId: validatedData.roomId,
         senderId: userId,
+        clientId: chatRoom.clientId,
         content: validatedData.content,
         messageType: validatedData.messageType,
         fileUrl: validatedData.fileUrl,

@@ -52,7 +52,7 @@ export const createChatRoom = async (req: AuthRequest, res: Response) => {
           bookingId,
           clientId: booking.clientId,
           lawyerId: booking.providerId,
-          // Add required fields per schema, e.g., name, status
+          name: `Consultation - ${booking.id.substring(0, 8)}`,
           status: 'ACTIVE',
         },
       });
@@ -239,12 +239,12 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       data: {
         roomId: validatedData.roomId,
         senderId: userId,
+        clientId: chatRoom.clientId,
         content: validatedData.content,
         messageType: validatedData.messageType,
         fileUrl: validatedData.fileUrl,
         fileName: validatedData.fileName,
         fileSize: validatedData.fileSize,
-        // Add required fields or enums if needed by schema
       },
       include: {
         sender: { select: { id: true, firstName: true, lastName: true, email: true } }

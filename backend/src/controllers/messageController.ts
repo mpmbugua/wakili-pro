@@ -94,7 +94,7 @@ export const getConversations = async (req: AuthenticatedRequest, res: Response)
           ? `${otherParticipant.user.firstName} ${otherParticipant.user.lastName}`
           : 'Unknown',
         participantRole: otherParticipant?.user?.role,
-        specialty: otherParticipant?.user?.lawyerProfile?.specialization || 'General Practice',
+        specialty: otherParticipant?.user?.lawyerProfile?.specializations?.[0] || 'General Practice',
         lastMessage: lastMessage?.content || '',
         lastMessageTime: lastMessage?.createdAt || conv.updatedAt,
         unreadCount: conv._count.messages,
