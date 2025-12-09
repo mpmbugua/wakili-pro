@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { X, Crown, Shield, Zap, CheckCircle, TrendingUp } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { Button } from './ui/Button';
 import { trackUpgradePromptShown, trackUpgradePromptDismissed } from '../services/analyticsService';
 
 interface UpgradePromptModalProps {
