@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "sync-pinecone": "tsx src/scripts/syncPineconeMetadata.ts"
+  }
+}

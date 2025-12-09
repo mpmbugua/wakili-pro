@@ -23,7 +23,8 @@
     "seed:docs": "ts-node ./prisma/seedDocumentTemplates.ts",
     "seed:articles": "ts-node ./prisma/seed-articles.ts",
     "seed:all": "npm run seed:users && npm run seed:lawyers && npm run seed:docs && npm run seed:articles",
-    "seed:auto": "ts-node ./prisma/seedAll.ts"
+    "seed:auto": "ts-node ./prisma/seedAll.ts",
+    "sync:pinecone": "ts-node ./src/scripts/syncPineconeMetadata.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
