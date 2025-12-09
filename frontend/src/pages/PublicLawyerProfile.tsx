@@ -52,7 +52,7 @@ interface PublicLawyerData {
 export const PublicLawyerProfile: React.FC = () => {
   const { lawyerId } = useParams<{ lawyerId: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { trackLawyerView } = useEventTracking();
   const [lawyer, setLawyer] = useState<PublicLawyerData | null>(null);
   const [loading, setLoading] = useState(true);
