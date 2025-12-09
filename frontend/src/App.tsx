@@ -208,17 +208,10 @@ function App() {
       <Router>
         <AnalyticsTracker />
         <Routes>
-          {/* Admin Login Route - Standalone */}
-          <Route 
-            path="/admin/login" 
-            element={<AdminLoginPage />} 
-          />
-
-          {/* Public Lawyer Profile - Standalone */}
-          <Route 
-            path="/lawyers/:lawyerId" 
-            element={<PublicLawyerProfile />} 
-          />
+          {/* Standalone Routes (No Layout) */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/lawyers/:lawyerId" element={<PublicLawyerProfile />} />
+          <Route path="/voip-call" element={<VoipCallPage />} />
 
           {/* Public Routes - Wrapped in GlobalLayout */}
           <Route path="/" element={<GlobalLayout><LandingPage /></GlobalLayout>} />
@@ -242,7 +235,6 @@ function App() {
           <Route path="/payment-callback" element={<GlobalLayout><PaymentCallbackPage /></GlobalLayout>} />
           <Route path="/verify/:certificateId" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />
           <Route path="/verify" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />
-          <Route path="/voip-call" element={<VoipCallPage />} />
           
           {/* Auth Routes - GlobalLayout */}
           <Route 
@@ -263,9 +255,7 @@ function App() {
           />
 
           {/* Protected Routes - Wrapped in AppShell */}
-          <Route path="*" element={
-            <AppShell>
-              <Routes>
+          <Route element={<AppShell><Routes>
             
             {/* Service Request Quote Routes (Protected) */}
             <Route 
@@ -611,11 +601,9 @@ function App() {
               } 
             />
 
-            {/* Catch-all - redirect to landing */}
+            {/* Catch-all inside AppShell - redirect to landing */}
             <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </AppShell>
-          } />
+          </Routes></AppShell>} />
         </Routes>
       </Router>
       <EmergencyCallButton />
