@@ -177,8 +177,7 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
         createdAt: serviceRequest.createdAt,
         phoneNumber: serviceRequest.phoneNumber,
         email: serviceRequest.email
-      } as any, formattedLawyers).catch(err =>
-      }, formattedLawyers).catch(err => {
+      } as any, formattedLawyers).catch(err => {
         console.error('Failed to send lawyer notifications:', err);
       });
     }
