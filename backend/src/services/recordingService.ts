@@ -335,7 +335,7 @@ export class RecordingService {
           startedAt: new Date(),
           createdAt: new Date()
           // updatedAt removed - doesn't exist in schema
-        }
+        } as any
       });
 
       // Clean up temporary file

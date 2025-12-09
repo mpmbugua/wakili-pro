@@ -243,7 +243,7 @@ class DocumentIngestionService {
    * List all indexed documents
    */
   async listDocuments(options?: {
-    documentType?: LegalDocumentType;
+    documentType?: string; // Was LegalDocumentType - enum doesn't exist
     category?: string;
     limit?: number;
   }): Promise<any[]> {

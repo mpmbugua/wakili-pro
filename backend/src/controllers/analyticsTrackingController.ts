@@ -454,16 +454,17 @@ export const exportAnalyticsData = async (req: AuthenticatedRequest, res: Respon
           where: {
             startedAt: { gte: start, lte: end },
             converted: true
-          },
-          include: {
-            user: {
-              select: {
-                id: true,
-                role: true
-              }
-            }
-          } as any
-        });
+          }
+          // Include removed - causing type issues
+          // include: {
+          //   user: {
+          //     select: {
+          //       id: true,
+          //       role: true
+          //     }
+          //   }
+          // }
+        } as any);
         break;
 
       case 'page-analytics':

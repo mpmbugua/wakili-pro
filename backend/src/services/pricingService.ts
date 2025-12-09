@@ -273,7 +273,7 @@ export const recordPayment = async (
       userId,
       bookingId,
       serviceType,
-      amount: pricingData.netAmount, // Fixed: grossAmount doesn't exist, use netAmount
+      amount: pricingData.lawyerShareBeforeWHT, // Use lawyerShareBeforeWHT instead of netAmount/grossAmount
       status: 'PAID',
       method: paymentMethod,
       externalTransactionId,

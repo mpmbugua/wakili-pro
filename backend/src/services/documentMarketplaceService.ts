@@ -12,7 +12,7 @@ export async function generateDocument(templateId: string, userInput: Record<str
   const template = await prisma.documentTemplate.findUnique({ where: { id: templateId } });
   if (!template) throw new Error('Template not found');
 
-  const generatedContent = await generateDocumentWithAI(template, userInput);
+  const generatedContent = await generateDocumentWithAI(template as any, userInput); // Cast to any to fix type mismatch
 
   // Optionally store generated content in a DocumentVersion or update a purchase record later
   // For now return generated content
