@@ -228,7 +228,15 @@ router.post('/seed-sample-data', authenticateToken, authorizeRoles('ADMIN', 'SUP
       if (!existing) {
         await prisma.legalDocument.create({
           data: {
-            ...doc,
+            title: doc.title,
+            documentType: doc.documentType,
+            category: doc.category,
+            citation: doc.citation,
+            sourceUrl: doc.sourceUrl,
+            filePath: `/legal-docs/${doc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
+            fileName: `${doc.title}.pdf`,
+            fileSize: 1000,
+            uploadedBy: req.user!.id,
             chunksCount: 10,
             vectorsCount: 10
           }

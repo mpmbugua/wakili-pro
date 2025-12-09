@@ -1,4 +1,5 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
+import { AuthRequest } from '../../types/auth';
 import {
   removeDuplicates,
   removeJunkDocuments,

@@ -264,7 +264,8 @@ export async function scrapeJudiciaryEvents() {
               data: { 
                 title: event.title, 
                 eventDate: new Date(event.eventDate), 
-                eventType: event.eventType, 
+                eventType: event.eventType,
+                source: 'Kenya Law Website',
                 sourceUrl: event.sourceUrl 
               }
             });
@@ -391,7 +392,8 @@ export async function scrapeLawSocietyEvents() {
               data: { 
                 title: event.title, 
                 eventDate: new Date(event.eventDate), 
-                eventType: event.eventType, 
+                eventType: event.eventType,
+                source: 'Judiciary Website',
                 sourceUrl: event.sourceUrl 
               }
             });
@@ -469,7 +471,8 @@ export async function scrapeKenyanLawReviewEvents() {
               data: { 
                 title: event.title, 
                 eventDate: eventDateObj, 
-                eventType: event.eventType, 
+                eventType: event.eventType,
+                source: 'Parliament Website',
                 sourceUrl: event.sourceUrl 
               }
             });

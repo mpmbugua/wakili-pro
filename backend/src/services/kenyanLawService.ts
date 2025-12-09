@@ -99,7 +99,7 @@ Be conversational but professional, accurate but accessible to laypeople.
       // const conversationHistory: Array<{ role: string; content: string }> = [];
 
       // Use RAG service to get answer with legal document context
-      // const ragResponse = await ragService.query(request.query, conversationHistory);
+      const ragResponse = await ragService.query(request.query, conversationHistory);
 
       // Database save disabled until AIQuery schema is fixed (currently using 'aIQuery' which doesn't match 'AIQuery' model)
       // TODO: Fix model name mismatch and re-enable database logging
