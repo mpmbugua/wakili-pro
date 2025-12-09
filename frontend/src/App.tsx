@@ -208,12 +208,11 @@ function App() {
       <Router>
         <AnalyticsTracker />
         <Routes>
-          {/* Standalone Routes (No Layout) */}
+          {/* Standalone Routes (No Layout) - MUST BE FIRST */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/lawyers/:lawyerId" element={<PublicLawyerProfile />} />
           <Route path="/voip-call" element={<VoipCallPage />} />
 
-          {/* Public Routes - Wrapped in GlobalLayout */}
+          {/* Public Routes with GlobalLayout */}
           <Route path="/" element={<GlobalLayout><LandingPage /></GlobalLayout>} />
           <Route path="/about" element={<GlobalLayout><AboutPage /></GlobalLayout>} />
           <Route path="/contact" element={<GlobalLayout><ContactPage /></GlobalLayout>} />
@@ -223,6 +222,7 @@ function App() {
           <Route path="/blog" element={<GlobalLayout><BlogPage /></GlobalLayout>} />
           <Route path="/ai" element={<GlobalLayout><AIAssistant /></GlobalLayout>} />
           <Route path="/lawyers" element={<GlobalLayout><LawyersBrowse /></GlobalLayout>} />
+          <Route path="/lawyers/:lawyerId" element={<PublicLawyerProfile />} />
           <Route path="/services" element={<GlobalLayout><LegalServicesPage /></GlobalLayout>} />
           <Route path="/marketplace" element={<GlobalLayout><MarketplaceBrowse /></GlobalLayout>} />
           <Route path="/resources" element={<GlobalLayout><ResourcesPage /></GlobalLayout>} />
@@ -236,7 +236,7 @@ function App() {
           <Route path="/verify/:certificateId" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />
           <Route path="/verify" element={<GlobalLayout><VerifyCertificate /></GlobalLayout>} />
           
-          {/* Auth Routes - GlobalLayout */}
+          {/* Auth Routes */}
           <Route 
             path="/login" 
             element={isAuthenticated ? <Navigate to="/dashboard" /> : <GlobalLayout><Login /></GlobalLayout>} 
@@ -253,357 +253,437 @@ function App() {
             path="/reset-password" 
             element={<GlobalLayout><ResetPassword /></GlobalLayout>} 
           />
-
-          {/* Protected Routes - Wrapped in AppShell */}
-          <Route element={<AppShell><Routes>
             
-            {/* Service Request Quote Routes (Protected) */}
+            {/* Service Request Quote Routes (Protected with AppShell) */}
             <Route 
               path="/service-requests/:id/quote" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <LawyerQuoteSubmissionPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <LawyerQuoteSubmissionPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/service-requests/:id/quotes" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <QuoteComparisonPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <QuoteComparisonPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/service-requests/:id/track" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <ServiceTrackingPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <ServiceTrackingPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
 
-            {/* Protected Dashboard Routes */}
+            {/* Protected Dashboard Routes with AppShell */}
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <Dashboard />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <Dashboard />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/bookings" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <MyBookings />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <MyBookings />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/bookings/:bookingId" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <BookingDetails />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <BookingDetails />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/profile/settings" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <LawyerProfileSettings />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <LawyerProfileSettings />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/calendar" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <CalendarPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <CalendarPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/subscriptions" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <SubscriptionsPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <SubscriptionsPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/settings" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <SettingsPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/help" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <HelpPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <HelpPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/submit-article" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <SubmitArticlePage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <SubmitArticlePage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/clients" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <MyClientsPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <MyClientsPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/my-services" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <MyServicesPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <MyServicesPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/billing" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <BillingPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <BillingPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/analytics" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <AnalyticsPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <AnalyticsPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/performance" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <PerformancePage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <PerformancePage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/consultations" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <ConsultationsPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <ConsultationsPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/consultations/new" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <NewConsultationPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <NewConsultationPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/consultation/:consultationId/video" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <VideoConsultationPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <VideoConsultationPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/clients/new" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <NewClientPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <NewClientPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/lawyer/ai" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <LawyerAIAssistant />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <LawyerAIAssistant />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/admin/ai" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <AdminAIAssistant />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <AdminAIAssistant />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/appointments" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <AppointmentsPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <AppointmentsPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/messages" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <MessagesPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <MessagesPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/documents/:documentId/request-review" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <DocumentReviewRequestPage />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <DocumentReviewRequestPage />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/document-reviews" 
               element={
-                <VerifiedLawyerRoute>
-                  <DocumentReviewDashboard />
-                </VerifiedLawyerRoute>
+                <AppShell>
+                  <VerifiedLawyerRoute>
+                    <DocumentReviewDashboard />
+                  </VerifiedLawyerRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/lawyer/onboarding" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <LawyerOnboarding />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <LawyerOnboarding />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/lawyer/profile" 
               element={
-                <ProtectedRoute hydrated={hydrated}>
-                  <LawyerProfile />
-                </ProtectedRoute>
+                <AppShell>
+                  <ProtectedRoute hydrated={hydrated}>
+                    <LawyerProfile />
+                  </ProtectedRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/lawyer/signature-setup" 
               element={
-                <VerifiedLawyerRoute>
-                  <LawyerSignatureSetup />
-                </VerifiedLawyerRoute>
+                <AppShell>
+                  <VerifiedLawyerRoute>
+                    <LawyerSignatureSetup />
+                  </VerifiedLawyerRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/lawyer/certifications" 
               element={
-                <VerifiedLawyerRoute>
-                  <DocumentCertificationPage />
-                </VerifiedLawyerRoute>
+                <AppShell>
+                  <VerifiedLawyerRoute>
+                    <DocumentCertificationPage />
+                  </VerifiedLawyerRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/lawyer/wallet" 
               element={
-                <VerifiedLawyerRoute>
-                  <LawyerWalletPage />
-                </VerifiedLawyerRoute>
+                <AppShell>
+                  <VerifiedLawyerRoute>
+                    <LawyerWalletPage />
+                  </VerifiedLawyerRoute>
+                </AppShell>
               } 
             />
             
-            {/* Admin Routes */}
+            {/* Admin Routes with AppShell */}
             <Route 
               path="/admin" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <AdminDashboardWrapper />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <AdminDashboardWrapper />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/admin/analytics" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <AnalyticsDashboard />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <AnalyticsDashboard />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/admin/ai-data-export" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <AIDataExportPage />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <AIDataExportPage />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/admin/articles" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <ArticleManagementPage />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <ArticleManagementPage />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/admin/lawyers" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <AdminLawyerApproval />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <AdminLawyerApproval />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/admin/withdrawals" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <AdminWithdrawalManagement />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <AdminWithdrawalManagement />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/admin/legal-knowledge" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <AdminLegalKnowledgeBase />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <AdminLegalKnowledgeBase />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/admin/pinecone-test" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <PineconeTestPage />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <PineconeTestPage />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
             <Route 
               path="/admin/call-logs" 
               element={
-                <AdminRoute hydrated={hydrated}>
-                  <CallLogPage />
-                </AdminRoute>
+                <AppShell>
+                  <AdminRoute hydrated={hydrated}>
+                    <CallLogPage />
+                  </AdminRoute>
+                </AppShell>
               } 
             />
 
-            {/* Super Admin Routes */}
+            {/* Super Admin Routes with AppShell */}
             <Route 
               path="/super-admin" 
               element={
-                <SuperAdminRoute hydrated={hydrated}>
-                  <SuperAdminDashboardWrapper />
-                </SuperAdminRoute>
+                <AppShell>
+                  <SuperAdminRoute hydrated={hydrated}>
+                    <SuperAdminDashboardWrapper />
+                  </SuperAdminRoute>
+                </AppShell>
               } 
             />
 
-            {/* Catch-all inside AppShell - redirect to landing */}
+            {/* Catch-all - redirect to landing */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes></AppShell>} />
         </Routes>
       </Router>
       <EmergencyCallButton />
