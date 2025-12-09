@@ -172,10 +172,10 @@ export const HelpPage: React.FC = () => {
               Learn how to make the most of Wakili Pro with our comprehensive user guide
             </p>
             <button 
-              onClick={() => window.open('/docs/getting-started.md', '_blank')}
-              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
+              onClick={() => navigate('/resources')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
             >
-              View Guide
+              View Resources
             </button>
           </div>
 
