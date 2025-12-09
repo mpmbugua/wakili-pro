@@ -38,34 +38,17 @@ export const assignLawyerToDocumentReview = async (reviewId: string): Promise<vo
     const lawyers = await prisma.user.findMany({
       where: {
         role: 'LAWYER',
-        isActive: true,
         lawyerProfile: {
           isVerified: true
         }
       },
       include: {
-        lawyerProfile: true,
-        _count: {
-          select: {
-            assignedReviews: {
-              where: {
-                status: {
-                  in: ['pending_lawyer_assignment', 'assigned', 'in_progress']
-                }
-              }
-            },
-            completedReviews: {
-              where: {
-                status: 'completed'
-              }
-            }
-          }
-        }
+        lawyerProfile: true
       },
       orderBy: [
         {
           lawyerProfile: {
-            avgRating: 'desc'
+            rating: 'desc'
           }
         }
       ]
@@ -76,8 +59,38 @@ export const assignLawyerToDocumentReview = async (reviewId: string): Promise<vo
       throw new Error('No verified lawyers available');
     }
 
+    // Get workload counts for each lawyer
+    const lawyersWithWorkload = await Promise.all(
+      lawyers.map(async (lawyer) => {
+        const [activeCount, completedCount] = await Promise.all([
+          prisma.documentReview.count({
+            where: {
+              lawyerId: lawyer.id,
+              status: {
+                in: ['pending_lawyer_assignment', 'assigned', 'in_progress']
+              }
+            }
+          }),
+          prisma.documentReview.count({
+            where: {
+              lawyerId: lawyer.id,
+              status: 'completed'
+            }
+          })
+        ]);
+
+        return {
+          ...lawyer,
+          _count: {
+            assignedReviews: activeCount,
+            completedReviews: completedCount
+          }
+        };
+      })
+    );
+
     // Filter lawyers based on tier limits (strict 2-per-service for FREE tier)
-    const eligibleLawyers = lawyers.filter(lawyer => {
+    const eligibleLawyers = lawyersWithWorkload.filter(lawyer => {
       const tier = lawyer.lawyerProfile?.tier || 'FREE';
       const activeWorkload = lawyer._count.assignedReviews;
       const completedCount = lawyer._count.completedReviews;
