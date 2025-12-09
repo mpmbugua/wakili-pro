@@ -1,7 +1,7 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import jwt from 'jsonwebtoken';
-import { PrismaClient, MessageType, NotificationType } from '@prisma/client';
+import { PrismaClient, NotificationType } from '@prisma/client';
 import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
@@ -217,8 +217,8 @@ export class ChatService {
         data: {
           roomId: data.roomId,
           senderId: socket.userId,
+          clientId: chatRoom.clientId,
           content: data.content,
-          messageType: (data.messageType as MessageType) || MessageType.TEXT,
           fileUrl: data.fileUrl,
           fileName: data.fileName,
           fileSize: data.fileSize
@@ -434,7 +434,7 @@ export class ChatService {
     try {
       const chatRoom = await prisma.chatRoom.create({
         data: {
-                // name removed: not present in schema
+          name: `Consultation - ${bookingId.substring(0, 8)}`,
           bookingId,
           clientId,
           lawyerId,

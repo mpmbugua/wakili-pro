@@ -92,7 +92,6 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
         urgency,
         phoneNumber,
         email,
-        preferredTimeline,
         additionalNotes,
         // Context fields
         propertyLocation,
@@ -178,6 +177,7 @@ export const createServiceRequest = async (req: AuthRequest, res: Response) => {
         createdAt: serviceRequest.createdAt,
         phoneNumber: serviceRequest.phoneNumber,
         email: serviceRequest.email
+      } as any, formattedLawyers).catch(err =>
       }, formattedLawyers).catch(err => {
         console.error('Failed to send lawyer notifications:', err);
       });
