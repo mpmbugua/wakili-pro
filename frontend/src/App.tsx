@@ -248,11 +248,11 @@ function App() {
           />
           <Route 
             path="/forgot-password" 
-            element={<GlobalLayout><ForgotPassword /></GlobalLayout>} 
+            element={<ForgotPassword />} 
           />
           <Route 
             path="/reset-password" 
-            element={<GlobalLayout><ResetPassword /></GlobalLayout>} 
+            element={<ResetPassword />} 
           />
             
             {/* Service Request Quote Routes (Protected with AppShell) */}
