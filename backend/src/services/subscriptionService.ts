@@ -98,7 +98,7 @@ export const createSubscription = async (
   const discountedMonthlyFee = Math.round(monthlyFee * (1 - discount));
 
   // Create subscription
-  const subscription = await prisma.subscription.create({
+  const subscription = await prisma.lawyerSubscription.create({
     data: {
       lawyerId,
       tier: targetTier,
@@ -144,7 +144,7 @@ export const createSubscription = async (
     });
 
     // Store M-Pesa request IDs in subscription metadata
-    await prisma.subscription.update({
+    await prisma.lawyerSubscription.update({
       where: { id: subscription.id },
       data: {
         metadata: {
@@ -172,7 +172,7 @@ export const confirmSubscriptionPayment = async (
   subscriptionId: string,
   transactionId: string
 ): Promise<void> => {
-  const subscription = await prisma.subscription.findUnique({
+  const subscription = await prisma.lawyerSubscription.findUnique({
     where: { id: subscriptionId },
   });
 
@@ -181,7 +181,7 @@ export const confirmSubscriptionPayment = async (
   }
 
   // Update subscription to ACTIVE
-  await prisma.subscription.update({
+  await prisma.lawyerSubscription.update({
     where: { id: subscriptionId },
     data: {
       status: 'ACTIVE',
@@ -197,7 +197,7 @@ export const confirmSubscriptionPayment = async (
  * Activate subscription and update lawyer profile
  */
 async function activateSubscription(subscriptionId: string): Promise<void> {
-  const subscription = await prisma.subscription.findUnique({
+  const subscription = await prisma.lawyerSubscription.findUnique({
     where: { id: subscriptionId },
   });
 
@@ -207,25 +207,17 @@ async function activateSubscription(subscriptionId: string): Promise<void> {
 
   const tierLimits = TIER_LIMITS[subscription.tier];
 
-  // Update lawyer profile with new tier and limits
+  // Update lawyer profile with new tier
   await prisma.lawyerProfile.update({
     where: { userId: subscription.lawyerId },
     data: {
       tier: subscription.tier,
-      maxSpecializations: tierLimits.maxSpecializations,
-      maxServicesPerMonth: tierLimits.maxServicesPerMonth,
-      maxBookingsPerMonth: tierLimits.maxBookingsPerMonth,
-      maxCertificationsPerMonth: tierLimits.maxCertificationsPerMonth,
-      // Reset usage counters on tier upgrade
-      monthlyBookings: 0,
-      monthlyCertifications: 0,
-      monthlyServices: 0,
-      usageResetAt: subscription.currentPeriodEnd,
+      maxSpecializations: tierLimits.maxSpecializations
     },
   });
 
   // Cancel any previous active subscriptions
-  await prisma.subscription.updateMany({
+  await prisma.lawyerSubscription.updateMany({
     where: {
       lawyerId: subscription.lawyerId,
       status: 'ACTIVE',
@@ -242,7 +234,7 @@ async function activateSubscription(subscriptionId: string): Promise<void> {
  * Cancel subscription
  */
 export const cancelSubscription = async (lawyerId: string): Promise<void> => {
-  const activeSubscription = await prisma.subscription.findFirst({
+  const activeSubscription = await prisma.lawyerSubscription.findFirst({
     where: { lawyerId, status: 'ACTIVE' },
   });
 
@@ -251,7 +243,7 @@ export const cancelSubscription = async (lawyerId: string): Promise<void> => {
   }
 
   // Set to cancel at end of current period
-  await prisma.subscription.update({
+  await prisma.lawyerSubscription.update({
     where: { id: activeSubscription.id },
     data: {
       cancelAt: activeSubscription.currentPeriodEnd,
@@ -268,7 +260,7 @@ export const processSubscriptionRenewals = async (): Promise<void> => {
   const now = new Date();
 
   // Find subscriptions that need renewal
-  const dueSubscriptions = await prisma.subscription.findMany({
+  const dueSubscriptions = await prisma.lawyerSubscription.findMany({
     where: {
       status: 'ACTIVE',
       nextBillingDate: { lte: now },
@@ -302,7 +294,7 @@ export const processSubscriptionRenewals = async (): Promise<void> => {
       });
 
       // Store M-Pesa request IDs in subscription metadata
-      await prisma.subscription.update({
+      await prisma.lawyerSubscription.update({
         where: { id: subscription.id },
         data: {
           metadata: {
@@ -316,7 +308,7 @@ export const processSubscriptionRenewals = async (): Promise<void> => {
       const nextBillingDate = new Date(now);
       nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
 
-      await prisma.subscription.update({
+      await prisma.lawyerSubscription.update({
         where: { id: subscription.id },
         data: {
           currentPeriodStart: now,
@@ -347,15 +339,11 @@ async function downgradeToFree(lawyerId: string): Promise<void> {
     where: { userId: lawyerId },
     data: {
       tier: LawyerTier.FREE,
-      maxSpecializations: tierLimits.maxSpecializations,
-      maxServicesPerMonth: tierLimits.maxServicesPerMonth,
-      maxBookingsPerMonth: tierLimits.maxBookingsPerMonth,
-      maxCertificationsPerMonth: tierLimits.maxCertificationsPerMonth,
-      acceptingCertifications: false, // FREE tier cannot certify
+      maxSpecializations: tierLimits.maxSpecializations
     },
   });
 
-  await prisma.subscription.updateMany({
+  await prisma.lawyerSubscription.updateMany({
     where: { lawyerId, status: 'ACTIVE' },
     data: {
       status: 'CANCELLED',
@@ -368,7 +356,7 @@ async function downgradeToFree(lawyerId: string): Promise<void> {
   const currentPeriodEnd = new Date(now);
   currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
 
-  await prisma.subscription.create({
+  await prisma.lawyerSubscription.create({
     data: {
       lawyerId,
       tier: LawyerTier.FREE,
