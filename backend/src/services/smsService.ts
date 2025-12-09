@@ -157,12 +157,6 @@ export async function sendAppointmentReminder(
  */
 export async function sendBulkSMS(
   phoneNumbers: string[],
-/**
- * Bulk SMS - send same message to multiple recipients
- * Useful for announcements or batch notifications
- */
-export async function sendBulkSMS(
-  phoneNumbers: string[],
   message: string
 ): Promise<void> {
   // In development mode
@@ -210,6 +204,14 @@ export async function sendBulkSMS(
       console.warn('⚠️ Bulk SMS failed:', result.error || result.message);
     }
   } catch (error: any) {
+    // Fallback: Send individually if bulk endpoint not available
+    console.warn('⚠️ Bulk endpoint failed, sending individually...');
+    for (const phoneNumber of phoneNumbers) {
+      await sendSMS(phoneNumber, message);
+    }
+  }
+}
+
 /**
  * Fetch SMS delivery reports
  * Check status of previously sent messages
@@ -240,15 +242,8 @@ export async function fetchDeliveryReports(messageId?: string): Promise<any> {
     console.error('❌ Error fetching delivery reports:', error.message);
     return null;
   }
-}   return null;
-  }
 }
 
-/**
- * Check account balance (SMS credits remaining)
- */
-export async function checkBalance(): Promise<{ balance: string; currency: string } | null> {
-  const apiKey = process.env.AFRICASTALKING_API_KEY;
 /**
  * Check account balance (SMS credits remaining)
  */
