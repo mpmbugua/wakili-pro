@@ -461,9 +461,19 @@ export const LandingPage: React.FC = () => {
                             </p>
                             <div className="flex items-center text-xs text-slate-500 mt-1">
                               <MapPin className="h-3 w-3 mr-1" />
-                              {typeof lawyer.location === 'string' 
-                                ? JSON.parse(lawyer.location).city || 'Kenya'
-                                : lawyer.location?.city || 'Kenya'}
+                              {(() => {
+                                if (!lawyer.location) return 'Kenya';
+                                if (typeof lawyer.location === 'string') {
+                                  try {
+                                    const parsed = JSON.parse(lawyer.location);
+                                    return parsed.city || 'Kenya';
+                                  } catch {
+                                    // Plain string like "Nairobi"
+                                    return lawyer.location;
+                                  }
+                                }
+                                return lawyer.location?.city || 'Kenya';
+                              })()}
                             </div>
                           </div>
                           <div className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded flex items-center space-x-1">

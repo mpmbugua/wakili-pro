@@ -216,9 +216,16 @@ export const LawyerProfile: React.FC = () => {
   }
   
   const location = lawyerProfile?.location 
-    ? (typeof lawyerProfile.location === 'string' 
-        ? JSON.parse(lawyerProfile.location) 
-        : lawyerProfile.location)
+    ? (() => {
+        if (typeof lawyerProfile.location === 'string') {
+          try {
+            return JSON.parse(lawyerProfile.location);
+          } catch {
+            return { county: lawyerProfile.location };
+          }
+        }
+        return lawyerProfile.location;
+      })()
     : {};
 
   const tierBadges = {
