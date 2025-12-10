@@ -400,6 +400,8 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
         isVerified: true,
         specializations: true,
         experience: true,
+        yearsOfExperience: true,
+        location: true,
         rating: true,
         reviewCount: true,
         hourlyRate: true,
