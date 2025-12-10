@@ -151,12 +151,31 @@ export const LandingPage: React.FC = () => {
 
     const fetchFeaturedLawyers = async () => {
       try {
-        const response = await axiosInstance.get('/lawyers?limit=6');
-        if (response.data.success && response.data.data) {
-          setFeaturedLawyers(response.data.data.lawyers || []);
+        // Use direct fetch to production API for better reliability
+        const response = await fetch('https://wakili-pro.onrender.com/api/lawyers?limit=6', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Lawyers API response:', data);
+        
+        if (data.success && data.data && data.data.lawyers) {
+          setFeaturedLawyers(data.data.lawyers);
+          console.log('✅ Loaded', data.data.lawyers.length, 'lawyers');
+        } else {
+          console.warn('No lawyers found in response');
         }
       } catch (error) {
         console.error('Failed to fetch featured lawyers:', error);
+        // Set empty array to show "no lawyers" state instead of loading forever
+        setFeaturedLawyers([]);
       } finally {
         setLoadingLawyers(false);
       }
