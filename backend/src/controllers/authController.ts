@@ -110,8 +110,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         firstName,
         lastName,
         phoneNumber,
-        role,
-        emailVerified: false
+        role
+        // emailVerified: false // Field doesn't exist in production schema
       },
       select: {
         id: true,
@@ -119,7 +119,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         firstName: true,
         lastName: true,
         role: true,
-        emailVerified: true,
+        // emailVerified: true, // Field doesn't exist in production schema
         phoneNumber: true,
         createdAt: true
       }
@@ -226,7 +226,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         firstName: true,
         lastName: true,
         role: true,
-        emailVerified: true,
+        // emailVerified: true, // Field doesn't exist in production schema
         phoneNumber: true
       }
     });
@@ -686,7 +686,7 @@ export const googleOAuth = async (req: Request, res: Response): Promise<void> =>
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.role,
-          emailVerified: user.emailVerified,
+          // emailVerified: user.emailVerified, // Field doesn't exist in production schema
           profile: user.profile,
         },
         accessToken,
@@ -753,7 +753,7 @@ export const facebookOAuth = async (req: Request, res: Response): Promise<void> 
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.role,
-          emailVerified: user.emailVerified,
+          // emailVerified: user.emailVerified, // Field doesn't exist in production schema
           profile: user.profile,
         },
         accessToken: jwtAccessToken,
