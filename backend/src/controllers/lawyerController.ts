@@ -393,7 +393,17 @@ export const searchLawyers = async (req: Request, res: Response): Promise<void> 
     // Get lawyers with basic filtering
     const lawyers = await prisma.lawyerProfile.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        licenseNumber: true,
+        isVerified: true,
+        specializations: true,
+        experience: true,
+        rating: true,
+        reviewCount: true,
+        hourlyRate: true,
+        // allowsFirstConsultDiscount: true, // Field doesn't exist in production
         user: {
           select: {
             id: true,

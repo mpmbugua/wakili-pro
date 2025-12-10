@@ -118,29 +118,32 @@ export const createConsultationBooking = async (
     let clientPaymentAmount = Number(lawyer.hourlyRate) * durationHours;
     
     // Check for first consultation 50% discount
-    const clientUser = await prisma.user.findUnique({
-      where: { id: data.clientId },
-      select: { hasUsedFirstConsultDiscount: true }
-    });
+    // DISABLED: Fields don't exist in production database
+    // const clientUser = await prisma.user.findUnique({
+    //   where: { id: data.clientId },
+    //   select: { hasUsedFirstConsultDiscount: true }
+    // });
 
-    const lawyerWithOptIn = await prisma.lawyerProfile.findUnique({
-      where: { userId: data.lawyerId },
-      select: { allowsFirstConsultDiscount: true }
-    });
+    // const lawyerWithOptIn = await prisma.lawyerProfile.findUnique({
+    //   where: { userId: data.lawyerId },
+    //   select: { allowsFirstConsultDiscount: true }
+    // });
 
     const originalAmount = clientPaymentAmount;
     let isFirstConsultDiscount = false;
     
-    if (!clientUser?.hasUsedFirstConsultDiscount && lawyerWithOptIn?.allowsFirstConsultDiscount !== false) {
-      // Apply 50% discount (lawyer absorbs the cost)
-      clientPaymentAmount = clientPaymentAmount * 0.5;
-      isFirstConsultDiscount = true;
-      
-      // Mark discount as used
-      await prisma.user.update({
-        where: { id: data.clientId },
-        data: { hasUsedFirstConsultDiscount: true }
-      });
+    // DISABLED: First consult discount feature (database fields missing)
+    // if (!clientUser?.hasUsedFirstConsultDiscount && lawyerWithOptIn?.allowsFirstConsultDiscount !== false) {
+    //   // Apply 50% discount (lawyer absorbs the cost)
+    //   clientPaymentAmount = clientPaymentAmount * 0.5;
+    //   isFirstConsultDiscount = true;
+    //   
+    //   // Mark discount as used
+    //   await prisma.user.update({
+    //     where: { id: data.clientId },
+    //     data: { hasUsedFirstConsultDiscount: true }
+    //   });
+    // }
 
       // Track freebie usage
       await analyticsService.trackFreebieUsage(data.clientId, 'first_consult_discount', {
