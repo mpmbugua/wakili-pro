@@ -174,19 +174,19 @@ export default function FinalWakiliApp() {
               <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-lg">
                 <div className="bg-blue-50 p-6 rounded-2xl shadow-lg">
                   <div className="font-bold text-blue-800 mb-3">Backend URL</div>
-                  <a href="https://wakili-pro.onrender.com" target="_blank" className="text-blue-600 hover:underline break-all font-mono">
+                  <a href="https://wakili-pro.onrender.com" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all font-mono">
                     https://wakili-pro.onrender.com
                   </a>
                 </div>
                 <div className="bg-green-50 p-6 rounded-2xl shadow-lg">
                   <div className="font-bold text-green-800 mb-3">Health Check</div>
-                  <a href="https://wakili-pro.onrender.com/health" target="_blank" className="text-green-600 hover:underline break-all font-mono">
+                  <a href="https://wakili-pro.onrender.com/health" target="_blank" rel="noreferrer" className="text-green-600 hover:underline break-all font-mono">
                     /health
                   </a>
                 </div>
                 <div className="bg-purple-50 p-6 rounded-2xl shadow-lg">
                   <div className="font-bold text-purple-800 mb-3">API Root</div>
-                  <a href="https://wakili-pro.onrender.com/api" target="_blank" className="text-purple-600 hover:underline break-all font-mono">
+                  <a href="https://wakili-pro.onrender.com/api" target="_blank" rel="noreferrer" className="text-purple-600 hover:underline break-all font-mono">
                     /api
                   </a>
                 </div>

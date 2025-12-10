@@ -1,1 +1,0 @@
-This folder contains backup copies of test files with unresolved merge conflicts or duplicate backend test files from the merge process. These files should be reviewed and deleted once the main backend test suite is confirmed clean and passing.

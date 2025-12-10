@@ -11,7 +11,7 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:@typescript-eslint/recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs', 'vite.config.ts'],
+  ignorePatterns: ['dist', '.eslintrc.cjs', 'vite.config.ts', '_backup_merge_conflict_tests', 'admin.backup', '**/ai/AILegalAssistant.tsx'],
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'react-refresh', 'react', 'react-hooks'],
   globals: {

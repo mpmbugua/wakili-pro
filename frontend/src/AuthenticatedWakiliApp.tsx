@@ -24,6 +24,8 @@ export default function AuthenticatedWakiliApp() {
   const [showProfile, setShowProfile] = useState(false);
   
   const { user, isAuthenticated, logout } = useAuthStore();
+  const userId = user?.id || 'mock-user';
+  const { status: subscriptionStatus } = useSubscriptionStatus(userId);
 
   useEffect(() => {
     // Use the same API base URL for consistency
@@ -172,12 +174,7 @@ export default function AuthenticatedWakiliApp() {
         </div>
 
         {/* Subscription status for premium protection */}
-        {(() => {
-          const user = useAuthStore.getState().user;
-          const userId = user?.id || 'mock-user';
-          const { status: subscriptionStatus } = useSubscriptionStatus(userId);
-          return (
-            <Routes>
+        <Routes>
               <Route path="/marketplace" element={
                 <ProtectedRoute requireSubscription subscriptionStatus={subscriptionStatus}>
                   <Marketplace />
@@ -213,8 +210,6 @@ export default function AuthenticatedWakiliApp() {
                 </div>
               } />
             </Routes>
-          );
-        })()}
 
         {/* Why Choose Wakili Pro */}
         <div className="mt-32 bg-gradient-to-r from-green-50 to-blue-50 rounded-3xl p-12 shadow-2xl">
@@ -280,7 +275,7 @@ export default function AuthenticatedWakiliApp() {
               <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-lg">
                 <div className="bg-blue-50 p-6 rounded-2xl shadow-lg">
                   <div className="font-bold text-blue-800 mb-3">Backend URL</div>
-                  <a href="https://wakili-pro.onrender.com" target="_blank" className="text-blue-600 hover:underline break-all font-mono">
+                  <a href="https://wakili-pro.onrender.com" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all font-mono">
                     https://wakili-pro.onrender.com
                   </a>
                 </div>

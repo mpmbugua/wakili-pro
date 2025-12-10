@@ -35,28 +35,7 @@ export default function Dashboard() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
-  // Route to appropriate dashboard based on user role
-  if (!user) {
-    return <GuestDashboard />;
-  }
-
-  if (user.role === 'PUBLIC') {
-    return <PublicDashboard user={user} />;
-  }
-
-  if (user.role === 'LAWYER') {
-    return <LawyerDashboard user={user} />;
-  }
-
-  if (user.role === 'ADMIN') {
-    return <AdminDashboard user={user} />;
-  }
-
-  if (user.role === 'SUPER_ADMIN') {
-    return <SuperAdminDashboard user={user} />;
-  }
-
-  // Fallback for any unknown roles
+  // Initialize all hooks at the top (before any conditional returns)
   const [loading, setLoading] = useState(true);
   const hasFetchedData = React.useRef(false);
   const [stats, setStats] = useState({
@@ -125,7 +104,28 @@ export default function Dashboard() {
     };
     
     fetchDashboardData();
-  }, []); // Empty dependency array - only run once
+  }, [user?.role]); // Add user.role dependency
+
+  // Route to appropriate dashboard based on user role (after all hooks)
+  if (!user) {
+    return <GuestDashboard />;
+  }
+
+  if (user.role === 'PUBLIC') {
+    return <PublicDashboard user={user} />;
+  }
+
+  if (user.role === 'LAWYER') {
+    return <LawyerDashboard user={user} />;
+  }
+
+  if (user.role === 'ADMIN') {
+    return <AdminDashboard user={user} />;
+  }
+
+  if (user.role === 'SUPER_ADMIN') {
+    return <SuperAdminDashboard user={user} />;
+  }
 
   // Table columns
   const consultationColumns: Column<Consultation>[] = [
