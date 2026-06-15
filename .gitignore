@@ -120,3 +120,4 @@ yarn-error.log
 !.yarn/sdks
 !.yarn/versions
 >>>>>>> 23e2ce6 (Initial commit)
+backend/.env.production
